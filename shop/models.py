@@ -2,31 +2,28 @@ from django.db import models
 from django.urls import reverse
 from ckeditor.fields import RichTextField
 
-# Create your models here.
-
-
 
 class Category(models.Model):
-     name = models.CharField(max_length=250 , unique=True)
-     slug = models.SlugField(max_length=250 , unique=True)
-     description = RichTextField(blank=True)
-     image = models.ImageField(upload_to='category' , blank=True)
+    name = models.CharField(max_length=250, unique=True)
+    slug = models.SlugField(max_length=250, unique=True)
+    description = RichTextField(blank=True)
+    image = models.ImageField(upload_to='category', blank=True)
 
-     class Meta:
-         ordering = ('name',)
-         verbose_name ='category'
-         verbose_name_plural = 'categories'
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'category'
+        verbose_name_plural = 'categories'
 
-     def get_url(self):
+    def get_url(self):
         return reverse('shop:products_by_category', args=[self.slug])
 
-     def __str__(self):
+    def __str__(self):
         return '{}'.format(self.name)
 
 
-class Product (models.Model):
-    name = models.CharField(max_length=250, unique =True)
-    slug = models.SlugField(max_length=250, unique= True)
+class Product(models.Model):
+    name = models.CharField(max_length=250, unique=True)
+    slug = models.SlugField(max_length=250, unique=True)
     description = RichTextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -42,24 +39,23 @@ class Product (models.Model):
         verbose_name_plural = 'products'
 
     def get_url(self):
-            return reverse('shop:ProdCatDetail', args=[self.category.slug, self.slug])
+        return reverse('shop:ProdCatDetail', args=[self.category.slug, self.slug])
 
     def __str__(self):
-            return '{}'.format(self.name)
-
+        return '{}'.format(self.name)
 
 # For creating multiple pics on Product Model
-   # class ProductImage(models.Model):
-   #     name = models.CharField(max_length=250, unique=True)
-    #    image = models.ImageField(upload_to='product', blank=True)
-   #     product = models.ForeignKey(product, on_delete=models.CASCADE)
-    #    created = models.DateTimeField(auto_now_add=True)
-    #    updated = models.DateTimeField(auto_now=True)
+# class ProductImage(models.Model):
+#     name = models.CharField(max_length=250, unique=True)
+#    image = models.ImageField(upload_to='product', blank=True)
+#     product = models.ForeignKey(product, on_delete=models.CASCADE)
+#    created = models.DateTimeField(auto_now_add=True)
+#    updated = models.DateTimeField(auto_now=True)
 
-    #    class Meta:
-    #        ordering = ('updated',)
-    #        verbose_name = 'image'
-    #        verbose_name_plural = 'images'
+#    class Meta:
+#        ordering = ('updated',)
+#        verbose_name = 'image'
+#        verbose_name_plural = 'images'
 
-    #    def __str__(self):
-     #       return '{}'.format(self.name)
+#    def __str__(self):
+#       return '{}'.format(self.name)
