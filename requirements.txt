@@ -1,3 +1,6 @@
 django
 django-ckeditor
 stripe
+django-crispy-forms
+django-import-export
+pillow
