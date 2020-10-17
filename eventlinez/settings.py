@@ -25,7 +25,7 @@ SECRET_KEY = 'wv3ra^smy9n*-^&oj%&h4ygkl7&#il(z$hc6$!*6ib+jhbx0rx'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['store.calisamba.com']
+ALLOWED_HOSTS = []
 
 
 # Application definition
