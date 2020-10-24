@@ -7,7 +7,6 @@ class Cart(models.Model):
 	date_added = models.DateField(auto_now_add=True)
 
 	class Meta:
-		db_table = 'Cart'
 		ordering = ['date_added']
 
 	def __str__(self):
@@ -19,9 +18,6 @@ class CartItem(models.Model):
 	cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
 	quantity = models.IntegerField()
 	active = models.BooleanField(default=True)
-
-	class Meta:
-		db_table = 'CartItem'
 
 	def sub_total(self):
 		return self.product.price * self.quantity

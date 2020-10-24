@@ -18,7 +18,6 @@ class Order(models.Model):
 	shippingCountry = models.CharField(max_length=200, blank=True)
 
 	class Meta:
-		db_table = 'Order'
 		ordering = ['-created']
 
 	def __str__(self):
@@ -30,9 +29,6 @@ class OrderItem(models.Model):
 	quantity = models.IntegerField()
 	price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='GBP Price')
 	order = models.ForeignKey(Order, on_delete=models.CASCADE)
-
-	class Meta:
-		db_table = 'OrderItem'
 
 	def sub_total(self):
 		return self.quantity * self.price
