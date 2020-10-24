@@ -14,23 +14,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path , include
+from django.urls import path, include
 from shop import views
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-	path('admin/', admin.site.urls),
-	path('shop/', include('shop.urls')),
-	path('', views.index, name='index'),
-	path('search/', include('search_app.urls')),
-	path('cart/', include('cart.urls')),
-	path('order/', include('order.urls')),
-	path('account/create/', views.signup_view, name='signup'),
-	path('account/login/', views.signin_view, name='signin'),
-	path('account/logout/', views.signout_view, name='signout'),
-      ]
+    path('admin/', admin.site.urls),
+    path('shop/', include('shop.urls')),
+    path('', views.index, name='index'),
+    path('search/', include('search_app.urls')),
+    path('cart/', include('cart.urls')),
+    path('order/', include('order.urls')),
+    path('account/create/', views.signup_view, name='signup'),
+    path('account/login/', views.signin_view, name='signin'),
+    path('account/logout/', views.signout_view, name='signout'),
+]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root =settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root =settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
