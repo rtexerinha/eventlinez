@@ -1,5 +1,5 @@
 from django.db import models
-from shop.models import Product
+from event.models import Event
 
 
 class Cart(models.Model):
@@ -14,13 +14,13 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-	product = models.ForeignKey(Product, on_delete=models.CASCADE)
+	event = models.ForeignKey(Event, on_delete=models.CASCADE)
 	cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
 	quantity = models.IntegerField()
 	active = models.BooleanField(default=True)
 
 	def sub_total(self):
-		return self.product.price * self.quantity
+		return self.event.price * self.quantity
 
 	def __str__(self):
-		return self.product
+		return self.event

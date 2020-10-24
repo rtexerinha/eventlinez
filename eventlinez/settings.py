@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'ckeditor',
     'import_export',
+    'event',
     'shop',
     'search_app',
     'cart',

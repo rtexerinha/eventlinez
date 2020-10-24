@@ -1,6 +1,5 @@
 django
 django-ckeditor
-stripe
 django-crispy-forms
-django-import-export
+stripe
 pillow

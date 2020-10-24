@@ -5,14 +5,13 @@ from .models import Order, OrderItem
 class OrderItemAdmin(admin.TabularInline):
     model = OrderItem
     fieldsets = [
-        ('Product', {'fields': ['product'], }),
+        ('Event', {'fields': ['event'], }),
         ('Quantity', {'fields': ['quantity'], }),
         ('Price', {'fields': ['price'], }),
     ]
-    readonly_fields = ['product', 'quantity', 'price']
+    readonly_fields = ['event', 'quantity', 'price']
     can_delete = False
     max_num = 0
-    template = 'admin/order/tabular.html'
 
 
 @admin.register(Order)

@@ -12,13 +12,13 @@
 	</div>
 	<div class="container">
 		<div class="row mx-auto">
-			{% for product in products %}
+			{% for event in events %}
 				<div class="my_bottom_margin col-9 col-sm-12 col-md-4 col-md-12 col-lg-4">
 					<div class="card text-center" style="min-width: 18rem;">
-						<a href="{{product.get_url}}"><img class="card-img-top my_image" src="{{product.image.url}}" alt="{{product.name}}"></a>
+						<a href="{{event.get_url}}"><img class="card-img-top my_image" src="{{event.image.url}}" alt="{{event.name}}"></a>
 						<div class="card-body">
-							<h4>{{product.name}}</h4>
-							<p>${{product.price}}</p>
+							<h4>{{event.name}}</h4>
+							<p>${{event.price}}</p>
 						</div>
 					</div>
 				</div>

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from .models import Category, Product
+from event.models import Category, Event
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.contrib.auth.models import Group, User
 from .forms import SignUpForm
@@ -13,33 +13,31 @@ def index(request):
 	return HttpResponse(text_var)
 
 
-def all_product_catogories(request, c_slug=None):
+def all_event_categories(request, c_slug=None):
 	c_page = None
-	products_list = None
 	if c_slug!=None:
 		c_page = get_object_or_404(Category, slug=c_slug)
-		products_list = Product.objects.filter(category=c_page, available=True)
+		products_list = Event.objects.filter(category=c_page, available=True)
 	else:
-		products_list = Product.objects.all().filter(available=True)
-	'''Pagination code'''
+		products_list = Event.objects.all().filter(available=True)
 	paginator = Paginator(products_list, 3)
 	try:
 		page = int(request.GET.get('page', '1'))
 	except:
 		page = 1
 	try:
-		products = paginator.page(page)
-	except (EmptyPage,InvalidPage):
-		products = paginator.page(paginator.num_pages)
-	return render(request, 'shop/category.html', {'category': c_page, 'products': products})
+		events = paginator.page(page)
+	except (EmptyPage, InvalidPage):
+		events = paginator.page(paginator.num_pages)
+	return render(request, 'shop/category.html', {'category': c_page, 'events': events})
 
 
-def product_category_detail(request, c_slug, product_slug):
+def product_event_detail(request, c_slug, event_slug):
 	try:
-		product = Product.objects.get(category__slug=c_slug, slug=product_slug)
+		event = Event.objects.get(category__slug=c_slug, slug=event_slug)
 	except Exception as e:
 		raise e
-	return render(request, 'shop/product.html', {'product': product})
+	return render(request, 'shop/event.html', {'event': event})
 
 
 def signup_view(request):
@@ -65,7 +63,7 @@ def signin_view(request):
 			user = authenticate(username=username, password=password)
 			if user is not None:
 				login(request, user)
-				return redirect('shop:allProdCat')
+				return redirect('shop:all_event_categories')
 			else:
 				return redirect('signup')
 	else:

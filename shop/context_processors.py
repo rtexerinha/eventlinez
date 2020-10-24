@@ -1,4 +1,4 @@
-from .models import Category
+from event.models import Category
 
 
 def menu_links(request):
