@@ -42,7 +42,7 @@ def product_category_detail(request, c_slug, product_slug):
 	return render(request, 'shop/product.html', {'product': product})
 
 
-def signupView(request):
+def signup_view(request):
 	if request.method == 'POST':
 		form = SignUpForm(request.POST)
 		if form.is_valid():
