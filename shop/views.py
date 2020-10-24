@@ -13,7 +13,7 @@ def index(request):
 	return HttpResponse(text_var)
 
 
-def allProdCat(request, c_slug=None):
+def all_product_catogories(request, c_slug=None):
 	c_page = None
 	products_list = None
 	if c_slug!=None:
