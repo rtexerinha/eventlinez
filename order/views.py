@@ -10,7 +10,7 @@ def thanks(request, order_id):
 
 
 @login_required()
-def orderHistory(request):
+def order_history(request):
 	if request.user.is_authenticated:
 		email = str(request.user.email)
 		order_details = Order.objects.filter(emailAddress=email)
@@ -18,7 +18,7 @@ def orderHistory(request):
 
 
 @login_required()
-def viewOrder(request, order_id):
+def view_order(request, order_id):
 	if request.user.is_authenticated:
 		email = str(request.user.email)
 		order = Order.objects.get(id=order_id, emailAddress=email)
