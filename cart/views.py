@@ -2,12 +2,16 @@ import stripe
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-from order.models import Order, OrderItem
 from django.template.loader import get_template
 from django.core.mail import EmailMessage
 
+from order.models import Order, OrderItem
 from shop.models import Product
 from .models import Cart, CartItem
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _cart_id(request):
@@ -56,20 +60,19 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
     description = 'Perfect Calisamba - New Order'
     data_key = settings.STRIPE_PUBLISHABLE_KEY
     if request.method == 'POST':
-        # print(request.POST)
         try:
             token = request.POST['stripeToken']
             email = request.POST['stripeEmail']
-            billingName = request.POST['stripeBillingName']
-            billingAddress1 = request.POST['stripeBillingAddressLine1']
+            billing_name = request.POST['stripeBillingName']
+            billing_address1 = request.POST['stripeBillingAddressLine1']
             billingcity = request.POST['stripeBillingAddressCity']
-            billingPostcode = request.POST['stripeBillingAddressZip']
-            billingCountry = request.POST['stripeBillingAddressCountryCode']
-            shippingName = request.POST['stripeShippingName']
-            shippingAddress1 = request.POST['stripeShippingAddressLine1']
+            billing_postcode = request.POST['stripeBillingAddressZip']
+            billing_country = request.POST['stripeBillingAddressCountryCode']
+            shipping_name = request.POST['stripeShippingName']
+            shipping_address1 = request.POST['stripeShippingAddressLine1']
             shippingcity = request.POST['stripeShippingAddressCity']
-            shippingPostcode = request.POST['stripeShippingAddressZip']
-            shippingCountry = request.POST['stripeShippingAddressCountryCode']
+            shipping_postcode = request.POST['stripeShippingAddressZip']
+            shipping_country = request.POST['stripeShippingAddressCountryCode']
             customer = stripe.Customer.create(
                 email=email,
                 source=token
@@ -80,22 +83,22 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 description=description,
                 customer=customer.id
             )
-            '''Creating the order'''
+            logger.info("Creating the order")
             try:
                 order_details = Order.objects.create(
                     token=token,
                     total=total,
                     emailAddress=email,
-                    billingName=billingName,
-                    billingAddress1=billingAddress1,
+                    billingName=billing_name,
+                    billingAddress1=billing_address1,
                     billingCity=billingcity,
-                    billingPostcode=billingPostcode,
-                    billingCountry=billingCountry,
-                    shippingName=shippingName,
-                    shippingAddress1=shippingAddress1,
+                    billingPostcode=billing_postcode,
+                    billingCountry=billing_country,
+                    shippingName=shipping_name,
+                    shippingAddress1=shipping_address1,
                     shippingCity=shippingcity,
-                    shippingPostcode=shippingPostcode,
-                    shippingCountry=shippingCountry
+                    shippingPostcode=shipping_postcode,
+                    shippingCountry=shipping_country
                 )
                 order_details.save()
                 for order_item in cart_items:
@@ -106,16 +109,14 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                         order=order_details
                     )
                     oi.save()
-                    '''Reduce stock when order is placed or saved'''
                     products = Product.objects.get(id=order_item.product.id)
                     products.stock = int(order_item.product.stock - order_item.quantity)
                     products.save()
                     order_item.delete()
-                    '''The terminal will print this message when the order is saved'''
-                    print('The order has been created')
+                    logger.info("The order has been created")
                 # try:
-                #	'''Calling the sendEmail function'''
-                #	sendEmail(order_details.id)
+                #	'''Calling the send_email function'''
+                #	send_email(order_details.id)
                 #	print('The order email has been sent to the customer.')
                 #	except IOError as e:
                 #		return e
@@ -124,8 +125,8 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 pass
         except stripe.error.CardError as e:
             return False, e
-        return render(request, 'cart.html', dict(cart_items=cart_items, total=total, counter=counter, data_key=data_key,
-                                                 stripe_total=stripe_total, description=description))
+    return render(request, 'cart.html', dict(cart_items=cart_items, total=total, counter=counter,
+                                             data_key=data_key, stripe_total=stripe_total, description=description))
 
 
 def cart_remove(request, product_id):
@@ -148,7 +149,7 @@ def full_remove(request, product_id):
     return redirect('cart:cart_detail')
 
 
-def sendEmail(order_id):
+def send_email(order_id):
     transaction = Order.objects.get(id=order_id)
     order_items = OrderItem.objects.filter(order=transaction)
     try:
