@@ -73,6 +73,6 @@ def signin_view(request):
 	return render(request, 'accounts/signin.html', {'form': form})
 
 
-def signoutView(request):
+def signout_view(request):
 	logout(request)
 	return redirect('signin')
