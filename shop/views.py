@@ -8,12 +8,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 
 
-def index(request):
-    text_var = 'Welcome to Calisambas Page'
-    return HttpResponse(text_var)
-
-
-def all_event_categories(request, c_slug=None):
+def index(request, c_slug=None):
     c_page = None
     if c_slug is not None:
         c_page = get_object_or_404(Category, slug=c_slug)
@@ -29,7 +24,7 @@ def all_event_categories(request, c_slug=None):
         events = paginator.page(page)
     except (EmptyPage, InvalidPage):
         events = paginator.page(paginator.num_pages)
-    return render(request, 'shop/category.html', {'category': c_page, 'events': events})
+    return render(request, 'shop/home.html', {'category': c_page, 'events': events})
 
 
 def product_event_detail(request, c_slug, event_slug):
@@ -63,7 +58,7 @@ def signin_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('shop:all_event_categories')
+                return redirect('shop:index')
             else:
                 return redirect('signup')
     else:

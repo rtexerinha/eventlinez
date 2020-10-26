@@ -11,7 +11,7 @@
 {% block content %}
 	<div class="row my_prod_row_class">
 		<div class="mx-auto">
-			<p><a href="{% url 'shop:all_event_categories' %}">Home</a> | <a href="{{ event.category.get_url }}">{{event.category}}</a> | {{event.name}}</p>
+			<p><a href="{% url 'shop:index' %}">Home</a> | <a href="{{ event.category.get_url }}">{{event.category}}</a> | {{event.name}}</p>
 		</div>
 		<div class="container">
 			<br>

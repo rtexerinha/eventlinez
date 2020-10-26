@@ -1,17 +1,14 @@
 {% load static %}
 <header class="header">
-    <a href="{% url 'shop:all_event_categories' %}" class="link-nav nav__link logo">
+    <a href="{% url 'index' %}" class="link-nav nav__link logo">
         <img src="{% static 'img/logo.png' %}" alt=" logo ">
     </a>
-    <nav class="header-left">
-        <a class="link-nav nav__link " href="#">Best sellers</a>
-        <a class="link-nav nav__link " href="#">New</a>
-        <a class="link-nav nav__link " href="#">City</a>
-    </nav>
 
     <form class="form-search" action="{% url 'search_app:searchResult' %}" method="get">
         {% csrf_token %}
         <input class="input-form-search" type="search" placeholder="Search" aria-label="Search" name="q">
+            <img src="">
+        </input>
     </form>
 
     <nav class="header-right">
