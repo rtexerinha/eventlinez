@@ -1,0 +1,129 @@
+/* Container for every body of the page */
+.container-full{
+    width: 100vw;
+    height: 100vh;
+    background-color: #FFFFFF;
+}
+
+.banner{
+    width: 93vw;
+    height: 60vh;
+    /*background: url('./background.png'); */
+}
+
+@media(max-width: 600px){
+    .banner{
+        width: 97vw;
+    }
+}
+
+
+#title-home{
+    width: 45vw;
+    font-family: Nunito;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 4rem;
+    line-height: 82px;
+    display: flex;
+    align-items: center;
+    color: #FFFFFF;
+    background: linear-gradient(90deg, #E10087 -0.47%,rgba(96, 1, 98, 0.4));
+    margin: 90px 0 0 30px;
+}
+
+
+@media(max-width: 900px){
+    #title-home{
+        font-size: 2rem;
+        line-height: 42px;
+        width: 70vw;
+        margin-top: 40px;
+    }
+    #subtitle-home{
+        width: 70vw !important;
+        line-height: 20px;
+        margin: 0;
+    }
+}
+
+@media(max-width: 600px){
+    #title-home{
+        width: 85vw;
+        margin-top: 30px;
+        font-size: 28px;
+        line-height: 41px;
+    }
+    #subtitle-home{
+        width: 80vw !important;
+        font-size: 13px;
+        line-height: 18px;
+    }
+}
+
+
+#subtitle-home{
+    width: 40vw;
+    font-family: Nunito;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+    display: flex;
+    align-items: center;
+    color: #FFFFFF;
+    margin: 30px 0 0 30px;
+}
+
+.button-container-body{
+    width: 142px;
+    height: 40px;
+    background: #D90075;
+    border-radius: 10px;
+
+    font-family: Nunito;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 22px;
+    display: flex;
+    align-items: center;
+    color: #FFFFFF;
+    margin: 20px 0 0 30px;
+    border: none;
+    justify-content: center;
+}
+
+
+
+/** FOTTER*/
+.container-footer{
+    margin-top: 30px;
+    width: 100vw;
+    height: 274px;
+    background: #312046;
+}
+
+.footer-text{
+    padding: 5px 10px;
+    margin: 0 30px;
+    font-family: Nunito;
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+.footer-title{
+    padding-top: 30px;
+    font-weight: 800;
+    font-size: 25px;
+    line-height: 34px;
+}
+
+.footer-subtitle{
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+}

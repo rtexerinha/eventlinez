@@ -1,25 +1,87 @@
-<div class="container">
-	<div class="my_custom_menu">
-		<ul>
-			{% if request.user.is_authenticated and request.user.first_name %}
-			<li>
-				Welcome, <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ request.user.first_name }} <i class="fas fa-user-circle"></i></a>
-				<div class="dropdown-menu dropdown-menu-right">
-					<a href="{% url 'order:order_history' %}" class="dropdown-item">Order History</a>
-				</div>
-			</li>
-			<li>
-				<a href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
-			</li>
-			{% else %}
-			<li>
-				<a href="{% url 'signup' %}">Sign Up <i class="fas fa-user-plus"></i></a>
-			</li>
-			<li>
-				<a href="{% url 'signin' %}">Sign In <i class="fas fa-sign-in-alt"></i></a>
-			</li>
-			{% endif %}
-		</ul>
+{% load static %}
+<header class="header">
+    <a href="{% url 'shop:all_event_categories' %}" class="link-nav nav__link logo">
+        <img src="{% static 'img/logo.png' %}" alt=" logo ">
+    </a>
+    <nav class="header-left">
+        <a class="link-nav nav__link " href="#">Best sellers</a>
+        <a class="link-nav nav__link " href="#">New</a>
+        <a class="link-nav nav__link " href="#">City</a>
+    </nav>
 
-	</div>
-</div>
+    <form class="form-search" action="{% url 'search_app:searchResult' %}" method="get">
+        {% csrf_token %}
+        <input class="input-form-search" type="search" placeholder="Search" aria-label="Search" name="q">
+    </form>
+
+    <nav class="header-right">
+        {% if request.user.is_authenticated and request.user.first_name %}
+                Welcome,
+                <a class=" link-nav nav__link link-right" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ request.user.first_name }}
+                    <i class="fas fa-user-circle"></i>
+                </a>
+
+                <div class="dropdown-menu dropdown-menu-right">
+					<a href="{% url 'order:order_history' %}" class="dropdown-item">Order History</a>
+                </div>
+                <a class="link-nav nav__link link-right" href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
+        {% else %}
+            <a class="link-nav link-right nav__link " href="{% url 'signup' %}">
+                <i style="padding-right: 10px" class="fas fa-user-plus"></i>
+                Sign Up
+            </a>
+
+            <a class="link-nav link-right nav__link" href="{% url 'signin' %}">
+                <i style="padding-right: 10px" class="fas fa-sign-in-alt"></i>
+                Sign In
+            </a>
+        {% endif %}
+    </nav>
+
+    <button class="nav-toggle" aria-label="toggle navigation">
+        <span class="hamburger"></span>
+    </button>
+
+    <nav class="nave">
+        <ul class="nav__list">
+            {% if request.user.is_authenticated and request.user.first_name %}
+                <li class="nav__item">
+				    Welcome,
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ request.user.first_name }}
+                    <i class="fas fa-user-circle"></i>
+                </a>
+				    <div class="dropdown-menu dropdown-menu-right">
+					<a href="{% url 'order:order_history' %}" class="dropdown-item">Order History</a>
+				    </div>
+			    </li>
+
+			    <li>
+				    <a class="nav__link" href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
+			    </li>
+
+            {% else %}
+                <li class="nav__item">
+                    <a href="{% url 'signup' %}" class="nav__link">
+                        <i class="fas fa-user-plus"></i>
+                        Sign Up </a>
+                </li>
+                <li class="nav__item">
+                <a href="{% url 'signin' %}"  class="nav__link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In </a>
+                </li>
+            {% endif %}
+                <li class="nav__item">
+                    <a href="#" class="nav__link">Best sellers</a>
+                </li>
+
+                <li class="nav__item">
+                    <a href="#" class="nav__link">New</a>
+                </li>
+
+            <li class="nav__item">
+                <a href="#" class="nav__link">City</a>
+            </li>
+        </ul>
+    </nav>
+</header>

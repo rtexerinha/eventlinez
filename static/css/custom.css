@@ -134,10 +134,13 @@ body {
 	margin-bottom: 20px !important;
 }
 .my_top_navbar_div {
+	background-color: blueviolet;
+	width: 100vw;
 	height: 60px;
 	line-height: 50px;
 }
 .my_custom_menu {
+	background-color: #0b2e13;
 	text-align: right !important;
 }
 .my_custom_menu ul li {
