@@ -46,9 +46,9 @@
         <div id="content">
             {% for event in events.object_list %}
                 <a href="{{event.get_url}}">
-          <img
-            class="item"
-            src="{{event.image.url}}" alt="{{event.name}}"/>
+                    <img
+                        class="item"
+                        src="{{event.image.url}}" alt="{{event.name}}"/>
                 </a>
             <p class="text-default card-data">{{ event.created|date:"d M Y"}}</p>
             <div class="card-event" style="margin-left: -280px;">

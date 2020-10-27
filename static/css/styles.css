@@ -279,3 +279,73 @@ color: #171717;
 }
 
 
+
+.event-card-details{
+    position: absolute;
+    width: 419px;
+    height: 737px;
+    left: 893px;
+    top: 183px;
+
+    background: #F9F9F9;
+    border: 2px solid #F5F2F2;
+    box-sizing: border-box;
+    border-radius: 30px;
+}
+
+.title-event-card-details{
+    font-size: 35px;
+    line-height: 48px;
+    color: #171717;
+    margin-left: 10px;
+}
+
+#location-event-card-details{
+    font-size: 15px;
+    line-height: 20px;
+    color: #171717;
+}
+
+#price-event-card-details{
+    font-weight: bold;
+    color: #171717;
+    margin-left: 10px;
+}
+
+.pay-event-card-details{
+    position: absolute;
+    width: 381px;
+    height: 40px;
+    background: #D90075;
+    border-radius: 10px;
+    color: #FFFFFF;
+    justify-content: center;
+    align-content: center;
+    margin: 0 auto 0 15px;
+}
+
+.day-event-card-details{
+    width: 88px;
+    height: 30px;
+    font-weight: bold;
+    font-size: 60px;
+    line-height: 82px;
+    color: #D90075;
+    margin: 30px auto;
+}
+
+.date-event-card-details{
+    width: 180px;
+    height: 30px;
+    font-weight: 600;
+    font-size: 35px;
+    line-height: 48px;
+    color: #171717;
+    margin: 30px auto;
+}
+
+
+
+
+
+

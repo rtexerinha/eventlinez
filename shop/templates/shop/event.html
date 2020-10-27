@@ -1,36 +1,36 @@
 {% extends "base.html" %}
 {% load static %}
-{% block metadescription %}
-	{{ event.description|truncatewords: 155 }}
-{% endblock %}
+
 
 {% block title %}
 	{{ event.name }} - Calisamba's Store
 {% endblock %}
 
 {% block content %}
-	<div class="row my_prod_row_class">
+	<div class="my_prod_row_class" >
 		<div class="mx-auto">
 			<p><a href="{% url 'shop:index' %}">Home</a> | <a href="{{ event.category.get_url }}">{{event.category}}</a> | {{event.name}}</p>
 		</div>
+    <br>
 		<div class="container">
 			<br>
 			<div class="row">
-				<div class="col-12 col-sm-12 col-md-12 col-lg-6 text-center">
-					<div style="min-width: 18rem;">
-						    <img src="{{event.image.url}}" alt="{{event.name}}">
+				<div class="col-12">
+					<div>
+						    <img src="{{event.image.url}}" alt="{{event.name}}" style="position: absolute;width: 90vw; height: 320px; left: 0;top: 0px;">
 					</div>
 				</div>
-				<div class="col-12 col-sm-12 col-md-12 col-lg-6">
+				<div class="event-card-details">
 					<div>
-						<h1 class="my_prod_title">{{event.name}}</h1>
-						<p>${{event.price}}</p>
-						<p class="my_title">Product Description</p>
-						<p class="text-justify my_prod_text">{{event.description}}</p>
-						{% if event.stock <= 0%}
+						<h2 class="text-default title-event-card-details">{{event.name}}</h2>
+                        <h4 class="text-default" id="location-event-card-details">Av Hollywood Boulevard, 1283, Los Angeles, Califórnia</h4>
+						<p class="text-default" id="price-event-card-details">Total &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${{event.price}}</p>
+						<p class="text-default day-event-card-details">{{ event.created|date:"d"}}</p>
+                        <p class="text-default date-event-card-details">{{ event.created|date:"M Y"}}</p>
+                        {% if event.stock <= 0%}
 							<p class="text-justify my_prod_text"><b>Out of Stock</b></p>
 						{% else %}
-							<a class="btn btn-secondary" href="{% url 'cart:add_cart' event.id %}">Add to Cart</a>
+							<a class="pay-event-card-details text-default" href="{% url 'cart:add_cart' event.id %}">Add to Cart</a>
 						{% endif %}
 					</div>
 				</div>
