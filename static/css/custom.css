@@ -48,6 +48,7 @@ body {
 }
 .my_bottom_margin {
 	margin-bottom: 10px;
+	float: right;
 }
 .card-body h4 {
 	font-size: 14px;
@@ -159,4 +160,10 @@ body {
 	text-transform: uppercase;
 	letter-spacing: .2em;
 	font-size: 12px;
+}
+
+.carousel-indicators > li {
+	border-radius: 50%!important;
+    width: 10px!important;
+	height: 10px!important;
 }
