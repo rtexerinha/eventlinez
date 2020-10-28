@@ -24,7 +24,7 @@
            <!--Carrousel images navigation-->
             <section class="banner">
             <article>
-                <img style="padding-left: 40px;" src="{% static 'img/banner.jpg' %}" alt="First slide">
+                <img style="padding-left: 74px;" src="{% static 'img/banner.jpg' %}" alt="First slide">
                 <h1 id="title-home">
                     Enjoy the Experience
                 </h1>
@@ -50,10 +50,10 @@
                         class="item"
                         src="{{event.image.url}}" alt="{{event.name}}"/>
                 </a>
-            <p class="text-default card-data">{{ event.created|date:"d M Y"}}</p>
+            <p class="text-default card-data" style="margin-left: -151px;">{{ event.created|date:"d M Y"}}</p>
             <div class="card-event" style="margin-left: -280px;">
                 <h4 class="text-default event-name">{{event.name}}</h4>
-                <p class="text-default event-localization">localization</p>
+                <p class="text-default event-localization">Av Hollywood Boulevard, 1283, Los Angeles, Califórnia</p>
                 <p class="text-default event-price"> Tickets from ${{event.price}}</p>
             </div>
 
@@ -86,7 +86,7 @@
     </div>
 
     <div>
-    <div id="wrapper" style="margin-top: 30px; padding-left: 25px;">
+    <div id="wrapper" style="margin-top: 60px; padding-left: 25px;">
 		<div class="row">
         <h2 class="title-section">Shows</h2>
 			{% for event in events.object_list %}

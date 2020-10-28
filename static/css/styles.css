@@ -5,12 +5,12 @@
 }
 
 .banner{
-    width: 97.5vw;
+    width: 99vw;
     height: 60vh;
     display: inline-block;
     position: relative;
     z-index: 0;
-    left: 20px;
+    /*left: 20px; */
 }
 
 @media(max-width: 600px){
@@ -197,22 +197,23 @@ color: #171717;
     position: absolute;
 }
 
+
 #prev {
-  top: 50%;
-  left: 0;
-  transform: translate(50%, -50%);
-  display: none;
-        color: red;
+    top: 50%;
+    left: 0;
+    transform: translate(50%, -50%);
+    display: none;
+    color: red;
 }
 
 #next {
   top: 50%;
-  right: 0;
+  right: -60px;
   transform: translate(-50%, -50%);
 }
 
 #content {
-    height: 270px;
+    height: 300px;
     display: grid;
     grid-gap: 30px;
     grid-auto-flow: column;
@@ -222,7 +223,7 @@ color: #171717;
 }
 
 .content-all {
-    height: 270px;
+    height: 300px;
     width: 221px;
     display: grid;
     grid-gap: 10px;
@@ -255,23 +256,27 @@ color: #171717;
     margin-left: -131px;
     margin-top: 125px;
     background-color: #FFFFFF;
+    color: #1C1C1C;
     border-radius: 10px;
     padding-left: 5px;
+    font-size: 15px;
 }
 
 .card-event {
     width: 223px;
-    height: 100px;
-    margin-top: 165px;
+    height: 150px;
+    margin-top: 160px;
     margin-left: -240px;
 }
 
 .event-name{
     color: #000000;
+    margin-top: 5px;
 }
 
 .event-price{
     color: #2F00ED;
+    font-size: 20px;
 }
 
 .event-localization{

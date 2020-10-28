@@ -86,20 +86,27 @@
 
 .form-search{
     height: 39px;
-    width: 400px;
+    width: 550px;
     margin: 0 auto;
 }
 
 .input-form-search{
         width: 467px;
         height: 35px;
-        margin-top: 4px;
         margin-left: 3px;
         background: #DDDDDD;
         border-radius: 20px;
-        padding-left: 10px;
+        padding-left: 40px;
         border: none;
-    }
+}
+
+#icone{
+    position: relative;
+    float: right;
+    top: 11px;
+    right: 515px;
+    color: #BCBBBB;
+}
 
 .nave {
     position: fixed;

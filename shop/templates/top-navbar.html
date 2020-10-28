@@ -6,6 +6,7 @@
 
     <form class="form-search" action="{% url 'search_app:searchResult' %}" method="get">
         {% csrf_token %}
+        <i class="fas fa-search" id="icone"></i>
         <input class="input-form-search" type="search" placeholder="Search" aria-label="Search" name="q">
     </form>
 
