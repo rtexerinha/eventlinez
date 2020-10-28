@@ -30,9 +30,10 @@ def index(request, c_slug=None):
 def product_event_detail(request, c_slug, event_slug):
     try:
         event = Event.objects.get(category__slug=c_slug, slug=event_slug)
+        products_list = Event.objects.all().filter(available=True)
     except Exception as e:
         raise e
-    return render(request, 'shop/event.html', {'event': event})
+    return render(request, 'shop/event.html', {'event': event, 'products_list': products_list})
 
 
 def signup_view(request):

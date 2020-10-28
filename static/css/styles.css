@@ -119,8 +119,39 @@
     line-height: 48px;
     display: flex;
     align-items: center;
+    color: #171717;
+}
 
-color: #171717;
+.container-details{
+    height: 400px;
+    width: 100%;
+}
+
+.container-additional-details{
+    width: 60vw;
+    height: 50vh;
+    position: absolute;
+    left: 58px;
+    top: 550px;
+}
+
+#box-tags{
+    width: 500px;
+    height: 35px;
+    display: flex;
+}
+
+.box-tag{
+    width: 135px;
+    height: 34px;
+    background: #EDEBEB;
+    border-radius: 10px;
+    margin-right: 25px;
+    margin-left: 5px;
+    padding-top: 5px;
+    text-align: center;
+    color: #1C1C1C;
+     text-decoration: none;
 }
 
 
@@ -290,8 +321,7 @@ color: #171717;
     width: 419px;
     height: 737px;
     left: 893px;
-    top: 183px;
-
+    top: 150px;
     background: #F9F9F9;
     border: 2px solid #F5F2F2;
     box-sizing: border-box;
@@ -302,7 +332,6 @@ color: #171717;
     font-size: 35px;
     line-height: 48px;
     color: #171717;
-    margin-left: 10px;
 }
 
 #location-event-card-details{
@@ -311,14 +340,37 @@ color: #171717;
     color: #171717;
 }
 
-#price-event-card-details{
-    font-weight: bold;
+.price-event-card-details{
+    display: table-cell;
     color: #171717;
-    margin-left: 10px;
+
+}
+
+.table-price-bord{
+    font-weight: bold;
+}
+
+.table-left{
+    padding: 7px 0 7px 15px;
+}
+
+.table-right{
+    text-align: right;
+    padding-right:30px;
+}
+
+#buttons-pay-event-card-details{
+    position: absolute;
+    width: 381px;
+    height: 110px;
+    margin: 60px 20px;
+    justify-content: center;
+    align-content: center;
+
 }
 
 .pay-event-card-details{
-    position: absolute;
+    position: relative;
     width: 381px;
     height: 40px;
     background: #D90075;
@@ -326,8 +378,16 @@ color: #171717;
     color: #FFFFFF;
     justify-content: center;
     align-content: center;
-    margin: 0 auto 0 15px;
+    margin: 10px auto;
+    text-decoration:none;
 }
+
+.pay-event-card-details:hover {
+    border: 2px solid #D90075;
+    background-color: #FFFFFF;
+    color: #D90075;
+    text-decoration:none;
+  }
 
 .day-event-card-details{
     width: 88px;
@@ -340,17 +400,13 @@ color: #171717;
 }
 
 .date-event-card-details{
-    width: 180px;
+    width: 200px;
     height: 30px;
     font-weight: 600;
     font-size: 35px;
     line-height: 48px;
     color: #171717;
-    margin: 30px auto;
+    margin: 5px auto;
+    text-align: center;
+    justify-content: center;
 }
-
-
-
-
-
-

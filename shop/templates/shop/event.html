@@ -7,34 +7,107 @@
 {% endblock %}
 
 {% block content %}
-	<div class="my_prod_row_class" >
-		<div class="mx-auto">
-			<p><a href="{% url 'shop:index' %}">Home</a> | <a href="{{ event.category.get_url }}">{{event.category}}</a> | {{event.name}}</p>
-		</div>
-    <br>
-		<div class="container">
-			<br>
-			<div class="row">
+	<div class="my_prod_row_class" style="height: 800px">
+		<div class="container-details">
 				<div class="col-12">
-					<div>
-						    <img src="{{event.image.url}}" alt="{{event.name}}" style="position: absolute;width: 90vw; height: 320px; left: 0;top: 0px;">
-					</div>
+                    <img src="{{event.image.url}}" alt="{{event.name}}" style="position: absolute;width: 95vw; height: 320px; right: 0;top: 0;">
 				</div>
-				<div class="event-card-details">
-					<div>
+				<aside class="event-card-details">
+                    <div style="margin-left: 20px; margin-top: 10px">
 						<h2 class="text-default title-event-card-details">{{event.name}}</h2>
                         <h4 class="text-default" id="location-event-card-details">Av Hollywood Boulevard, 1283, Los Angeles, Califórnia</h4>
-						<p class="text-default" id="price-event-card-details">Total &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${{event.price}}</p>
+                    </div>
+                <div style="margin-top: 30px">
 						<p class="text-default day-event-card-details">{{ event.created|date:"d"}}</p>
                         <p class="text-default date-event-card-details">{{ event.created|date:"M Y"}}</p>
+                        <p class="text-default date-event-card-details" style="font-size: 20px;">{{ event.created|date:"l H:m"}}</p>
+                </div>
+                        <table style="width:100%; margin-top: 30px">
+                            <tr>
+                                <th class="text-default price-event-card-details table-price-bord table-left">Cost</th>
+                                <th class="text-default price-event-card-details table-price-bord table-right">Quantity</th>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #D7D7D7;">
+                                <td class="text-default price-event-card-details table-left">$ {{event.price}}</td>
+                                <td class="text-default price-event-card-details table-right">1</td>
+                            </tr>
+                            </tr>
+                            <tr>
+                                <td class="text-default price-event-card-details table-left">Total</td>
+                                <td class="text-default price-event-card-details table-right">${{event.price}}</td>
+                            </tr>
+                        </table>
+
                         {% if event.stock <= 0%}
 							<p class="text-justify my_prod_text"><b>Out of Stock</b></p>
 						{% else %}
-							<a class="pay-event-card-details text-default" href="{% url 'cart:add_cart' event.id %}">Add to Cart</a>
+                            <div id="buttons-pay-event-card-details">
+                                <a class="pay-event-card-details text-default" href="{% url 'cart:add_cart' event.id %}">Add to Cart</a>
+                                <a href="{% url 'shop:index' %}" class="pay-event-card-details text-default">Continue Shopping</a>
+                            </div>
 						{% endif %}
-					</div>
-				</div>
-			</div>
+				</aside>
+
+                <div class="container-additional-details">
+                    <h2 class="text-default title-event-card-details" style="margin-left: 0">Age rating</h2>
+                    <h4 class="text-default" id="location-event-card-details">16 years. Children under 16 enter accompanied by parents / guardians.</h4>
+                    <h2 class="text-default title-event-card-details" style="margin-left: 0">About</h2>
+                    <h4 class="text-default" id="location-event-card-details">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce scelerisque et nisi nec finibus. Ut luctus dolor velit, sed molestie ligula maximus quis. Curabitur lectus magna, ultrices quis tortor et, iaculis malesuada purus. In ut dapibus massa. Mauris commodo lectus nec consequat efficitur. Aenean eu mi est. Nulla a ipsum mauris. </h4>
+                    <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
+                    <div id="box-tags">
+                        <a class="box-tag" href="{% url 'shop:index' %}">Home</a>
+                        <a class="box-tag" href="{{ event.category.get_url }}">{{event.category}}</a>
+                        <p class="box-tag">{{event.name}}</p>
+                    </div>
+                </div>
 		</div>
 	</div>
+
+    <!--Cards destak-->
+     <div id="wrapper">
+            <h2 class="title-section">Recommended</h2>
+      <div id="carousel">
+        <div id="content">
+            {% for list_event in products_list %}
+                <a href="{{list_event.get_url}}">
+                    <img
+                        class="item"
+                        src="{{list_event.image.url}}" alt="{{list_event.name}}"/>
+                </a>
+            <p class="text-default card-data" style="margin-left: -151px;">{{ list_event.created|date:"d M Y"}}</p>
+            <div class="card-event" style="margin-left: -280px;">
+                <h4 class="text-default event-name">{{list_event.name}}</h4>
+                <p class="text-default event-localization">Av Hollywood Boulevard, 1283, Los Angeles, Califórnia</p>
+                <p class="text-default event-price"> Tickets from ${{list_event.price}}</p>
+            </div>
+
+            {% endfor %}
+
+        </div>
+      </div>
+      <button id="prev">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path fill="none" d="M0 0h24v24H0V0z" />
+          <path d="M15.61 7.41L14.2 6l-6 6 6 6 1.41-1.41L11.03 12l4.58-4.59z" />
+        </svg>
+      </button>
+      <button id="next">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <path fill="none" d="M0 0h24v24H0V0z" />
+          <path d="M10.02 6L8.61 7.41 13.19 12l-4.58 4.59L10.02 18l6-6-6-6z" />
+        </svg>
+      </button>
+    </div>
+
+
 {% endblock %}
