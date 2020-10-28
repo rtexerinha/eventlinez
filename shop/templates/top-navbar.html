@@ -11,6 +11,11 @@
     </form>
 
     <nav class="header-right">
+            {% if item_count > 0 %}
+                <a class="link-nav nav__link" href="{% url 'cart:cart_detail' %}">
+                    <i class="fas fa-shopping-cart"></i>({{item_count}})
+                </a>
+            {% endif %}
         {% if request.user.is_authenticated and request.user.first_name %}
                 Welcome,
                 <a class=" link-nav nav__link link-right" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ request.user.first_name }}

@@ -14,7 +14,7 @@
 .header-right{
     position:relative;
     float: right;
-    width: 240px;
+    width: 280px;
     margin-top: -40px;
     margin-right: 25px;
   }
@@ -42,9 +42,9 @@
     margin-right: 75px;
 }
 
-  .header .link-nav:hover {
+.header .link-nav:hover {
     text-decoration:none;
-  }
+}
 
 
   @media(max-width: 600px){
@@ -148,7 +148,7 @@
 
 
 .nav__link:hover {
-    color: #00345B;
+      color: #D90075;
 }
 
 .nav-toggle {

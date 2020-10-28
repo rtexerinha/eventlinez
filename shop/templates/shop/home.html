@@ -91,9 +91,11 @@
         <h2 class="title-section">Shows</h2>
 			{% for event in events.object_list %}
             <div class="content-all" style="margin: 60px 20px 0 60px">
+                <a href="{{event.get_url}}">
                 <img
                     class="item"
                     src="{{event.image.url}}" alt="{{event.name}}"/>
+                 </a>
                     <p class="text-default card-data">{{ event.created|date:"d M Y"}}</p>
                 <div class="card-event">
                     <h4 class="text-default event-name">{{event.name}}</h4>
