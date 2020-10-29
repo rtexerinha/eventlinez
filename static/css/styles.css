@@ -410,3 +410,69 @@
     text-align: center;
     justify-content: center;
 }
+
+#wrapper-login {
+    width: 70vw;
+    height: 78vh;
+    margin: 80px auto;
+}
+
+.logoimg{
+    width: 80px;
+    height: 54px;
+    margin: 45px auto 1px auto;
+}
+
+.title-login {
+    width: 393px;
+    height: 40px;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+    color: #ACABAB;
+    margin: 0 auto;
+}
+
+.button-login{
+    width: 380px;
+    height: 40px;
+    background: #D90075;
+    border-radius: 10px;
+
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 22px;
+    color: #FFFFFF;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.login-div-right{
+    background-image: url("../../static/img/backgroundLogin.png");
+     background-repeat: no-repeat;
+    width: 480px;
+}
+
+
+.logo-login{
+    width: 280px;
+    height: 82px;
+    font-weight: 800;
+    font-size: 60px;
+    line-height: 82px;
+    color: #FFFFFF;
+    margin: 140px auto 0 auto;
+}
+
+.description-login{
+    width: 393px;
+    height: 80px;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+    color: #FFFFFF;
+    margin: 0 auto;
+}

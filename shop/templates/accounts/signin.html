@@ -7,32 +7,31 @@
 {% block title %}
 	Login - Calisamba's Store
 {% endblock %}
+
 {% block content %}
-	<div class="container">
-		<br>
-		<h1 class="my_title text-center">Login or Create a New Account</h1>
-		<br>
+	<div id="wrapper-login" style="background-color: #1c7430">
 		<div class="row">
-			<div class="col-12 col-sm-12 col-md-12 col-lg-6 text-center my_custom_div">
-				<br>
-				<h2 class="my_title">New Customer?</h2>
-				<br>
-				<p>When you create an account with us, you can see your orders history.</p>
-				<br>
-				<a href="{% url 'signup' %}" class="btn btn-secondary">Create New Account</a>
-			</div>
-			<div class="col-12 col-sm-12 col-md-12 col-lg-6 bg-light">
-				<div>
-					<br>
-					<h2 class="my_title">Registered Customers Only</h2>
-					<form method="post">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-6 bg-light" style="height: 512px;">
+                <br>
+                <div class="logoimg">
+                    <img src="{% static 'img/logo.png' %}" alt="logo">
+                </div>
+
+                <h2 class="text-default title-login">Registered Customers Only</h2>
+					<form method="post" style="width: 380px;height: 400px; margin: 0 auto">
 						{% csrf_token %}
 						<p>{{ form | crispy }}</p>
-						<button type="submit" class="btn btn-secondary">Login</button>
+						<button type="submit" class="text-default button-login">Login</button>
 					</form>
 					<br>
-				</div>
-				
+
+			</div>
+
+			<div class="login-div-right">
+				<br>
+				<h2 class="text-default logo-login">Eventlinez</h2>
+				<br>
+				<p class="text-default description-login">When you create an account with us, you can see your orders history.</p>
 			</div>
 		</div>
 		<br>
