@@ -49,20 +49,20 @@ def signup_view(request):
 
 
 def signin_view(request):
-	if request.method == 'POST':
-		form = SignInForm(data=request.POST)
-		if form.is_valid():
-			username = request.POST['username']
-			password = request.POST['password']
-			user = authenticate(username=username, password=password)
-			if user is not None:
-				login(request, user)
-				return redirect('shop:all_event_categories')
-			else:
-				return redirect('signup')
-	else:
-		form = SignInForm()
-	return render(request, 'accounts/signin.html', {'form': form})
+    if request.method == 'POST':
+        form = SignInForm(data=request.POST)
+        if form.is_valid():
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('shop:index')
+            else:
+                return redirect('signup')
+    else:
+        form = SignInForm()
+    return render(request, 'accounts/signin.html', {'form': form})
 
 
 def signout_view(request):
