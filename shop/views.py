@@ -3,8 +3,7 @@ from django.http import HttpResponse
 from event.models import Category, Event
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.contrib.auth.models import Group, User
-from .forms import SignUpForm
-from django.contrib.auth.forms import AuthenticationForm
+from .forms import SignUpForm, SignInForm
 from django.contrib.auth import login, authenticate, logout
 
 
@@ -56,7 +55,7 @@ def signup_view(request):
 
 def signin_view(request):
 	if request.method == 'POST':
-		form = AuthenticationForm(data=request.POST)
+		form = SignInForm(data=request.POST)
 		if form.is_valid():
 			username = request.POST['username']
 			password = request.POST['password']
@@ -67,7 +66,7 @@ def signin_view(request):
 			else:
 				return redirect('signup')
 	else:
-		form = AuthenticationForm()
+		form = SignInForm()
 	return render(request, 'accounts/signin.html', {'form': form})
 
 
