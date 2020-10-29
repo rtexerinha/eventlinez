@@ -1,7 +1,50 @@
 /* Container for every body of the page */
 .container-full{
-    width: 99vw;
+    width: 100%;
     background-color: #FFFFFF;
+}
+
+
+#background {
+    background-image: url("../../static/img/banner.jpg");
+    background-position: center;
+    background-size: cover;
+    height: 60vh;
+    width: 93%;
+    margin-left: 88px;
+    border-radius: 30px 0 0 30px;
+}
+
+@media (min-width: 480px) {
+    #background { height: 215px;
+    }
+}
+
+@media(max-width: 600px){
+    #background{
+        height: 215px;
+        width: 98%;
+        margin-left: 10px;
+        background-color: #0b2e13;
+    }
+}
+
+@media(min-width: 1400px){
+     #background{
+         width: 94%;
+         margin-left: 100px;
+     }
+}
+
+@media (min-width: 768px) {
+    #background { height: 200px;
+    }
+}
+
+@media (min-width: 992px) {
+    #background {
+        height: 410px;
+    }
 }
 
 .banner{
@@ -39,8 +82,8 @@
 
 #subtitle-home{
     position: absolute;
-    left: 98px;
-    top: 180px;
+    left: 150px;
+    top: 280px;
     width: 40vw;
     font-family: Nunito;
     font-style: normal;
@@ -54,8 +97,8 @@
 
 .button-container-body{
     position: absolute;
-    left: 98px;
-    top: 260px;
+    left: 150px;
+    top: 350px;
     width: 142px;
     height: 40px;
     background: #D90075;
@@ -75,8 +118,8 @@
 
 #title-home{
     position: absolute;
-    left: 98px;
-    top: 80px;
+    left: 150px;
+    top: 180px;
     width: 45vw;
     font-family: Nunito;
     font-style: normal;
@@ -91,17 +134,47 @@
 
 @media(max-width: 600px){
     #title-home{
-        width: 85vw;
+        width: 60vw;
         margin-top: 30px;
         font-size: 28px;
         line-height: 41px;
+        top: 100px;
+        left: 50px;
+    }
+    #subtitle-home{
+        width: 60vw !important;
+        font-size: 14px;
+        line-height: 18px;
+        top: 180px;
+        left: 50px;
+    }
+    .button-container-body{
+        left: 50px;
+        top: 260px;
+        width: 104px;
+        height: 30px;
+    }
+}
+
+@media(max-width: 400px){
+    #title-home{
+        width: 90vw;
+        margin-top: 30px;
+        font-size: 28px;
+        line-height: 31px;
+        left: 30px;
     }
     #subtitle-home{
         width: 80vw !important;
-        font-size: 13px;
-        line-height: 18px;
+        font-size: 14px;
+        line-height: 14px;
+        left: 30px;
+    }
+    .button-container-body{
+        left: 30px;
     }
 }
+
 
 .title-section{
     position: absolute;
@@ -160,12 +233,12 @@
 /** FOTTER*/
 .container-footer{
     margin-top: 30px;
-    width: 99vw;
+    width: 100%;
     height: 274px;
     background: #312046;
     position: absolute;
     left: 0;
-    top: 1700px;
+    top: 1400px;
 }
 
 .footer-text{
@@ -475,4 +548,12 @@
     line-height: 20px;
     color: #FFFFFF;
     margin: 0 auto;
+}
+
+.cart{
+    color: #D90075;
+}
+
+.left-card{
+    margin-left: -275px;
 }

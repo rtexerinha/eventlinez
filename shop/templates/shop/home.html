@@ -3,28 +3,13 @@
 {% block metadescription %}{% endblock %}
 
 {% block content %}
-	<!--Breadcrumb navigation-->
-	{% if category %}
-		<div class="row my_row_class">
-			<div class="mx-auto">
-				<p><a href="{% url 'shop:index' %}">Our Product Collection</a> | {{category.name}}</p>
-			</div>
-		</div>
-	{% endif %}
-
-    <div class="mx-auto">
-	    {% if category %}
-{#		<img class="my_image" src="{{category.image.url}}" alt="{{category.name}}">#}
-	</div>
-
-	<div>
-		<h1 class="text-center my_title">{{category.name}}</h1>
-	</div>
+    {% if category %}
+        <div>
+		    <h1 class="text-center my_title">{{category.name}}</h1>
+	    </div>
 	{% else %}
-           <!--Carrousel images navigation-->
-            <section class="banner">
-            <article>
-                <img style="padding-left: 74px;" src="{% static 'img/banner.jpg' %}" alt="First slide">
+        <div class="tab-content">
+            <article id="background">
                 <h1 id="title-home">
                     Enjoy the Experience
                 </h1>
@@ -35,14 +20,11 @@
                     Button
                 </button>
             </article>
-            </section>
-	{% endif %}
-
-
-
-     <div id="wrapper">
+<!--------------------------------------->
+        <div id="wrapper">
+        <div class="row">
             <h2 class="title-section">Recommended</h2>
-      <div id="carousel">
+      <div id="carousel" >
         <div id="content">
             {% for event in events.object_list %}
                 <a href="{{event.get_url}}">
@@ -51,7 +33,7 @@
                         src="{{event.image.url}}" alt="{{event.name}}"/>
                 </a>
             <p class="text-default card-data" style="margin-left: -151px;">{{ event.created|date:"d M Y"}}</p>
-            <div class="card-event" style="margin-left: -280px;">
+            <div class="card-event left-card">
                 <h4 class="text-default event-name">{{event.name}}</h4>
                 <p class="text-default event-localization">Av Hollywood Boulevard, 1283, Los Angeles, Califórnia</p>
                 <p class="text-default event-price"> Tickets from ${{event.price}}</p>
@@ -84,8 +66,10 @@
         </svg>
       </button>
     </div>
+    </div>
 
-    <div>
+
+        <div>
     <div id="wrapper" style="margin-top: 60px; padding-left: 25px;">
 		<div class="row">
         <h2 class="title-section">Shows</h2>
@@ -106,6 +90,7 @@
 			{% endfor %}
 
 		</div>
+
 		<div class="mx-auto">
 			{% if events.paginator.num_pages > 1 %}
 				<hr>
@@ -119,6 +104,16 @@
 		<br>
 	</div>
         </div>
+
+
+
+
+
+        </div>
+	{% endif %}
+
+
+
 
 
 {% endblock %}

@@ -10,23 +10,32 @@
         <input class="input-form-search" type="search" placeholder="Search" aria-label="Search" name="q">
     </form>
 
-    <nav class="header-right">
-            {% if item_count > 0 %}
-                <a class="link-nav nav__link" href="{% url 'cart:cart_detail' %}">
-                    <i class="fas fa-shopping-cart"></i>({{item_count}})
-                </a>
-            {% endif %}
+    <nav>
         {% if request.user.is_authenticated %}
-                Welcome,
-                <a class=" link-nav nav__link link-right" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ request.user.first_name }}
+            <div class="header-right-log">
+                {% if item_count > 0 %}
+                    <a class="link-nav nav__link cart" href="{% url 'cart:cart_detail' %}">
+                        <i class="fas fa-shopping-cart"></i>({{item_count}})
+                    </a>
+                {% endif %}
+                <a class="link-nav nav__link" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">  Welcome, {{ request.user.first_name }}
                     <i class="fas fa-user-circle"></i>
                 </a>
 
                 <div class="dropdown-menu dropdown-menu-right">
 					<a href="{% url 'order:order_history' %}" class="dropdown-item">Order History</a>
                 </div>
-                <a class="link-nav nav__link link-right" href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
+                <a class="link-nav nav__link" href="{% url 'signout' %}">Sign Out
+                    <i class="fas fa-sign-out-alt" id="icons-space-left"></i>
+                </a>
+            </div>
         {% else %}
+            <div class="header-right">
+                {% if item_count > 0 %}
+                    <a class="link-nav nav__link" href="{% url 'cart:cart_detail' %}">
+                        <i class="fas fa-shopping-cart"></i>({{item_count}})
+                    </a>
+                {% endif %}
             <a class="link-nav link-right nav__link " href="{% url 'signup' %}">
                 <i style="padding-right: 10px" class="fas fa-user-plus"></i>
                 Sign Up
@@ -36,6 +45,7 @@
                 <i style="padding-right: 10px" class="fas fa-sign-in-alt"></i>
                 Sign In
             </a>
+            </div>
         {% endif %}
     </nav>
 
@@ -52,36 +62,28 @@
                     <i class="fas fa-user-circle"></i>
                 </a>
 				    <div class="dropdown-menu dropdown-menu-right">
-					<a href="{% url 'order:order_history' %}" class="dropdown-item">Order History</a>
+					<a href="{% url 'order:order_history' %}" class="dropdown-item nav__link">Order History</a>
 				    </div>
 			    </li>
 
 			    <li>
-				    <a class="nav__link" href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
+				    <a class="nav__link" href="{% url 'signout' %}">Sign Out
+                        <i class="fas fa-sign-out-alt" id="icons-space-left"></i>
+                    </a>
 			    </li>
             {% else %}
                 <li class="nav__item">
                     <a href="{% url 'signup' %}" class="nav__link">
-                        <i class="fas fa-user-plus"></i>
+                        <i class="fas fa-user-plus" id="icons-space"></i>
                         Sign Up </a>
                 </li>
                 <li class="nav__item">
                 <a href="{% url 'signin' %}"  class="nav__link">
-                    <i class="fas fa-sign-in-alt"></i>
+                    <i class="fas fa-sign-in-alt" id="icons-space"></i>
                     Sign In </a>
                 </li>
             {% endif %}
-            <li class="nav__item">
-                <a href="#" class="nav__link">Best sellers</a>
-            </li>
 
-            <li class="nav__item">
-                <a href="#" class="nav__link">New</a>
-            </li>
-
-            <li class="nav__item">
-                <a href="#" class="nav__link">City</a>
-            </li>
         </ul>
     </nav>
 </header>
