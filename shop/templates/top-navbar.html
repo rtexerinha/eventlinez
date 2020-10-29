@@ -16,7 +16,7 @@
                     <i class="fas fa-shopping-cart"></i>({{item_count}})
                 </a>
             {% endif %}
-        {% if request.user.is_authenticated and request.user.first_name %}
+        {% if request.user.is_authenticated %}
                 Welcome,
                 <a class=" link-nav nav__link link-right" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ request.user.first_name }}
                     <i class="fas fa-user-circle"></i>
@@ -45,7 +45,7 @@
 
     <nav class="nave">
         <ul class="nav__list">
-            {% if request.user.is_authenticated and request.user.first_name %}
+            {% if request.user.is_authenticated %}
                 <li class="nav__item">
 				    Welcome,
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ request.user.first_name }}
@@ -59,7 +59,6 @@
 			    <li>
 				    <a class="nav__link" href="{% url 'signout' %}">Sign Out <i class="fas fa-sign-out-alt"></i></a>
 			    </li>
-
             {% else %}
                 <li class="nav__item">
                     <a href="{% url 'signup' %}" class="nav__link">
@@ -72,13 +71,13 @@
                     Sign In </a>
                 </li>
             {% endif %}
-                <li class="nav__item">
-                    <a href="#" class="nav__link">Best sellers</a>
-                </li>
+            <li class="nav__item">
+                <a href="#" class="nav__link">Best sellers</a>
+            </li>
 
-                <li class="nav__item">
-                    <a href="#" class="nav__link">New</a>
-                </li>
+            <li class="nav__item">
+                <a href="#" class="nav__link">New</a>
+            </li>
 
             <li class="nav__item">
                 <a href="#" class="nav__link">City</a>
