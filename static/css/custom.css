@@ -84,14 +84,13 @@ body {
 }
 /****Cart Page****/
 .my_custom_table {
-	min-width: 400px;
+	min-width: 320px!important;
 	font-size: 14px;
 }
 .my_custom_thead {
 	font-weight: normal;
 	text-transform: uppercase;
 	letter-spacing: .2em;
-	background-color: #f8f9fa!important;
 }
 .custom_image {
 	width: 100px;
@@ -102,7 +101,7 @@ body {
 }
 .custom_icon {
 	text-decoration: none;
-	color: #868e96 !important;
+	color: #D90075 !important;
 }
 .my_custom_button {
 	margin-top: 5px;
@@ -166,4 +165,8 @@ body {
 	border-radius: 50%!important;
     width: 10px!important;
 	height: 10px!important;
+}
+
+.custom-icon-delete{
+	color: #D90000;
 }
