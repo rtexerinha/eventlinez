@@ -8,8 +8,8 @@
 		    <h1 class="text-center my_title">{{category.name}}</h1>
 	    </div>
 	{% else %}
-        <div class="tab-content">
-            <article id="background">
+        <main class="tab-content">
+            <section id="background">
                 <h1 id="title-home">
                     Enjoy the Experience
                 </h1>
@@ -19,9 +19,9 @@
                 <button class="button-container-body">
                     Button
                 </button>
-            </article>
+            </section>
 <!--------------------------------------->
-        <div id="wrapper">
+        <section id="wrapper">
         <div class="row">
             <h2 class="title-section">Recommended</h2>
       <div id="carousel" >
@@ -66,11 +66,11 @@
         </svg>
       </button>
     </div>
-    </div>
+    </section>
 
 
-        <div>
-    <div id="wrapper" style="margin-top: 60px; padding-left: 25px;">
+
+    <section id="wrapper" style="margin-top: 60px; padding-left: 25px;">
 		<div class="row">
         <h2 class="title-section">Shows</h2>
 			{% for event in events.object_list %}
@@ -102,18 +102,8 @@
 			{% endif %}
 		</div>
 		<br>
-	</div>
-        </div>
-
-
-
-
-
-        </div>
+	</section>
+        </main>
 	{% endif %}
-
-
-
-
 
 {% endblock %}

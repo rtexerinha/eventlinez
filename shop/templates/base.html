@@ -18,12 +18,12 @@
 </head>
 
 <body>
-	<div class="container-full">
+	<main class="container-full">
 		{% include 'top-navbar.html' %}
         {% block content %}
 		{% endblock %}
     		{% include 'footer.html' %}
-    </div>
+    </main>
 
     <script src="{% static 'js/index.js' %}"></script>
      <script src="{% static 'js/app.js' %}"></script>
