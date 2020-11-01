@@ -1,10 +1,11 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 
 class Order(models.Model):
 	token = models.CharField(max_length=250, blank=True)
-	total = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='GBP Order Total')
-	emailAddress = models.EmailField(max_length=250, blank=True, verbose_name='Email Address')
+	total = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+	emailAddress = models.EmailField(max_length=250, blank=True)
 	created = models.DateTimeField(auto_now_add=True)
 	billingName = models.CharField(max_length=250, blank=True)
 	billingAddress1 = models.CharField(max_length=250, blank=True)
