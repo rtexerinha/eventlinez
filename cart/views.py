@@ -69,10 +69,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
             shippingcity = request.POST['stripeShippingAddressCity']
             shipping_postcode = request.POST['stripeShippingAddressZip']
             shipping_country = request.POST['stripeShippingAddressCountryCode']
-            customer = stripe.Customer.create(
-                email=email,
-                source=token
-            )
+            customer = stripe.Customer.create(email=email, source=token)
             charge = stripe.Charge.create(
                 amount=stripe_total,
                 currency="usd",
@@ -81,7 +78,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
             )
             logger.info("Creating the order")
             try:
-                order_details = Order.objects.create(
+                order = Order.objects.create(
                     token=token,
                     total=total,
                     emailAddress=email,
@@ -96,18 +93,17 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                     shippingPostcode=shipping_postcode,
                     shippingCountry=shipping_country
                 )
-                order_details.save()
                 for order_item in cart_items:
-                    oi = OrderItem.objects.create(
+                    oi = OrderItem(
                         event=order_item.event.name,
                         quantity=order_item.quantity,
                         price=order_item.event.price,
-                        order=order_details
+                        order=order
                     )
-                    oi.save() #TODO: Remover essa redundância
-                    events = Event.objects.get(id=order_item.event.id)
-                    events.stock = int(order_item.event.stock - order_item.quantity)
-                    events.save()
+                    oi.save()
+                    event = Event.objects.get(id=order_item.event.id)
+                    event.stock = int(order_item.event.stock - order_item.quantity)
+                    event.save()
                     order_item.delete()
                     logger.info("The order has been created")
                 # try:
@@ -116,7 +112,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 #	print('The order email has been sent to the customer.')
                 #	except IOError as e:
                 #		return e
-                return redirect('order:thanks', order_details.id)
+                return redirect('order:thanks', order.id)
             except ObjectDoesNotExist:
                 pass
         except stripe.error.CardError as e:
