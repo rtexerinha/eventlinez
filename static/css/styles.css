@@ -195,11 +195,19 @@
     color: #171717;
 }
 
-.container-details{
-    height: 400px;
+#container-details{
+    height: 30vw;
     width: 100%;
 }
 
+#container-details-img{
+    height: 100%;
+    width: 100%;
+    border-radius: 30px;
+}
+
+
+/***********APAGAR ESSE **************************/
 .container-additional-details{
     width: 60vw;
     height: 50vh;
@@ -227,6 +235,19 @@
      text-decoration: none;
 }
 
+@media (max-width: 600px) {
+    #box-tags{
+        width: 100%;
+    }
+
+    .box-tag{
+        width: 80px;
+        height: 20px;
+        padding-top: 0;
+        margin-top: 8px;
+    }
+
+}
 
 
 
@@ -433,17 +454,25 @@
 }
 
 #buttons-pay-event-card-details{
-    position: absolute;
     width: 381px;
     height: 110px;
     margin: 60px 20px;
     justify-content: center;
     align-content: center;
+}
 
+@media (max-width: 600px) {
+    #buttons-pay-event-card-details{
+        width: 100%;
+        margin: 0;
+    }
+    .pay-event-card-details{
+        width: 90% !important;
+        margin: 0;
+    }
 }
 
 .pay-event-card-details{
-    position: relative;
     width: 381px;
     height: 40px;
     background: #D90075;
@@ -806,3 +835,23 @@ div.content-right-signin {
         margin: 0!important;
     }
 }
+
+@media (max-width: 600px) {
+    #div-description{
+        display: none;
+    }
+}
+
+
+#div-description-mobile{
+    height: 100%;
+    width: 100%;
+}
+
+@media (min-width: 600px) {
+    #div-description-mobile{
+        display: none;
+    }
+
+}
+
