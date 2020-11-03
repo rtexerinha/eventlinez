@@ -21,53 +21,6 @@
                 </button>
             </section>
 <!--------------------------------------->
-        <section id="wrapper">
-        <div class="row">
-            <h2 class="title-section">Recommended</h2>
-      <div id="carousel" >
-        <div id="content">
-            {% for event in events.object_list %}
-                <a href="{{event.get_url}}">
-                    <img
-                        class="item"
-                        src="{{event.image.url}}" alt="{{event.name}}"/>
-                </a>
-            <p class="text-default card-data" style="margin-left: -151px;">{{ event.created|date:"d M Y"}}</p>
-            <div class="card-event left-card">
-                <h4 class="text-default event-name">{{event.name}}</h4>
-                <p class="text-default event-localization">Av Hollywood Boulevard, 1283, Los Angeles, Califórnia</p>
-                <p class="text-default event-price"> Tickets from ${{event.price}}</p>
-            </div>
-
-            {% endfor %}
-
-        </div>
-      </div>
-      <button id="prev">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path fill="none" d="M0 0h24v24H0V0z" />
-          <path d="M15.61 7.41L14.2 6l-6 6 6 6 1.41-1.41L11.03 12l4.58-4.59z" />
-        </svg>
-      </button>
-      <button id="next">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path fill="none" d="M0 0h24v24H0V0z" />
-          <path d="M10.02 6L8.61 7.41 13.19 12l-4.58 4.59L10.02 18l6-6-6-6z" />
-        </svg>
-      </button>
-    </div>
-    </section>
-
 
 
     <section id="wrapper" style="margin-top: 60px; padding-left: 25px;">
