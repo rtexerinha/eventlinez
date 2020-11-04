@@ -37,9 +37,9 @@
                         <h4 class="text-default" id="location-event-card-details">Av Hollywood Boulevard, 1283, Los Angeles, Califórnia</h4>
                     </div>
                 <div style="margin-top: 30px">
-                        <p class="text-default day-event-card-details">{{ event.created|date:"d"}}</p>
-                        <p class="text-default date-event-card-details">{{ event.created|date:"M Y"}}</p>
-                        <p class="text-default date-event-card-details" style="font-size: 20px;">{{ event.created|date:"l H:m"}}</p>
+                        <p class="text-default day-event-card-details">{{ event.event_date|date:"d"}}</p>
+                        <p class="text-default date-event-card-details">{{ event.event_date|date:"M Y"}}</p>
+                        <p class="text-default date-event-card-details" style="font-size: 20px;">{{ event.event_date|date:"l H:m"}}</p>
                 </div>
                         <table style="width:100%; margin-top: 30px">
                             <tr>

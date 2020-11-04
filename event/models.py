@@ -33,6 +33,7 @@ class Event(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Category, blank=False, on_delete=models.PROTECT)
+    event_date = models.DateTimeField(blank=False, null=False, default='')
 
     class Meta:
         ordering = ('name',)
