@@ -55,20 +55,23 @@
 
     <section id="wrapper">
 		<div class="row">
-			{% for event in events.object_list %}
-            <div class="content-all">
-                <a href="{{event.get_url}}">
-                <img
-                    class="item"
-                    src="{{event.image.url}}" alt="{{event.name}}"/>
-                 </a>
-                    <p class="text-default card-data">{{ event.event_date|date:"d M Y"}}</p>
-                <div class="card-event">
-                    <h4 class="text-default event-name">{{event.name}}</h4>
-                </div>
-            </div>
-			{% endfor %}
-
+            {% if events.object_list %}
+                {% for event in events.object_list %}
+                    <div class="content-all">
+                        <a href="{{event.get_url}}">
+                            <img
+                            class="item"
+                            src="{{event.image.url}}" alt="{{event.name}}"/>
+                        </a>
+                        <p class="text-default card-data">{{ event.event_date|date:"d M Y"}}</p>
+                        <div class="card-event">
+                            <h4 class="text-default event-name">{{event.name}}</h4>
+                        </div>
+                    </div>
+			    {% endfor %}
+            {% else %}
+                <h2>No events at the moment</h2>
+            {% endif %}
 		</div>
 
 		<div class="mx-auto">
