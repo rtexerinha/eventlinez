@@ -10,23 +10,36 @@
 	<div>
 		<p class="text-center my_search_text">You have searched for: <b>"{{ query }}"</b></p>
 	</div>
-	<div class="container">
-		<div class="row mx-auto">
+
+        <section id="wrapper">
+		<div class="row">
 			{% for event in events %}
-				<div class="my_bottom_margin col-9 col-sm-12 col-md-4 col-md-12 col-lg-4">
-					<div class="card text-center" style="min-width: 18rem;">
-						<a href="{{event.get_url}}"><img class="card-img-top my_image" src="{{event.image.url}}" alt="{{event.name}}"></a>
-						<div class="card-body">
-							<h4>{{event.name}}</h4>
-							<p>${{event.price}}</p>
-						</div>
-					</div>
-				</div>
-				{% empty %}
-				<div class="row mx-auto">
-					<p class="text-center my_search_text">0 results found.</p>
-				</div>
+            <div class="content-all">
+                <a href="{{event.get_url}}">
+                <img
+                    class="item"
+                    src="{{event.image.url}}" alt="{{event.name}}"/>
+                 </a>
+                    <p class="text-default card-data">{{ event.created|date:"d M Y"}}</p>
+                <div class="card-event">
+                    <h4 class="text-default event-name">{{event.name}}</h4>
+                </div>
+            </div>
 			{% endfor %}
+
 		</div>
-	</div>
+
+		<div class="mx-auto">
+			{% if events.paginator.num_pages > 1 %}
+				<hr>
+				<div class="text-center">
+					{% for pg in events.paginator.page_range %}
+						<a href="?page={{pg}}" class="btn btn-light btn-sm {% if events.number == pg %}active{% endif %}">{{pg}}</a>
+					{% endfor %}
+				</div>
+			{% endif %}
+		</div>
+		<br>
+	</section>
+
 {% endblock %}
