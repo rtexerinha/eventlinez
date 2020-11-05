@@ -9,32 +9,46 @@
 {% endblock %}
 
 {% block content %}
-	<div id="wrapper-login">
-		<div class="row">
-            <div class="col-12 col-sm-12 col-md-12 col-lg-6 bg-light" style="height: 512px;">
-                <br>
+	<div class="col-lg-12 col-sm-11" id="wrapper-login">
+        <section class="row">
+
+            <aside class="col-lg-12 col-sm-12 col-md-12 login-div-right-mobile">
+
+                    <h2 class="text-default logo-login">Eventlinez</h2>
+                    <br>
+                    <p class="text-default description-login">When you create an account with us, you can see your orders history.</p>
+
+            </aside>
+
+            <main class="col-lg-7" style="background-color: #F9F9F9; height: 500px; border-radius: 10px 0px 0px 10px;">
+                <h2 class="text-default title-login">Welcome to</h2>
                 <div class="logoimg">
                     <img src="{% static 'img/logo.png' %}" alt="logo">
                 </div>
+                 <h2 class="text-default description-login-left">Registered Customers Only</h2>
 
-                <h2 class="text-default title-login">Registered Customers Only</h2>
-					<form method="post" style="width: 380px;height: 400px; margin: 0 auto">
-						{% csrf_token %}
-						<p>{{ form | crispy }}</p>
-						<button type="submit" class="text-default button-login">Login</button>
-					</form>
-					<br>
+                <form method="post" class="col-lg-9" style="margin: 0 auto">
+                    {% csrf_token %}
+                    <p>{{ form | crispy }}</p>
+                    <button type="submit" class="text-default button-login">Login</button>
+                    <p class="text-default text-small-login">Don’t  have an account?
+                        <a href="{% url 'signup' %}"
+                           style="color: #d90075;
+                           text-decoration-line: none;
+                           margin-left: 5px;
+                        "> Sing up now</a>
+                      </p>
+                </form>
 
-			</div>
+            </main>
 
-			<div class="login-div-right">
-				<br>
-				<h2 class="text-default logo-login">Eventlinez</h2>
-				<br>
-				<p class="text-default description-login">When you create an account with us, you can see your orders history.</p>
-			</div>
-		</div>
-		<br>
-	</div>
-	<br>
+            <aside class="col-lg-5 login-div-right" style="background-color: #a71a;border-radius: 0px 10px 10px 0px;">
+
+                    <h2 class="text-default logo-login">Eventlinez</h2>
+                    <br>
+                    <p class="text-default description-login">When you create an account with us, you can see your orders history.</p>
+
+            </aside>
+        </section>
+    </div>
 {% endblock %}

@@ -566,29 +566,45 @@
 }
 
 #wrapper-login {
-    width: 70vw;
-    height: 78vh;
-    margin: 80px auto;
+    margin: 0 auto;
+    height: 100%;
+    padding: 0 80px 0 120px;
+}
+
+@media (max-width: 990px) {
+    #wrapper-login {
+        padding: 0;
+    }
 }
 
 .logoimg{
-    width: 80px;
-    height: 54px;
-    margin: 45px auto 1px auto;
+    height: 41px;
+    margin: 0 auto 1px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center
 }
 
 .title-login {
-    width: 393px;
-    height: 40px;
+    justify-content: center;
     font-weight: 600;
-    font-size: 15px;
-    line-height: 20px;
+    font-size: 22px;
+    line-height: 28px;
+    margin: 40px auto 0 auto;
+    color: #171717;
+}
+
+.description-login-left{
+    display: flex;
+    width: 100%;
     color: #ACABAB;
     margin: 0 auto;
+    justify-content: center;
 }
 
 .button-login{
-    width: 380px;
+    display: flex;
+    width: 98%;
     height: 40px;
     background: #D90075;
     border-radius: 10px;
@@ -598,7 +614,7 @@
     font-size: 16px;
     line-height: 22px;
     color: #FFFFFF;
-    margin: 0 auto;
+    margin: 60px 0 10px 0;
     justify-content: center;
     align-items: center;
 }
@@ -606,29 +622,70 @@
 
 .login-div-right{
     background-image: url("../../static/img/backgroundLogin.png");
-     background-repeat: no-repeat;
-    width: 480px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+@media (max-width: 991px) {
+    .login-div-right{
+        display: none;
+    }
+}
+
+.login-div-right-mobile{
+    background-image: url("../../static/img/backgroundLoginMobile.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    /*margin: 0 0 0 30px;*/
+}
+
+
+@media (min-width: 992px) {
+    .login-div-right-mobile{
+        display: none;
+    }
 }
 
 
 .logo-login{
-    width: 280px;
-    height: 82px;
+    display: flex;
+    width: 100%;
     font-weight: 800;
     font-size: 60px;
-    line-height: 82px;
+    line-height: 42px;
     color: #FFFFFF;
-    margin: 140px auto 0 auto;
+    margin: 45% auto 0 auto;
+    justify-content: center;
 }
 
+@media (max-width: 400px) {
+    .logo-login{ font-size: 35px;}
+}
+
+@media (max-width: 800px) {
+    .logo-login{
+        margin-top: 60px;
+    }
+}
+
+@media (max-width: 990px) and (min-width: 800px){
+    .logo-login{
+        margin-top: 10% !important;
+    }
+}
+
+
+
 .description-login{
-    width: 393px;
-    height: 80px;
+    display: flex;
+    width: 100%;
     font-weight: 600;
     font-size: 15px;
     line-height: 20px;
     color: #FFFFFF;
     margin: 0 auto;
+    justify-content: center;
+    padding: 0 30px 30px 30px;
 }
 
 .cart{
@@ -763,7 +820,6 @@ div.content-right-signin {
         width: 95% !important;
     }
     .button-login{
-        width: 301px;
         height: 36px;
     }
     .title-signup{
@@ -954,6 +1010,17 @@ div.content-right-signin {
 #table-event-details{
     width:100%;
     margin-top: 30px;
+}
+
+.text-small-login{
+    display: flex;
+    font-family: Nunito;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 19px;
+    color: #171717;
+    justify-content: center;
+    padding: 30px 0;
 }
 
 
