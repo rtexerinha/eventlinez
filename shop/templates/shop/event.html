@@ -9,7 +9,7 @@
 {% block content %}
 
     <div class="row col-lg-12 col-sm-12">
-        <div class="col-lg-7">
+        <div id="div-left-detals" class="col-lg-7" >
             <div class="col-lg-12 col-sm-12" id="container-details">
                 <img src="{{event.image.url}}" alt="{{event.name}}" id="container-details-img"/>
             </div>
@@ -31,12 +31,12 @@
         </div>
 
         <div class="col-lg-5 float-right">
-              <aside>
+              <aside style="background-color: #F5F2F2; padding-bottom: 60px">
                     <div style="margin-left: 20px; margin-top: 10px">
                         <h2 class="text-default title-event-card-details">{{event.name}}</h2>
                         <h4 class="text-default" id="location-event-card-details">Av Hollywood Boulevard, 1283, Los Angeles, Califórnia</h4>
                     </div>
-                <div style="margin-top: 30px">
+                <div style="margin-top: 80px">
                         <p class="text-default day-event-card-details">{{ event.event_date|date:"d"}}</p>
                         <p class="text-default date-event-card-details">{{ event.event_date|date:"M Y"}}</p>
                         <p class="text-default date-event-card-details" style="font-size: 20px;">{{ event.event_date|date:"l H:m"}}</p>
@@ -60,10 +60,10 @@
                         {% if event.stock <= 0%}
                             <p class="text-justify my_prod_text"><b>Out of Stock</b></p>
                         {% else %}
-                            <br>
+                            <br><br>
                             <div id="buttons-pay-event-card-details">
                                 <a class="pay-event-card-details text-default" href="{% url 'cart:add_cart' event.id %}">Add to Cart</a>
-                                <a href="{% url 'shop:index' %}" class="pay-event-card-details text-default">Continue Shopping</a>
+                                <a href="{% url 'shop:index' %}" class="pay-event-card-details text-default invert">Continue Shopping</a>
                             </div>
                         {% endif %}
                 </aside>
@@ -88,8 +88,5 @@
     </div>
 
     <br> <br>
-
-
-
 
 {% endblock %}

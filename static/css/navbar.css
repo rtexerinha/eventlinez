@@ -48,8 +48,6 @@
     font-size: 25px;
     font-weight: bold;
     margin-left: 60px;
-    margin-top: -5px;
-    /*margin-right: 75px; */
 }
 
 .header .link-nav:hover {
@@ -244,6 +242,7 @@
     .header-right-log {
         margin-top: 0;
     }
+    .header-right {margin-top: 0;}
 }
 
 
