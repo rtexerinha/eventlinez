@@ -71,7 +71,7 @@
             <div style="padding-left: 30px">
                 <h2 class="text-default title-event-card-details" style="margin-left: 0">About</h2>
                 <h4 class="text-default" id="location-event-card-details">
-                    {{ event.description }}
+                    {{ event.description|safe }}
                 </h4>
 
                 <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
