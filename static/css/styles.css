@@ -173,6 +173,8 @@
 @media (max-width: 800px) {
     .header-filter-home{
         padding: 0;
+        height: 100%;
+        margin-bottom: 10px;
     }
 }
 
@@ -488,7 +490,7 @@
 #buttons-pay-event-card-details{
     width: 381px;
     height: 110px;
-    margin: 60px 20px;
+    margin: 60px auto;
     justify-content: center;
     align-content: center;
 }
