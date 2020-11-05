@@ -16,10 +16,8 @@
 
             <div class="col-lg-12" id="div-description" style="height: 50%;">
                 <br>
-                    <h2 class="text-default title-event-card-details" style="margin-left: 0">Age rating</h2>
-                    <h4 class="text-default" id="location-event-card-details">16 years. Children under 16 enter accompanied by parents / guardians.</h4>
                     <h2 class="text-default title-event-card-details" style="margin-left: 0">About</h2>
-                    <h4 class="text-default" id="location-event-card-details">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce scelerisque et nisi nec finibus. Ut luctus dolor velit, sed molestie ligula maximus quis. Curabitur lectus magna, ultrices quis tortor et, iaculis malesuada purus. In ut dapibus massa. Mauris commodo lectus nec consequat efficitur. Aenean eu mi est. Nulla a ipsum mauris. </h4>
+                   {{ event.description|safe }}
                     <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
                     <div id="box-tags">
                         <a class="box-tag" href="{% url 'shop:index' %}">Home</a>
@@ -71,11 +69,12 @@
         <div id="div-description-mobile">
             <br>
             <div style="padding-left: 30px">
-            <h2 class="text-default title-event-card-details" style="margin-left: 0">Age rating</h2>
-            <h4 class="text-default" id="location-event-card-details">16 years. Children under 16 enter accompanied by parents / guardians.</h4>
-            <h2 class="text-default title-event-card-details" style="margin-left: 0">About</h2>
-            <h4 class="text-default" id="location-event-card-details">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce scelerisque et nisi nec finibus. Ut luctus dolor velit, sed molestie ligula maximus quis. Curabitur lectus magna, ultrices quis tortor et, iaculis malesuada purus. In ut dapibus massa. Mauris commodo lectus nec consequat efficitur. Aenean eu mi est. Nulla a ipsum mauris. </h4>
-            <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
+                <h2 class="text-default title-event-card-details" style="margin-left: 0">About</h2>
+                <h4 class="text-default" id="location-event-card-details">
+                    {{ event.description }}
+                </h4>
+
+                <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
             <div id="box-tags">
                 <a class="box-tag" href="{% url 'shop:index' %}">Home</a>
                 <a class="box-tag" href="{{ event.category.get_url }}">{{event.category}}</a>

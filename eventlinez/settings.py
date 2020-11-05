@@ -27,6 +27,13 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+CKEDITOR_CONFIGS = {
+    'default': {
+        'autoParagraph': False
+    },
+}
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -144,3 +151,5 @@ try:
     from local_settings import *
 except ImportError:
     pass
+
+
