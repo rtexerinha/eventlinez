@@ -5,7 +5,7 @@
 {% block content %}
     <main class="col-lg-12 col-sm-12" style="padding-right: 0">
         <section class="col-lg-12 float-right" id="background">
-            <h1 id="title-home">Enjoy the Experience</h1>
+            <h1 id="title-home" style="width: max-content;">Enjoy the Experience</h1>
             <p id="subtitle-home">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ut magna ultrices, efficitur augue nec, rhoncus sapien. Phasellus quis nisi ligula. Vestibulum porta ipsum ac nibh sodales ultrices.
             </p>
@@ -18,10 +18,9 @@
 
 
     <header class="row col-lg-12 col-sm-12 header-filter-home">
-        <form class="row-cols-sm-1 mobile" action="{% url 'search_app:searchResult' %}" method="get" style="width: 100%">
+        <form class="col-lg-12 mobile" action="{% url 'search_app:searchResult' %}" method="get" style="width: 100%; background-color: #a71d2a">
             {% csrf_token %}
-            <i class="fas fa-search" id="icone"></i>
-            <input class="input-form-search" type="search" placeholder="Search" aria-label="Search" name="q" style="width: 70%; margin: 20px 0 20px 30px">
+            <input class="input-form-search col-lg-10" type="search" placeholder="Search" aria-label="Search" name="q" style="width: 70%; margin: 20px 0 20px 30px">
         </form>
 
         {% if category %}
@@ -34,16 +33,16 @@
             </div>
 	    {% endif %}
 
-        <nav class="col-lg-2 col-sm-5 float-right text-center nav-filter">
+        <nav class="col-lg-2 col-sm-4 float-right text-center nav-filter">
             <ul>
-                <li class="nav-item dropdown {% if 'shop' in request.path %}active{% endif %}">
+                <li class="nav-item dropdown{% if 'shop' in request.path %}active{% endif %}">
                     <a class="nav-link dropdown-toggle text-bk" href="{% url 'shop:index' %}" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         All
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{% url 'shop:index' %}">All Events</a>
+                    <div class="dropdown-menu text-mobile" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item text-mobile" href="{% url 'shop:index' %}">All Events</a>
                     {% for cat in links %}
-                        <a class="dropdown-item" href="{{cat.get_url}}">{{cat.name}}</a>
+                        <a class="dropdown-item text-mobile" href="{{cat.get_url}}">{{cat.name}}</a>
                     {% endfor %}
                     </div>
                 </li>
@@ -53,7 +52,7 @@
         <div class="clearfix"></div>
     </header>
 
-    <section id="wrapper">
+    <section id="wrapper" class="col-xl-6">
 		<div class="row">
             {% if events.object_list %}
                 {% for event in events.object_list %}

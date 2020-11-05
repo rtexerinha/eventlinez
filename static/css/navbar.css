@@ -23,9 +23,9 @@
 .header-right-log{
     position:relative;
     float: right;
-    width: 350px;
+    width: 320px;
     margin-top: -40px;
-    margin-right: 1px;
+    display: flex;
   }
 
 @media (min-width: 770px) and (max-width:800px){
@@ -48,7 +48,8 @@
     font-size: 25px;
     font-weight: bold;
     margin-left: 60px;
-    margin-right: 75px;
+    margin-top: -5px;
+    /*margin-right: 75px; */
 }
 
 .header .link-nav:hover {
@@ -83,7 +84,6 @@
 @media(max-width: 1000px){
     .form-search{
         margin: 0;
-        background-color: gold;
         width: 80vw;
     }
 
@@ -238,6 +238,13 @@
 
 .hamburger::before { top: 6px; }
 .hamburger::after { bottom: 6px; }
+
+
+@media (min-width: 601px) and (max-width: 800px) {
+    .header-right-log {
+        margin-top: 0;
+    }
+}
 
 
 

@@ -61,20 +61,22 @@
 }
 
 
-
-
-@media(max-width: 900px){
+@media(max-width: 1000px){
     #title-home{
-        font-size: 2rem;
-        line-height: 42px;
+        font-size: 2rem!important;
+        line-height: 32px!important;
         width: 70vw;
-        margin-top: 40px;
+        margin-top: 20px!important;
     }
     #subtitle-home{
         width: 70vw !important;
         line-height: 20px;
         margin: 0;
     }
+    #button-container-body{
+
+    }
+
 }
 
 
@@ -128,13 +130,13 @@
     #title-home{
         width: 100%;
         margin-top: 30px;
-        font-size: 28px;
+        font-size: 28px!important;
         line-height: 41px;
         margin-left: 0;
 
     }
     #subtitle-home{
-        width: 60vw !important;
+        width: 80vw !important;
         font-size: 14px;
         line-height: 18px;
         margin-left: 0;
@@ -150,7 +152,7 @@
     #title-home{
         width: 80vw;
         margin-top: 30px;
-        font-size: 28px;
+        font-size: 24px!important;
         line-height: 31px;
         left: 30px;
     }
@@ -167,6 +169,11 @@
 .header-filter-home{
     height: 100px;
     padding: 80px;
+}
+@media (max-width: 800px) {
+    .header-filter-home{
+        padding: 0;
+    }
 }
 
 .div-title-home{
@@ -646,7 +653,18 @@ div.content-right-signin {
 .text-bk:hover{
     color: #D90075;
 }
+@media (max-width: 400px) {
+    .text-mobile{
+        font-size: small!important;
+    }
+    .dropdown-menu{
+        min-width: 0rem!important;
+    }
+    .dropdown-item{
+        padding: 0.25rem 0.5rem!important;
+    }
 
+}
 
 #box-signup{
     width: 300px;
@@ -881,10 +899,13 @@ div.content-right-signin {
     #div-description-mobile{
         display: none;
     }
-    .mobile{
+
+}
+
+@media (min-width: 800px) {
+       .mobile{
         display: none;
     }
-
 }
 
 @media (min-width: 1400px) {
