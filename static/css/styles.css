@@ -1,7 +1,13 @@
 /* Container for every body of the page */
 .container-full{
-    width: 99%;
+    width: 100%;
     background-color: #FFFFFF;
+}
+
+@media(max-width: 600px){
+    .container-full{
+        width: 99%;
+    }
 }
 
 
