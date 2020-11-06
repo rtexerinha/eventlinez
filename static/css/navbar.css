@@ -169,7 +169,7 @@
 }
 
 .nav-toggle {
-    padding: .5em;
+    /*padding: .2em .5em .5em .5em; */
     background: transparent;
     border: 0;
     cursor: pointer;
@@ -197,10 +197,12 @@
 
 .nav-open .hamburger {
     transform: rotate(.625turn);
+    background-color: #d90075!important;
 }
 
 .nav-open .hamburger::before {
     transform: rotate(90deg) translateX(-6px);
+    background-color: #d90075!important;
 }
 
 .nav-open .hamburger::after {

@@ -1,6 +1,6 @@
 /* Container for every body of the page */
 .container-full{
-    width: 100%;
+    width: 99%;
     background-color: #FFFFFF;
 }
 
@@ -890,7 +890,6 @@ div.content-right-signin {
     width: 240px;
     height: 40px;
     background: #FFFFFF;
-    border-radius: 10px;
     font-size: 1rem;
     line-height: 22px;
     color: #D90075;
