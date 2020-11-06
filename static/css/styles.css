@@ -474,7 +474,6 @@
 
 @media (max-width: 600px){
     .card-data{
-        font-size: 10px;
         width: 70px;
         height: 16px;
         margin-top: 85px;
@@ -641,6 +640,18 @@
     }
 }
 
+#wrapper-log {
+    margin: 0 auto;
+    height: 100%;
+    padding: 0 80px 0 90px;
+}
+
+@media (max-width: 990px) {
+    #wrapper-log {
+        padding: 0;
+    }
+}
+
 .logoimg{
     height: 41px;
     margin: 0 auto 1px auto;
@@ -767,15 +778,13 @@
         padding: 0 100px;
 }
 
-div.content-left-signin{
-        width: 38vw;
-        height: 800px;
-        display: inline-block;
-        background-image: url("../../static/img/backgroundsignup.jpg");
-        background-repeat: no-repeat;
-        text-align: center;
-        margin-right: 10px;
-
+.content-left-signin{
+    background-image: url("../../static/img/backgroundsignup.jpg");
+    background-repeat: no-repeat;
+     background-size: cover;
+    text-align: center;
+    height: 100%;
+    border-radius: 30px;
 }
 
 div.content-right-signin {
@@ -808,20 +817,31 @@ div.content-right-signin {
 }
 
 #box-signup{
-    width: 300px;
-    height: 200px;
-    margin: 200px auto 0 auto;
+    margin: 0 auto;
+    /*margin: 200px auto 0 auto; */
 }
 
 .subtitle-signup{
-    width: 164px;
+    display: flex;
+    width: 100%;
     height: 41px;
     font-size: 30px;
     line-height: 41px;
-    align-items: center;
-    text-align: center;
     color: #FFFFFF;
-    margin: 0 auto;
+    justify-content: center;
+}
+
+@media (max-width:600px) {
+    .subtitle-signup {
+        margin-top: 30px;
+    }
+}
+
+@media (min-width:990px) {
+    #box-signup {
+        margin: 0 auto;
+        padding-top: 60%;
+    }
 }
 
 .title-signup{
@@ -864,16 +884,12 @@ div.content-right-signin {
         margin-top: 10px;
     }
 
-    .content-right-signin{
-        width: 100% !important;
-        margin: 0!important;
-        float:right!important;
-    }
 
-    div.content-left-signin{
+    .content-left-signin{
         width: 100%;
         margin: 0;
         height: 250px;
+        border-radius: 30px;
     }
 
     #box-signup{
@@ -902,8 +918,6 @@ div.content-right-signin {
 }
 
 #back-to-home{
-    margin-left: 40px;
-    margin-right: 10px;
     width: 46px;
     height: 46px;
     border-radius: 10px;
