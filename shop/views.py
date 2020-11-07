@@ -4,6 +4,7 @@ from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.contrib.auth.models import Group, User
 from .forms import SignUpForm, SignInForm
 from django.contrib.auth import login, authenticate, logout
+from django.db.models import Q
 
 
 def index(request, c_slug=None):
@@ -32,6 +33,15 @@ def product_event_detail(request, c_slug, event_slug):
     except Exception as e:
         raise e
     return render(request, 'shop/event.html', {'event': event, 'products_list': products_list})
+
+
+def search_result(request):
+    events = None
+    query = None
+    if 'q' in request.GET:
+        query = request.GET.get('q')
+        events = Event.objects.all().filter(Q(name__contains=query) | Q(description__contains=query))
+    return render(request, 'search.html', {'query': query, 'events': events})
 
 
 def signup_view(request):
