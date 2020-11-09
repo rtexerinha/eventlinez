@@ -27,7 +27,7 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
 	event = models.CharField(max_length=250)
-	quantity = models.IntegerField()
+	quantity = models.IntegerField(validators=[MinValueValidator(0)])
 	price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='GBP Price')
 	order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
