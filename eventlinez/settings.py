@@ -27,6 +27,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+GOOGLE_API_KEY = 'AIzaSyAYLCjEAsx3xjfkeLSZ55EyximUAMBVDFI'
+
+
 CKEDITOR_CONFIGS = {
     'default': {
         'autoParagraph': False
@@ -45,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'stripe',
     'imagekit',
+    'address',
     'crispy_forms',
     'ckeditor',
     'import_export',
@@ -150,5 +154,3 @@ try:
     from local_settings import *
 except ImportError:
     pass
-
-
