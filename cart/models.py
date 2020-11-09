@@ -1,5 +1,6 @@
 from django.db import models
 from event.models import Event
+from django.core.validators import MinValueValidator
 
 
 class Cart(models.Model):
@@ -16,7 +17,7 @@ class Cart(models.Model):
 class CartItem(models.Model):
 	event = models.ForeignKey(Event, on_delete=models.CASCADE)
 	cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-	quantity = models.IntegerField()
+	quantity = models.IntegerField(validators=[MinValueValidator(0)])
 	active = models.BooleanField(default=True)
 
 	def sub_total(self):
