@@ -38,11 +38,7 @@ body {
 	width: 100%;
 	height: auto;
 }
-.my_title {
-	font-size: 16px;
-	text-transform: uppercase;
-	letter-spacing: .2em;
-}
+
 .my_image_padding {
 	padding-top: 5px;
 }

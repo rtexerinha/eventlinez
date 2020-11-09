@@ -8,15 +8,17 @@
 {% endblock %}
 {% block content %}
 	{% if not cart_items %}
-		<div>
+		<div style="min-height: 39vh">
 			<div class="text-center">
 				<br>
-				<h1 class="text-center my_title">
+				<h1 class="text-center title-cart">
 					Your shopping cart is empty
 				</h1>
 				<br>
-				<p class="text-center">
-					Please click <a href="{% url 'shop:index' %}">here</a> to continue shopping.
+				<p class="text-center text-default" style="justify-content: center;">
+					Please click
+                    <a class="link-cart" href="{% url 'shop:index' %}"> here </a>
+                    to continue shopping.
 				</p>
 			</div>
 		</div>

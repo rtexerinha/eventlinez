@@ -106,12 +106,6 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                     event.save()
                     order_item.delete()
                     logger.info("The order has been created")
-                # try:
-                #	'''Calling the send_email function'''
-                #	send_email(order_details.id)
-                #	print('The order email has been sent to the customer.')
-                #	except IOError as e:
-                #		return e
                 return redirect('order:thanks', order.id)
             except ObjectDoesNotExist:
                 pass

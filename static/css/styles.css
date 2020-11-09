@@ -1118,3 +1118,29 @@ div.content-right-signin {
 }
 }
 
+.title-cart {
+	font-family: Nunito;
+	font-style: normal;
+	font-weight: 600;
+	font-size: 20px;
+	text-transform: uppercase;
+	/*letter-spacing: .2em;*/
+    color: #000000;
+}
+
+@media (max-width: 800px) {
+	.title-cart{
+		font-size: 15px;
+		line-height: 20px;
+	}
+}
+
+.link-cart{
+    color: #d90075;
+    padding: 0 5px;
+}
+
+.link-cart:hover{
+    color: #d90075;
+}
+
