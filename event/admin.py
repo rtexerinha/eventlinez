@@ -10,6 +10,6 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['name', 'price', 'stock', 'available', 'event_address', 'created', 'updated', 'event_date']
+    list_display = ['name', 'unit_price', 'stock', 'available', 'event_address', 'created', 'updated', 'event_date']
     # list_editable = ['price', 'stock', 'available']
     prepopulated_fields = {'slug': ('name',)}

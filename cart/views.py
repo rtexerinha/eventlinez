@@ -46,7 +46,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_items = CartItem.objects.filter(cart=cart, active=True)
         for cart_item in cart_items:
-            total += (cart_item.event.price * cart_item.quantity)
+            total += (cart_item.event.unit_price * cart_item.quantity)
             counter += cart_item.quantity
     except ObjectDoesNotExist:
         pass
@@ -97,7 +97,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                     oi = OrderItem(
                         event=order_item.event.name,
                         quantity=order_item.quantity,
-                        price=order_item.event.price,
+                        price=order_item.event.unit_price,
                         order=order
                     )
                     oi.save()
