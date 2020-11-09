@@ -4,6 +4,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
 from ckeditor.fields import RichTextField
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 
 
 class Category(models.Model):
@@ -27,13 +29,17 @@ class Event(models.Model):
     slug = models.SlugField(max_length=250, unique=True)
     description = RichTextField(blank=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
-    image = models.ImageField(upload_to='event', blank=False, null=False)
     stock = models.IntegerField()
     available = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Category, blank=False, on_delete=models.PROTECT)
     event_date = models.DateTimeField(blank=False, null=False, default='')
+    image = models.ImageField(upload_to='event', blank=False, null=False)
+    thumbnail = ImageSpecField(source='image',
+                               processors=[ResizeToFill(200, 159)],
+                               format='JPEG',
+                               options={'quality': 90})
 
     class Meta:
         ordering = ('name',)

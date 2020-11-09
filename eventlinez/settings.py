@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'stripe',
+    'imagekit',
     'crispy_forms',
     'ckeditor',
     'import_export',

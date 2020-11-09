@@ -62,9 +62,9 @@
                         <a href="{{event.get_url}}">
                             <img
                             class="item"
-                            src="{{event.image.url}}" alt="{{event.name}}"/>
+                            src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
                         </a>
-                        <p class="text-default card-data">{{ event.event_date|date:"d M Y"}}</p>
+                        <p class="text-default card-data">{{event.event_date|date:"d M Y"}}</p>
                         <div class="card-event">
                             <h4 class="text-default event-name">{{event.name}}</h4>
                         </div>
