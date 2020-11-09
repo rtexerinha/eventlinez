@@ -139,7 +139,7 @@
         margin: 10px 0!important;
     }
     #buttons-pay-event-card-details{
-        width: 90% !important;
+        width: 95% !important;
         margin: 0 auto!important;
     }
 }
@@ -1112,5 +1112,9 @@ div.content-right-signin {
     padding: 30px 0;
 }
 
-
+@media (max-width:600px) {
+    #reset-margin{
+        margin-left: 0!important;
+}
+}
 
