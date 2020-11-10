@@ -84,7 +84,7 @@
                                         </a>
 									</td>
                                     <td class="cart-details-quantity">
-                                        ${{cart_item.sub_total}}
+                                        ${{cart_item.event.unit_price }}
                                     </td>
 								{% else %}
 									<td>
@@ -117,7 +117,7 @@
 				</table>
 				<div class="mx-auto row align-items-center">
                     <a href="{% url 'shop:index' %}" class="text-default button-cart">Continue Shopping</a>
-					<form action="" method="POST">
+					<form action="" method="POST" style="margin: auto">
 						{% csrf_token %}
 					  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button button-cart"
 					    data-key="{{ data_key }}"

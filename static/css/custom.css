@@ -128,10 +128,15 @@ body {
 }
 
 @media(max-width: 600px) {
+	.stripe-button-el{
+		width: 250px!important;
+		margin: 0 auto !important;
+	}
     .stripe-button-el span {
-        width: 166px!important;
         font-size: .8rem!important;
         line-height: 14px!important;
+		margin: 0 auto !important;
+		padding: 12px 12px!important;
     }
 }
 

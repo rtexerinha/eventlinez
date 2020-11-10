@@ -942,9 +942,10 @@ div.content-right-signin {
         display: flex;
     }
     .button-cart {
-        width: 166px!important;
+        width: 250px!important;
         font-size: .8rem!important;
         line-height: 14px!important;
+        margin: 0 auto 10px auto !important;
     }
 }
 

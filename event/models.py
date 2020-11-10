@@ -28,7 +28,9 @@ class Event(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(max_length=250, unique=True)
     description = RichTextField(blank=False)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
+    unit_price = models.DecimalField(max_digits=10,
+                                     decimal_places=2,
+                                     validators=[MinValueValidator(Decimal('0.00'))])
     stock = models.IntegerField()
     available = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
@@ -52,3 +54,14 @@ class Event(models.Model):
 
     def __str__(self):
         return '{}'.format(self.name)
+
+
+class EventItem(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    quantity = models.IntegerField(validators=[MinValueValidator(0)], default=0)
+
+    def sub_total(self):
+        return self.event.unit_price * self.quantity
+
+    def __str__(self):
+        return self.event
