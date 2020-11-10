@@ -3,9 +3,9 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
 from ckeditor.fields import RichTextField
-
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
+from address.models import Address
 
 
 class Category(models.Model):
@@ -35,6 +35,7 @@ class Event(models.Model):
     updated = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Category, blank=False, on_delete=models.PROTECT)
     event_date = models.DateTimeField(blank=False, null=False, default='')
+    event_address = models.ForeignKey(Address, blank=True, null=True, on_delete=models.PROTECT)
     image = models.ImageField(upload_to='event', blank=False, null=False)
     thumbnail = ImageSpecField(source='image',
                                processors=[ResizeToFill(200, 159)],

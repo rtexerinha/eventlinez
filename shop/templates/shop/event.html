@@ -31,7 +31,11 @@
               <aside id="aside-event-details">
                     <div style="margin-left: 10px; margin-top: 10px;">
                         <h2 class="text-default title-event-card-details">{{event.name}}</h2>
-                        <h4 class="text-default" id="location-event-card-details"> Addres</h4>
+                        <h4 class="text-default" id="location-event-card-details">
+                            {{ event.event_address }},
+                            {{ event.event_address.city }},
+                            {{ event.event_address.city.state }}
+                        </h4>
                     </div>
                 <div style="margin-top: 80px">
                         <p class="text-default day-event-card-details">{{ event.event_date|date:"d"}}</p>
