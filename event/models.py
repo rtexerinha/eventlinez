@@ -24,6 +24,14 @@ class Category(models.Model):
         return '{}'.format(self.name)
 
 
+class Promoter(models.Model):
+    name = models.CharField(max_length=250, unique=True)
+    address_promoter = models.CharField(max_length=250, null=True, blank=True)
+
+    def __str__(self):
+        return '{}'.format(self.name)
+
+
 class Event(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(max_length=250, unique=True)
@@ -38,6 +46,7 @@ class Event(models.Model):
     category = models.ForeignKey(Category, blank=False, on_delete=models.PROTECT)
     event_date = models.DateTimeField(blank=False, null=False, default='')
     event_address = models.ForeignKey(Address, blank=True, null=True, on_delete=models.PROTECT)
+    promoter = models.ForeignKey(Promoter, blank=True, null=True, on_delete=models.PROTECT)
     image = models.ImageField(upload_to='event', blank=False, null=False)
     thumbnail = ImageSpecField(source='image',
                                processors=[ResizeToFill(200, 159)],
