@@ -1,4 +1,5 @@
 import stripe
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
@@ -48,7 +49,8 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
         for cart_item in cart_items:
             total += (cart_item.event.unit_price * cart_item.quantity)
             counter += cart_item.quantity
-    except ObjectDoesNotExist:
+    except Cart.DoesNotExist:
+        logger.error("The cart doest not exist.")
         pass
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -56,19 +58,19 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
     description = 'New Order'
     data_key = settings.STRIPE_PUBLISHABLE_KEY
     if request.method == 'POST':
+        token = request.POST['stripeToken']
+        email = request.POST['stripeEmail']
+        billing_name = request.POST['stripeBillingName']
+        billing_address1 = request.POST['stripeBillingAddressLine1']
+        billingcity = request.POST['stripeBillingAddressCity']
+        billing_postcode = request.POST['stripeBillingAddressZip']
+        billing_country = request.POST['stripeBillingAddressCountryCode']
+        shipping_name = request.POST['stripeShippingName']
+        shipping_address1 = request.POST['stripeShippingAddressLine1']
+        shippingcity = request.POST['stripeShippingAddressCity']
+        shipping_postcode = request.POST['stripeShippingAddressZip']
+        shipping_country = request.POST['stripeShippingAddressCountryCode']
         try:
-            token = request.POST['stripeToken']
-            email = request.POST['stripeEmail']
-            billing_name = request.POST['stripeBillingName']
-            billing_address1 = request.POST['stripeBillingAddressLine1']
-            billingcity = request.POST['stripeBillingAddressCity']
-            billing_postcode = request.POST['stripeBillingAddressZip']
-            billing_country = request.POST['stripeBillingAddressCountryCode']
-            shipping_name = request.POST['stripeShippingName']
-            shipping_address1 = request.POST['stripeShippingAddressLine1']
-            shippingcity = request.POST['stripeShippingAddressCity']
-            shipping_postcode = request.POST['stripeShippingAddressZip']
-            shipping_country = request.POST['stripeShippingAddressCountryCode']
             customer = stripe.Customer.create(email=email, source=token)
             charge = stripe.Charge.create(
                 amount=stripe_total,
@@ -76,41 +78,44 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 description=description,
                 customer=customer.id
             )
-            logger.info("Creating the order")
-            try:
-                order = Order.objects.create(
-                    token=token,
-                    total=total,
-                    emailAddress=email,
-                    billingName=billing_name,
-                    billingAddress1=billing_address1,
-                    billingCity=billingcity,
-                    billingPostcode=billing_postcode,
-                    billingCountry=billing_country,
-                    shippingName=shipping_name,
-                    shippingAddress1=shipping_address1,
-                    shippingCity=shippingcity,
-                    shippingPostcode=shipping_postcode,
-                    shippingCountry=shipping_country
+        except stripe.error.CardError as err:
+            # return HttpResponse(status=400, content=err.user_message)
+            content = err.user_message
+            return render(request, 'order/error_cart.html', {'content': content})
+        logger.info("Creating the order")
+        try:
+            order = Order.objects.create(
+                token=token,
+                total=total,
+                emailAddress=email,
+                billingName=billing_name,
+                billingAddress1=billing_address1,
+                billingCity=billingcity,
+                billingPostcode=billing_postcode,
+                billingCountry=billing_country,
+                shippingName=shipping_name,
+                shippingAddress1=shipping_address1,
+                shippingCity=shippingcity,
+                shippingPostcode=shipping_postcode,
+                shippingCountry=shipping_country
+            )
+            for order_item in cart_items:
+                oi = OrderItem(
+                    event=order_item.event.name,
+                    quantity=order_item.quantity,
+                    price=order_item.event.unit_price,
+                    order=order
                 )
-                for order_item in cart_items:
-                    oi = OrderItem(
-                        event=order_item.event.name,
-                        quantity=order_item.quantity,
-                        price=order_item.event.unit_price,
-                        order=order
-                    )
-                    oi.save()
-                    event = Event.objects.get(id=order_item.event.id)
-                    event.stock = int(order_item.event.stock - order_item.quantity)
-                    event.save()
-                    order_item.delete()
-                    logger.info("The order has been created")
-                return redirect('order:thanks', order.id)
-            except ObjectDoesNotExist:
-                pass
-        except stripe.error.CardError as e:
-            return False, e
+                oi.save()
+                event = Event.objects.get(id=order_item.event.id)
+                event.stock = int(order_item.event.stock - order_item.quantity)
+                event.save()
+                order_item.delete()
+                logger.info("The order has been created")
+            return redirect('order:thanks', order.id)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=400, content="Page errada")
+
     return render(request, 'cart.html', dict(cart_items=cart_items, total=total, counter=counter,
                                              data_key=data_key, stripe_total=stripe_total, description=description))
 
