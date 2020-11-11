@@ -53,7 +53,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
     stripe_total = int(total * 100)
-    description = 'Perfect Calisamba - New Order'
+    description = 'New Order'
     data_key = settings.STRIPE_PUBLISHABLE_KEY
     if request.method == 'POST':
         try:
@@ -140,7 +140,7 @@ def send_email(order_id):
     order_items = OrderItem.objects.filter(order=transaction)
     try:
         '''Sending the order'''
-        subject = "Calisamba's Store - New Order #{}".format(transaction.id)
+        subject = "Eventlinez - New Order #{}".format(transaction.id)
         to = ['{}'.format(transaction.emailAddress)]
         from_email = "contact@calisamba.com"
         order_information = {

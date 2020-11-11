@@ -4,7 +4,7 @@
 	This is the shopping cart page. Proceed to review your items and place the order.
 {% endblock %}
 {% block title %}
-	Cart - Calisamba Store
+	Cart - Eventlinez
 {% endblock %}
 {% block content %}
 	{% if not cart_items %}
@@ -122,7 +122,7 @@
 					  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button button-cart"
 					    data-key="{{ data_key }}"
 					    data-amount="{{ stripe_total }}"
-					    data-name="Calisamba Shop"
+					    data-name="Eventlinez"
 					    data-description="{{ description }}"
 					    data-image="{% static 'img/logo.png' %}"
 					    data-locale="auto"
