@@ -9,7 +9,7 @@
 {% block content %}
 
     <div class="row col-lg-12 col-sm-12" id="reset-margin">
-        <div id="div-left-detals" class="col-lg-7" >
+        <div id="div-left-detals" class="col-lg-7" style="height: 100%;">
             <div class="col-lg-12 col-sm-12" id="container-details">
                 <img src="{{event.image.url}}" alt="{{event.name}}" id="container-details-img"/>
             </div>
@@ -71,13 +71,11 @@
                 </aside>
 
         </div>
-        <div id="div-description-mobile">
+        <div id="div-description-mobile" style="height: 100%;">
             <br>
-            <div style="padding-left: 30px">
-                <h4 class="text-default" id="location-event-card-details">
+            <div style="padding-left: 30px; width: 95%">
                     {{ event.description|safe }}
-                </h4>
-
+                <br>
                 <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
             <div id="box-tags">
                 <a class="box-tag" href="{% url 'shop:index' %}">Home</a>

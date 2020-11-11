@@ -283,12 +283,13 @@
     height: 34px;
     background: #EDEBEB;
     border-radius: 10px;
-    margin-right: 25px;
+    margin-right: 15px;
     margin-left: 5px;
     padding-top: 5px;
     text-align: center;
     color: #1C1C1C;
-     text-decoration: none;
+    text-decoration: none;
+    font-size: 14px;
 }
 
 .box-tag:hover{
@@ -302,7 +303,7 @@
     }
 
     .box-tag{
-        width: 80px;
+        width: 100px;
         height: 40px;
         padding-top: 10px;
         margin-top: 8px;
