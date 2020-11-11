@@ -28,10 +28,10 @@ class City(models.Model):
 
 class Address(models.Model):
     address_name = models.CharField(max_length=250, unique=True)
-    address_number = models.IntegerField(blank=True)
+    address_number = models.IntegerField(null=True, blank=True)
     city = models.ForeignKey(City, blank=True, on_delete=models.PROTECT)
-    latitude = models.DecimalField(max_digits=22, decimal_places=16, blank=True)
-    longitude = models.DecimalField(max_digits=22, decimal_places=16, blank=True)
+    latitude = models.DecimalField(max_digits=22, decimal_places=16, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=22, decimal_places=16, null=True, blank=True)
     zipcode = models.CharField(max_length=5, blank=True, null=True)
 
     class Meta:

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load static %}
+{% block metadescription %}
+	This is the shopping cart page. Proceed to review your items and place the order.
+{% endblock %}
+{% block title %}
+	Cart - Eventlinez
+{% endblock %}
+{% block content %}
+	{% if not cart_items %}
+		<div style="min-height: 39vh">
+			<div class="text-center">
+				<br>
+				<h1 class="text-center title-cart">
+					Your shopping cart is empty
+				</h1>
+				<br>
+				<p class="text-center text-default" style="justify-content: center;">
+					Please click
+                    <a class="link-cart" href="{% url 'shop:index' %}"> here </a>
+                    to continue shopping.
+				</p>
+			</div>
+		</div>
+	{% else %}
+        <main class="col-lg-12 col-sm-12" style="padding-right: 0;">
+            <section class="col-lg-12 float-right" id="background" style="height: 254px;">
+            </section>
+            <div class="clearfix"></div>
+        </main>
+
+
+		<div class="container-cart">
+            <br>
+            <h1 class="my_title text-default"
+                style="text-align: start;
+                margin-left: 30px;
+                font-size: 35px;
+                line-height: 48px;">Order summary</h1>
+		<div class="row mx-auto">
+			<div class="col-12 col-sm-12 col-md-12 col-lg-12 text-center">
+				<table class="table my_custom_table">
+				<thead class="my_custom_thead" >
+						<tr>
+							<th id="cart-table-th">
+								Events
+							</th>
+                            <th id="cart-table-th-quantity">
+								Quantity
+							</th>
+                             <th id="cart-table-th-quantity">
+								price
+							</th>
+
+						</tr>
+					</thead>
+					<tbody>
+						{% for cart_item in cart_items %}
+							<tr>
+								<td class="float-left">
+									<a href="{{cart_item.event.get_url}}">
+                                        <img src="{{cart_item.event.image.url}}" alt="" class="rounded custom_image">
+                                    </a>
+
+                                    <div style="float: right; margin-left: 10px">
+                                          <p class="text-default cart-title">
+                                     	{{cart_item.event.name}}
+                                        </p>
+                                        <p class="event-localization">
+                                        {{ cart_item.event.event_address }},
+                                        {{ cart_item.event.event_address.city }}
+                                        </p>
+                                    </div>
+								</td>
+
+								{% if cart_item.quantity < cart_item.event.stock %}
+									<td >
+                                        <a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a">
+                                            <i class="fas fa-minus-circle custom_icon"></i>
+                                        </a>&nbsp;
+                                        {{cart_item.quantity }}&nbsp;
+										<a href="{% url 'cart:add_cart' cart_item.event.id %}" class="custom_a">
+                                            <i class="fas fa-plus-circle custom_icon"></i>
+                                        </a>
+									</td>
+                                    <td class="cart-details-quantity">
+                                        ${{cart_item.event.unit_price }}
+                                    </td>
+								{% else %}
+									<td>
+										&nbsp;<a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a"><i class="fas fa-minus-circle custom_icon"></i></a>&nbsp;
+                                         <a href="{% url 'cart:full_remove' cart_item.event.id %}" class="custom_icon"><i class="fas fa-trash-alt custom_icon"></i></a>
+									</td>
+
+								{% endif %}
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+            <div class="col-lg-6"> </div>
+            <div class="col-12 col-sm-12 col-md-12 col-lg-6 float-right">
+				<table class="table my_custom_table" style="min-width: 320px!important;">
+					<thead class="my_custom_thead">
+					</thead>
+					<tbody>
+						<tr>
+							<td class="float-left" style="width: 50%">
+								Your total is:
+							</td>
+
+                            <td class="float-right" style="width: 30%; padding-left: 30px">
+								<strong>${{ total }}</strong>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div class="mx-auto row align-items-center">
+                    <a href="{% url 'shop:index' %}" class="text-default button-cart">Continue Shopping</a>
+					<form action="" method="POST" style="margin: auto">
+						{% csrf_token %}
+					  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button button-cart"
+					    data-key="{{ data_key }}"
+					    data-amount="{{ stripe_total }}"
+					    data-name="Eventlinez"
+					    data-description="{{ description }}"
+					    data-image="{% static 'img/logosmall.jpg' %}"
+					    data-locale="auto"
+					    data-currency="usd"
+					    data-shipping-address="true"
+					    data-billing-address="true"
+					    data-zip-code="true">
+					  </script>
+					</form>
+				</div>
+			</div>
+        </div>
+        </div>
+		<br>
+	{% endif %}
+{% endblock %}
