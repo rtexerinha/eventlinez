@@ -46,11 +46,11 @@ INSTALLED_APPS = [
     'crispy_forms',
     'ckeditor',
     'import_export',
+    'address',
     'event',
     'shop',
     'cart',
     'order',
-    'address',
 ]
 
 MIDDLEWARE = [

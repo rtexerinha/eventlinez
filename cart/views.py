@@ -3,8 +3,9 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-from django.template.loader import get_template
-from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+
 
 from order.models import Order, OrderItem
 from event.models import Event
@@ -72,6 +73,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
         shipping_country = request.POST['stripeShippingAddressCountryCode']
         try:
             customer = stripe.Customer.create(email=email, source=token)
+            logger.info("create customer")
             charge = stripe.Charge.create(
                 amount=stripe_total,
                 currency="usd",
@@ -86,6 +88,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
         try:
             order = Order.objects.create(
                 token=token,
+                # token=charge,
                 total=total,
                 emailAddress=email,
                 billingName=billing_name,
@@ -112,6 +115,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 event.save()
                 order_item.delete()
                 logger.info("The order has been created")
+                send_email(order.id)
             return redirect('order:thanks', order.id)
         except ObjectDoesNotExist:
             return HttpResponse(status=400, content="Page errada")
@@ -141,20 +145,23 @@ def full_remove(request, product_id):
 
 
 def send_email(order_id):
-    transaction = Order.objects.get(id=order_id)
-    order_items = OrderItem.objects.filter(order=transaction)
-    try:
-        '''Sending the order'''
-        subject = "Eventlinez - New Order #{}".format(transaction.id)
-        to = ['{}'.format(transaction.emailAddress)]
-        from_email = "contact@calisamba.com"
-        order_information = {
-            'transaction': transaction,
-            'order_items': order_items
-        }
-        message = get_template('email/email.html').render(order_information)
-        msg = EmailMessage(subject, message, to=to, from_email=from_email)
-        msg.content_subtype = 'html'
-        msg.send()
-    except IOError as e:
-        return e
+    order = Order.objects.get(id=order_id)
+    subject = "Eventlinez - New Order #{}".format(order.id)
+
+    context = {
+        'order_id': order.id,
+        'order_created': order.created,
+        'order_total': order.total,
+    }
+    message = render_to_string('order/email/email.html', context)
+    message_txt = 'Message de teste'
+
+    send_mail(
+        subject=subject,
+        message=message_txt,
+        from_email="noreply@eventlinez.com",
+        recipient_list=[order.emailAddress],
+        fail_silently=False,
+        html_message=message
+    )
+
