@@ -4,40 +4,165 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>New Order #{{ order.id }} - EventLinez </title>
-		<style>
-			table {
-				width: 60%;
-				margin: 0 auto;
-				border-collapse: collapse;
-			}
-			table tr td {
-				border: 1px solid #c1c1c1;
-			}
-			#mensage {
-				padding-right: 50px;
-				padding-left: 50px;
+        <style type="text/css">
+           #title-message{color: #d90075;}
+            .tg  {border-collapse:collapse;border-spacing:0;}
+            .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+              overflow:hidden;padding:10px 5px;word-break:normal;}
+            .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+              font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+            .tg .tg-ugcu{background-color:#d90075;border-color:inherit;color:#ffffff;font-size:14px;text-align:center;vertical-align:top}
+            .tg .tg-ob96{background-color:#d90075;border-color:inherit;color:#ffffff;text-align:center;vertical-align:top}
+            .tg .tg-l93j{border-color:inherit;font-size:16px;font-weight:bold;text-align:center;vertical-align:top}
+            .tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+            .tg .tg-uaft{border-color:inherit;color:#e10087;font-size:32px;text-align:center;vertical-align:top}
+            .tg .tg-yhtz{background-color:#D90075;border-color:inherit;color:#FFF;font-weight:bold;text-align:center;vertical-align:top}
+            .tg .tg-73oq{border-color:#000000;text-align:left;vertical-align:top}
+            .tg .tg-uah7{border-color:#000000;color:#212529;text-align:center;vertical-align:top}
+			#mensage {padding-right: 50px;padding-left: 50px;
 			}
 		</style>
 	</head>
 	<body>
-			<h1>Thanks for shopping with us</h1>
-			<p>This email is to confirm that you have placed an order on the EventLinez.<br>Please make sure that all the details of your order are correct.</p>
+         <div style="width: 80%;margin: auto">
+			<h1 id="title-message">Thanks for shopping with us</h1>
+			<p>This email is to confirm that you have placed an order on the EventLinez.
+                <br>Please make sure that all the details of your order are correct.
+            </p>
+		    <br>
 
-		<br>
-		<table>
-			<tr>
-				<td valign="top" colspan="2" style="width: 50%;">
-					<b>Order: </b>#{{ order_id }}<br>
-					<b>Date: </b>{{ order_created|date:"d M Y" }}
-				</td>
-			</tr>
-			<tr>
-				<td colspan="3" style="text-align: right;"><b>Total</b></td>
-				<td>£{{ order_total }}</td>
-			</tr>
-		</table>
+            <table class="tg" style="margin: auto">
+                <thead>
+                  <tr>
+                    <th class="tg-uaft" colspan="4"><span style="font-weight:700;font-style:normal">Eventlinez</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="tg-ugcu" colspan="2"><span style="font-weight:bold">
+                        Order</span>: #{{ order_id }}</td>
+                    <td class="tg-yhtz" colspan="2">
+                         <b>Date: </b>{{ order_created|date:"d M Y" }}
+                    </td>
+                  </tr>
+                  <tr>
+                      <td class="tg-baqh" colspan="4">
+                          <span style="font-weight:bolder;font-style:normal">
+                              Bill to:
+                          </span>
+                          <br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_billingName }}
+                          </span>
+                          <br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_billingAddress1 }}
+                          </span>
+                          <br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_billingCity }}
+                          </span>
+                          <br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_billingPostcode }}
+                          </span><br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_shippingCountry }}
+                          </span>
+                      </td>
+                  </tr>
+
+                  <tr>
+                    <td class="tg-73oq">
+                        <span style="font-weight:bolder;font-style:inherit">
+                            Product Description
+                        </span></td>
+                    <td class="tg-73oq">
+                        <span style="font-weight:bolder;font-style:normal">
+                            Qty
+                        </span></td>
+                    <td class="tg-73oq">
+                        <span style="font-weight:bolder;font-style:inherit">
+                            Unit Price
+                        </span>
+                    </td>
+                    <td class="tg-73oq">
+                        <span style="font-weight:bolder;font-style:inherit">
+                            Sub-Total
+                        </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="tg-73oq">
+                        <span style="font-weight:400;font-style:normal">
+                            Calisamba
+                        </span>
+                    </td>
+                    <td class="tg-uah7">
+                        <span style="font-weight:inherit;font-style:inherit">
+                            2
+                        </span>
+                    </td>
+                    <td class="tg-73oq">
+                        <span style="font-weight:inherit;font-style:inherit">
+                            £ 10,00
+                        </span>
+                    </td>
+                    <td class="tg-uah7">
+                        <span style="font-weight:inherit;font-style:inherit">
+                            £ 20,00
+                        </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="tg-l93j" colspan="2">Total</td>
+                    <td class="tg-c3ow" colspan="2">£{{ order_total }}</td>
+                  </tr>
+
+                    <tr>
+                      <td class="tg-baqh" colspan="4">
+                          <span style="font-weight:bolder;font-style:normal">
+                              Ship to:
+                          </span>
+                          <br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_shippingName }}
+                          </span>
+                          <br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_shippingAddress1 }}
+                          </span>
+                          <br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_shippingCity }}
+                          </span>
+                          <br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_shippingPostcode }}
+                          </span><br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order_shippingCountry }}
+                          </span>
+                      </td>
+                  </tr>
+
+                  <tr>
+                    <td class="tg-ob96" colspan="4">
+                        <span style="font-weight:bolder;font-style:normal">
+                            Payment details:
+                        </span>
+                        <br><br>
+                        <span style="font-weight:400;font-style:normal">
+                            £{{ order_total }} was paid successfully via Stripe.
+                        </span>
+                    </td>
+                  </tr>
+                </tbody>
+            </table>
 
 			<br>
 			<p id="mensage">If you are a registered customer and want to check your order history, please <a href="http://127.0.0.1:8000/account/login/">sign in</a>.<br>Otherwise <a href="http://127.0.0.1:8000/account/create/">sign up</a> to create a new account with us.</p>
+	        </div>
+
 	</body>
 </html>

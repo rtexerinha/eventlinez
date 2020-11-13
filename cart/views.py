@@ -152,6 +152,16 @@ def send_email(order_id):
         'order_id': order.id,
         'order_created': order.created,
         'order_total': order.total,
+        'order_billingName': order.billingName,
+        'order_billingAddress1': order.billingAddress1,
+        'order_billingCity': order.billingCity,
+        'order_billingPostcode': order.billingPostcode,
+        'order_billingCountry': order.billingCountry,
+        'order_shippingName': order.shippingName,
+        'order_shippingAddress1': order.shippingAddress1,
+        'order_shippingCity': order.shippingCity,
+        'order_shippingPostcode': order.shippingPostcode,
+        'order_shippingCountry': order.shippingCountry,
     }
     message = render_to_string('order/email/email.html', context)
     message_txt = 'Message de teste'
@@ -164,4 +174,3 @@ def send_email(order_id):
         fail_silently=False,
         html_message=message
     )
-
