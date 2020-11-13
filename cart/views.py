@@ -6,7 +6,6 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 
-
 from order.models import Order, OrderItem
 from event.models import Event
 from .models import Cart, CartItem
@@ -115,7 +114,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 event.save()
                 order_item.delete()
                 logger.info("The order has been created")
-                send_email(order.id)
+                send_email(order.id, order_item)
             return redirect('order:thanks', order.id)
         except ObjectDoesNotExist:
             return HttpResponse(status=400, content="Page errada")
@@ -144,7 +143,7 @@ def full_remove(request, product_id):
     return redirect('cart:cart_detail')
 
 
-def send_email(order_id):
+def send_email(order_id, order_item):
     order = Order.objects.get(id=order_id)
     subject = "Eventlinez - New Order #{}".format(order.id)
 
@@ -162,6 +161,9 @@ def send_email(order_id):
         'order_shippingCity': order.shippingCity,
         'order_shippingPostcode': order.shippingPostcode,
         'order_shippingCountry': order.shippingCountry,
+        'order_event_name': order_item.event.name,
+        'order_event_price': order_item.event.unit_price,
+        'order_event_quantity': order_item.quantity,
     }
     message = render_to_string('order/email/email.html', context)
     message_txt = 'Message de teste'
