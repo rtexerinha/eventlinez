@@ -63,9 +63,10 @@ def signup_view(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            signup_user = User.objects.get(username=username)
-            customer_group = Group.objects.get(name='Customer')
-            customer_group.user_set.add(signup_user)
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('shop:index')
     else:
         form = SignUpForm()
     return render(request, 'accounts/signup.html', {'form': form})
