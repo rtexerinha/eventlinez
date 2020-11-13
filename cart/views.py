@@ -6,6 +6,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 
+from local_settings import EVENTLINEZ_FEE
 from order.models import Order, OrderItem
 from event.models import Event
 from .models import Cart, CartItem
@@ -47,7 +48,8 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_items = CartItem.objects.filter(cart=cart, active=True)
         for cart_item in cart_items:
-            total += (cart_item.event.unit_price * cart_item.quantity)
+            total += (((float(cart_item.event.unit_price) * EVENTLINEZ_FEE) +
+                       float(cart_item.event.unit_price)) * float(cart_item.quantity))
             counter += cart_item.quantity
     except Cart.DoesNotExist:
         logger.error("The cart doest not exist.")

@@ -86,7 +86,7 @@ body {
 .my_custom_thead {
 	font-weight: normal;
 	text-transform: uppercase;
-	letter-spacing: .2em;
+	letter-spacing: .1em;
 }
 .custom_image {
 	width: 100px;

@@ -6,6 +6,7 @@ from ckeditor.fields import RichTextField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from address.models import Address
+from local_settings import EVENTLINEZ_FEE
 
 
 class Category(models.Model):
@@ -69,8 +70,11 @@ class EventItem(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     quantity = models.IntegerField(validators=[MinValueValidator(0)], default=0)
 
+    def price_fee(self):
+        return (self.event.unit_price * EVENTLINEZ_FEE) + self.event.unit_price
+
     def sub_total(self):
-        return self.event.unit_price * self.quantity
+        return (self.event.unit_price * EVENTLINEZ_FEE) + self.event.unit_price * self.quantity
 
     def __str__(self):
         return self.event
