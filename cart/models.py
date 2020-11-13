@@ -26,7 +26,7 @@ class CartItem(models.Model):
 		return float(self.event.unit_price) * EVENTLINEZ_FEE
 
 	def price_total(self):
-		return (float(self.event.unit_price) * EVENTLINEZ_FEE) + float(self.event.unit_price) * float(self.quantity)
+		return ((float(self.event.unit_price) * EVENTLINEZ_FEE) + float(self.event.unit_price)) * float(self.quantity)
 
 	def sub_total(self):
 		return ((self.event.unit_price * EVENTLINEZ_FEE) + self.event.unit_price) * self.quantity
