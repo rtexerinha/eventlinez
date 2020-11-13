@@ -84,13 +84,21 @@
 
         			                {% if cart_item.quantity <= cart_item.event.stock %}
 									<td >
+                                        {% if cart_item.event.stock  == 1 %}
+                                            <a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a">
+                                                <i class="fas fa-minus-circle custom_icon"></i>
+                                            </a>&nbsp;
+                                            {{cart_item.quantity }}&nbsp;
+                                        {% else %}
                                         <a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a">
                                             <i class="fas fa-minus-circle custom_icon"></i>
                                         </a>&nbsp;
                                         {{cart_item.quantity }}&nbsp;
+
 										<a href="{% url 'cart:add_cart' cart_item.event.id %}" class="custom_a">
                                             <i class="fas fa-plus-circle custom_icon"></i>
                                         </a>
+                                        {% endif %}
 									</td>
                                     <td class="cart-details-quantity">
                                         ${{cart_item.event.unit_price }}
