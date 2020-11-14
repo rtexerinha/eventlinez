@@ -962,7 +962,7 @@ div.content-right-signin {
     color: #D90075;
     text-decoration: none;
     justify-content: center;
-    margin-right: 20px;
+    margin: 0;
 }
 
 .button-cart:after{
