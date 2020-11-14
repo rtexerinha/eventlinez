@@ -64,7 +64,14 @@
                                 <b>Out of Stock</b>
                             </p>
                         {% else %}
-                            <br><br>
+                            <br>
+                            <div class="div_code_promo">
+                                <label for="promo_code" id="label_promo_code">Promo code</label>
+                                <input id="promo_code" type="text" name="promo_code" placeholder="Insert code"
+                                                        value="{{ promo_code }}"
+                                                       class="col-sm-6 col-lg-12 col-md-6 input_promo_code">
+                            </div>
+
                             <div id="buttons-pay-event-card-details">
                                 <a class="pay-event-card-details text-default" href="{% url 'cart:add_cart' event.id %}">Add to Cart</a>
                                 <a href="{% url 'shop:index' %}" class="pay-event-card-details text-default invert">Continue Shopping</a>

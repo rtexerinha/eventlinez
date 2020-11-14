@@ -87,7 +87,7 @@
 
 #subtitle-home{
     width: 40vw;
-    font-family: Nunito;
+    font-family: Nunito, serif;
     font-style: normal;
     font-weight: 600;
     font-size: 15px;
@@ -104,7 +104,7 @@
     background: #D90075;
     border-radius: 10px;
 
-    font-family: Nunito;
+    font-family: Nunito, serif;
     font-style: normal;
     font-weight: bold;
     font-size: 1rem;
@@ -226,7 +226,7 @@
 
 .title-section{
     height: 30px;
-    font-family: Nunito;
+    font-family: Nunito, serif;
     font-style: normal;
     font-weight: bold;
     font-size: 35px;
@@ -329,7 +329,7 @@
 .footer-text{
     padding: 5px 10px;
     margin: 0 30px;
-    font-family: Nunito;
+    font-family: Nunito, serif;
     font-style: normal;
     display: flex;
     align-items: center;
@@ -451,7 +451,7 @@
 }
 
 .text-default{
-    font-family: Nunito;
+    font-family: Nunito, serif;
     font-style: normal;
     font-weight: 600;
     font-size: 17px;
@@ -1105,7 +1105,7 @@ div.content-right-signin {
 
 .text-small-login{
     display: flex;
-    font-family: Nunito;
+    font-family: Nunito, serif;
     font-weight: normal;
     font-size: 14px;
     line-height: 19px;
@@ -1121,7 +1121,7 @@ div.content-right-signin {
 }
 
 .title-cart {
-	font-family: Nunito;
+    font-family: Nunito, serif;
 	font-style: normal;
 	font-weight: 600;
 	font-size: 20px;
@@ -1145,4 +1145,32 @@ div.content-right-signin {
 .link-cart:hover{
     color: #d90075;
 }
+
+#label_promo_code{
+    font-family: Nunito, Arial, serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 25px;
+    display: flex;
+    align-items: center;
+    color: #171717;
+}
+
+.input_promo_code{
+    border: 1px solid #A4B0CC;
+    padding-left: 20px;
+    height: 35px;
+    border-radius: 10px;
+   margin: 0 auto;
+}
+
+.div_code_promo{
+    width: 80%;
+    margin: 0 auto;
+    height: 90px;
+    justify-content: center;
+}
+
+
 
