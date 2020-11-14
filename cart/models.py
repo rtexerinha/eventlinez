@@ -23,7 +23,7 @@ class CartItem(models.Model):
 	active = models.BooleanField(default=True)
 
 	def price_fee(self):
-		return float(self.event.unit_price) * EVENTLINEZ_FEE
+		return (float(self.event.unit_price) * EVENTLINEZ_FEE) * self.quantity
 
 	def price_total(self):
 		return ((float(self.event.unit_price) * EVENTLINEZ_FEE) + float(self.event.unit_price)) * float(self.quantity)
