@@ -135,20 +135,22 @@
                     </tbody>
 				</table>
 			</div>
-            <div class="col-lg-6"> </div>
+            <div class="col-lg-5 col-xl-6"> </div>
 
-            <div class="col-12 col-sm-12 col-md-12 col-lg-6 float-right">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-7 col-xl-6 float-right">
 				<table class="table my_custom_table" style="min-width: 320px!important;">
 					<thead class="my_custom_thead">
 					</thead>
 					<tbody>
 						<tr>
-							<td class="float-left" style="width: 50%">
-								Your total is:
-							</td>
 
-                            <td class="float-right" style="width: 30%; padding-left: 30px">
-								<strong>${{ total|floatformat:2 }}</strong>
+
+                            <td class="text-default" style="width: 100%; justify-content: flex-end">
+                                <strong>
+                                    Your total is:
+                                </strong>
+
+								<strong class="text-default" style="padding-left: 12%; padding-right: 9%">${{ total|floatformat:2 }}</strong>
 							</td>
 						</tr>
 					</tbody>
