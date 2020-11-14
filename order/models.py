@@ -1,7 +1,6 @@
 from django.db import models
+from django.conf import settings
 from django.core.validators import MinValueValidator
-
-from local_settings import EVENTLINEZ_FEE
 
 
 class Order(models.Model):
@@ -37,10 +36,10 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
     def price_fee(self):
-        return (self.price * EVENTLINEZ_FEE) + self.price
+        return (self.price * settings.EVENTLINEZ_FEE) + self.price
 
     def sub_total(self):
-        return self.quantity * (self.price * EVENTLINEZ_FEE) + self.price
+        return self.quantity * (self.price * settings.EVENTLINEZ_FEE) + self.price
 
     def __str__(self):
         return self.event
