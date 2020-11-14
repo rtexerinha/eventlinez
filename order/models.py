@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -56,7 +58,7 @@ class OrderItem(models.Model):
         return (self.price * settings.EVENTLINEZ_FEE) + self.price
 
     def sub_total(self):
-        return self.quantity * (self.price * settings.EVENTLINEZ_FEE) + self.price
+        return self.quantity * (self.price * Decimal(settings.EVENTLINEZ_FEE)) + self.price
 
     def __str__(self):
         return self.event
