@@ -145,29 +145,11 @@ def full_remove(request, product_id):
     return redirect('cart:cart_detail')
 
 
-def send_email(order_id, order_item):
+def send_email(order_id):
     order = Order.objects.get(id=order_id)
-    subject = "Eventlinez - New Order #{}".format(order.id)
+    subject = "Eventlinez - New Order #%s" % order.id
 
-    context = {
-        'order_id': order.id,
-        'order_created': order.created,
-        'order_total': order.total,
-        'order_billingName': order.billingName,
-        'order_billingAddress1': order.billingAddress1,
-        'order_billingCity': order.billingCity,
-        'order_billingPostcode': order.billingPostcode,
-        'order_billingCountry': order.billingCountry,
-        'order_shippingName': order.shippingName,
-        'order_shippingAddress1': order.shippingAddress1,
-        'order_shippingCity': order.shippingCity,
-        'order_shippingPostcode': order.shippingPostcode,
-        'order_shippingCountry': order.shippingCountry,
-        'order_event_name': order_item.event.name,
-        'order_event_price': order_item.event.unit_price,
-        'order_event_quantity': order_item.quantity,
-    }
-    message = render_to_string('order/email/email.html', context)
+    message = render_to_string('order/email/email.html', {'order': order})
     message_txt = 'Message de teste'
 
     send_mail(

@@ -42,9 +42,9 @@
                 <tbody>
                   <tr>
                     <td class="tg-ugcu" colspan="2"><span style="font-weight:bold">
-                        Order</span>: #{{ order_id }}</td>
+                        Order</span>: #{{ order.id }}</td>
                     <td class="tg-yhtz" colspan="2">
-                         <b>Date: </b>{{ order_created|date:"d M Y" }}
+                         <b>Date: </b>{{ order.created|date:"d M Y" }}
                     </td>
                   </tr>
                   <tr>
@@ -54,22 +54,22 @@
                           </span>
                           <br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_billingName }}
+                              {{ order.billingName }}
                           </span>
                           <br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_billingAddress1 }}
+                              {{ order.billingAddress1 }}
                           </span>
                           <br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_billingCity }}
+                              {{ order.billingCity }}
                           </span>
                           <br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_billingPostcode }}
+                              {{ order.billingPostcode }}
                           </span><br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_shippingCountry }}
+                              {{ order.shippingCountry }}
                           </span>
                       </td>
                   </tr>
@@ -77,7 +77,7 @@
                   <tr>
                     <td class="tg-73oq">
                         <span style="font-weight:bolder;font-style:inherit">
-                            Product Description
+                            Event
                         </span></td>
                     <td class="tg-73oq">
                         <span style="font-weight:bolder;font-style:normal">
@@ -94,33 +94,35 @@
                         </span>
                     </td>
                   </tr>
-                  <tr>
-                    <td class="tg-73oq">
-                        <span style="font-weight:400;font-style:normal">
-                            {{order_event_name}}
-                        </span>
-                    </td>
-                    <td class="tg-uah7">
-                        <span style="font-weight:inherit;font-style:inherit">
-                            {{ order_event_quantity }}
-                        </span>
-                    </td>
-                    <td class="tg-73oq">
-                        <span style="font-weight:inherit;font-style:inherit">
-                            $ {{ order_event_price }}
-                        </span>
-                    </td>
-                    <td class="tg-uah7">
-                        <span style="font-weight:inherit;font-style:inherit">
-                            $ {{ order_total }}
-                        </span>
-                    </td>
-                  </tr>
+
+                  {% for item in order.orderitem_set.all %}
+                      <tr>
+                        <td class="tg-73oq">
+                            <span style="font-weight:400;font-style:normal">
+                                {{item.event}}
+                            </span>
+                        </td>
+                        <td class="tg-uah7">
+                            <span style="font-weight:inherit;font-style:inherit">
+                                {{ item.quantity }}
+                            </span>
+                        </td>
+                        <td class="tg-73oq">
+                            <span style="font-weight:inherit;font-style:inherit">
+                                $ {{ item.price }}
+                            </span>
+                        </td>
+                        <td class="tg-uah7">
+                            <span style="font-weight:inherit;font-style:inherit">
+                                $ {{ item.sub_total }}
+                            </span>
+                        </td>
+                      </tr>
+                  {% endfor %}
                   <tr>
                     <td class="tg-l93j" colspan="2">Total</td>
-                    <td class="tg-c3ow" colspan="2">${{ order_total }}</td>
+                    <td class="tg-c3ow" colspan="2">${{ order.total }}</td>
                   </tr>
-
                     <tr>
                       <td class="tg-baqh" colspan="4">
                           <span style="font-weight:bolder;font-style:normal">
@@ -128,22 +130,22 @@
                           </span>
                           <br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_shippingName }}
+                              {{ order.shippingName }}
                           </span>
                           <br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_shippingAddress1 }}
+                              {{ order.shippingAddress1 }}
                           </span>
                           <br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_shippingCity }}
+                              {{ order.shippingCity }}
                           </span>
                           <br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_shippingPostcode }}
+                              {{ order.shippingPostcode }}
                           </span><br><br>
                           <span style="font-weight:400;font-style:normal">
-                              {{ order_shippingCountry }}
+                              {{ order.shippingCountry }}
                           </span>
                       </td>
                   </tr>
@@ -155,7 +157,7 @@
                         </span>
                         <br><br>
                         <span style="font-weight:400;font-style:normal">
-                            £{{ order_total }} was paid successfully via Stripe.
+                            £{{ order.total }} was paid successfully via Stripe.
                         </span>
                     </td>
                   </tr>
