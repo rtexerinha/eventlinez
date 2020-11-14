@@ -91,7 +91,9 @@
                         </td>
 
                         <td>
-                            {{ cart_item.promo_code }}
+                            {% if cart_item.promo_code %}
+                                {{ cart_item.promo_code }}
+                            {% endif %}
                         </td>
 
                         {% if cart_item.quantity <= cart_item.event.stock %}
