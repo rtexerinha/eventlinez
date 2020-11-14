@@ -71,6 +71,10 @@
                     {% for cart_item in cart_items %}
                     <tr>
                         <td class="float-left">
+                            <a href="{% url 'cart:full_remove' cart_item.event.id %}" class="icon_remove_a">
+                                <i style="padding-right: 10px" class="fas fa-trash-alt icon_remove"></i>
+                            </a>
+
                             <a href="{{cart_item.event.get_url}}">
                                 <img src="{{cart_item.event.image.url}}" alt="" class="rounded custom_image">
                             </a>

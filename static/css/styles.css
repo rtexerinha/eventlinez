@@ -1172,5 +1172,17 @@ div.content-right-signin {
     justify-content: center;
 }
 
+.icon_remove {
+	text-decoration: none;
+	color: #D90075 !important;
+}
+
+@media (max-width: 700px) {
+    .icon_remove_a{
+        display: none;
+    }
+
+}
+
 
 
