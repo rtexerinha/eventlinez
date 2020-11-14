@@ -5,3 +5,4 @@ django-imagekit
 stripe
 pillow
 sentry-sdk
+celery[redis]

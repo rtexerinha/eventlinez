@@ -8,6 +8,7 @@ from django.conf import settings
 
 from local_settings import EVENTLINEZ_FEE
 from order.models import Order, OrderItem
+from order.tasks import send_mail
 from event.models import Event
 from .models import Cart, CartItem
 from .forms import AddItemToCardForm
@@ -119,7 +120,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 event.save()
                 order_item.delete()
                 logger.info("The order has been created")
-            order.send_notification()
+            send_mail.delay(order.id)
             return redirect('order:thanks', order.id)
         except ObjectDoesNotExist:
             return HttpResponse(status=400, content="Page errada")
