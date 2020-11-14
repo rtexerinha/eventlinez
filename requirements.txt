@@ -4,3 +4,4 @@ django-crispy-forms
 django-imagekit
 stripe
 pillow
+sentry-sdk
