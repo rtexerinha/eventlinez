@@ -1,3 +1,5 @@
+from builtins import map
+
 from django.db import models
 from event.models import Event
 from django.core.validators import MinValueValidator
@@ -19,6 +21,7 @@ class Cart(models.Model):
 class CartItem(models.Model):
 	event = models.ForeignKey(Event, on_delete=models.CASCADE)
 	cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+	promo_code = models.CharField(max_length=10, null=True)
 	quantity = models.IntegerField(validators=[MinValueValidator(0)])
 	active = models.BooleanField(default=True)
 

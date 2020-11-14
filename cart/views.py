@@ -10,6 +10,7 @@ from local_settings import EVENTLINEZ_FEE
 from order.models import Order, OrderItem
 from event.models import Event
 from .models import Cart, CartItem
+from .forms import AddItemToCardForm
 
 
 logger = logging.getLogger(__name__)
@@ -24,20 +25,23 @@ def _cart_id(request):
 
 def add_cart(request, product_id):
     event = Event.objects.get(id=product_id)
+    form = AddItemToCardForm(request.POST)
+    promo_code = None
+
+    if form.is_valid():
+        promo_code = form.cleaned_data.get("promo_code")
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
     except Cart.DoesNotExist:
-        cart = Cart.objects.create(
-            cart_id=_cart_id(request)
-        )
+        cart = Cart.objects.create(cart_id=_cart_id(request))
         cart.save()
     try:
-        cart_item = CartItem.objects.get(event=event, cart=cart)
+        cart_item = CartItem.objects.get(event=event, cart=cart, promo_code=promo_code)
         if cart_item.quantity < cart_item.event.stock:
             cart_item.quantity += 1
         cart_item.save()
     except CartItem.DoesNotExist:
-        cart_item = CartItem.objects.create(event=event, quantity=1, cart=cart)
+        cart_item = CartItem.objects.create(event=event, quantity=1, cart=cart, promo_code=promo_code)
         cart_item.save()
     return redirect('cart:cart_detail')
 
