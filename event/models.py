@@ -59,6 +59,10 @@ class Event(models.Model):
         verbose_name = 'Event'
         verbose_name_plural = 'Event'
 
+    @property
+    def code_promo(self):
+        return self
+
     def get_url(self):
         return reverse('shop:product_event_detail', args=[self.category.slug, self.slug])
 
