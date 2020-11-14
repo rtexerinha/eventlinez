@@ -21,7 +21,8 @@ class OrderMailTest(TestCase):
             shippingName="Rafael Reuber",
             shippingAddress1="Rua A",
             shippingCity="Fortaleza",
-            shippingPostcode="60326901"
+            shippingPostcode="60326901",
+            payment_code="123"
         )
         self.order.save()
         order_item1 = OrderItem(event="Event 1", quantity=1, price=100, order=self.order)

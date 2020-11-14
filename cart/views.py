@@ -88,7 +88,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
         try:
             order = Order.objects.create(
                 token=token,
-                # token=charge,
+                payment_code=charge.stripe_id,
                 total=total,
                 emailAddress=email,
                 billingName=billing_name,

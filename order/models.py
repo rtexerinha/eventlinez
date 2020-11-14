@@ -22,6 +22,7 @@ class Order(models.Model):
     shippingCity = models.CharField(max_length=250, blank=True)
     shippingPostcode = models.CharField(max_length=10, blank=True)
     shippingCountry = models.CharField(max_length=200, blank=True)
+    payment_code = models.CharField(max_length=200)
 
     def send_notification(self):
         subject = "Eventlinez - New Order #%s" % self.id
@@ -55,7 +56,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
     def price_fee(self):
-        return (self.price * settings.EVENTLINEZ_FEE) + self.price
+        return (self.price * Decimal(settings.EVENTLINEZ_FEE)) + self.price
 
     def sub_total(self):
         return self.quantity * (self.price * Decimal(settings.EVENTLINEZ_FEE)) + self.price
