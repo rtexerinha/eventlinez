@@ -8,10 +8,11 @@ from .models import OrderItem
 
 class OrderMailTest(TestCase):
 
-    def test_send_mail(self):
-        order = Order(
+    def setUp(self):
+        self.order = Order(
             token="12",
-            total=123, billingName="Rafael Reuber",
+            total=123,
+            billingName="Rafael Reuber",
             emailAddress="rafaelreuber@gmail.com",
             billingAddress1="Rua A",
             billingCity="Fortaleza",
@@ -22,21 +23,15 @@ class OrderMailTest(TestCase):
             shippingCity="Fortaleza",
             shippingPostcode="60326901"
         )
-        order.save()
-        order_item1 = OrderItem(event="Event 1", quantity=1, price=100, order=order)
-        order_item2 = OrderItem(event="Event 2", quantity=1, price=50, order=order)
+        self.order.save()
+        order_item1 = OrderItem(event="Event 1", quantity=1, price=100, order=self.order)
+        order_item2 = OrderItem(event="Event 2", quantity=1, price=50, order=self.order)
 
         order_item1.save()
         order_item2.save()
 
-        order.send_notification()
+    def test_send_mail(self):
+        self.order.send_notification()
         self.assertEqual(1, len(mail.outbox))
-        self.assertEqual(mail.outbox[0].to, [order.emailAddress])
-        self.assertEqual(mail.outbox[0].subject, "Eventlinez - New Order #" + str(order.id))
-
-
-class OrderItemTestCase(TestCase):
-
-    def test_price_free_shold_work_when_fee_is_a_integer(self):
-        settings.EVENTLINEZ_FEE = 10
-
+        self.assertEqual(mail.outbox[0].to, [self.order.emailAddress])
+        self.assertEqual(mail.outbox[0].subject, "Eventlinez - New Order #" + str(self.order.id))
