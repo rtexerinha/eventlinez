@@ -1,17 +1,16 @@
+import logging
+
 import stripe
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-from django.template.loader import render_to_string
-from django.core.mail import send_mail
 
 from local_settings import EVENTLINEZ_FEE
 from order.models import Order, OrderItem
 from event.models import Event
 from .models import Cart, CartItem
 
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +115,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 event.save()
                 order_item.delete()
                 logger.info("The order has been created")
-                send_email(order.id, order_item)
+            order.send_notification()
             return redirect('order:thanks', order.id)
         except ObjectDoesNotExist:
             return HttpResponse(status=400, content="Page errada")
@@ -144,19 +143,3 @@ def full_remove(request, product_id):
     cart_item.delete()
     return redirect('cart:cart_detail')
 
-
-def send_email(order_id):
-    order = Order.objects.get(id=order_id)
-    subject = "Eventlinez - New Order #%s" % order.id
-
-    message = render_to_string('order/email/email.html', {'order': order})
-    message_txt = 'Message de teste'
-
-    send_mail(
-        subject=subject,
-        message=message_txt,
-        from_email="noreply@eventlinez.com",
-        recipient_list=[order.emailAddress],
-        fail_silently=False,
-        html_message=message
-    )

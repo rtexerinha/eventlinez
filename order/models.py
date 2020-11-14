@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
+from django.template.loader import render_to_string
+from django.core import mail
 
 
 class Order(models.Model):
@@ -18,6 +20,21 @@ class Order(models.Model):
     shippingCity = models.CharField(max_length=250, blank=True)
     shippingPostcode = models.CharField(max_length=10, blank=True)
     shippingCountry = models.CharField(max_length=200, blank=True)
+
+    def send_notification(self):
+        subject = "Eventlinez - New Order #%s" % self.id
+
+        message = render_to_string('order/email/email.html', {'order': self})
+        message_txt = 'Message de teste'
+
+        mail.send_mail(
+            subject=subject,
+            message=message_txt,
+            from_email="noreply@eventlinez.com",
+            recipient_list=[self.emailAddress],
+            fail_silently=False,
+            html_message=message
+        )
 
     class Meta:
         ordering = ['-created']

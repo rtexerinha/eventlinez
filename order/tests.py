@@ -4,7 +4,6 @@ from django.conf import settings
 
 from .models import Order
 from .models import OrderItem
-from cart.views import send_email
 
 
 class OrderMailTest(TestCase):
@@ -30,7 +29,7 @@ class OrderMailTest(TestCase):
         order_item1.save()
         order_item2.save()
 
-        send_email(order_id=order.id)
+        order.send_notification()
         self.assertEqual(1, len(mail.outbox))
         self.assertEqual(mail.outbox[0].to, [order.emailAddress])
         self.assertEqual(mail.outbox[0].subject, "Eventlinez - New Order #" + str(order.id))
