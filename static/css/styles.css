@@ -1184,5 +1184,33 @@ div.content-right-signin {
 
 }
 
+.title-order{
+    width: 100%;
+    font-family: Nunito;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 2rem;
+    line-height: 48px;
+    display: flex;
+    align-items: center;
+    color: #d90075;
+    justify-content: center;
+}
+
+.title-table-order{
+    font-family: Nunito, serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 27px;
+    align-items: center;
+    color: #171717;
+}
+
+.link-order{
+    color: #d90075;
+}
+
+
 
 

@@ -7,17 +7,17 @@
 	<div>
 		<div class="text-center">
 			<br>
-			<h1 class="text-center my_title">Order History</h1>
+			<h1 class="text-center title-order">Order History</h1>
 			<br>
 			{% if order_details %}
 			<table class="table table-striped">
 				<thead>
 					<tr>
-						<th>Order Number</th>
-						<th>Order Date</th>
-						<th>Total Amount</th>
-						<th>Status</th>
-						<th>Action</th>
+						<th class="title-table-order">Order Number</th>
+						<th class="title-table-order">Order Date</th>
+						<th class="title-table-order">Total Amount</th>
+						<th class="title-table-order">Status</th>
+						<th class="title-table-order">Action</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -26,8 +26,8 @@
 						<td>{{ order.id }}</td>
 						<td>{{ order.created|date:"d M Y" }}</td>
 						<td>{{ order.total }}</td>
-						<td><i class="fas fa-check"></i>&nbsp;Complete</td>
-						<td><a href="{% url 'order:order_detail' order.id %}">View order</a></td>
+						<td><i class="fas fa-check" style="color: #1e7e34"></i>&nbsp;Complete</td>
+						<td><a class="link-order" href="{% url 'order:order_detail' order.id %}">View order</a></td>
 					</tr>
 					{% endfor %}
 				</tbody>
