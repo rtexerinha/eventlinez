@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from event.models import Category, Event, EventItem
+from event.models import Category, Event
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.contrib.auth.models import Group, User
 from .forms import SignUpForm, SignInForm
@@ -24,19 +24,6 @@ def index(request, c_slug=None):
     except (EmptyPage, InvalidPage):
         events = paginator.page(paginator.num_pages)
     return render(request, 'shop/home.html', {'category': c_page, 'events': events})
-
-
-def add_event(request, event_id):
-    event = Event.objects.get(id=event_id)
-    try:
-        if EventItem.quantity < event.stock:
-            EventItem.quantity += 1
-        EventItem.save()
-    except EventItem.DoesNotExist:
-        event_item = EventItem.objects.create(event=event,
-                                              quantity=1)
-        event_item.save()
-    return redirect('shop:product_event_detail')
 
 
 def product_event_detail(request, c_slug, event_slug):

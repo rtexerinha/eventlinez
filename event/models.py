@@ -69,16 +69,3 @@ class Event(models.Model):
     def __str__(self):
         return '{}'.format(self.name)
 
-
-class EventItem(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    quantity = models.IntegerField(validators=[MinValueValidator(0)], default=0)
-
-    def price_fee(self):
-        return (self.event.unit_price * EVENTLINEZ_FEE) + self.event.unit_price
-
-    def sub_total(self):
-        return (self.event.unit_price * EVENTLINEZ_FEE) + self.event.unit_price * self.quantity
-
-    def __str__(self):
-        return self.event
