@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 
 
 def thanks(request, order_id):
+    customer_order = None
     if order_id:
         customer_order = get_object_or_404(Order, id=order_id)
     return render(request, 'thanks.html', {'customer_order': customer_order})

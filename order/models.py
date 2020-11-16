@@ -55,11 +55,14 @@ class OrderItem(models.Model):
                                 validators=[MinValueValidator(0)])
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
-    def price_fee(self):
-        return (self.price * Decimal(settings.EVENTLINEZ_FEE)) + self.price
-
     def sub_total(self):
-        return self.quantity * (self.price * Decimal(settings.EVENTLINEZ_FEE)) + self.price
+        return self.quantity * self.price
+
+    def fee(self):
+        return (self.price * Decimal(settings.EVENTLINEZ_FEE)) * self.quantity
+
+    def price_total(self):
+        return self.sub_total() + Decimal(self.fee())
 
     def __str__(self):
         return self.event

@@ -1,4 +1,5 @@
-from builtins import map
+
+from decimal import Decimal
 
 from django.db import models
 from event.models import Event
@@ -25,14 +26,14 @@ class CartItem(models.Model):
 	quantity = models.IntegerField(validators=[MinValueValidator(0)])
 	active = models.BooleanField(default=True)
 
-	def price_fee(self):
-		return (float(self.event.unit_price) * EVENTLINEZ_FEE) * self.quantity
+	def sub_total(self):
+		return self.event.unit_price * self.quantity
+
+	def fee(self):
+		return (self.event.unit_price * Decimal(EVENTLINEZ_FEE)) * self.quantity
 
 	def price_total(self):
-		return ((float(self.event.unit_price) * EVENTLINEZ_FEE) + float(self.event.unit_price)) * float(self.quantity)
-
-	def sub_total(self):
-		return ((self.event.unit_price * EVENTLINEZ_FEE) + self.event.unit_price) * self.quantity
+		return self.sub_total() + Decimal(self.fee())
 
 	def __str__(self):
 		return self.event

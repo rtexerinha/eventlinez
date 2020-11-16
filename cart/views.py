@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 
 import stripe
 from django.http import HttpResponse
@@ -52,8 +53,8 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_items = CartItem.objects.filter(cart=cart, active=True)
         for cart_item in cart_items:
-            total += (((float(cart_item.event.unit_price) * EVENTLINEZ_FEE) +
-                       float(cart_item.event.unit_price)) * float(cart_item.quantity))
+            total += (((cart_item.event.unit_price * Decimal(EVENTLINEZ_FEE)) +
+                       cart_item.event.unit_price) * cart_item.quantity)
             counter += cart_item.quantity
     except Cart.DoesNotExist:
         logger.error("The cart doest not exist.")
@@ -147,4 +148,3 @@ def full_remove(request, product_id):
     cart_item = CartItem.objects.get(event=event, cart=cart)
     cart_item.delete()
     return redirect('cart:cart_detail')
-
