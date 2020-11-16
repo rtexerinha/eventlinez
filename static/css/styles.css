@@ -1214,7 +1214,7 @@ div.content-right-signin {
     font-style: normal;
     font-weight: 600;
     font-size: 1rem;
-    line-height: 27px;
+    line-height: 1.5rem;
     align-items: center;
     color: #171717;
 }
@@ -1223,6 +1223,47 @@ div.content-right-signin {
     color: #d90075;
 }
 
+.buttons{
+    width: 381px;
+    height: 40px;
+    background: #D90075;
+    border-radius: 10px;
+    border: 2px solid #D90075;
+    box-sizing: border-box;
+    font-family: Nunito, serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 0.8rem;
+    line-height: 22px;
+    display: flex;
+    align-items: center;
+    color: #FFFFFF;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+@media (max-width: 400px) {
+    .buttons{
+        width: 90%;
+    }
+    .title-table-order{
+        font-size: 0.8rem;
+        line-height: 1rem;
+    }
+}
+
+.ibtw{
+    color: #FFFFFF;
+}
+
+.text-body-table{
+    font-family: Nunito, serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: #171717;
+}
 
 
 
