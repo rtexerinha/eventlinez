@@ -84,13 +84,12 @@
 
 }
 
-
 #subtitle-home{
     width: 40vw;
     font-family: Nunito, serif;
     font-style: normal;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 1.5rem;
     line-height: 20px;
     display: flex;
     align-items: center;
