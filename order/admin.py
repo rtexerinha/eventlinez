@@ -6,10 +6,11 @@ class OrderItemAdmin(admin.TabularInline):
     model = OrderItem
     fieldsets = [
         ('Event', {'fields': ['event'], }),
+        ('Promo Code', {'fields': ['promo_code'], }),
         ('Quantity', {'fields': ['quantity'], }),
         ('Price', {'fields': ['price'], }),
     ]
-    readonly_fields = ['event', 'quantity', 'price']
+    readonly_fields = ['event', 'quantity', 'price', 'promo_code']
     can_delete = False
     max_num = 0
 

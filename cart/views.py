@@ -113,6 +113,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                     event=order_item.event.name,
                     quantity=order_item.quantity,
                     price=order_item.event.unit_price,
+                    promo_code=order_item.promo_code,
                     order=order
                 )
                 oi.save()

@@ -49,6 +49,7 @@ class Order(models.Model):
 class OrderItem(models.Model):
     event = models.CharField(max_length=250)
     quantity = models.IntegerField(validators=[MinValueValidator(0)])
+    promo_code = models.CharField(max_length=10, null=True)
     price = models.DecimalField(max_digits=10,
                                 decimal_places=2,
                                 verbose_name='GBP Price',
