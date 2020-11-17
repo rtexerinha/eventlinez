@@ -35,8 +35,7 @@
 
 @media(min-width: 1400px){
      #background{
-         width: 94%;
-         margin-left: 100px;
+         width: 95vw!important;
      }
 }
 
@@ -47,6 +46,7 @@
 @media (min-width: 992px) {
     #background {
         height: 410px;
+        width: 92vw;
     }
 }
 
