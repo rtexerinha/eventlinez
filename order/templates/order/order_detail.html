@@ -16,34 +16,47 @@
                     <br>
                         <b>Order: </b>#{{ order.id }}
                     </td>
-                    <td class="text-left text-body-table" colspan="3">
+                    <td class="text-left text-body-table" colspan="2">
 						<b>Order Total: </b>${{ order.total }}
                         <br>
 						<b>Order Status: </b><i class="fas fa-check"></i> Complete.
 					</td>
 				</tr>
 				<tr style="background-color: #d90075">
-					<td class="title-table-order ibtw"><b>Product Description</b></td>
-					<td class="title-table-order ibtw"><b>Qty</b></td>
+                    <td class="title-table-order ibtw">
+                        <b>Product Description</b>
+                    </td>
+                    <td class="title-table-order ibtw"><b>Qty</b></td>
 					<td class="title-table-order ibtw"><b>Unit Price</b></td>
-                    <td class="title-table-order ibtw"><b>Fee</b></td>
-					<td class="title-table-order ibtw"><b>Price</b></td>
+					<td class="title-table-order ibtw"><b>Price + Fee</b></td>
 				</tr>
 				{% for item in order_items %}
 				<tr>
-					<td class="text-body-table">{{ item.event }}</td>
+                    {% if item.promo_code %}
+                        <td class="text-body-table">
+                            <b>{{ item.event }}</b>
+                            <p style="font-size: 0.8rem">
+                                <b style="font-size: 0.8rem">Promo Code:</b>
+                                {{ item.promo_code }}
+                            </p>
+                        </td>
+					{% else %}
+                        <td class="text-body-table">
+                            <b>{{ item.event }}</b>
+                        </td>
+                    {% endif %}
 					<td class="text-body-table">{{ item.quantity }}</td>
 					<td class="text-body-table">${{ item.sub_total }}</td>
-                    <td class="text-body-table">${{ item.fee|floatformat:2 }}</td>
+
                     <td class="text-body-table">${{ item.price_total|floatformat:2 }}</td>
 				</tr>
 				{% endfor %}
 				<tr>
-					<td class="text-right text-body-table" colspan="4"><b>Total</b></td>
+					<td class="text-right text-body-table" colspan="3"><b>Total</b></td>
 					<td>${{ order.total }}</td>
 				</tr>
 				<tr>
-					<td class="text-right text-body-table" colspan="4"><b>Total Paid</b></td>
+					<td class="text-right text-body-table" colspan="3"><b>Total Paid</b></td>
 					<td>${{ order.total }}</td>
 				</tr>
 				<tr>
@@ -65,7 +78,7 @@
 					</td>
 				</tr>
                 <tr>
-                    <td class="text-left text-body-table" colspan="5" style="background-color: #d90075; ">
+                    <td class="text-left text-body-table" colspan="6" style="background-color: #d90075; ">
                         <p style="text-align: center; color: #FFFFFF;justify-content: center">
                             <b>Payment Details: </b><br>
 						The order #{{ order.id }} has been paid successfully via Stripe.
