@@ -38,7 +38,7 @@ def add_cart(request, product_id):
         cart = Cart.objects.create(cart_id=_cart_id(request))
         cart.save()
     try:
-        cart_item = CartItem.objects.get(event=event, cart=cart, promo_code=promo_code)
+        cart_item = CartItem.objects.get(event=event, cart=cart)
         if cart_item.quantity < cart_item.event.stock:
             cart_item.quantity += 1
         cart_item.save()
