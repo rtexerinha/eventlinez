@@ -1,10 +1,10 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from event.models import Category, Event
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-# from django.contrib.auth.models import Group, User
-from .forms import SignUpForm, SignInForm
 from django.contrib.auth import login, authenticate, logout
 from django.db.models import Q
+
+from .forms import SignUpForm, SignInForm
 
 
 def index(request, c_slug=None):
