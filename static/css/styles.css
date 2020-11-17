@@ -326,7 +326,7 @@
 
 
 .footer-text{
-    padding: 5px 10px;
+    padding: 5px 60px;
     margin: 0 30px;
     font-family: Nunito, serif;
     font-style: normal;
@@ -1262,6 +1262,32 @@ div.content-right-signin {
     font-size: 1rem;
     line-height: 1.5rem;
     color: #171717;
+}
+
+.title-about{
+    margin-top: 5%;
+    font-family: Nunito, serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 35px;
+    line-height: 48px;
+    display: flex;
+    align-items: center;
+    color: #171717;
+}
+
+.text-about{
+    font-family: Nunito, serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 2rem;
+    color: #171717;
+}
+
+.link-to-about:hover{
+    color: #d90075;
+    text-decoration: #d90075;
 }
 
 

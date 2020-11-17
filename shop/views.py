@@ -26,6 +26,10 @@ def index(request, c_slug=None):
     return render(request, 'shop/home.html', {'category': c_page, 'events': events})
 
 
+def about(request):
+    return render(request, 'pages/about.html')
+
+
 def product_event_detail(request, c_slug, event_slug):
     try:
         event = Event.objects.get(category__slug=c_slug, slug=event_slug)
