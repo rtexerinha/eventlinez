@@ -1269,8 +1269,8 @@ div.content-right-signin {
     font-family: Nunito, serif;
     font-style: normal;
     font-weight: bold;
-    font-size: 35px;
-    line-height: 48px;
+    font-size: 2.25rem;
+    line-height: 2.8rem;
     display: flex;
     align-items: center;
     color: #171717;
@@ -1290,5 +1290,25 @@ div.content-right-signin {
     text-decoration: #d90075;
 }
 
+@media (max-width: 600px) {
+    .about-mobile{
+        padding-left: 30px!important;
+    }
+    .title-about{
+        font-size: 1.8rem;
+        line-height: 1.5rem;
+    }
+}
+
+@media (min-width: 1500px) {
+    .title-about{
+        font-size: 3rem;
+        line-height: 3.2rem;
+    }
+    .text-about {
+        font-size: 1.5rem;
+        line-height: 2.5rem;
+    }
+}
 
 

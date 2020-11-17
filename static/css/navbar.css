@@ -68,14 +68,14 @@
     .form-search{
         display: none;
     }
-    .header .logo {
-        margin: 0;
-    }
 }
 
 @media(max-width: 800px){
     .form-search{
         display: none;
+    }
+    .header .logo {
+        margin: 0;
     }
 }
 
