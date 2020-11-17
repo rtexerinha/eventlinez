@@ -40,9 +40,8 @@ def search_result(request):
     query = None
     if 'q' in request.GET:
         query = request.GET.get('q')
-        events = Event.objects.all().filter(Q(name__contains=query) |
-                                            Q(description__contains=query)
-                                            )
+        events = Event.objects.all().filter(
+            Q(name__icontains=query) | Q(description__icontains=query))
     return render(request, 'search.html', {'query': query, 'events': events})
 
 
