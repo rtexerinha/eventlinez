@@ -1038,10 +1038,11 @@ div.content-right-signin {
     border-radius: 30px 0 0 30px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
     .container-cart{
         margin: 0;
         width: 100%;
+        padding: 0;
     }
     #background-cart {
          width: 100vw;
@@ -1311,4 +1312,16 @@ div.content-right-signin {
     }
 }
 
+
+@media (max-width: 650px) {
+    .desktop-cart{
+        display: none;
+    }
+}
+
+@media (min-width: 650px) {
+    .mobile-cart{
+        display: none;
+    }
+}
 
