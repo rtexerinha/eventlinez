@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'imagekit',
     'crispy_forms',
     'ckeditor',
-    'import_export',
     'address',
     'event',
     'shop',
