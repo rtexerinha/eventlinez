@@ -1,10 +1,17 @@
-from django.shortcuts import get_object_or_404, redirect, render
-from event.models import Category, Event
-from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.contrib.auth import login, authenticate, logout
-from django.db.models import Q
+import logging
 
-from .forms import SignUpForm, SignInForm
+from django.contrib.auth import login, authenticate, logout
+from django.core.mail import send_mail
+from django.core.paginator import Paginator, EmptyPage, InvalidPage
+from django.db.models import Q
+from django.http import BadHeaderError, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+
+from event.models import Category, Event
+from .forms import SignUpForm, SignInForm, ContactForm
+
+logger = logging.getLogger(__name__)
 
 
 def index(request, c_slug=None):
@@ -28,6 +35,45 @@ def index(request, c_slug=None):
 
 def about(request):
     return render(request, 'pages/about.html')
+
+
+def contact(request):
+    if request.method == 'GET':
+        form = ContactForm()
+    else:
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            subject = form.cleaned_data['subject']
+            cellphone = form.cleaned_data['cellphone']
+            mail = form.cleaned_data['mail']
+            message = form.cleaned_data['message']
+
+            subject_select = "Subject: {0}".format(subject)
+
+            msg = "# Eventlinez - New Contact \n  \n \n Mail: {0} \n Cellphone: {1} \n Subject: {2} " \
+                  "\n Message: {3}".format(mail,
+                                           cellphone,
+                                           subject_select,
+                                           message)
+
+            html_message = render_to_string('shop/email/email_contact.html', dict(mail=mail,
+                                                                                  cellphone=cellphone,
+                                                                                  subject=subject_select,
+                                                                                  message=message))
+
+            try:
+                send_mail(subject_select,
+                          msg,
+                          mail,
+                          ['Info@eventlinez.com'],
+                          fail_silently=False,
+                          html_message=html_message,
+                          )
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
+            # logger.info("We received your message and will contact you soon.")
+            return redirect('shop:index')
+    return render(request, 'pages/contactus.html', {'form': form})
 
 
 def product_event_detail(request, c_slug, event_slug):

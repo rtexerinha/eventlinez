@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>New Order #{{ order.id }} - EventLinez </title>
+        <style type="text/css">
+           #title-message{color: #d90075;}
+		</style>
+	</head>
+	<body>
+         <div style="width: 80%;margin: auto">
+             <div style="text-align: center">
+			    <h1 id="title-message">Eventlinez - New Contact</h1>
+             </div>
+		    <br>
+			<br>
+
+             <p><b>E-mail: </b>{{ mail}}</p>
+             <br>
+
+             <p><b>CellPhone: </b>{{ cellphone }}</p>
+             <br>
+
+              <p><b>Subject: </b>{{ subject }}</p>
+             <br>
+
+             <p>
+                 <b>message:</b>{{ message }}
+            </p>
+
+         </div>
+
+	</body>
+</html>

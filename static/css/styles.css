@@ -335,6 +335,12 @@
     text-align: center;
     color: #FFFFFF;
 }
+@media (max-width: 600px) {
+    .footer-text{
+        padding-left: 5px;
+    }
+
+}
 
 .footer-title{
     padding-top: 30px;
@@ -1286,6 +1292,10 @@ div.content-right-signin {
     color: #171717;
 }
 
+.link-to-about{
+    color: #c6c8ca;
+}
+
 .link-to-about:hover{
     color: #d90075;
     text-decoration: #d90075;
@@ -1325,3 +1335,56 @@ div.content-right-signin {
     }
 }
 
+.btn-form {
+    width: 30%;
+    height: 40px;
+    background: #D90075;
+    border: 2px solid #d90075;
+    border-radius: 10px;
+    font-family: Nunito, serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 1rem;
+    display: flex;
+    align-items: center;
+    color: #FFFFFF;
+    justify-content: center;
+    float: right;
+}
+
+@media (max-width: 600px) {
+    .btn-form{
+        width: 90%;
+        float: none;
+        margin: auto;
+    }
+
+}
+
+.form-contact{
+    border: 1px solid #A4B0CC;
+    border-radius: 10px;
+    font-family: Nunito, serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 25px;
+    display: flex;
+    align-items: center;
+    color: #171717;
+    width: 100%;
+}
+
+.select-form-contact{
+    width: 100%;
+    border: 1px solid #A4B0CC;
+    border-radius: 10px;
+    font-family: Nunito, serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 25px;
+    background-color: #FFFFFF;
+
+}

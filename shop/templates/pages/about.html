@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% block metadescription %}{% endblock %}
+{% block title %}
+	About - Eventlinez!
+{% endblock %}
 
 {% block content %}
     <main class="col-lg-12 col-sm-12" style="padding-right: 0;">
@@ -25,7 +28,7 @@
             </div>
             
             <aside class="col-lg-6 mt-5">
-                <img style="width: 90%; display: block; margin: auto" src="{% static 'img/about.jpg' %}">
+                <img style="width: 90%; display: block; margin: auto" src="{% static 'img/about.jpg' %}" alt="Ilustração de uma banda">
             </aside>
             
         </div>
