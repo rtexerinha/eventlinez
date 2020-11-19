@@ -130,3 +130,8 @@ def signin_view(request):
 def signout_view(request):
     logout(request)
     return redirect('signin')
+
+
+def handler404(request, exception):
+    return render(request, 'pages/error.html')
+
