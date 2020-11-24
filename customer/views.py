@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import SignUpForm, SignInForm
+# from django.contrib.auth.models import User
 import logging
 
 from django.contrib.auth import login, authenticate, logout
@@ -12,7 +13,7 @@ def signup_view(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
-            username = form.cleaned_data.get('username')
+            username = form.cleaned_data.get('email')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
