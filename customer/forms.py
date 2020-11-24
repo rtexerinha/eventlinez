@@ -1,12 +1,10 @@
 from django import forms
 from django.forms import ValidationError
-# from django.contrib.auth.forms import UserCreationForm
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UsernameField
 from django.contrib.auth.models import User
-from django.contrib.auth import password_validation, login, authenticate
-from requests import request
+from django.contrib.auth import password_validation
 
 from customer.models import Customer
 
@@ -53,7 +51,9 @@ class SignUpForm(forms.Form):
         user = User.objects.create_user(
             self.cleaned_data["email"],
             self.cleaned_data["email"],
-            self.cleaned_data["password1"])
+            self.cleaned_data["password1"],
+            first_name=self.cleaned_data["first_name"]
+        )
 
         user.save()
         customer = Customer(first_name=self.cleaned_data["first_name"],
