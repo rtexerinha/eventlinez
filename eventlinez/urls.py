@@ -34,6 +34,10 @@ urlpatterns = [
     path('account/logout/', views.signout_view, name='signout'),
 ]
 
+
+admin.site.site_header = 'Eventlinez'
+admin.site.index_title = 'Admin Panel'
+admin.site.site_title = 'Welcome Eventlinez'
 handler404 = views.handler404
 
 if settings.DEBUG:
