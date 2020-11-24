@@ -1,6 +1,6 @@
 import logging
 
-from django.contrib.auth import login, authenticate, logout
+# from django.contrib.auth import login, authenticate, logout
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.db.models import Q
@@ -9,7 +9,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 
 from event.models import Category, Event
-from .forms import SignUpForm, SignInForm, ContactForm
+from .forms import ContactForm
+
 
 logger = logging.getLogger(__name__)
 
@@ -95,43 +96,5 @@ def search_result(request):
     return render(request, 'search.html', {'query': query, 'events': events})
 
 
-def signup_view(request):
-    if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return redirect('shop:index')
-    else:
-        form = SignUpForm()
-    return render(request, 'accounts/signup.html', {'form': form})
-
-
-def signin_view(request):
-    if request.method == 'POST':
-        form = SignInForm(data=request.POST)
-        if form.is_valid():
-            username = request.POST['username']
-            password = request.POST['password']
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('shop:index')
-            else:
-                return redirect('signup')
-    else:
-        form = SignInForm()
-    return render(request, 'accounts/signin.html', {'form': form})
-
-
-def signout_view(request):
-    logout(request)
-    return redirect('signin')
-
-
 def handler404(request, exception):
     return render(request, 'pages/error.html')
-

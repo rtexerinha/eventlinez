@@ -6,6 +6,6 @@ from customer.models import Customer
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['fist_name', 'last_name', 'cellphone', 'email']
+    list_display = ['first_name', 'last_name', 'cellphone', 'email']
 
 
