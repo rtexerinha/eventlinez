@@ -6,7 +6,6 @@ from ckeditor.fields import RichTextField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from address.models import Address
-from local_settings import EVENTLINEZ_FEE
 
 
 class Category(models.Model):
@@ -68,4 +67,3 @@ class Event(models.Model):
 
     def __str__(self):
         return '{}'.format(self.name)
-
