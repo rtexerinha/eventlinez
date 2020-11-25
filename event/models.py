@@ -6,6 +6,7 @@ from ckeditor.fields import RichTextField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from address.models import Address
+from django.contrib.auth.models import User
 
 
 class Category(models.Model):
@@ -25,8 +26,10 @@ class Category(models.Model):
 
 
 class Promoter(models.Model):
-    name = models.CharField(max_length=250, unique=True)
-    address_promoter = models.CharField(max_length=250, null=True, blank=True)
+    name = models.CharField(max_length=250)
+    address_promoter = models.ForeignKey(Address, on_delete=models.PROTECT, max_length=250, null=True, blank=True)
+    email = models.CharField(max_length=250, unique=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='promoter', null=True)
 
     def __str__(self):
         return '{}'.format(self.name)

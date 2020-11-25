@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load crispy_forms_filters %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block metadescription %}
+	Sign up to get a new account with us. The Eventlinez has a variety of stunning products and tickets.
+{% endblock %}
+{% block title %}
+	Create a New Account Promoter- Eventlinez
+{% endblock %}
+{% block content %}
+
+    <div class="col-lg-12 col-12" id="wrapper-log">
+        <section class="row">
+            <main class="col-lg-6">
+                <div class="col-lg-10 col-md-12 content-left-signin">
+                    <a href="{% url 'index' %}" id="back-to-home-mobile">
+                    <i class="fas fa-arrow-left" style="color: #D90075;"></i>
+                </a>
+                    <div id="box-signup">
+                        <h2 class="text-default subtitle-signup">Welcome to</h2>
+                        <h1 class="text-default title-signup">Eventlinez.</h1>
+                        <p class="text-default description-signup">Create a new account promoter</p>
+                    </div>
+
+                </div>
+
+            </main>
+
+            <aside class="col-lg-6 col-md-10 col-sm-10 pl-sm-5" style="border-radius: 0 10px 10px 0;">
+             {% if not form_promoter.is_valid %}
+                 <div style="display: flex; padding-top: 20px">
+                    <a href="{% url 'index' %}" id="back-to-home">
+                        <i class="fas fa-arrow-left" style="color: #D90075;"></i>
+                    </a>
+                    <h4 class="text-default text-bk">Enter the following information to create an account.</h4>
+                </div>
+
+                <form method="post" class="col-lg-12 ml-sm-4">
+                {% csrf_token %}
+                    <p class="text-default">{{ form_promoter.name |as_crispy_field }}</p>
+                    <p class="text-default">{{ form_promoter.email | as_crispy_field }}</p>
+                    <p class="text-default">{{ form_promoter.address_promoter | as_crispy_field }}</p>
+                    <p class="text-default">{{ form_promoter.password1 | as_crispy_field }}</p>
+                    <p class="text-default">{{ form_promoter.password2 | as_crispy_field }}</p>
+
+                    <button type="submit" class="text-default button-login">Register Account Promoter</button>
+                </form>
+            {% else %}
+                 <h4 class="text-default">Your account has been successfully created</h4>
+                 <br>
+
+                 <div>
+                    <p>
+                        Dear Customer,
+                        <br><br>
+                        Your account has been created and it is ready to use.
+                        <br>
+                        <a href="{% url 'shop:index' %}">Continue shopping</a> and enjoy the variety of cushions that we have at the perfect cushion store.
+                    </p>
+                </div>
+
+            {% endif %}
+            </aside>
+        </section>
+    </div>
+{% endblock %}
