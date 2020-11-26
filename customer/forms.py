@@ -13,7 +13,9 @@ from event.models import Promoter
 class SignUpFormPromoter(forms.Form):
     name = forms.CharField(max_length=100, required=True)
     email = forms.EmailField(label="Email", max_length=254, help_text='eg. youremail@anyemail.com', required=True)
-    address_promoter = forms.CharField(max_length=255)
+    address = forms.CharField(max_length=255)
+    city = forms.CharField(max_length=250)
+    zip = forms.CharField(max_length=11)
     password1 = forms.CharField(
         label=_("Password"),
         strip=False,
@@ -39,7 +41,7 @@ class SignUpFormPromoter(forms.Form):
 
     def clean_email(self):
         if self.cleaned_data.get("email").endswith("@test.com"):
-            raise ValidationError("Você não pode criar um usurio com @test")
+            raise ValidationError("You cannot create a user with @test")
         return self.cleaned_data.get("email")
 
     def save(self):
@@ -51,12 +53,15 @@ class SignUpFormPromoter(forms.Form):
             self.cleaned_data["email"],
             self.cleaned_data["email"],
             self.cleaned_data["password1"],
+            first_name=self.cleaned_data["name"]
         )
 
         user.save()
         promoter = Promoter(name=self.cleaned_data["name"],
                             email=self.cleaned_data["email"],
-                            address_promoter=self.cleaned_data['address_promoter'],
+                            address=self.cleaned_data['address'],
+                            city=self.cleaned_data['city'],
+                            zip=self.cleaned_data['zip'],
                             user=user)
         promoter.save()
 
