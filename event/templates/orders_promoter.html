@@ -1,0 +1,39 @@
+{% extends "base_promoter.html" %}
+
+{% block title %} Panel Admin - Orders{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <main>
+        <div class="container-fluid">
+                <h1 class="mt-4 title-dast">Orders</h1>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#30</td>
+                                    <td>Bruno José</td>
+                                    <td>88 996351705</td>
+                                    <td>brunojndias@gmail.com</td>
+                                    <td>89,00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+        </div>
+    </main>
+
+{% endblock content %}
