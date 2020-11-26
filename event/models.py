@@ -27,9 +27,11 @@ class Category(models.Model):
 
 class Promoter(models.Model):
     name = models.CharField(max_length=250)
-    address_promoter = models.ForeignKey(Address, on_delete=models.PROTECT, max_length=250, null=True, blank=True)
     email = models.CharField(max_length=250, unique=True, null=True)
-    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='promoter', null=True)
+    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='promoter', unique=True)
+    address = models.CharField(max_length=250)
+    city = models.CharField(max_length=250)
+    zip = models.CharField(max_length=11)
 
     def __str__(self):
         return '{}'.format(self.name)
