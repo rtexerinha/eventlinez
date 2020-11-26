@@ -20,7 +20,7 @@ class SignUpFormPromoter(forms.Form):
         label=_("Password"),
         strip=False,
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
-        help_text=password_validation.password_validators_help_text_html(),
+        help_text=_("Your password must contain at least 8 characters, cannot password be entirely numeric."),
     )
     password2 = forms.CharField(
         label=_("Password confirmation"),
