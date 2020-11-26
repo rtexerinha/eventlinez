@@ -17,7 +17,7 @@ urlpatterns = [
     path('cart/', include('cart.urls')),
     path('order/', include('order.urls')),
     path('account/create/', signup_view, name='signup'),
-    path('account/create/promoter/', signup_view_promoter, name='signup_promoter'),
+    path('account/promoter/creater/', signup_view_promoter, name='signup_promoter'),
     path('account/login/', signin_view, name='signin'),
     path('account/logout/', signout_view, name='signout'),
 ]

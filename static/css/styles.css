@@ -787,7 +787,16 @@
 .content-left-signin{
     background-image: url("../../static/img/backgroundsignup.jpg");
     background-repeat: no-repeat;
-     background-size: cover;
+    background-size: cover;
+    text-align: center;
+    height: 100%;
+    border-radius: 30px;
+}
+
+.content-left-signin-promoter{
+    background-image: url("../../static/img/promoter_signup.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
     text-align: center;
     height: 100%;
     border-radius: 30px;
@@ -892,6 +901,13 @@ div.content-right-signin {
 
 
     .content-left-signin{
+        width: 100%;
+        margin: 0;
+        height: 250px;
+        border-radius: 30px;
+    }
+
+    .content-left-signin-promoter{
         width: 100%;
         margin: 0;
         height: 250px;

@@ -17,10 +17,10 @@ def signup_view_promoter(request):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            return redirect('shop:index')
+            return redirect('order_promoter')
     else:
         form = SignUpFormPromoter()
-    return render(request, 'accounts/signup.html', {'form': form})
+    return render(request, 'accounts/signup_promoter.html', {'form': form})
 
 
 def signup_view(request):
