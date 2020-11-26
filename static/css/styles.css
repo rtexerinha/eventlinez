@@ -846,8 +846,23 @@ div.content-right-signin {
     justify-content: center;
 }
 
+.subtitle-signup-promoter{
+    font-family: Nunito;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 41px;
+    line-height: 55px;
+    display: flex;
+    align-items: center;
+    color: #FFFFFF;
+    text-align: left;
+}
+
 @media (max-width:600px) {
     .subtitle-signup {
+        margin-top: 30px;
+    }
+    .subtitle-signup-promoter {
         margin-top: 30px;
     }
 }
@@ -856,6 +871,10 @@ div.content-right-signin {
     #box-signup {
         margin: 0 auto;
         padding-top: 60%;
+    }
+    #box-signup-promoter {
+        margin: 0 auto;
+        padding-top: 10%;
     }
 }
 
@@ -871,6 +890,10 @@ div.content-right-signin {
     color: #FFFFFF;
     margin: 0 auto;
     justify-content: center;
+}
+
+.promoter-title{
+    margin: 0!important;
 }
 
 .description-signup{
