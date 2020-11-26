@@ -40,7 +40,7 @@
                 {% csrf_token %}
                     <p class="text-default">{{ form_promoter.name |as_crispy_field }}</p>
                     <p class="text-default">{{ form_promoter.email | as_crispy_field }}</p>
-                    <p class="text-default">{{ form_promoter.address_promoter | as_crispy_field }}</p>
+                    <p class="text-default">{{ form_promoter.address | as_crispy_field }}</p>
                     <p class="text-default">{{ form_promoter.password1 | as_crispy_field }}</p>
                     <p class="text-default">{{ form_promoter.password2 | as_crispy_field }}</p>
 
