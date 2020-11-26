@@ -10,17 +10,17 @@ logger = logging.getLogger(__name__)
 
 def signup_view_promoter(request):
     if request.method == 'POST':
-        form_promoter = SignUpFormPromoter(request.POST)
-        if form_promoter.is_valid():
-            form_promoter.save()
-            username = form_promoter.cleaned_data.get('email')
-            raw_password = form_promoter.cleaned_data.get('password1')
+        form = SignUpFormPromoter(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('email')
+            raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
             return redirect('shop:index')
     else:
-        form_promoter = SignUpFormPromoter()
-    return render(request, 'accounts/signup_promoter.html', {'form_promoter': form_promoter})
+        form = SignUpFormPromoter()
+    return render(request, 'accounts/signup.html', {'form': form})
 
 
 def signup_view(request):
