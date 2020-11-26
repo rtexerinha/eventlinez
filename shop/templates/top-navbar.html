@@ -6,7 +6,7 @@
 
     <form class="form-search col-lg-6 col-md-6 col-sm-4 col-xl-6" action="{% url 'shop:search' %}" method="get">
         {% csrf_token %}
-        <input class="input-form-search col-sm-10 col-md-7 col-lg-9 col-xl-10" type="search" placeholder="Search" aria-label="Search" name="q">
+        <input class="input-form-search col-sm-10 col-md-7 col-lg-9 col-xl-8" type="search" placeholder="Search" aria-label="Search" name="q">
     </form>
 
     <nav class="col-lg-3 float-lg-right">
@@ -37,6 +37,10 @@
                         <i class="fas fa-shopping-cart"></i>({{item_count}})
                     </a>
                 {% endif %}
+            <a class="link-nav link-right nav__link" style="color: #d90075" href="{% url 'signup_promoter' %}">
+                Organize your event
+            </a>
+
             <a class="link-nav link-right nav__link " href="{% url 'signup' %}">
                 <i style="padding-right: 10px" class="fas fa-user-plus"></i>
                 Sign Up
