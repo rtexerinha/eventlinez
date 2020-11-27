@@ -72,6 +72,11 @@ def signin_view(request):
     return render(request, 'accounts/signin_customer.html', {'form': form})
 
 
+def signout_view_promoter(request):
+    logout(request)
+    return redirect('signin_promoter')
+
+
 def signout_view(request):
     logout(request)
     return redirect('signin')
