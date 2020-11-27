@@ -23,6 +23,7 @@ class Order(models.Model):
     shippingPostcode = models.CharField(max_length=10, blank=True)
     shippingCountry = models.CharField(max_length=200, blank=True)
     payment_code = models.CharField(max_length=200)
+    # promoter = models.CharField(max_length=255)
 
     def send_notification(self):
         subject = "Eventlinez - New Order #%s" % self.id

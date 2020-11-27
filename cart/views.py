@@ -77,6 +77,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
         shippingcity = request.POST['stripeShippingAddressCity']
         shipping_postcode = request.POST['stripeShippingAddressZip']
         shipping_country = request.POST['stripeShippingAddressCountryCode']
+        # promoter = request.POST['promoter']
         try:
             customer = stripe.Customer.create(email=email, source=token)
             logger.info("create customer")
@@ -106,7 +107,8 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 shippingAddress1=shipping_address1,
                 shippingCity=shippingcity,
                 shippingPostcode=shipping_postcode,
-                shippingCountry=shipping_country
+                shippingCountry=shipping_country,
+                # promoter=promoter
             )
             for order_item in cart_items:
                 oi = OrderItem(
@@ -114,7 +116,8 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                     quantity=order_item.quantity,
                     price=order_item.event.unit_price,
                     promo_code=order_item.promo_code,
-                    order=order
+                    order=order,
+                    # promoter=order_item.event.promoter
                 )
                 oi.save()
                 event = Event.objects.get(id=order_item.event.id)
