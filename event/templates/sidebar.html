@@ -5,14 +5,16 @@
            <div class="sb-sidenav-menu">
                 <div class="nav">
                     <div class="sb-sidenav-menu-heading">Main</div>
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                    <a class="nav-link collapsed"
+                       href="{% url 'events_promoter' %}">
                         <div class="sb-nav-link-icon">
                             <i class="far fa-calendar"></i>
                         </div>
                         Events
                     </a>
 
-                    <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="{% url 'order_promoter' %}">
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}"
+                       href="{% url 'order_promoter' %}">
                         <div class="sb-nav-link-icon">
                           <i class="far fa-list-alt"></i>
                         </div>
