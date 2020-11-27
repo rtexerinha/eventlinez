@@ -37,7 +37,7 @@ hr {
 small,
 .small {
   font-size: 80%;
-  font-family: Nunito;
+  font-family: Nunito, 'serif';
   font-style: normal;
   font-weight: normal;
   line-height: 20px;
@@ -1319,11 +1319,18 @@ pre code {
 }
 
 .table-bordered {
-  border: 1px solid #dee2e6;
+  border: 1px solid darkred;
 }
-.table-bordered th,
+.table-bordered th{
+    border-left: 2px solid #F4F4F4!important;
+    border-right: 2px solid #F4F4F4!important;
+}
+
+
 .table-bordered td {
-  border: 1px solid #dee2e6;
+  border-left: 1px solid #FFFFFF!important;
+  border-right: 1px solid #FFFFFF!important;
+  border-bottom: 1px solid #d6d8d9!important;
 }
 .table-bordered thead th,
 .table-bordered thead td {
@@ -9612,6 +9619,7 @@ h3 {
   .table {
     border-collapse: collapse !important;
   }
+/*
   .table td,
 .table th {
     background-color: #fff !important;
@@ -9621,6 +9629,7 @@ h3 {
 .table-bordered td {
     border: 1px solid #dee2e6 !important;
   }
+  */
 
   .table-dark {
     color: inherit;
@@ -9907,3 +9916,20 @@ body {
   align-items: center;
   color: #171717;
 }
+
+#button-adm{
+  width: 142px;
+  height: 31px;
+  background: #D90075;
+  border-radius: 10px;
+  font-family: Nunito, 'serif';
+  font-style: normal;
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1rem;
+  display: flex;
+  align-items: center;
+  color: #FFFFFF;
+  justify-content: center;
+}
+
