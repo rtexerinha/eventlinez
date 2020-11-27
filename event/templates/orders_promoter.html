@@ -23,13 +23,15 @@
                                 </tr>
                             </thead>
                             <tbody>
+                            {% for order_details in order_details %}
                                 <tr>
-                                    <td>#30</td>
-                                    <td>Bruno José</td>
-                                    <td>88 996351705</td>
-                                    <td>brunojndias@gmail.com</td>
-                                    <td>89,00</td>
+                                    <td>{{ order_details.id }}</td>
+                                    <td>{{ order_details.billingName }}</td>
+                                    <td>{{ order_details.billingPostcode }}</td>
+                                    <td>{{ order_details.emailAddress }}</td>
+                                    <td>{{ order_details.total }}</td>
                                 </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>

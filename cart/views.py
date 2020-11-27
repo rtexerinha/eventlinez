@@ -112,7 +112,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
             )
             for order_item in cart_items:
                 oi = OrderItem(
-                    event=order_item.event.name,
+                    event=order_item.event,
                     quantity=order_item.quantity,
                     price=order_item.event.unit_price,
                     promo_code=order_item.promo_code,

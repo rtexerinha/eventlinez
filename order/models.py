@@ -6,6 +6,8 @@ from django.core.validators import MinValueValidator
 from django.template.loader import render_to_string
 from django.core import mail
 
+from event.models import Event
+
 
 class Order(models.Model):
     token = models.CharField(max_length=250, blank=True)
@@ -48,7 +50,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    event = models.CharField(max_length=250)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
     quantity = models.IntegerField(validators=[MinValueValidator(0)])
     promo_code = models.CharField(max_length=10, null=True)
     price = models.DecimalField(max_digits=10,
