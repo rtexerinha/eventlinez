@@ -35,7 +35,24 @@ def signup_view(request):
             return redirect('shop:index')
     else:
         form = SignUpForm()
-    return render(request, 'accounts/signup.html', {'form': form})
+    return render(request, 'accounts/signup_customer.html', {'form': form})
+
+
+def signin_view_promoter(request):
+    if request.method == 'POST':
+        form = SignInForm(data=request.POST)
+        if form.is_valid():
+            username = request.POST['username']
+            password = request.POST['password']
+            promoter = authenticate(username=username, password=password)
+            if promoter is not None:
+                login(request, promoter)
+                return redirect('order_promoter')
+            else:
+                return redirect('signup_promoter')
+    else:
+        form = SignInForm()
+    return render(request, 'accounts/signin_promoter.html', {'form': form})
 
 
 def signin_view(request):
@@ -52,7 +69,7 @@ def signin_view(request):
                 return redirect('signup')
     else:
         form = SignInForm()
-    return render(request, 'accounts/signin.html', {'form': form})
+    return render(request, 'accounts/signin_customer.html', {'form': form})
 
 
 def signout_view(request):
