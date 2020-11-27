@@ -1,0 +1,53 @@
+{% extends "base_promoter.html" %}
+
+{% block title %} Panel Admin - Events{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <main>
+        <div class="container-fluid">
+                <h1 class="mt-4 title-dast">Events</h1>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                                <tr style="background-color:#F4F4F4;">
+                                    <th>Event</th>
+                                    <th>Price</th>
+                                    <th>Tickets sold</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for events in events %}
+                                <tr>
+                                    <td>{{ events.name }}</td>
+                                    <td>{{ events.unit_price }}</td>
+                                    <td>{{ events.stock }}</td>
+                                    <td colspan="3">
+                                        <div style="display: flex; justify-content: center">
+                                            <a id="button-adm">
+                                                Orders
+                                            </a>
+
+                                            <a href="#" class="icon_remove_a">
+                                                <i style="padding-left: 15px; padding-top: 5px; color: #d90075" class="far fa-edit icon_remove"></i>
+                                            </a>
+
+                                            <a href="#" class="icon_remove_a">
+                                                <i style="padding-left: 15px; padding-top: 5px; color: #d90075" class="fas fa-trash-alt icon_remove"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+        </div>
+    </main>
+
+{% endblock content %}
