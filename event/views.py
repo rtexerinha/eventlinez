@@ -1,19 +1,18 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from event.models import Event
-from order.models import Order, OrderItem
+from order.models import Order
 
 
-@login_required()
 def order_promoter(request):
     # TODO: Verifica possibilidade de simplificar código sobre login
-    if request.user.is_authenticated:
+    if not request.user.is_authenticated:
+        return redirect('signin_promoter')
+    else:
         promoter = request.user.promoter
         orders = Order.objects.filter(orderitem__event__promoter=promoter)
         return render(request, 'orders_promoter.html', {'order_details': orders})
-    else:
-        return render(request, 'accounts/signin_customer.html')
 
 
 @login_required
