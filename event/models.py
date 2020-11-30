@@ -27,7 +27,7 @@ class Category(models.Model):
 
 class Promoter(models.Model):
     name = models.CharField(max_length=250)
-    email = models.CharField(max_length=250, unique=True, null=True)
+    email = models.CharField(max_length=250, unique=True)
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='promoter', unique=True)
     address = models.CharField(max_length=250)
     city = models.CharField(max_length=250)
