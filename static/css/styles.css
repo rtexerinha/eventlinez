@@ -1429,5 +1429,10 @@ div.content-right-signin {
     font-size: 18px;
     line-height: 25px;
     background-color: #FFFFFF;
-
+}
+@media(max-width: 600px) {
+    .row-mobile {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
 }

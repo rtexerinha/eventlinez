@@ -151,7 +151,7 @@
 
 .nav__link {
     text-decoration: none;
-    font-family: Nunito;
+    font-family: Nunito, 'serif';
     font-style: normal;
     font-weight: bold;
     font-size: 15px;
