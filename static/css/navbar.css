@@ -117,6 +117,7 @@
 }
 
 .nave {
+    display: none;
     position: absolute;
     background:#FFFFFF;
     color: #383838;
@@ -195,11 +196,13 @@
     }
 }
 
+
 .nav-open .nave {
+    display: flex;
     transform: translateX(0%);
     max-width: 100%;
     max-height: fit-content;
-    position: fixed;
+    /*position: fixed;*/
 }
 
 /*
@@ -260,6 +263,10 @@
     .header-right {margin-top: 0;}
 }
 
+
+.nav-cart{
+    padding-left: 0!important;
+}
 
 
 

@@ -107,10 +107,7 @@
                  {% endif %}
 
                 {% if item_count > 0 %}
-                    <a class="link-nav nav__link" href="{% url 'cart:cart_detail' %}"
-                       style="padding-left: 0!important;
-                               padding-top: 0!important;"
-                    >
+                    <a class="link-nav nav__link nav-cart" href="{% url 'cart:cart_detail' %}">
                         <i class="fas fa-shopping-cart" style="padding-right: 5px"></i>
                         Cart ({{item_count}})
                     </a>
@@ -125,11 +122,6 @@
                     </a>
 			    </li>
             {% else %}
-                {% if item_count > 0 %}
-                    <a class="link-nav nav__link" href="{% url 'cart:cart_detail' %}">
-                        <i class="fas fa-shopping-cart"></i>({{item_count}})
-                    </a>
-                {% endif %}
                 <li class="nav__item">
                     <a href="{% url 'order_promoter' %}"
                        class="nav__link"
@@ -138,6 +130,7 @@
                         Organize your Event
                     </a>
                 </li>
+
 
                 <li class="nav__item">
                     <a href="{% url 'signup' %}" class="nav__link">
@@ -150,6 +143,15 @@
                     <i class="fas fa-sign-in-alt" id="icons-space"></i>
                     Sign In </a>
                 </li>
+
+                                {% if item_count > 0 %}
+                    <a class="link-nav nav__link nav-cart"
+                       href="{% url 'cart:cart_detail' %}">
+                        <i class="fas fa-shopping-cart" style="padding-right: 5px"></i>
+                        Cart
+                        ({{item_count}})
+                    </a>
+                {% endif %}
             {% endif %}
 
         </ul>
