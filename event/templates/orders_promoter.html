@@ -17,7 +17,6 @@
                                 <tr style="background-color:#F4F4F4;">
                                     <th>Order</th>
                                     <th>Customer</th>
-                                    <th>Phone</th>
                                     <th>Email</th>
                                     <th>Total</th>
                                 </tr>
@@ -27,9 +26,9 @@
                                 <tr>
                                     <td>{{ order_details.id }}</td>
                                     <td>{{ order_details.billingName }}</td>
-                                    <td>{{ order_details.billingPostcode }}</td>
                                     <td>{{ order_details.emailAddress }}</td>
                                     <td>{{ order_details.total }}</td>
+
                                 </tr>
                             {% endfor %}
                             </tbody>
