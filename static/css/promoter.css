@@ -9933,3 +9933,35 @@ body {
   justify-content: center;
 }
 
+.input-search-adm{
+  height: 39px;
+  background: #F8F8F8;
+  border: 1px solid #DDDDDD;
+  box-sizing: border-box;
+  border-radius: 20px;
+  font-family: Nunito, 'serif';
+  font-style: normal;
+  font-weight: normal;
+  font-size: 17px;
+  line-height: 115.3%;
+  text-align: justify;
+  color: #B3B3B3;
+}
+
+.div-adm-newevent{
+  display: flex;
+  height: 60px;
+}
+
+@media (max-width: 400px){
+  .div-adm-newevent{
+    display: block;
+    height: 100%;
+    padding: 15px 0;
+  }
+  #button-adm{
+    margin: 10px auto;
+    width: 100%;
+  }
+}
+
