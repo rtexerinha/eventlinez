@@ -10,7 +10,7 @@
 
     <main>
         <div class="container-fluid">
-            <h1 class="mt-4 title-dast">Enter the following information to create an Event</h1>
+            <h1 class="mt-4 mb-4 title-dast">New Event</h1>
 
              <form method="post" class="col-lg-12 ml-sm-4"
                    style="margin-left: 0!important;
@@ -34,6 +34,7 @@
                     </div>
 
                     <div class="col-md-12 mb-0">
+                        {{ form.media }}
                         {{ form.description| as_crispy_field }}
                     </div>
 
