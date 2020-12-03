@@ -12,6 +12,8 @@ from customer.views import signup_view_promoter, signin_view_promoter, \
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
+    path('cart/', include('cart.urls')),
+    path('order/', include('order.urls')),
     path('shop/', include('shop.urls')),
     path('about/', shop.views.about, name='about'),
     path('contact/', shop.views.contact, name='contact'),
