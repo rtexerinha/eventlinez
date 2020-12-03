@@ -9,7 +9,7 @@
 			<br>
 			<h1 class="text-center title-order">Order History</h1>
 			<br>
-			{% if order_details %}
+			{% if orders %}
 			<table class="table table-striped col-xl-10 col-lg-10 col-sm-10" style="width: 100%; margin: auto">
 				<thead>
 					<tr>
@@ -20,18 +20,18 @@
 					</tr>
 				</thead>
 				<tbody>
-					{% for order in order_details %}
+					{% for orders in orders %}
 					<tr>
 						<td class="text-body-table">
-                            <a class="link-order" href="{% url 'order:order_detail' order.id %}">
-                                #{{ order.id }}
+                            <a class="link-order" href="{% url 'order:order_detail' orders.id %}">
+                                #{{ orders.id }}
                             </a>
                         </td>
 						<td class="text-body-table">
-                            {{ order.created|date:"d M Y" }}
+                            {{ orders.created|date:"d M Y" }}
                         </td>
 						<td class="text-body-table">
-                            {{ order.total }}
+                            {{ orders.total }}
                         </td>
 						<td class="text-body-table">
                             <i class="fas fa-check" style="color: #1e7e34"></i>&nbsp
