@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UsernameField
 from django.contrib.auth.models import User
-from django.contrib.auth import password_validation
+# from django.contrib.auth import password_validation
 
 from customer.models import Customer
 from event.models import Promoter
@@ -76,7 +76,7 @@ class SignUpForm(forms.Form):
         label=_("Password"),
         strip=False,
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
-        help_text=password_validation.password_validators_help_text_html(),
+        help_text=_("Your password must contain at least 8 characters, cannot password be entirely numeric."),
     )
     password2 = forms.CharField(
         label=_("Password confirmation"),

@@ -7,6 +7,14 @@
 
 {% block content %}
 
+    <style>
+        @media (max-width: 768px){
+            tr th:nth-child(3),tr td:nth-child(3){
+                display:none;
+            }
+        }
+    </style>
+
     <main>
         <div class="container-fluid">
             <h1 class="mt-4 title-dast">Orders</h1>
@@ -27,7 +35,7 @@
 
                     <button onclick="window.print();"
                        id="button-adm"
-                       style="height: 40px;text-decoration: none; border: #d90075">
+                       style="height: 40px;text-decoration: none; border: #d90075;">
                         Export
                     </button>
                 </div>
@@ -41,6 +49,7 @@
                             <th class="text-table text-bold">Order</th>
                             <th class="text-table text-bold">Customer</th>
                             <th class="text-table text-bold">Email</th>
+                            <th class="text-table text-bold">Date</th>
                             <th class="text-table text-bold">Total</th>
                         </tr>
                     </thead>
@@ -51,6 +60,7 @@
                             <td class="text-table">{{ order_details.id }}</td>
                             <td class="text-table">{{ order_details.billingName }}</td>
                             <td class="text-table">{{ order_details.emailAddress }}</td>
+                            <td class="text-table">{{ order_details.created }}</td>
                             <td class="text-table">{{ order_details.total }}</td>
                         </tr>
                     {% endfor %}

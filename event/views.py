@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.shortcuts import render, redirect
-
+from django.shortcuts import render, redirect, get_object_or_404
 
 from event.forms import NewEvent
 from event.models import Event
@@ -31,7 +30,17 @@ def events_promoter(request):
         events = Event.objects.filter(promoter=promoter)
         return render(request, 'events_promoter.html', {'events': events})
     else:
-        return render(request, 'accounts/signin_customer.html')
+        return render(request, 'accounts/signin_promoter.html')
+
+
+def order_per_events(request):
+    if not request.user.is_authenticated:
+        return render(request, 'accounts/signin_promoter.html')
+    else:
+        promoter = request.user.promoter.id
+        events = Event.objects.filter(promoter=promoter)
+        orders = Order.objects.filter(event=events)
+        return render(request, 'events_promoter.html', {'order_details': orders})
 
 
 def new_events(request):
@@ -65,3 +74,11 @@ def new_events(request):
     else:
         form = NewEvent()
     return render(request, 'new_event.html', {'form': form})
+
+
+def remove_event(request, event_id):
+    promoter = request.user.promoter.id
+    # event = get_object_or_404(Event, id=event_id)
+    event = Event.objects.get(id=event_id, promoter=promoter)
+    event.delete()
+    return redirect('cart:cart_detail')

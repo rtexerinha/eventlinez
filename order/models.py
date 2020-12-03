@@ -69,4 +69,4 @@ class OrderItem(models.Model):
         return self.sub_total() + Decimal(self.fee())
 
     def __str__(self):
-        return self.event
+        return self.event.name
