@@ -36,18 +36,18 @@
                         <table class="table table-bordered" id="dataTable">
                             <thead>
                                 <tr style="background-color:#F4F4F4;">
-                                    <th>Event</th>
-                                    <th>Price</th>
-                                    <th>Tickets sold</th>
+                                    <th class="text-table text-bold">Event</th>
+                                    <th class="text-table text-bold">Price</th>
+                                    <th class="text-table text-bold">Tickets sold</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                             {% for events in events %}
                                 <tr>
-                                    <td>{{ events.name }}</td>
-                                    <td>{{ events.unit_price }}</td>
-                                    <td>{{ events.stock }}</td>
+                                    <td class="text-table">{{ events.name }}</td>
+                                    <td class="text-table">{{ events.unit_price }}</td>
+                                    <td class="text-table">{{ events.stock }}</td>
                                     <td colspan="3">
                                         <div style="display: flex; justify-content: center">
                                             <a id="button-adm">

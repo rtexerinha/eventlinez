@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.shortcuts import render, redirect
 
 
-# from event.forms import CategoryForm, EventForm
 from event.forms import NewEvent
 from event.models import Event
 from order.models import Order
@@ -15,6 +15,12 @@ def order_promoter(request):
     else:
         promoter = request.user.promoter
         orders = Order.objects.filter(orderitem__event__promoter=promoter)
+        paginator = Paginator(orders, 8)
+        page = int(request.GET.get('page', '1'))
+        try:
+            orders = paginator.page(page)
+        except (EmptyPage, InvalidPage):
+            orders = paginator.page(paginator.num_pages)
         return render(request, 'orders_promoter.html', {'order_details': orders})
 
 
@@ -29,30 +35,33 @@ def events_promoter(request):
 
 
 def new_events(request):
-    form = NewEvent(request.POST or None)
-    promoter = request.user.promoter.id
+    promoter = request.user.promoter
     if request.method == 'POST':
+        form = NewEvent(request.POST)
         if form.is_valid():
-            form.save()
+            name = form.cleaned_data['name']
+            slug = name
+            description = form.cleaned_data['description']
+            unit_price = form.cleaned_data['unit_price']
+            stock = form.cleaned_data['stock']
+            available = form.cleaned_data['available']
+            category = form.cleaned_data['category']
+            image = form.cleaned_data['image']
+
+            events = Event.objects.create(
+                name=name,
+                slug=slug,
+                description=description,
+                unit_price=unit_price,
+                stock=stock,
+                available=available,
+                category=category,
+                image=image,
+                promoter=promoter
+            )
+            events.save()
+            print(events)
             return redirect('events_promoter')
-    return render(request, 'new_event.html', {'form': form, 'promoter': promoter})
-
-
-'''
-def new_events(request):
-    CategoryInlineFormSet = inlineformset_factory(Category, Event, form=CategoryForm)
-    if request.method == 'POST':
-        FormEvent = EventForm(request.POST)
-        if FormEvent.is_valid():
-            new_event = FormEvent.save()
-            categoryInlineFormSet = CategoryInlineFormSet(request.POST, request.FILES, instance=new_event)
-
-            if categoryInlineFormSet.is_valid():
-                FormEvent.save()
-                return HttpResponseRedirect(reverse('shop:index'))
     else:
-        categoryInlineFormSet = CategoryInlineFormSet()
-        FormEvent = EventForm()
-    return render(request, 'new_event.html', {'categoryInlineFormSet': categoryInlineFormSet,
-                                              'FormEvent': FormEvent})
-'''
+        form = NewEvent()
+    return render(request, 'new_event.html', {'form': form})

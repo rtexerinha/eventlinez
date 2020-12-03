@@ -73,5 +73,3 @@ class Event(models.Model):
     def __str__(self):
         return '{}'.format(self.name)
 
-    def is_valid(self):
-        pass
