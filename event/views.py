@@ -31,7 +31,17 @@ def events_promoter(request):
         events = Event.objects.filter(promoter=promoter)
         return render(request, 'events_promoter.html', {'events': events})
     else:
-        return render(request, 'accounts/signin_customer.html')
+        return render(request, 'accounts/signin_promoter.html')
+
+
+def order_per_events(request):
+    if not request.user.is_authenticated:
+        return render(request, 'accounts/signin_promoter.html')
+    else:
+        promoter = request.user.promoter.id
+        events = Event.objects.filter(promoter=promoter)
+        orders = Order.objects.filter(event=events)
+        return render(request, 'events_promoter.html', {'events': events})
 
 
 def new_events(request):
