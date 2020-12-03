@@ -4,20 +4,19 @@ from django.contrib import admin
 from django.urls import path, include
 
 import shop
+from shop.views import index
 from event.views import order_promoter, events_promoter, new_events
 from customer.views import signup_view_promoter, signin_view_promoter, \
     signout_view_promoter
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', index, name='index'),
     path('shop/', include('shop.urls')),
-    path('', shop.views.index, name='index'),
-    path('cart/', include('cart.urls')),
-    path('order/', include('order.urls')),
     path('about/', shop.views.about, name='about'),
     path('contact/', shop.views.contact, name='contact'),
     path('customer/', include('customer.urls')),
-    path('promoter/account/creater/', signup_view_promoter, name='signup_promoter'),
+    path('promoter/account/create/', signup_view_promoter, name='signup_promoter'),
     path('promoter/account/login/', signin_view_promoter, name='signin_promoter'),
     path('promoter/account/logout/', signout_view_promoter, name='signout_promoter'),
     path('promoter/admin/', order_promoter, name='order_promoter'),
