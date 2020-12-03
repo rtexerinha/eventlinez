@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 import shop
-from event.views import order_promoter, events_promoter
+from event.views import order_promoter, events_promoter, new_events
 from customer.views import signout_view, signup_view, signin_view, signup_view_promoter, signin_view_promoter, \
     signout_view_promoter
 
@@ -12,6 +12,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin/promoter/', order_promoter, name='order_promoter'),
     path('admin/promoter/events', events_promoter, name='events_promoter'),
+    path('admin/promoter/events/new/', new_events, name='new_events'),
     path('shop/', include('shop.urls')),
     path('about/', shop.views.about, name='about'),
     path('contact/', shop.views.contact, name='contact'),

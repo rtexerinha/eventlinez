@@ -721,7 +721,11 @@
     background-image: url("../../static/img/backgroundLoginMobile.jpg");
     background-repeat: no-repeat;
     background-size: cover;
-    /*margin: 0 0 0 30px;*/
+    margin: 0 0 0 30px;
+}
+
+.ldrmp{
+    background-image: url("../../static/img/promoter_signup.jpg")!important;
 }
 
 
@@ -851,7 +855,7 @@ div.content-right-signin {
 }
 
 .subtitle-signup-promoter{
-    font-family: Nunito;
+    font-family: Nunito, 'serif';
     font-style: normal;
     font-weight: 800;
     font-size: 2rem;
@@ -942,7 +946,7 @@ div.content-right-signin {
     }
 
     #box-signup{
-       margin-top: 60px!important;
+       margin-top: 30px!important;
     }
 
     #form-signup{
@@ -980,7 +984,7 @@ div.content-right-signin {
     border-radius: 5px;
     display: none;
     padding: 8px;
-    margin: 15px 0 0 20px;
+    margin: 0 0 0 10px;
 }
 
 @media(max-width: 600px) {
@@ -1429,5 +1433,10 @@ div.content-right-signin {
     font-size: 18px;
     line-height: 25px;
     background-color: #FFFFFF;
-
+}
+@media(max-width: 600px) {
+    .row-mobile {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
 }

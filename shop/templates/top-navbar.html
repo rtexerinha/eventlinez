@@ -17,6 +17,15 @@
                         <i class="fas fa-shopping-cart"></i>({{item_count}})
                     </a>
                 {% endif %}
+            {% if request.user.promoter %}
+                <a class="link-nav link-right nav__link" style="color: #d90075" href="{% url 'order_promoter' %}">
+                Panel Admin
+                </a>
+
+                 <a class="link-nav nav__link" href="{% url 'signout' %}">Sign Out
+                    <i class="fas fa-sign-out-alt" id="icons-space-left"></i>
+                </a>
+            {% else %}
                 <a class="link-nav nav__link" href="#" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
                     Welcome, {{ request.user.first_name }}
@@ -29,6 +38,7 @@
                 <a class="link-nav nav__link" href="{% url 'signout' %}">Sign Out
                     <i class="fas fa-sign-out-alt" id="icons-space-left"></i>
                 </a>
+            {% endif %}
             </div>
         {% else %}
             <div class="header-right">
@@ -37,7 +47,7 @@
                         <i class="fas fa-shopping-cart"></i>({{item_count}})
                     </a>
                 {% endif %}
-            <a class="link-nav link-right nav__link" style="color: #d90075" href="{% url 'signin_promoter' %}">
+            <a class="link-nav link-right nav__link" style="color: #d90075" href="{% url 'order_promoter' %}">
                 Organize your event
             </a>
 
@@ -58,37 +68,90 @@
         <span class="hamburger"></span>
     </button>
 
+<!--Navbar Mobile-->
     <nav class="nave">
         <ul class="nav__list">
             {% if request.user.is_authenticated %}
-                <li class="nav__item">
-				    Welcome,
+                 {% if request.user.promoter %}
+                       <li class="nav__item">
+                    Welcome,
                     <a style="color: #d90075; text-decoration: #d90075" href="#" class="dropdown-toggle" data-toggle="dropdown"
                        aria-haspopup="true"
                        aria-expanded="false">{{ request.user.first_name }}
-                    <i class="fas fa-user-circle"></i>
-                </a>
-				    <div class="dropdown-menu dropdown-menu-right">
-					<a href="{% url 'order:order_history' %}" class="dropdown-item nav__link">Order History</a>
-				    </div>
-			    </li>
+                        <i class="fas fa-user-circle"></i>
+                        </a>
+				        <div class="dropdown-menu dropdown-menu-right">
+					        <a href="{% url 'order_promoter' %}"
+                               class="dropdown-item nav__link">
+                                Panel Admin
+                            </a>
+				        </div>
+			        </li>
+
+                 {% else %}
+                     <li class="nav__item">
+				        Welcome,
+                        <a style="color: #d90075; text-decoration: #d90075" href="#" class="dropdown-toggle" data-toggle="dropdown"
+                       aria-haspopup="true"
+                       aria-expanded="false">{{ request.user.first_name }}
+                        <i class="fas fa-user-circle"></i>
+                        </a>
+				        <div class="dropdown-menu dropdown-menu-right">
+					        <a href="{% url 'order:order_history' %}"
+                               class="dropdown-item nav__link">
+                                Order History
+                            </a>
+				        </div>
+			        </li>
+
+                 {% endif %}
+
+                {% if item_count > 0 %}
+                    <a class="link-nav nav__link nav-cart" href="{% url 'cart:cart_detail' %}">
+                        <i class="fas fa-shopping-cart" style="padding-right: 5px"></i>
+                        Cart ({{item_count}})
+                    </a>
+                {% endif %}
 
 			    <li>
-				    <a class="nav__link" href="{% url 'signout' %}">Sign Out
-                        <i class="fas fa-sign-out-alt" id="icons-space-left"></i>
+				    <a class="nav__link" href="{% url 'signout' %}">
+                        <i class="fas fa-sign-out-alt"
+                           id="icons-space-right"
+                           style="padding-right: 5px"></i>
+                        Sign Out
                     </a>
 			    </li>
             {% else %}
                 <li class="nav__item">
+                    <a href="{% url 'order_promoter' %}"
+                       class="nav__link"
+                       style="color: #d90075">
+                        <i class="far fa-list-alt" style="padding-right: 10px"></i>
+                        Organize your Event
+                    </a>
+                </li>
+
+
+                <li class="nav__item">
                     <a href="{% url 'signup' %}" class="nav__link">
                         <i class="fas fa-user-plus" id="icons-space"></i>
-                        Sign Up </a>
+                        Sign Up
+                    </a>
                 </li>
                 <li class="nav__item">
                 <a href="{% url 'signin' %}"  class="nav__link">
                     <i class="fas fa-sign-in-alt" id="icons-space"></i>
                     Sign In </a>
                 </li>
+
+                                {% if item_count > 0 %}
+                    <a class="link-nav nav__link nav-cart"
+                       href="{% url 'cart:cart_detail' %}">
+                        <i class="fas fa-shopping-cart" style="padding-right: 5px"></i>
+                        Cart
+                        ({{item_count}})
+                    </a>
+                {% endif %}
             {% endif %}
 
         </ul>

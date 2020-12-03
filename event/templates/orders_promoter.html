@@ -9,32 +9,87 @@
 
     <main>
         <div class="container-fluid">
-                <h1 class="mt-4 title-dast">Orders</h1>
+            <h1 class="mt-4 title-dast">Orders</h1>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="dataTable">
-                            <thead>
-                                <tr style="background-color:#F4F4F4;">
-                                    <th>Order</th>
-                                    <th>Customer</th>
-                                    <th>Phone</th>
-                                    <th>Email</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for order_details in order_details %}
-                                <tr>
-                                    <td>{{ order_details.id }}</td>
-                                    <td>{{ order_details.billingName }}</td>
-                                    <td>{{ order_details.billingPostcode }}</td>
-                                    <td>{{ order_details.emailAddress }}</td>
-                                    <td>{{ order_details.total }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="row">
+                <div class="col-lg-5 col-md-5"></div>
+                <div class="col-lg-7 col-md-7 div-adm-newevent">
+                    <form class="form-search col-lg-9 col-md-9 col-sm-8 col-xl-8"
+                          action="{% url 'shop:search' %}"
+                          method="get">
+                        {% csrf_token %}
+                        <input class="input-search-adm col-11 col-sm-11 col-md-10 col-lg-10 col-xl-11"
+                               type="search"
+                               placeholder="Search"
+                               aria-label="Search"
+                               name="q">
+                    </form>
+
+                    <button onclick="window.print();"
+                       id="button-adm"
+                       style="height: 40px;text-decoration: none; border: #d90075">
+                        Export
+                    </button>
+                </div>
+            </div>
+
+
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable">
+                    <thead>
+                        <tr style="background-color:#F4F4F4;">
+                            <th class="text-table text-bold">Order</th>
+                            <th class="text-table text-bold">Customer</th>
+                            <th class="text-table text-bold">Email</th>
+                            <th class="text-table text-bold">Total</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for order_details in order_details %}
+                        <tr>
+                            <td class="text-table">{{ order_details.id }}</td>
+                            <td class="text-table">{{ order_details.billingName }}</td>
+                            <td class="text-table">{{ order_details.emailAddress }}</td>
+                            <td class="text-table">{{ order_details.total }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-12 mb-5">
+                {% if order_details.paginator.num_pages > 1 %}
+                    <div class="row row-paginator">
+                        <div class="col-lg-3 col-5">
+                            <span class="text-table" >
+                                Showing {{ order_details.number }} - {{ order_details.paginator.num_pages }}
+                            </span>
+                        </div>
+
+                        <div class="col-lg-6"></div>
+
+                        <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
+                        {% if order_details.has_previous %}
+                            <a class="text-table text pr-3"
+                                href="?page={{ order_details.previous_page_number }}">
+                                <i class="fas fa-chevron-left fa-sm" style="color: #d90075; height: 10px; width: 10px"></i>
+                                Prev
+                            </a>
+                            {% endif %}
+
+                            {% if order_details.has_next %}
+                            <a class="text-table text"
+                               href="?page={{ order_details.next_page_number }}">
+                                Next
+                                <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </main>
 
