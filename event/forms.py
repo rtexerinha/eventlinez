@@ -1,3 +1,4 @@
+from ckeditor.widgets import CKEditorWidget
 from django import forms
 
 # from event import models
@@ -19,9 +20,8 @@ class EventForm(forms.ModelForm):
 class NewEvent(forms.Form):
     name = forms.CharField(max_length=250)
     slug = forms.SlugField(max_length=250)
-    description = forms.CharField(
-        required=True,
-        widget=forms.Textarea(attrs={'class': 'form-contact'}))
+    description = forms.CharField(widget=CKEditorWidget())
+
     unit_price = forms.DecimalField(max_digits=10,
                                     decimal_places=2)
     stock = forms.IntegerField()
