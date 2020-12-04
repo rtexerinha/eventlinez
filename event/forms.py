@@ -1,35 +1,24 @@
-from ckeditor.widgets import CKEditorWidget
-from django import forms
+from django.forms import ModelForm, DateTimeField, widgets
+from address.models import Address
+from event.models import Category, Event
 
-# from event import models
-# from event.models import Category, Event
 
-'''
-class CategoryForm(forms.ModelForm):
+class NewCategory(ModelForm):
     class Meta:
         model = Category
+        fields = ['name']
 
 
-class EventForm(forms.ModelForm):
+class NewAddress(ModelForm):
     class Meta:
-        model = Category
-        exclude = ('address', 'category', 'promoter')
-'''
+        model = Address
+        fields = ['address_name']
 
 
-class NewEvent(forms.Form):
-    name = forms.CharField(max_length=250)
-    slug = forms.SlugField(max_length=250)
-    description = forms.CharField(widget=CKEditorWidget())
+class NewEvent(ModelForm):
+    event_date = DateTimeField(input_formats=["%Y-%m-%d %H:%M:%S"],
+                               widget=widgets.DateTimeInput(attrs={'type': 'datetime-local'}))
 
-    unit_price = forms.DecimalField(max_digits=10,
-                                    decimal_places=2)
-    stock = forms.IntegerField()
-    available = forms.BooleanField(initial=False)
-    # category = forms.ForeignKey(Category, blank=False, on_delete=models.PROTECT)
-    category = forms.CharField(max_length=250)
-    event_date = forms.DateTimeField(input_formats=["%d %b %Y %H:%M:%S"],
-                                     widget=forms.widgets.DateTimeInput(attrs={'type': 'datetime-local'}))
-    # event_address = forms.ForeignKey(Address, blank=True, null=True, on_delete=models.PROTECT)
-    # promoter = forms.ForeignKey(Promoter, on_delete=models.PROTECT)
-    image = forms.ImageField()
+    class Meta:
+        model = Event
+        exclude = ('slug', 'created', 'updated', 'promoter',)

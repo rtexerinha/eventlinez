@@ -49,27 +49,29 @@ def order_per_events(request):
 def new_events(request):
     promoter = request.user.promoter
     if request.method == 'POST':
-        form = NewEvent(request.POST)
+        form = NewEvent(request.POST, request.FILES)
         if form.is_valid():
             name = form.cleaned_data['name']
-            slug = name
-            description = form.cleaned_data['description']
             unit_price = form.cleaned_data['unit_price']
             stock = form.cleaned_data['stock']
-            available = form.cleaned_data['available']
             category = form.cleaned_data['category']
+            description = form.cleaned_data['description']
+            event_date = form.cleaned_data['event_date']
+            event_address = form.cleaned_data['event_address']
             image = form.cleaned_data['image']
+            available = form.cleaned_data['available']
 
             events = Event.objects.create(
                 name=name,
-                slug=slug,
-                description=description,
                 unit_price=unit_price,
                 stock=stock,
-                available=available,
                 category=category,
+                description=description,
+                event_date=event_date,
+                promoter=promoter,
+                event_address=event_address,
                 image=image,
-                promoter=promoter
+                available=available,
             )
             events.save()
             print(events)
