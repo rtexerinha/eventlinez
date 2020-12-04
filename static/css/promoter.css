@@ -1,3 +1,7 @@
+body{
+    font-family: Nunito, 'serif'!important;
+}
+
 .lead {
   font-size: 1.25rem;
   font-weight: 300;
