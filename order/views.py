@@ -19,7 +19,5 @@ def order_list(request):
 
 @login_required()
 def order_detail(request, order_id):
-    email = str(request.user.username)
-    order = Order.objects.get(id=order_id, emailAddress=email)
-    order_items = OrderItem.objects.filter(order=order)
-    return render(request, 'order/order_detail.html', {'order': order, 'order_items': order_items})
+    order = Order.objects.get(id=order_id)
+    return render(request, 'order/order_detail.html', {'order': order})
