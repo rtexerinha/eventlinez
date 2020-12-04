@@ -23,7 +23,7 @@ def order_promoter(request):
             orders = paginator.page(page)
         except (EmptyPage, InvalidPage):
             orders = paginator.page(paginator.num_pages)
-        return render(request, 'orders_promoter.html', {'order_details': orders})
+        return render(request, 'orders_promoter.html', {'orders': orders})
 
 
 @login_required
