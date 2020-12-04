@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from event.forms import NewEvent
 from event.models import Event
@@ -77,8 +77,6 @@ def new_events(request):
 
 
 def remove_event(request, event_id):
-    promoter = request.user.promoter.id
-    # event = get_object_or_404(Event, id=event_id)
-    event = Event.objects.get(id=event_id, promoter=promoter)
+    event = get_object_or_404(Event, id=event_id)
     event.delete()
-    return redirect('cart:cart_detail')
+    return redirect('events_promoter')
