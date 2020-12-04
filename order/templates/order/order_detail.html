@@ -30,7 +30,7 @@
 					<td class="title-table-order ibtw"><b>Unit Price</b></td>
 					<td class="title-table-order ibtw"><b>Price + Fee</b></td>
 				</tr>
-				{% for item in order_items %}
+				{% for item in order.orderitem_set.all %}
 				<tr>
                     {% if item.promo_code %}
                         <td class="text-body-table">

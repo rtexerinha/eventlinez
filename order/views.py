@@ -11,17 +11,13 @@ def thanks(request, order_id):
 
 
 @login_required()
-def order_history(request):
-    if request.user.is_authenticated:
-        email = str(request.user.username)
-        order_details = Order.objects.filter(emailAddress=email)
-    return render(request, 'order/orders_list.html', {'order_details': order_details})
+def order_list(request):
+    email = str(request.user.username)
+    orders = Order.objects.filter(emailAddress=email)
+    return render(request, 'order/orders_list.html', {'orders': orders})
 
 
 @login_required()
-def view_order(request, order_id):
-    if request.user.is_authenticated:
-        email = str(request.user.username)
-        order = Order.objects.get(id=order_id, emailAddress=email)
-        order_items = OrderItem.objects.filter(order=order)
-    return render(request, 'order/order_detail.html', {'order': order, 'order_items': order_items})
+def order_detail(request, order_id):
+    order = Order.objects.get(id=order_id)
+    return render(request, 'order/order_detail.html', {'order': order})

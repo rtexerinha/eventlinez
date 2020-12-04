@@ -6,6 +6,7 @@ from django.core.validators import MinValueValidator
 from django.template.loader import render_to_string
 from django.core import mail
 
+from customer.models import Customer
 from event.models import Event
 
 
@@ -25,7 +26,7 @@ class Order(models.Model):
     shippingPostcode = models.CharField(max_length=10, blank=True)
     shippingCountry = models.CharField(max_length=200, blank=True)
     payment_code = models.CharField(max_length=200)
-    # promoter = models.CharField(max_length=255)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True)
 
     def send_notification(self):
         subject = "Eventlinez - New Order #%s" % self.id

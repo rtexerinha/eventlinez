@@ -1,5 +1,8 @@
+import csv
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from event.forms import NewEvent
@@ -77,8 +80,21 @@ def new_events(request):
 
 
 def remove_event(request, event_id):
-    promoter = request.user.promoter.id
-    # event = get_object_or_404(Event, id=event_id)
-    event = Event.objects.get(id=event_id, promoter=promoter)
+    event = get_object_or_404(Event, id=event_id)
     event.delete()
-    return redirect('cart:cart_detail')
+    return redirect('events_promoter')
+
+
+def export_orders_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="orders.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Order', 'Customer', 'Email', 'Date', 'Total'])
+
+    orders = Order.objects.all().values_list('id', 'billingName', 'emailAddress', 'created', 'total')
+
+    for list_order in orders:
+        writer.writerow(list_order)
+
+    return response
