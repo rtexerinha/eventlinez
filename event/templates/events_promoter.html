@@ -45,7 +45,11 @@
                             <tbody>
                             {% for events in events %}
                                 <tr>
-                                    <td class="text-table">{{ events.name }}</td>
+                                    <td class="text-table">
+                                        <a href="{% url 'update_event'  events.id%}" style="color: #d90075">
+                                            {{ events.name }}
+                                        </a>
+                                    </td>
                                     <td class="text-table">{{ events.unit_price }}</td>
                                     <td class="text-table">{{ events.stock }}</td>
                                     <td colspan="3">
