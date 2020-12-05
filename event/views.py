@@ -5,7 +5,7 @@ from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
-from event.forms import NewEvent
+from event.forms import NewEvent, UpdateEvent
 from event.models import Event
 from order.models import Order
 
@@ -78,6 +78,15 @@ def new_events(request):
             return redirect('events_promoter')
     else:
         form = NewEvent()
+    return render(request, 'new_event.html', {'form': form})
+
+
+def update_event(request, event_id):
+    instance = get_object_or_404(Event, id=event_id)
+    form = UpdateEvent(request.POST or None, instance=instance)
+    if form.is_valid():
+        form.save()
+        return redirect('events_promoter')
     return render(request, 'new_event.html', {'form': form})
 
 

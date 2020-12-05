@@ -22,3 +22,9 @@ class NewEvent(ModelForm):
     class Meta:
         model = Event
         exclude = ('slug', 'created', 'updated', 'promoter',)
+
+
+class UpdateEvent(ModelForm):
+    class Meta:
+        model = Event
+        exclude = ('slug', 'created', 'updated', 'promoter',)
