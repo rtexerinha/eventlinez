@@ -25,9 +25,9 @@ def _cart_id(request):
     return cart
 
 
-def cart_add(request, product_id):
+def cart_add(request, event_id):
     # TODO : Entender melhor a real utilidade do try/except e otimizar ainda mais essa view
-    event = Event.objects.get(id=product_id)
+    event = Event.objects.get(id=event_id)
     form = AddItemToCardForm(request.POST)
     promo_code = None
 
@@ -135,9 +135,9 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                                              data_key=data_key, stripe_total=stripe_total, description=description))
 
 
-def cart_remove(request, product_id):
+def cart_remove(request, event_id):
     cart = Cart.objects.get(cart_id=_cart_id(request))
-    event = get_object_or_404(Event, id=product_id)
+    event = get_object_or_404(Event, id=event_id)
     cart_item = CartItem.objects.get(event=event, cart=cart)
     if cart_item.quantity > 1:
         cart_item.quantity -= 1
@@ -147,9 +147,9 @@ def cart_remove(request, product_id):
     return redirect('cart:cart_detail')
 
 
-def full_remove(request, product_id):
+def full_remove(request, event_id):
     cart = Cart.objects.get(cart_id=_cart_id(request))
-    event = get_object_or_404(Event, id=product_id)
+    event = get_object_or_404(Event, id=event_id)
     cart_item = CartItem.objects.get(event=event, cart=cart)
     cart_item.delete()
     return redirect('cart:cart_detail')
