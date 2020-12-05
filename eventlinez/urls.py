@@ -5,13 +5,13 @@ from django.urls import path, include
 
 import shop
 from shop.views import index
-from event.views import order_promoter, events_promoter, new_events, order_per_events, remove_event, export_orders_csv, \
-    update_event
+from event.views import order_promoter, events_promoter, new_events, order_per_events, remove_event, export_orders_csv, update_event
 from customer.views import signup_view_promoter, signin_view_promoter, \
-    signout_view_promoter
+    signout_view_promoter, signin_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/login/', signin_view, name='signin'),
     path('', index, name='index'),
     path('cart/', include('cart.urls')),
     path('order/', include('order.urls')),
