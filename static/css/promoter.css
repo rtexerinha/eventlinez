@@ -9987,5 +9987,9 @@ body {
 }
 
 input[type='file'] {
-  background-color: #d90075!important;
+  font-family: Nunito, 'serif' !important;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 18px;
+  color: #171717!important;
 }
