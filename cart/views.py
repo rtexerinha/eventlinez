@@ -44,7 +44,10 @@ def cart_add(request, event_id):
             cart_item.quantity += 1
         cart_item.save()
     except CartItem.DoesNotExist:
-        cart_item = CartItem.objects.create(event=event, quantity=1, cart=cart, promo_code=promo_code)
+        cart_item = CartItem.objects.create(event=event,
+                                            quantity=1,
+                                            cart=cart,
+                                            promo_code=promo_code)
         cart_item.save()
     return redirect('cart:cart_detail')
 
@@ -131,8 +134,11 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
             return redirect('order:thanks', order.id)
         except ObjectDoesNotExist:
             return HttpResponse(status=400, content="Page errada")
-    return render(request, 'cart.html', dict(cart_items=cart_items, total=total, counter=counter,
-                                             data_key=data_key, stripe_total=stripe_total, description=description))
+    return render(request, 'cart.html', dict(cart_items=cart_items,
+                                             total=total, counter=counter,
+                                             data_key=data_key,
+                                             stripe_total=stripe_total,
+                                             description=description))
 
 
 def cart_remove(request, event_id):
