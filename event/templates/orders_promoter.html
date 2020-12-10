@@ -55,13 +55,13 @@
                     </thead>
 
                     <tbody>
-                    {% for order_details in order_details %}
+                    {% for orders in orders %}
                         <tr>
-                            <td class="text-table">{{ order_details.id }}</td>
-                            <td class="text-table">{{ order_details.billingName }}</td>
-                            <td class="text-table">{{ order_details.emailAddress }}</td>
-                            <td class="text-table">{{ order_details.created }}</td>
-                            <td class="text-table">{{ order_details.total }}</td>
+                            <td class="text-table">{{ orders.id }}</td>
+                            <td class="text-table">{{ orders.billingName }}</td>
+                            <td class="text-table">{{ orders.emailAddress }}</td>
+                            <td class="text-table">{{ orders.created }}</td>
+                            <td class="text-table">{{ orders.total }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -69,28 +69,28 @@
             </div>
 
             <div class="col-12 mb-5">
-                {% if order_details.paginator.num_pages > 1 %}
+                {% if orders.paginator.num_pages > 1 %}
                     <div class="row row-paginator">
                         <div class="col-lg-3 col-5">
                             <span class="text-table" >
-                                Showing {{ order_details.number }} - {{ order_details.paginator.num_pages }}
+                                Showing {{ orders.number }} - {{ orders.paginator.num_pages }}
                             </span>
                         </div>
 
                         <div class="col-lg-6"></div>
 
                         <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
-                        {% if order_details.has_previous %}
+                        {% if orders.has_previous %}
                             <a class="text-table text pr-3"
-                                href="?page={{ order_details.previous_page_number }}">
+                                href="?page={{ orders.previous_page_number }}">
                                 <i class="fas fa-chevron-left fa-sm" style="color: #d90075; height: 10px; width: 10px"></i>
                                 Prev
                             </a>
                             {% endif %}
 
-                            {% if order_details.has_next %}
+                            {% if orders.has_next %}
                             <a class="text-table text"
-                               href="?page={{ order_details.next_page_number }}">
+                               href="?page={{ orders.next_page_number }}">
                                 Next
                                 <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
                             </a>

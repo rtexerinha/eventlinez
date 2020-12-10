@@ -1,3 +1,7 @@
+body{
+    font-family: Nunito, 'serif'!important;
+}
+
 .lead {
   font-size: 1.25rem;
   font-weight: 300;
@@ -1673,8 +1677,8 @@ select.form-control:focus::-ms-value {
 
 .form-control-file,
 .form-control-range {
-  display: block;
-  width: 100%;
+  border: 1px solid #A4B0CC !important;
+  border-radius: 10px!important;
 }
 
 .col-form-label {
@@ -1683,6 +1687,11 @@ select.form-control:focus::-ms-value {
   margin-bottom: 0;
   font-size: inherit;
   line-height: 1.5;
+}
+
+.form-control{
+    border: 1px solid #A4B0CC!important;
+    border-radius: 10px!important;
 }
 
 .col-form-label-lg {
@@ -3306,12 +3315,13 @@ input[type=button].btn-block {
   margin: 0;
   opacity: 0;
 }
+
 .custom-file-input:focus ~ .custom-file-label {
   border-color: #80bdff;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 .custom-file-input[disabled] ~ .custom-file-label, .custom-file-input:disabled ~ .custom-file-label {
-  background-color: #e9ecef;
+  background-color: #e900ef!important;
 }
 .custom-file-input:lang(en) ~ .custom-file-label::after {
   content: "Browse";
@@ -9895,8 +9905,8 @@ body {
   font-family: Nunito, 'serif';
   font-style: normal;
   font-weight: bold;
-  font-size: 2.2rem;
-  line-height: 48px;
+  font-size: 2rem;
+  line-height: 2rem;
   display: flex;
   align-items: center;
   color: #171717;
@@ -9974,4 +9984,12 @@ body {
     display: flex!important;
     flex-wrap: nowrap!important;
   }
+}
+
+input[type='file'] {
+  font-family: Nunito, 'serif' !important;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 18px;
+  color: #171717!important;
 }
