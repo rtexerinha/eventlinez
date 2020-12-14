@@ -4,10 +4,12 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.template.loader import render_to_string
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.core import mail
 
 from customer.models import Customer
-from event.models import Event
+from event.models import Event, Ticket
 
 
 class Order(models.Model):
@@ -71,3 +73,12 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return self.event.name
+
+
+@receiver(post_save, sender=OrderItem)
+def create_tickets(sender, instance, **kwargs):
+    Ticket.objects.create(
+        event=instance.event,
+        customer=instance.order.customer,
+        order_item=instance,
+    )

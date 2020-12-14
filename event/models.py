@@ -9,6 +9,8 @@ from imagekit.processors import ResizeToFill
 from address.models import Address
 from django.contrib.auth.models import User
 
+from customer.models import Customer
+
 
 class Category(models.Model):
     name = models.CharField(max_length=250, unique=True)
@@ -77,3 +79,10 @@ class Event(models.Model):
 
     def __str__(self):
         return '{}'.format(self.name)
+
+
+class Ticket(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.PROTECT)
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    order_item = models.ForeignKey('order.OrderItem', on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now=True)

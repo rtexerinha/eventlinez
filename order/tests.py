@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.core import mail
-from django.conf import settings
+from model_bakery import baker
 
 from .models import Order
 from .models import OrderItem
@@ -36,3 +36,18 @@ class OrderMailTest(TestCase):
         self.assertEqual(1, len(mail.outbox))
         self.assertEqual(mail.outbox[0].to, [self.order.emailAddress])
         self.assertEqual(mail.outbox[0].subject, "Eventlinez - New Order #" + str(self.order.id))
+
+
+class OrderTicketGeneration(TestCase):
+
+    def test_create_order_item_shuld_create_a_ticket(self):
+        event = baker.make('event.Event', description="foo")
+        event.save()
+        order = baker.make('order.Order')
+        order.save()
+
+        order_item1 = OrderItem(quantity=1, price=100, order=order, event=event)
+        order_item1.save()
+
+        from event.models import Ticket
+        self.assertEqual(Ticket.objects.count(), 1)
