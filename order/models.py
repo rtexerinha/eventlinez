@@ -26,7 +26,7 @@ class Order(models.Model):
     shippingPostcode = models.CharField(max_length=10, blank=True)
     shippingCountry = models.CharField(max_length=200, blank=True)
     payment_code = models.CharField(max_length=200)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
 
     def send_notification(self):
         subject = "Eventlinez - New Order #%s" % self.id
