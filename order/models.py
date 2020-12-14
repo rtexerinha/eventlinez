@@ -51,6 +51,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     quantity = models.IntegerField(validators=[MinValueValidator(0)])
     promo_code = models.CharField(max_length=10, null=True)
@@ -58,7 +59,6 @@ class OrderItem(models.Model):
                                 decimal_places=2,
                                 verbose_name='GBP Price',
                                 validators=[MinValueValidator(0)])
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
     def sub_total(self):
         return self.quantity * self.price
