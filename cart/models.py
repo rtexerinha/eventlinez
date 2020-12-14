@@ -25,7 +25,6 @@ class CartItem(models.Model):
 	promo_code = models.CharField(max_length=10, null=True)
 	quantity = models.IntegerField(validators=[MinValueValidator(0)])
 	active = models.BooleanField(default=True)
-	# promoter = models.CharField(max_length=255)
 
 	def sub_total(self):
 		return self.event.unit_price * self.quantity
