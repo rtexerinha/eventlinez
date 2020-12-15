@@ -116,20 +116,15 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 customer=request.user.customer
             )
             for order_item in cart_items:
-                oi = OrderItem(
+                OrderItem.objects.create(
                     event=order_item.event,
                     quantity=order_item.quantity,
                     price=order_item.event.unit_price,
                     promo_code=order_item.promo_code,
-                    order=order,
-                    # promoter=order_item.event.promoter
+                    order=order
                 )
-                oi.save()
-                event = Event.objects.get(id=order_item.event.id)
-                event.stock = int(order_item.event.stock - order_item.quantity)
-                event.save()
-                order_item.delete()
                 logger.info("The order has been created")
+            cart.delete()
             send_mail.delay(order.id)
             return redirect('order:thanks', order.id)
         except ObjectDoesNotExist:
