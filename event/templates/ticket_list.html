@@ -24,11 +24,11 @@
                             <tbody>
                             {% for ticket in tickets %}
                                 <tr>
-                                    <td class="text-table">Num Ticket</td>
-                                    <td class="text-table">Created_at</td>
-                                    <td class="text-table">Event</td>
-                                    <td class="text-table">Customer</td>
-                                    <td class="text-table">Order</td>
+                                    <td class="text-table">{{ticket.id}}</td>
+                                    <td class="text-table">{{ticket.created_at}}</td>
+                                    <td class="text-table">{{ticket.event}}</td>
+                                    <td class="text-table">{{ ticket.customer }}</td>
+                                    <td class="text-table">{{ ticket.order_item_id }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
