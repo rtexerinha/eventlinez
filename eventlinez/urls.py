@@ -5,30 +5,44 @@ from django.urls import path, include
 
 import shop
 from shop.views import index
-from event.views import order_promoter, events_promoter, new_events, order_per_events, remove_event, export_orders_csv, update_event
+from event.views import order_promoter, events_promoter, new_events, tickets_events, remove_event, export_orders_csv, \
+    update_event, tickets_promoter
 from customer.views import signup_view_promoter, signin_view_promoter, \
     signout_view_promoter, signin_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/login/', signin_view, name='signin'),
     path('', index, name='index'),
+    path('accounts/login/', signin_view, name='signin'),
+
+    # Urls de apps
+    path('customer/', include('customer.urls')),
     path('cart/', include('cart.urls')),
     path('order/', include('order.urls')),
     path('shop/', include('shop.urls')),
+
+    # Pages statics
     path('about/', shop.views.about, name='about'),
     path('contact/', shop.views.contact, name='contact'),
-    path('customer/', include('customer.urls')),
+
+
+    # Promoter
     path('promoter/account/create/', signup_view_promoter, name='signup_promoter'),
     path('promoter/account/login/', signin_view_promoter, name='signin_promoter'),
     path('promoter/account/logout/', signout_view_promoter, name='signout_promoter'),
     path('promoter/', order_promoter, name='order_promoter'),
-    path('promoter/orders/', order_per_events, name='order_per_events'),
-    path('promoter/events/', events_promoter, name='events_promoter'),
+    path('promoter/export/', export_orders_csv, name='export_orders'),
+
+    # List all tickets
+    path('promoter/ticket/',  tickets_promoter, name='ticket_list'),
+    # List Tickets per events
+    path('promoter/ticket/<int:event_id>/', tickets_events, name='ticket_list_events'),
+
+    # CRUD events
     path('promoter/events/new/', new_events, name='new_events'),
+    path('promoter/events/', events_promoter, name='events_promoter'),
     path('promoter/events/update/<int:event_id>/', update_event, name='update_event'),
     path('promoter/events/full_remove/<int:event_id>/', remove_event, name='remove_event'),
-    path('promoter/export/', export_orders_csv, name='export_orders')
 ]
 
 
