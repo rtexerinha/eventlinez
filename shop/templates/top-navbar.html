@@ -28,7 +28,7 @@
             {% else %}
                 <a class="link-nav nav__link" href="#" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
-                    Welcome, {{ request.user.first_name }}
+                    {{ request.user.first_name }}
                     <i class="fas fa-user-circle"></i>
                 </a>
 
@@ -74,7 +74,7 @@
             {% if request.user.is_authenticated %}
                  {% if request.user.promoter %}
                        <li class="nav__item">
-                    Welcome,
+
                     <a style="color: #d90075; text-decoration: #d90075" href="#" class="dropdown-toggle" data-toggle="dropdown"
                        aria-haspopup="true"
                        aria-expanded="false">{{ request.user.first_name }}
@@ -90,7 +90,6 @@
 
                  {% else %}
                      <li class="nav__item">
-				        Welcome,
                         <a style="color: #d90075; text-decoration: #d90075" href="#" class="dropdown-toggle" data-toggle="dropdown"
                        aria-haspopup="true"
                        aria-expanded="false">{{ request.user.first_name }}
