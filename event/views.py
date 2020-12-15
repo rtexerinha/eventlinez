@@ -37,7 +37,7 @@ def events_promoter(request):
 
 
 # List all tickets
-def tickets_promoter(request):
+def tickets_list(request):
     if not request.user.is_authenticated:
         return render(request, 'accounts/signin_promoter.html')
     else:
@@ -47,12 +47,10 @@ def tickets_promoter(request):
 
 
 # List Tickets per events
-def tickets_events(request, event_id):
+def tickets_list_events(request, event_id):
     if not request.user.is_authenticated:
         return render(request, 'accounts/signin_promoter.html')
     else:
-        # promoter = request.user.promoter.id
-        # event = get_object_or_404(Event, id=event_id)
         tickets = Ticket.objects.filter(event_id=event_id)
         return render(request, 'ticket_list.html', {'tickets': tickets})
 
