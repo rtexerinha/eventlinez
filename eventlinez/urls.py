@@ -25,7 +25,6 @@ urlpatterns = [
     path('about/', shop.views.about, name='about'),
     path('contact/', shop.views.contact, name='contact'),
 
-
     # Promoter
     path('promoter/account/create/', signup_view_promoter, name='signup_promoter'),
     path('promoter/account/login/', signin_view_promoter, name='signin_promoter'),

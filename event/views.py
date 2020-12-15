@@ -23,7 +23,7 @@ def order_promoter(request):
             orders = paginator.page(page)
         except (EmptyPage, InvalidPage):
             orders = paginator.page(paginator.num_pages)
-        return render(request, 'orders_promoter.html', {'orders': orders})
+        return render(request, 'orders_list.html', {'orders': orders})
 
 
 @login_required
@@ -31,7 +31,7 @@ def events_promoter(request):
     if request.user.is_authenticated:
         promoter = request.user.promoter.id
         events = Event.objects.filter(promoter=promoter)
-        return render(request, 'events_promoter.html', {'events': events})
+        return render(request, 'events_list.html', {'events': events})
     else:
         return render(request, 'accounts/signin_promoter.html')
 
@@ -87,7 +87,7 @@ def new_events(request):
             return redirect('events_promoter')
     else:
         form = NewEvent()
-    return render(request, 'new_event.html', {'form': form})
+    return render(request, 'event_create.html', {'form': form})
 
 
 def update_event(request, event_id):
@@ -96,7 +96,7 @@ def update_event(request, event_id):
     if form.is_valid():
         form.save()
         return redirect('events_promoter')
-    return render(request, 'new_event.html', {'form': form})
+    return render(request, 'event_create.html', {'form': form})
 
 
 def remove_event(request, event_id):
