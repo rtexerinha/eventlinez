@@ -113,7 +113,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 shippingCity=shippingcity,
                 shippingPostcode=shipping_postcode,
                 shippingCountry=shipping_country,
-                # promoter=promoter
+                customer=request.user.customer
             )
             for order_item in cart_items:
                 oi = OrderItem(
