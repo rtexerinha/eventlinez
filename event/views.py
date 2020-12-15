@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from event.forms import NewEvent, UpdateEvent
-from event.models import Event
+from event.models import Event, Ticket
 from order.models import Order
 
 
@@ -36,14 +36,25 @@ def events_promoter(request):
         return render(request, 'accounts/signin_promoter.html')
 
 
-def order_per_events(request):
+# List all tickets
+def tickets_promoter(request):
     if not request.user.is_authenticated:
         return render(request, 'accounts/signin_promoter.html')
     else:
-        promoter = request.user.promoter.id
-        events = Event.objects.filter(promoter=promoter)
-        orders = Order.objects.filter(event=events)
-        return render(request, 'events_promoter.html', {'order_details': orders})
+        promoter = request.user.promoter
+        tickets = Ticket.objects.filter(event__promoter=promoter)
+        return render(request, 'ticket_list.html', {'tickets': tickets})
+
+
+# List Tickets per events
+def tickets_events(request, event_id):
+    if not request.user.is_authenticated:
+        return render(request, 'accounts/signin_promoter.html')
+    else:
+        # promoter = request.user.promoter.id
+        # event = get_object_or_404(Event, id=event_id)
+        tickets = Ticket.objects.filter(event_id=event_id)
+        return render(request, 'ticket_list.html', {'tickets': tickets})
 
 
 def new_events(request):
