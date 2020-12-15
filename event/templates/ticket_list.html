@@ -1,0 +1,40 @@
+{% extends "base_promoter.html" %}
+
+{% block title %} Panel Admin - Events{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+    <main>
+        <div class="container-fluid">
+                <h1 class="mt-4 title-dast">Tickets</h1>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                                <tr style="background-color:#F4F4F4;">
+                                    <th class="text-table text-bold">Num</th>
+                                    <th class="text-table text-bold">Created</th>
+                                    <th class="text-table text-bold">Event</th>
+                                    <th class="text-table text-bold">Customer</th>
+                                    <th class="text-table text-bold">Order</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for ticket in tickets %}
+                                <tr>
+                                    <td class="text-table">Num Ticket</td>
+                                    <td class="text-table">Created_at</td>
+                                    <td class="text-table">Event</td>
+                                    <td class="text-table">Customer</td>
+                                    <td class="text-table">Order</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+        </div>
+    </main>
+
+{% endblock content %}
