@@ -6,57 +6,89 @@
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-    <main>
-        <div class="container-fluid">
-                <h1 class="mt-4 title-dast">Tickets</h1>
+<main>
+    <div class="container-fluid">
+        <h1 class="mt-4 title-dast">Tickets</h1>
 
-                            <div class="row">
-                <div class="col-lg-5 col-md-5"></div>
-                <div class="col-lg-7 col-md-7 div-adm-newevent">
-                    <form class="form-search col-lg-9 col-md-9 col-sm-8 col-xl-8"
-                          action="{% url 'shop:search' %}"
-                          method="get">
-                        {% csrf_token %}
-                        <input class="input-search-adm col-11 col-sm-11 col-md-10 col-lg-10 col-xl-11"
-                               type="search"
-                               placeholder="Search"
-                               aria-label="Search"
-                               name="q">
-                    </form>
+        <header class="row">
+            <div class="col-lg-5 col-md-5"></div>
+            <div class="col-lg-7 col-md-7 div-adm-newevent">
+                <form class="form-search col-lg-9 col-md-9 col-sm-8 col-xl-8"
+                      action="{% url 'shop:search' %}"
+                      method="get">
+                    {% csrf_token %}
+                    <input class="input-search-adm col-11 col-sm-11 col-md-10 col-lg-10 col-xl-11"
+                           type="search"
+                           placeholder="Search"
+                           aria-label="Search"
+                           name="q">
+                </form>
 
-                    <a href="{%  url 'tickets_csv' %}"
-                       id="button-adm"
-                       style="height: 40px;text-decoration: none; border: #d90075;">
-                        Export
-                    </a>
-                </div>
+                <a href="{%  url 'tickets_csv' %}"
+                   id="button-adm"
+                   style="height: 40px;text-decoration: none; border: #d90075;">
+                    Export
+                </a>
             </div>
+        </header>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="dataTable">
-                            <thead>
-                                <tr style="background-color:#F4F4F4;">
-                                    <th class="text-table text-bold">Num</th>
-                                    <th class="text-table text-bold">Event</th>
-                                    <th class="text-table text-bold">Created</th>
-                                    <th class="text-table text-bold">Customer</th>
-                                    <th class="text-table text-bold">Order</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for ticket in tickets %}
-                                <tr>
-                                    <td class="text-table">{{ticket.id}}</td>
-                                    <td class="text-table">{{ticket.event}}</td>
-                                    <td class="text-table">{{ticket.created_at}}</td>
-                                    <td class="text-table">{{ticket.customer}}</td>
-                                    <td class="text-table">{{ ticket.order_item_id }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-        </div>
-    </main>
+        <section class="table-responsive">
+            <table class="table table-bordered" id="dataTable">
+                <thead>
+                    <tr style="background-color:#F4F4F4;">
+                        <th class="text-table text-bold">Num</th>
+                        <th class="text-table text-bold">Event</th>
+                        <th class="text-table text-bold">Created</th>
+                        <th class="text-table text-bold">Customer</th>
+                        <th class="text-table text-bold">Order</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for ticket in tickets %}
+                    <tr>
+                        <td class="text-table">{{ticket.id}}</td>
+                        <td class="text-table">{{ticket.event}}</td>
+                        <td class="text-table">{{ticket.created_at}}</td>
+                        <td class="text-table">{{ticket.customer}}</td>
+                        <td class="text-table">{{ ticket.order_item_id }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section class="col-12 mb-5">
+            {% if tickets.paginator.num_pages > 1 %}
+            <div class="row row-paginator">
+                <div class="col-lg-3 col-5">
+                    <span class="text-table" >
+                        Showing {{ tickets.number }} - {{ tickets.paginator.num_pages }}
+                    </span>
+                </div>
+
+                <div class="col-lg-6"></div>
+                <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
+                    {% if tickets.has_previous %}
+                    <a class="text-table text pr-3"
+                       href="?page={{ tickets.previous_page_number }}">
+                        <i class="fas fa-chevron-left fa-sm" style="color: #d90075; height: 10px; width: 10px"></i>
+                        Prev
+                    </a>
+                    {% endif %}
+
+                    {% if tickets.has_next %}
+                    <a class="text-table text"
+                       href="?page={{ tickets.next_page_number }}">
+                        Next
+                        <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+            </div>
+        </section>
+    </div>
+</main>
 
 {% endblock content %}
