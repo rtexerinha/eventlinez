@@ -1,9 +1,11 @@
 import csv
 
-import xlwt
+import xlsxwriter
+from io import BytesIO
+# import xlwt
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from event.forms import NewEvent, UpdateEvent
@@ -142,36 +144,36 @@ def tickets_csv(request):
     return resp
 
 
-@login_required(login_url='/promoter/account/login/')
+def get_foo_table_data():
+    """
+    Some table data
+    """
+    return [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9],
+    ]
+
+
 def tickets_excel(request):
-    response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="tickets.xls"'
 
-    wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Tickets')
-
-    # Sheet header, first row
-    row_num = 0
-
-    font_style = xlwt.XFStyle()
-    font_style.font.bold = True
-
-    columns = ['Num', 'Event', 'Customer', 'Order']
-
-    for col_num in range(len(columns)):
-        ws.write(row_num, col_num, columns[col_num], font_style)
-
-    # Sheet body, remaining rows
-    font_style = xlwt.XFStyle()
+    output = BytesIO()
+    book = xlsxwriter.Workbook(output)
+    sheet = book.add_worksheet("Tickets List")
     promoter = request.user.promoter
-    rows = Ticket.objects.filter(event__promoter=promoter).values_list('id',
-                                                                       'event__name',
-                                                                       'customer__first_name',
-                                                                       'order_item_id')
-    for row in rows:
-        row_num += 1
-        for col_num in range(len(row)):
-            ws.write(row_num, col_num, row[col_num], font_style)
+    tickets = Ticket.objects.filter(event__promoter=promoter).values_list('id',
+                                                                          'event__name',
+                                                                          'customer__first_name',
+                                                                          'order_item_id')
 
-    wb.save(response)
+    for row, columns in enumerate(tickets):
+        for column, cell_data in enumerate(columns):
+            sheet.write(row, column, cell_data)
+
+    book.close()  # close book and save it in "output"
+    output.seek(0)  # seek stream on begin to retrieve all data from it
+    response = StreamingHttpResponse(
+        output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=tickets.xlsx'
     return response
