@@ -108,7 +108,6 @@ def remove_event(request, event_id):
 def export_orders_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="orders.csv"'
-
     writer = csv.writer(response)
     writer.writerow(['Order', 'Customer', 'Email', 'Date', 'Total'])
 
@@ -118,3 +117,20 @@ def export_orders_csv(request):
         writer.writerow(list_order)
 
     return response
+
+
+def tickets_csv(request):
+    resp = HttpResponse(content_type='text/csv')
+    resp['Content-Disposition'] = 'attachment; filename="tickets.csv"'
+    writer_ticket = csv.writer(resp)
+    writer_ticket.writerow(['Num', 'Event', 'Created', 'Customer', 'Order'])
+    promoter = request.user.promoter
+    tickets = Ticket.objects.filter(event__promoter=promoter).values_list('id',
+                                                                          'event__name',
+                                                                          'created_at',
+                                                                          'customer__first_name',
+                                                                          'order_item_id')
+
+    for ticket_list in tickets:
+        writer_ticket.writerow(ticket_list)
+    return resp
