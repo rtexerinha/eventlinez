@@ -4,57 +4,45 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-
 from event.forms import NewEvent, UpdateEvent
 from event.models import Event, Ticket
 from order.models import Order
 
 
+@login_required(login_url='account/login/')
 def order_promoter(request):
-    # TODO: Verifica possibilidade de simplificar código sobre login
-    if not request.user.is_authenticated:
-        return redirect('signin_promoter')
-    else:
-        promoter = request.user.promoter
-        orders = Order.objects.filter(orderitem__event__promoter=promoter)
-        paginator = Paginator(orders, 8)
-        page = int(request.GET.get('page', '1'))
-        try:
-            orders = paginator.page(page)
-        except (EmptyPage, InvalidPage):
-            orders = paginator.page(paginator.num_pages)
-        return render(request, 'orders_list.html', {'orders': orders})
+    promoter = request.user.promoter
+    orders = Order.objects.filter(orderitem__event__promoter=promoter)
+    paginator = Paginator(orders, 8)
+    page = int(request.GET.get('page', '1'))
+    try:
+        orders = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        orders = paginator.page(paginator.num_pages)
+    return render(request, 'orders_list.html', {'orders': orders})
 
 
-@login_required
+@login_required(login_url='/promoter/account/login/')
 def events_promoter(request):
-    if request.user.is_authenticated:
-        promoter = request.user.promoter.id
-        events = Event.objects.filter(promoter=promoter)
-        return render(request, 'events_list.html', {'events': events})
-    else:
-        return render(request, 'accounts/signin_promoter.html')
+    promoter = request.user.promoter.id
+    events = Event.objects.filter(promoter=promoter)
+    return render(request, 'events_list.html', {'events': events})
 
 
-# List all tickets
+@login_required(login_url='/promoter/account/login/')
 def tickets_list(request):
-    if not request.user.is_authenticated:
-        return render(request, 'accounts/signin_promoter.html')
-    else:
-        promoter = request.user.promoter
-        tickets = Ticket.objects.filter(event__promoter=promoter)
-        return render(request, 'ticket_list.html', {'tickets': tickets})
+    promoter = request.user.promoter
+    tickets = Ticket.objects.filter(event__promoter=promoter)
+    return render(request, 'ticket_list.html', {'tickets': tickets})
 
 
-# List Tickets per events
+@login_required(login_url='/promoter/account/login/')
 def tickets_list_events(request, event_id):
-    if not request.user.is_authenticated:
-        return render(request, 'accounts/signin_promoter.html')
-    else:
-        tickets = Ticket.objects.filter(event_id=event_id)
-        return render(request, 'ticket_list.html', {'tickets': tickets})
+    tickets = Ticket.objects.filter(event_id=event_id)
+    return render(request, 'ticket_list.html', {'tickets': tickets})
 
 
+@login_required(login_url='/promoter/account/login/')
 def new_events(request):
     promoter = request.user.promoter
     if request.method == 'POST':
@@ -90,6 +78,7 @@ def new_events(request):
     return render(request, 'event_create.html', {'form': form})
 
 
+@login_required(login_url='/promoter/account/login/')
 def update_event(request, event_id):
     instance = get_object_or_404(Event, id=event_id)
     form = UpdateEvent(request.POST or None, instance=instance)
@@ -99,12 +88,14 @@ def update_event(request, event_id):
     return render(request, 'event_create.html', {'form': form})
 
 
+@login_required(login_url='/promoter/account/login/')
 def remove_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     event.delete()
     return redirect('events_promoter')
 
 
+@login_required(login_url='/promoter/account/login/')
 def export_orders_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="orders.csv"'
@@ -119,6 +110,7 @@ def export_orders_csv(request):
     return response
 
 
+@login_required(login_url='/promoter/account/login/')
 def tickets_csv(request):
     resp = HttpResponse(content_type='text/csv')
     resp['Content-Disposition'] = 'attachment; filename="tickets.csv"'
