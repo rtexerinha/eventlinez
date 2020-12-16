@@ -350,6 +350,11 @@
     line-height: 20px;
 }
 
+.footer-subtitle:hover{
+    color: #d90075;
+    text-decoration: #d90075;
+}
+
 #wrapper {
     width: 100%;
     max-width: 90vw;
@@ -1504,39 +1509,27 @@ div.content-right-signin {
     transition:color 0.2s;
 }
 
-#myFooter .fa-facebook:hover{
-   color: #2b55ff;
+#myFooter .fa-facebook-b:hover{
+    color: #d90075;
+    text-decoration: #d90075;
 }
 
 #myFooter .fa-facebook:focus{
-    color: #2b55ff;
+    color: #d90075;
 }
 
 #myFooter .fa-instagram:hover{
-    color:purple;
+    color:#d90075;
+    text-decoration: #d90075;
 }
 
 #myFooter .fa-instagram:focus{
-    color:purple;
+    color: #d90075;
 }
-
-#myFooter .fa-youtube:hover{
-    color:red;
-}
-
-#myFooter .fa-youtube:focus{
-    color:red;
-}
-
-#myFooter .fa-twitter:hover{
-    color: #00aced;
-
-}
-
 
 #myFooter{
    flex: 0 0 auto;
    -webkit-flex: 0 0 auto;
     background: #312046;
-    height: 180px;
+    height: 200px;
 }
