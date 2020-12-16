@@ -1,15 +1,31 @@
-<footer class="container-footer">
-    <h4 class="footer-text footer-title">
-        Eventlinez.
-    </h4>
-	<p class="footer-text footer-subtitle">Live the moment</p>
-    <p class="footer-text footer-subtitle">How it works</p>
-    <a href="{% url 'about' %}" class="footer-text footer-subtitle link-to-about">
-        About us
-    </a>
+<footer id="myFooter">
+        <div class="container">
+            <ul>
+                <li><a class="footer-text footer-subtitle" href="#">Live the moment</a></li>
+                <li>
+                    <a href="{% url 'about' %}"
+                       class="footer-text footer-subtitle link-to-about">
+                        About us
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'contact' %}" class="footer-text footer-subtitle link-to-about">
+                        Contact us
+                    </a>
+                </li>
 
-    <a href="{% url 'contact' %}" class="footer-text footer-subtitle link-to-about">
-        Contact us
-    </a>
+            </ul>
 
-</footer>
+            <div class="footer-social">
+            <a href="https://www.instagram.com/eventlinez/" class="social-icons">
+                <i class="fab fa-facebook-f" style="color: #FFFFFF;"></i>
+            </a>
+            <a href="https://www.instagram.com/eventlinez/" class="social-icons" style="margin-left: 30px; color: #FFFFFF;">
+                <i class="fab fa-instagram"></i>
+            </a>
+        </div>
+
+        </div>
+        <p class="footer-copyright">© 2020 Copyright - Vortex</p>
+    </footer>
+
