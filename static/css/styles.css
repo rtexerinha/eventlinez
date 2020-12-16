@@ -866,6 +866,14 @@ div.content-right-signin {
     text-align: left;
 }
 
+@media (max-width:400px) {
+    .subtitle-signup-promoter {
+        margin-top: 0;
+         font-size: 1.4rem!important;
+        line-height: 36px !important;
+    }
+}
+
 @media (max-width:600px) {
     .subtitle-signup {
         margin-top: 30px;
