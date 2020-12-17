@@ -36,7 +36,7 @@ def events_promoter(request):
 @login_required(login_url='/promoter/account/login/')
 def tickets_list(request):
     promoter = request.user.promoter
-    tickets = Ticket.objects.filter(event__promoter=promoter)
+    tickets = Ticket.objects.filter(event__promoter=promoter).order_by('-id')
     paginator = Paginator(tickets, 12)
     page = int(request.GET.get('page', '1'))
     try:
