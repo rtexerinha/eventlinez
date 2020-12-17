@@ -29,7 +29,7 @@ urlpatterns = [
     path('promoter/account/create/', signup_view_promoter, name='signup_promoter'),
     path('promoter/account/login/', signin_view_promoter, name='signin_promoter'),
     path('promoter/account/logout/', signout_view_promoter, name='signout_promoter'),
-    path('promoter/', order_promoter, name='order_promoter'),
+    path('promoter/', events_promoter, name='order_promoter'),
     path('promoter/export/', export_orders_csv, name='export_orders'),
 
     path('promoter/ticket/', tickets_list, name='ticket_list'),
