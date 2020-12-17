@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import SignUpForm, SignInForm, SignUpFormPromoter
-# from django.contrib.auth.models import User
+from .forms import SignUpForm, SignInForm, SignUpFormPromoter, SignInPromoterForm
 import logging
 
 from django.contrib.auth import login, authenticate, logout
@@ -40,7 +39,7 @@ def signup_view(request):
 
 def signin_view_promoter(request):
     if request.method == 'POST':
-        form = SignInForm(data=request.POST)
+        form = SignInPromoterForm(data=request.POST)
         if form.is_valid():
             username = request.POST['username']
             password = request.POST['password']
@@ -51,7 +50,7 @@ def signin_view_promoter(request):
             else:
                 return redirect('signup_promoter')
     else:
-        form = SignInForm()
+        form = SignInPromoterForm()
     return render(request, 'accounts/signin_promoter.html', {'form': form})
 
 

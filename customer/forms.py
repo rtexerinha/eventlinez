@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UsernameField
 from django.contrib.auth.models import User
-# from django.contrib.auth import password_validation
+
 
 from customer.models import Customer
 from event.models import Promoter
@@ -124,3 +124,18 @@ class SignUpForm(forms.Form):
 
 class SignInForm(AuthenticationForm):
     username = UsernameField(label="Email", widget=forms.EmailInput())
+
+
+class SignInPromoterForm(AuthenticationForm):
+    username = UsernameField(label="Email", widget=forms.EmailInput())
+
+    def clean(self):
+        super(SignInPromoterForm, self).clean()
+        try:
+            promoter = self.user_cache.promoter
+        except Promoter.DoesNotExist:
+            raise ValidationError(
+                "The user is not a Promoter",
+                code='non_promoter'
+            )
+        return self.cleaned_data
