@@ -61,9 +61,9 @@ def signin_view(request):
         if form.is_valid():
             username = request.POST['username']
             password = request.POST['password']
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
+            customer = authenticate(username=username, password=password)
+            if customer is not None:
+                login(request, customer)
                 return redirect('shop:index')
             else:
                 return redirect('signup')
