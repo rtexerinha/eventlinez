@@ -13,7 +13,7 @@ from event.models import Event, Ticket
 from order.models import Order
 
 
-@login_required(login_url='account/login/')
+@login_required(login_url='/promoter/account/login/')
 def order_promoter(request):
     promoter = request.user.promoter
     orders = Order.objects.filter(orderitem__event__promoter=promoter)

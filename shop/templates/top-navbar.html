@@ -18,11 +18,15 @@
                     </a>
                 {% endif %}
             {% if request.user.promoter %}
-                <a class="link-nav link-right nav__link" style="color: #d90075" href="{% url 'order_promoter' %}">
+                <a class="link-nav link-right nav__link"
+                   style="color: #d90075;margin-left: auto;"
+                   href="{% url 'order_promoter' %}">
                 Panel Admin
                 </a>
 
-                 <a class="link-nav nav__link" href="{% url 'signout' %}">Sign Out
+                 <a class="link-nav nav__link"
+                    style="margin-left: 0;"
+                    href="{% url 'signout' %}">Sign Out
                     <i class="fas fa-sign-out-alt" id="icons-space-left"></i>
                 </a>
             {% else %}
