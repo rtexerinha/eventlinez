@@ -67,7 +67,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
     stripe_total = int(total * 100)
-    description = 'New Order'
+
     data_key = settings.STRIPE_PUBLISHABLE_KEY
     if request.method == 'POST':
         token = request.POST['stripeToken']
@@ -82,10 +82,11 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
         shippingcity = request.POST['stripeShippingAddressCity']
         shipping_postcode = request.POST['stripeShippingAddressZip']
         shipping_country = request.POST['stripeShippingAddressCountryCode']
-        # promoter = request.POST['promoter']
+
         try:
             customer = stripe.Customer.create(email=email, source=token)
             logger.info("create customer")
+            description = 'New Order'
             charge = stripe.Charge.create(
                 amount=stripe_total,
                 currency="usd",
@@ -93,7 +94,6 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                 customer=customer.id
             )
         except stripe.error.CardError as err:
-            # return HttpResponse(status=400, content=err.user_message)
             content = err.user_message
             return render(request, 'order/error_cart.html', {'content': content})
         logger.info("Creating the order")
@@ -124,16 +124,21 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
                     order=order
                 )
                 logger.info("The order has been created")
+
+            # Updates the stripe payment title
+            charge.description = "%s (Order #%s)" % (cart_items.first().event.name, order.id)
+            charge.save()
+
             cart.delete()
             send_mail.delay(order.id)
             return redirect('order:thanks', order.id)
         except ObjectDoesNotExist:
             return HttpResponse(status=400, content="Page errada")
+
     return render(request, 'cart.html', dict(cart_items=cart_items,
                                              total=total, counter=counter,
                                              data_key=data_key,
-                                             stripe_total=stripe_total,
-                                             description=description))
+                                             stripe_total=stripe_total))
 
 
 def cart_remove(request, event_id):
