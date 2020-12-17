@@ -77,11 +77,12 @@ class OrderItem(models.Model):
 
 @receiver(post_save, sender=OrderItem)
 def create_tickets(sender, instance, **kwargs):
-    ticket = Ticket.objects.create(
-        event=instance.event,
-        customer=instance.order.customer,
-        order_item=instance,
-    )
+    for i in range(0, instance.quantity):
+        ticket = Ticket.objects.create(
+            event=instance.event,
+            customer=instance.order.customer,
+            order_item=instance,
+        )
 
-    ticket.event.stock = ticket.event.stock - 1
-    ticket.event.save()
+        ticket.event.stock = ticket.event.stock - 1
+        ticket.event.save()
