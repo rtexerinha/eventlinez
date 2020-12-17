@@ -2,7 +2,7 @@ import csv
 
 import xlsxwriter
 from io import BytesIO
-# import xlwt
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import HttpResponse, StreamingHttpResponse
@@ -60,34 +60,12 @@ def tickets_list_events(request, event_id):
 
 @login_required(login_url='/promoter/account/login/')
 def new_events(request):
-    promoter = request.user.promoter
     if request.method == 'POST':
         form = NewEvent(request.POST, request.FILES)
         if form.is_valid():
-            name = form.cleaned_data['name']
-            unit_price = form.cleaned_data['unit_price']
-            stock = form.cleaned_data['stock']
-            category = form.cleaned_data['category']
-            description = form.cleaned_data['description']
-            event_date = form.cleaned_data['event_date']
-            event_address = form.cleaned_data['event_address']
-            image = form.cleaned_data['image']
-            available = form.cleaned_data['available']
-
-            events = Event.objects.create(
-                name=name,
-                unit_price=unit_price,
-                stock=stock,
-                category=category,
-                description=description,
-                event_date=event_date,
-                promoter=promoter,
-                event_address=event_address,
-                image=image,
-                available=available,
-            )
+            events = Event(**form.cleaned_data)
+            events.promoter = request.user.promoter
             events.save()
-            print(events)
             return redirect('events_promoter')
     else:
         form = NewEvent()

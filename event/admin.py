@@ -15,15 +15,13 @@ class PromoterAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['name', 'unit_price', 'stock', 'event_address', 'available', 'event_date', 'promoter']
-    # list_editable = ['price', 'stock', 'available']
+    list_display = ['name', 'unit_price', 'stock', 'available', 'event_date', 'promoter']
     prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     list_display = ['created_at']
-    # list_editable = ['price', 'stock', 'available']
 
     def has_delete_permission(self, request, obj=None):
         return False

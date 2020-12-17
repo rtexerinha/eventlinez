@@ -52,7 +52,7 @@ class Event(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     event_date = models.DateTimeField(null=True, blank=True)
-    event_address = models.ForeignKey(Address, blank=True, null=True, on_delete=models.PROTECT)
+    address = models.CharField(max_length=300)
     promoter = models.ForeignKey(Promoter, on_delete=models.PROTECT)
     image = models.ImageField(upload_to='event', blank=False, null=False)
     thumbnail = ImageSpecField(source='image',
