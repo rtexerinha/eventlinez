@@ -21,7 +21,7 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ['created_at']
+    list_display = ['event', 'created_at']
 
     def has_delete_permission(self, request, obj=None):
         return False
