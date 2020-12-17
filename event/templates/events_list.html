@@ -37,6 +37,7 @@
                             <thead>
                                 <tr style="background-color:#F4F4F4;">
                                     <th class="text-table text-bold">Event</th>
+                                    <th class="text-table text-bold">Date</th>
                                     <th class="text-table text-bold">Price</th>
                                     <th class="text-table text-bold">Tickets Sold</th>
                                     <th></th>
@@ -50,6 +51,7 @@
                                             {{ events.name }}
                                         </a>
                                     </td>
+                                    <td class="text-table">{{ events.event_date|date:'Y-m-d H:i' }}</td>
                                     <td class="text-table">{{ events.unit_price }}</td>
                                     <td class="text-table">{{ events.stock }}</td>
                                     <td colspan="3">
