@@ -6,3 +6,4 @@ stripe
 pillow
 sentry-sdk
 celery[redis]
+xlsxwriter
