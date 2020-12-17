@@ -1,6 +1,14 @@
 from django.forms import ModelForm, DateTimeField, widgets
 
 from event.models import Category, Event
+from address.models import City
+
+
+# TODO: Move this to address app
+class CityForm(ModelForm):
+    class Meta:
+        model = City
+        fields = ['name']
 
 
 class NewCategory(ModelForm):

@@ -6,7 +6,7 @@ from django.urls import reverse
 from ckeditor.fields import RichTextField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
-from address.models import Address
+from address.models import City
 from django.contrib.auth.models import User
 
 from customer.models import Customer
@@ -53,6 +53,7 @@ class Event(models.Model):
     updated = models.DateTimeField(auto_now=True)
     event_date = models.DateTimeField(null=True, blank=True)
     address = models.CharField(max_length=300)
+    city = models.ForeignKey(City, on_delete=models.PROTECT, null=True)
     promoter = models.ForeignKey(Promoter, on_delete=models.PROTECT)
     image = models.ImageField(upload_to='event', blank=False, null=False)
     thumbnail = ImageSpecField(source='image',
