@@ -21,7 +21,7 @@ def index(request, c_slug=None):
         c_page = get_object_or_404(Category, slug=c_slug)
         products_list = Event.objects.filter(category=c_page, available=True)
     else:
-        products_list = Event.objects.all().filter(available=True)
+        products_list = Event.objects.all().filter(available=True).order_by('-created')
     paginator = Paginator(products_list, 8)
     try:
         page = int(request.GET.get('page', '1'))
