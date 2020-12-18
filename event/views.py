@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.translation import ugettext
 
 from event.forms import NewEvent, UpdateEvent
 from event.models import Event, Ticket
@@ -122,36 +123,48 @@ def tickets_csv(request):
     return resp
 
 
-def get_foo_table_data():
-    """
-    Some table data
-    """
-    return [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9],
-    ]
-
-
 def tickets_excel(request):
-
     output = BytesIO()
+    response = StreamingHttpResponse(
+        output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=tickets.xlsx'
+
     book = xlsxwriter.Workbook(output)
     sheet = book.add_worksheet("Tickets List")
-    promoter = request.user.promoter
-    tickets = Ticket.objects.filter(event__promoter=promoter).values_list('id',
-                                                                          'event__name',
-                                                                          'customer__first_name',
-                                                                          'order_item_id')
+    sheet.set_tab_color('#FF9900')  # Orange
 
-    for row, columns in enumerate(tickets):
-        for column, cell_data in enumerate(columns):
-            sheet.write(row, column, cell_data)
+    # Styles
 
-    book.close()  # close book and save it in "output"
-    output.seek(0)  # seek stream on begin to retrieve all data from it
-    response = StreamingHttpResponse(
-        output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename=tickets.xlsx'
+    title = book.add_format({'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter'})
+    tthead = book.add_format({'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter',
+                              'color': '#171717', 'bg_color': '#F4F4F4'})
+    tbody = book.add_format({'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF', 'bottom': 1})
+
+    tbody.set_bottom_color('#dee2e6')
+
+    title.set_font_name('Arial')
+    sheet.set_column('B:B', 40)
+    sheet.set_column('C:D', 20)
+    sheet.merge_range('A2:D2', u"{0}".format(ugettext("Tickets Sold")), title)
+
+    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).values_list('id',
+                                                                                       'event__name',
+                                                                                       'created_at',
+                                                                                       'customer__first_name'
+                                                                                       ).order_by('-id')
+
+    row_num = 2
+    columns = ['ID', 'Event', 'created_at', 'Customer']
+    for col_num in range(len(columns)):
+        sheet.write(row_num, col_num, columns[col_num], tthead)
+
+    for idx, data in enumerate(tickets):
+        row = 3 + idx
+        sheet.write_number(row, 0, data[0], tbody)
+        sheet.write_string(row, 1, data[1], tbody)
+        sheet.write(row, 2, data[2].strftime('%Y-%m-%d %H:%M'), tbody)
+        sheet.write_string(row, 3, data[3], tbody)
+
+    book.close()
+    output.seek(0)
     return response
