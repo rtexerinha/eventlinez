@@ -16,7 +16,7 @@ from order.models import Order
 @login_required(login_url='/promoter/account/login/')
 def order_promoter(request):
     promoter = request.user.promoter
-    orders = Order.objects.filter(orderitem__event__promoter=promoter)
+    orders = Order.objects.filter(orderitem__event__promoter=promoter).order_by('-id')
     paginator = Paginator(orders, 8)
     page = int(request.GET.get('page', '1'))
     try:
@@ -29,7 +29,7 @@ def order_promoter(request):
 @login_required(login_url='/promoter/account/login/')
 def events_promoter(request):
     promoter = request.user.promoter.id
-    events = Event.objects.filter(promoter=promoter)
+    events = Event.objects.filter(promoter=promoter).order_by('-created')
     return render(request, 'events_list.html', {'events': events})
 
 
@@ -48,7 +48,7 @@ def tickets_list(request):
 
 @login_required(login_url='/promoter/account/login/')
 def tickets_list_events(request, event_id):
-    tickets = Ticket.objects.filter(event_id=event_id)
+    tickets = Ticket.objects.filter(event_id=event_id).order_by('-id')
     paginator = Paginator(tickets, 6)
     page = int(request.GET.get('page', '1'))
     try:
