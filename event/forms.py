@@ -1,7 +1,10 @@
-from django.forms import ModelForm, DateTimeField, widgets
+from datetimepicker import widgets
+from django.forms import ModelForm, DateTimeField
 
 from event.models import Category, Event
 from address.models import City
+
+# from datetimepicker.widgets import DateTimePicker
 
 
 # TODO: Move this to address app
@@ -19,9 +22,9 @@ class NewCategory(ModelForm):
 
 class NewEvent(ModelForm):
     event_date = DateTimeField(
-        input_formats=["%Y-%m-%d %H:%M:%S"],
-        widget=widgets.DateTimeInput(attrs={'type': 'datetime-local'})
-    )
+        input_formats=['%d/%m/%Y %H:%M'],
+        widget=widgets.DateTimeInput(attrs={'id': 'datetimepicker', 'class': 'form_datetime'}))
+    # event_date = DateTimeField(widget=DateTimePicker(attrs={'class': 'form_datetime'}))
 
     class Meta:
         model = Event
