@@ -136,7 +136,7 @@ def cart_detail(request, total=0, counter=0, cart_items=None):
             return HttpResponse(status=400, content="Page errada")
 
     return render(request, 'cart.html', dict(cart_items=cart_items,
-                                             total=total, counter=counter,
+                                             total=total,
                                              data_key=data_key,
                                              stripe_total=stripe_total))
 
