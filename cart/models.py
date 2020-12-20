@@ -15,6 +15,12 @@ class Cart(models.Model):
 	class Meta:
 		ordering = ['date_added']
 
+	def amount(self):
+		total = 0
+		for item in self.cartitem_set.all():
+			total += item.price_total()
+		return total
+
 	def __str__(self):
 		return self.cart_id
 

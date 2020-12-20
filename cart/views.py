@@ -1,5 +1,4 @@
 import logging
-from decimal import Decimal
 
 import stripe
 from django.contrib.auth.decorators import login_required
@@ -8,7 +7,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
-from local_settings import EVENTLINEZ_FEE
 from order.models import Order, OrderItem
 from order.tasks import send_mail
 from event.models import Event
@@ -53,14 +51,11 @@ def cart_add(request, event_id):
 
 
 @login_required
-def cart_detail(request, total=0, counter=0, cart_items=None):
+def cart_detail(request, total=0, cart_items=None):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_items = CartItem.objects.filter(cart=cart, active=True)
-        for cart_item in cart_items:
-            total += (((cart_item.event.unit_price * Decimal(EVENTLINEZ_FEE)) +
-                       cart_item.event.unit_price) * cart_item.quantity)
-            counter += cart_item.quantity
+        total = cart.amount()
     except Cart.DoesNotExist:
         logger.error("The cart doest not exist.")
         pass
