@@ -11,7 +11,9 @@ class SignUpFormTest(TestCase):
                 'last_name': 'Bezerra Nogueira',
                 'password1': 'qpp1p2o3po23',
                 'password2': 'qpp1p2o3po23',
-                'email': 'rafaelreuber@gmail.com'
+                'email': 'rafaelreuber@gmail.com',
+                'address': 'Rua A',
+                'cellphone': '9855445123'
                 }
         form = SignUpForm(data)
         self.assertTrue(form.is_valid())
