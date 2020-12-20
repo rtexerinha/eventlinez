@@ -9,27 +9,15 @@ from .models import OrderItem
 class OrderMailTest(TestCase):
 
     def setUp(self):
-        self.order = Order(
-            token="12",
-            total=123,
-            billingName="Rafael Reuber",
-            emailAddress="rafaelreuber@gmail.com",
-            billingAddress1="Rua A",
-            billingCity="Fortaleza",
-            billingPostcode="60326-901",
-            shippingCountry="BR",
-            shippingName="Rafael Reuber",
-            shippingAddress1="Rua A",
-            shippingCity="Fortaleza",
-            shippingPostcode="60326901",
-            payment_code="123"
-        )
-        self.order.save()
-        order_item1 = OrderItem(event="Event 1", quantity=1, price=100, order=self.order)
-        order_item2 = OrderItem(event="Event 2", quantity=1, price=50, order=self.order)
+        self.order = baker.make('order.Order', emailAddress="me@gmail.com")
+        event = baker.make('event.Event', description="foo", stock=2, unit_price=100)
 
-        order_item1.save()
-        order_item2.save()
+        with self.settings(EVENTLINEZ_FEE=0.10):
+            order_item1 = OrderItem(event=event, quantity=1, price=100, order=self.order)
+            order_item2 = OrderItem(event=event, quantity=1, price=100, order=self.order)
+
+            order_item1.save()
+            order_item2.save()
 
     def test_send_mail(self):
         self.order.send_notification()
