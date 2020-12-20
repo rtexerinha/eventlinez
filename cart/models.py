@@ -30,7 +30,11 @@ class CartItem(models.Model):
 		return self.event.unit_price * self.quantity
 
 	def fee(self):
-		return (self.event.unit_price * Decimal(EVENTLINEZ_FEE)) * self.quantity
+		"""
+		:return: Valor total da taxa
+		"""
+		fee = (self.event.unit_price * Decimal(EVENTLINEZ_FEE)) * self.quantity
+		return round(fee, 2)
 
 	def price_total(self):
 		return self.sub_total() + Decimal(self.fee())
