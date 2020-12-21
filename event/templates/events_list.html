@@ -40,8 +40,7 @@
                                     <th class="text-table text-bold">Date</th>
                                     <th class="text-table text-bold">Unit Price</th>
                                     <th class="text-table text-bold">Tickets Sold</th>
-                                    <th class="text-table text-bold">Qtd Tickets</th>
-                                    <th class="text-table text-bold">Amount Sold</th>
+                                    <th class="text-table text-bold">Amount</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -55,8 +54,7 @@
                                     </td>
                                     <td class="text-table">{{ events.event_date|date:'Y-m-d H:i' }}</td>
                                     <td class="text-table">{{ events.unit_price}}</td>
-                                    <td class="text-table">{{ events.sales_info.qtd_sould}}</td>
-                                    <td class="text-table">{{ events.sales_info.qtd_available}}</td>
+                                    <td class="text-table">{{ events.sales_info.qtd_sould}}/{{ events.sales_info.qtd_available}}</td>
                                     <td class="text-table">{{ events.sales_info.amount_sould}}</td>
 {#                                    <td class="text-table">{{ events.stock }}</td>#}
                                     <td colspan="3">
