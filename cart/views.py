@@ -51,13 +51,14 @@ def cart_add(request, event_id):
 
 
 @login_required
-def cart_detail(request, total=0, cart_items=None):
+def cart_detail(request, cart_items=None):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_items = CartItem.objects.filter(cart=cart, active=True)
         total = cart.amount()
     except Cart.DoesNotExist:
         logger.error("The cart doest not exist.")
+        total = 0
         pass
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -110,15 +111,17 @@ def cart_detail(request, total=0, cart_items=None):
                 shippingCountry=shipping_country,
                 customer=request.user.customer
             )
-            for order_item in cart_items:
+            for item in cart_items:
                 OrderItem.objects.create(
-                    event=order_item.event,
-                    quantity=order_item.quantity,
-                    price=order_item.event.unit_price,
-                    promo_code=order_item.promo_code,
+                    event=item.event,
+                    quantity=item.quantity,
+                    price=item.event.unit_price,
+                    amount=item.price_total(),
+                    fee=item.fee(),
+                    promo_code=item.promo_code,
                     order=order
                 )
-                logger.info("The order has been created")
+            logger.info("The order %s has been created" % str(order))
 
             # Updates the stripe payment title
             charge.description = "%s (Order #%s)" % (cart_items.first().event.name, order.id)
