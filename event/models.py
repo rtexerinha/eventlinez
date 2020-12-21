@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.db import models
+
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 from ckeditor.fields import RichTextField
@@ -71,6 +72,18 @@ class Event(models.Model):
         self.slug = slugify(self.name)
         super(Event, self).save(*args, **kwargs)
 
+    def sales_info(self):
+        result = self.ticket_set.all().aggregate(
+            amount_sould=models.Sum('price'),
+            qtd_sould=models.Count('price')
+        )
+        if not result['amount_sould']:
+            result['amount_sould'] = 0
+        if not result['qtd_sould']:
+            result['qtd_sould'] = 0
+        result['qtd_available'] = self.stock - result['qtd_sould']
+        return result
+
     @property
     def code_promo(self):
         return self
@@ -86,4 +99,5 @@ class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
     order_item = models.ForeignKey('order.OrderItem', on_delete=models.PROTECT)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
     created_at = models.DateTimeField(auto_now=True)

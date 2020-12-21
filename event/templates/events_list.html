@@ -38,8 +38,10 @@
                                 <tr style="background-color:#F4F4F4;">
                                     <th class="text-table text-bold">Event</th>
                                     <th class="text-table text-bold">Date</th>
-                                    <th class="text-table text-bold">Price</th>
+                                    <th class="text-table text-bold">Unit Price</th>
                                     <th class="text-table text-bold">Tickets Sold</th>
+                                    <th class="text-table text-bold">Qtd Tickets</th>
+                                    <th class="text-table text-bold">Amount Sold</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -52,18 +54,19 @@
                                         </a>
                                     </td>
                                     <td class="text-table">{{ events.event_date|date:'Y-m-d H:i' }}</td>
-                                    <td class="text-table">{{ events.unit_price }}</td>
-                                    <td class="text-table">{{ events.stock }}</td>
+                                    <td class="text-table">{{ events.unit_price}}</td>
+                                    <td class="text-table">{{ events.sales_info.qtd_sould}}</td>
+                                    <td class="text-table">{{ events.sales_info.qtd_available}}</td>
+                                    <td class="text-table">{{ events.sales_info.amount_sould}}</td>
+{#                                    <td class="text-table">{{ events.stock }}</td>#}
                                     <td colspan="3">
                                         <div style="display: flex; justify-content: center">
                                             <a id="button-adm" href="{% url 'ticket_list_events' events.id %}" >
                                                 Tickets
                                             </a>
-
                                             <a href="{% url 'update_event'  events.id%}" class="icon_remove_a">
                                                 <i style="padding-left: 15px; padding-top: 5px; color: #d90075" class="far fa-edit icon_remove"></i>
                                             </a>
-
                                             <a href="{% url 'remove_event'  events.id%}" class="icon_remove_a">
                                                 <i style="padding-left: 15px; padding-top: 5px; color: #d90075" class="fas fa-trash-alt icon_remove"></i>
                                             </a>

@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.core import mail
 from model_bakery import baker
 
-from .models import Order
 from .models import OrderItem
 
 
@@ -13,8 +12,8 @@ class OrderMailTest(TestCase):
         event = baker.make('event.Event', description="foo", stock=2, unit_price=100)
 
         with self.settings(EVENTLINEZ_FEE=0.10):
-            order_item1 = OrderItem(event=event, quantity=1, price=100, order=self.order)
-            order_item2 = OrderItem(event=event, quantity=1, price=100, order=self.order)
+            order_item1 = OrderItem(event=event, quantity=1, price=100, amount=100, fee=10, order=self.order)
+            order_item2 = OrderItem(event=event, quantity=1, price=100,  amount=100, fee=10, order=self.order)
 
             order_item1.save()
             order_item2.save()
@@ -29,25 +28,27 @@ class OrderMailTest(TestCase):
 class OrderTicketGeneration(TestCase):
 
     def test_create_order_item_should_create_a_ticket(self):
-        event = baker.make('event.Event', description="foo")
+        event = baker.make('event.Event', description="foo",  unit_price=50)
         event.save()
         order = baker.make('order.Order')
         order.save()
 
-        order_item1 = OrderItem(quantity=2, price=100, order=order, event=event)
-        order_item1.save()
+        with self.settings(EVENTLINEZ_FEE=0.10):
+            order_item1 = OrderItem(quantity=2, price=50, amount=100, fee=10,  order=order, event=event)
+            order_item1.save()
 
         from event.models import Ticket
         self.assertEqual(Ticket.objects.count(), 2)
 
     def test_create_order_should_decrease_ticket_quantity(self):
-        event = baker.make('event.Event', description="foo", stock=1)
+        event = baker.make('event.Event', description="foo", stock=1, unit_price=50)
         event.save()
         order = baker.make('order.Order')
         order.save()
 
-        order_item1 = OrderItem(quantity=1, price=100, order=order, event=event)
-        order_item1.save()
+        with self.settings(EVENTLINEZ_FEE=0.10):
+            order_item1 = OrderItem(quantity=1, price=100,  amount=100, fee=10, order=order, event=event)
+            order_item1.save()
 
         event.refresh_from_db()
         self.assertEqual(event.stock, 0)

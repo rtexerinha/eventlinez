@@ -1,7 +1,5 @@
-from decimal import Decimal
 
 from django.db import models
-from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.template.loader import render_to_string
 from django.db.models.signals import post_save
@@ -55,21 +53,14 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    quantity = models.IntegerField(validators=[MinValueValidator(0)])
     promo_code = models.CharField(max_length=10, null=True)
-    price = models.DecimalField(max_digits=10,
-                                decimal_places=2,
-                                verbose_name='GBP Price',
-                                validators=[MinValueValidator(0)])
+    quantity = models.IntegerField(validators=[MinValueValidator(0)])
+    fee = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
 
     def sub_total(self):
         return self.quantity * self.price
-
-    def fee(self):
-        return (self.price * Decimal(settings.EVENTLINEZ_FEE)) * self.quantity
-
-    def price_total(self):
-        return self.sub_total() + Decimal(self.fee())
 
     def __str__(self):
         return self.event.name
@@ -82,6 +73,7 @@ def create_tickets(sender, instance, **kwargs):
             event=instance.event,
             customer=instance.order.customer,
             order_item=instance,
+            price=instance.event.unit_price
         )
 
         ticket.event.stock = ticket.event.stock - 1
