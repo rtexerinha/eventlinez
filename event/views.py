@@ -125,6 +125,7 @@ def tickets_csv(request):
     return resp
 
 
+@login_required(login_url='/promoter/account/login/')
 def tickets_excel(request):
     output = BytesIO()
     response = StreamingHttpResponse(
@@ -135,27 +136,27 @@ def tickets_excel(request):
     sheet = book.add_worksheet("Tickets List")
     sheet.set_tab_color('#FF9900')  # Orange
 
-    # Styles
-    title = book.add_format({'bold': True,
-                             'font_size': 14,
-                             'align': 'center',
-                             'valign': 'vcenter',
-                             'font_name': 'Arial'})
-    tthead = book.add_format({'bold': True,
-                              'font_size': 10,
-                              'align': 'center',
-                              'valign': 'vcenter',
-                              'color': '#171717',
-                              'bg_color': '#F4F4F4',
-                              'font_name': 'Arial'})
-    event_style = book.add_format({'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF',
-                                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'})
-    tbody_style = book.add_format({'font_size': 10, 'align': 'center', 'color': '#171717', 'bg_color': '#FFFFFF',
-                                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'})
+    props_title = {'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter', 'font_name': 'Arial'}
 
-    money_format = book.add_format({'num_format': '$#,##0', 'font_size': 10, 'align': 'right', 'color': '#171717',
-                                    'bg_color': '#FFFFFF', 'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6',
-                                    'valign': 'vcenter'})
+    props_header = {'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter', 'color': '#171717',
+                    'bg_color': '#F4F4F4', 'font_name': 'Arial'}
+
+    props_price = {'num_format': '[$$-409]#,##0.00', 'font_size': 10, 'align': 'right', 'color': '#171717',
+                   'bg_color': '#FFFFFF', 'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6',
+                   'valign': 'vcenter'}
+
+    props_event = {'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF',
+                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'}
+
+    props_table = {'font_size': 10, 'align': 'center', 'color': '#171717', 'bg_color': '#FFFFFF',
+                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'}
+    # Styles
+    title = book.add_format(props_title)
+    tthead = book.add_format(props_header)
+    event_style = book.add_format(props_event)
+    tbody_style = book.add_format(props_table)
+    money_format = book.add_format(props_price)
+
     sheet.set_column('B:B', 40)
     sheet.set_column('D:E', 20)
     sheet.set_row(1, 25)
@@ -177,7 +178,7 @@ def tickets_excel(request):
         row = 2 + idx
         sheet.write_number(row, 0, data[0], tbody_style)
         sheet.write_string(row, 1, data[1], event_style)
-        sheet.write_number(row, 2, data[2], money_format)
+        sheet.write_number(row, 2, data[2], money_format, )
         sheet.write(row, 3, data[3].strftime('%Y-%m-%d %H:%M'), tbody_style)
         sheet.write_string(row, 4, data[4], tbody_style)
 
