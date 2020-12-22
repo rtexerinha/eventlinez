@@ -148,35 +148,42 @@ def tickets_excel(request):
                               'color': '#171717',
                               'bg_color': '#F4F4F4',
                               'font_name': 'Arial'})
-    tbody = book.add_format({'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF',
-                            'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'})
+    event_style = book.add_format({'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF',
+                                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'})
+    tbody_style = book.add_format({'font_size': 10, 'align': 'center', 'color': '#171717', 'bg_color': '#FFFFFF',
+                                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'})
 
+    money_format = book.add_format({'num_format': '$#,##0', 'font_size': 10, 'align': 'right', 'color': '#171717',
+                                    'bg_color': '#FFFFFF', 'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6',
+                                    'valign': 'vcenter'})
     sheet.set_column('B:B', 40)
-    sheet.set_column('C:D', 20)
-    sheet.set_row(1, 30)
+    sheet.set_column('D:E', 20)
+    sheet.set_row(1, 25)
     sheet.set_default_row(30)
-    sheet.merge_range('A2:D2', u"{0}".format(ugettext("Tickets Sold")), title)
+    sheet.merge_range('A1:E1', u"{0}".format(ugettext("Tickets Sold")), title)
     tickets = Ticket.objects.filter(event__promoter=request.user.promoter).values_list('id',
                                                                                        'event__name',
+                                                                                       'order_item__price',
                                                                                        'created_at',
                                                                                        'customer__first_name'
                                                                                        ).order_by('-id')
 
-    row_num = 2
-    columns = ['ID', 'Event', 'created_at', 'Customer']
+    row_num = 1
+    columns = ['Ticket', 'Event', 'Price', 'Date', 'Customer']
     for col_num in range(len(columns)):
         sheet.write(row_num, col_num, columns[col_num], tthead)
 
     for idx, data in enumerate(tickets):
-        row = 3 + idx
-        sheet.write_number(row, 0, data[0], tbody)
-        sheet.write_string(row, 1, data[1], tbody)
-        sheet.write(row, 2, data[2].strftime('%Y-%m-%d %H:%M'), tbody)
-        sheet.write_string(row, 3, data[3], tbody)
+        row = 2 + idx
+        sheet.write_number(row, 0, data[0], tbody_style)
+        sheet.write_string(row, 1, data[1], event_style)
+        sheet.write_number(row, 2, data[2], money_format)
+        sheet.write(row, 3, data[3].strftime('%Y-%m-%d %H:%M'), tbody_style)
+        sheet.write_string(row, 4, data[4], tbody_style)
 
     way = path.abspath("static")
     logo = path.join(way, 'img', 'logo.png')
-    sheet.merge_range('A1:D1',  sheet.insert_image('A1', logo))
+    sheet.insert_image('A1', logo)
 
     book.close()
     output.seek(0)
