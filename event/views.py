@@ -134,19 +134,26 @@ def tickets_excel(request):
     sheet.set_tab_color('#FF9900')  # Orange
 
     # Styles
+    title = book.add_format({'bold': True,
+                             'font_size': 14,
+                             'align': 'center',
+                             'valign': 'vcenter',
+                             'font_name': 'Arial'})
+    tthead = book.add_format({'bold': True,
+                              'font_size': 10,
+                              'align': 'center',
+                              'valign': 'vcenter',
+                              'color': '#171717',
+                              'bg_color': '#F4F4F4',
+                              'font_name': 'Arial'})
+    tbody = book.add_format({'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF',
+                            'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'})
 
-    title = book.add_format({'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter'})
-    tthead = book.add_format({'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter',
-                              'color': '#171717', 'bg_color': '#F4F4F4'})
-    tbody = book.add_format({'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF', 'bottom': 1})
-
-    tbody.set_bottom_color('#dee2e6')
-
-    title.set_font_name('Arial')
     sheet.set_column('B:B', 40)
     sheet.set_column('C:D', 20)
+    sheet.set_row(1, 30)
+    sheet.set_default_row(30)
     sheet.merge_range('A2:D2', u"{0}".format(ugettext("Tickets Sold")), title)
-
     tickets = Ticket.objects.filter(event__promoter=request.user.promoter).values_list('id',
                                                                                        'event__name',
                                                                                        'created_at',
