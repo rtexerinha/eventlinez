@@ -2,6 +2,8 @@ import csv
 
 import xlsxwriter
 from io import BytesIO
+# from django.conf import settings
+from os import path
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
@@ -171,6 +173,10 @@ def tickets_excel(request):
         sheet.write_string(row, 1, data[1], tbody)
         sheet.write(row, 2, data[2].strftime('%Y-%m-%d %H:%M'), tbody)
         sheet.write_string(row, 3, data[3], tbody)
+
+    way = path.abspath("static")
+    logo = path.join(way, 'img', 'logo.png')
+    sheet.merge_range('A1:D1',  sheet.insert_image('A1', logo))
 
     book.close()
     output.seek(0)
