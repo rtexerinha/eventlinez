@@ -5,7 +5,7 @@ from django.urls import path, include
 
 import shop
 from shop.views import index
-from event.views import order_promoter, events_promoter, new_events, tickets_list_events, remove_event, \
+from event.views import events_promoter, new_events, remove_event, \
     export_orders_csv, update_event, tickets_list, tickets_csv, tickets_excel
 from customer.views import signup_view_promoter, signin_view_promoter, \
     signout_view_promoter, signin_view
@@ -33,7 +33,7 @@ urlpatterns = [
     path('promoter/export/', export_orders_csv, name='export_orders'),
 
     path('promoter/ticket/', tickets_list, name='ticket_list'),
-    path('promoter/ticket/<int:event_id>/', tickets_list_events, name='ticket_list_events'),
+    path('promoter/ticket/<int:event_id>/', tickets_list, name='ticket_list'),
     path('promoter/ticket/export/', tickets_csv, name='tickets_csv'),
     path('promoter/ticket/excel/', tickets_excel, name='tickets_excel'),
 
