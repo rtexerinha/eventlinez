@@ -12,21 +12,22 @@
                 <h1 class="mt-4 title-dast">Events</h1>
 
             <div class="row">
-                <div class="col-lg-5 col-md-5"></div>
-                <div class="col-lg-7 col-md-7 div-adm-newevent">
-                        <form class="form-search col-lg-9 col-md-9 col-sm-8 col-xl-8"
-                              action="{% url 'shop:search' %}"
-                              method="get">
-                            {% csrf_token %}
-                            <input class="input-search-adm col-11 col-sm-11 col-md-10 col-lg-10 col-xl-11"
-                                   type="search"
-                                   placeholder="Search"
-                                   aria-label="Search"
-                                   name="q">
-                        </form>
+                <div class="col-lg-10 col-md-5"></div>
+                <div class="col-lg-2 col-md-7 div-adm-newevent">
+{#                        <form class="form-search col-lg-9 col-md-9 col-sm-8 col-xl-8"#}
+{#                              action="{% url 'shop:search' %}"#}
+{#                              method="get">#}
+{#                            {% csrf_token %}#}
+{#                            <input class="input-search-adm col-11 col-sm-11 col-md-10 col-lg-10 col-xl-11"#}
+{#                                   type="search"#}
+{#                                   placeholder="Search"#}
+{#                                   aria-label="Search"#}
+{#                                   name="q">#}
+{#                        </form>#}
 
                     <a href="{% url 'new_events' %}"
                        id="button-adm"
+                       class="float-righ"
                        style="height: 40px;text-decoration: none;">
                         New Event
                     </a>
@@ -48,7 +49,7 @@
                             {% for events in events %}
                                 <tr>
                                     <td class="text-table">
-                                        <a href="{% url 'update_event'  events.id%}" style="color: #d90075">
+                                        <a href="{% url 'update_event'  events.id%}" style="color: #d90075; font-size: 12px">
                                             {{ events.name }}
                                         </a>
                                     </td>
@@ -58,10 +59,11 @@
                                     <td class="text-table">{{ events.sales_info.amount_sould}}</td>
 {#                                    <td class="text-table">{{ events.stock }}</td>#}
                                     <td colspan="3">
-                                        <div style="display: flex; justify-content: center">
-                                            <a id="button-adm" href="{% url 'ticket_list_events' events.id %}" >
-                                                Tickets
-                                            </a>
+                                        <div style="display: flex; justify-content: center;">
+
+{#                                            <a id="button-adm" href="{% url 'ticket_list' events.id %}" >#}
+{#                                                Tickets#}
+{#                                            </a>#}
                                             <a href="{% url 'update_event'  events.id%}" class="icon_remove_a">
                                                 <i style="padding-left: 15px; padding-top: 5px; color: #d90075" class="far fa-edit icon_remove"></i>
                                             </a>
