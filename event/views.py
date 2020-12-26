@@ -112,11 +112,8 @@ def tickets_csv(request):
     writer_ticket = csv.writer(resp)
     writer_ticket.writerow(['Num', 'Event', 'Created', 'Customer', 'Order'])
     promoter = request.user.promoter
-    tickets = Ticket.objects.filter(event__promoter=promoter).values_list('id',
-                                                                          'event__name',
-                                                                          'created_at',
-                                                                          'customer__first_name',
-                                                                          'order_item_id')
+    tickets = Ticket.objects.filter(event__promoter=promoter).values_list(
+        'id', 'event__name', 'created_at', 'customer__first_name', 'order_item_id')
 
     for ticket_list in tickets:
         writer_ticket.writerow(ticket_list)
@@ -134,7 +131,6 @@ def tickets_excel(request):
     sheet.set_tab_color('#FF9900')  # Orange
 
     # Styles
-
     title = book.add_format({'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter'})
     tthead = book.add_format({'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter',
                               'color': '#171717', 'bg_color': '#F4F4F4'})
@@ -147,11 +143,8 @@ def tickets_excel(request):
     sheet.set_column('C:D', 20)
     sheet.merge_range('A2:D2', u"{0}".format(ugettext("Tickets Sold")), title)
 
-    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).values_list('id',
-                                                                                       'event__name',
-                                                                                       'created_at',
-                                                                                       'customer__first_name'
-                                                                                       ).order_by('-id')
+    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).\
+        values_list('id', 'event__name', 'created_at', 'customer__first_name').order_by('-id')
 
     row_num = 2
     columns = ['ID', 'Event', 'created_at', 'Customer']
