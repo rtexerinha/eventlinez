@@ -2,6 +2,8 @@ import csv
 
 import xlsxwriter
 from io import BytesIO
+# from django.conf import settings
+from os import path
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
@@ -112,14 +114,18 @@ def tickets_csv(request):
     writer_ticket = csv.writer(resp)
     writer_ticket.writerow(['Num', 'Event', 'Created', 'Customer', 'Order'])
     promoter = request.user.promoter
-    tickets = Ticket.objects.filter(event__promoter=promoter).values_list(
-        'id', 'event__name', 'created_at', 'customer__first_name', 'order_item_id')
+    tickets = Ticket.objects.filter(event__promoter=promoter).values_list('id',
+                                                                          'event__name',
+                                                                          'created_at',
+                                                                          'customer__first_name',
+                                                                          'order_item_id')
 
     for ticket_list in tickets:
         writer_ticket.writerow(ticket_list)
     return resp
 
 
+@login_required(login_url='/promoter/account/login/')
 def tickets_excel(request):
     output = BytesIO()
     response = StreamingHttpResponse(
@@ -130,33 +136,55 @@ def tickets_excel(request):
     sheet = book.add_worksheet("Tickets List")
     sheet.set_tab_color('#FF9900')  # Orange
 
+    props_title = {'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter', 'font_name': 'Arial'}
+
+    props_header = {'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter', 'color': '#171717',
+                    'bg_color': '#F4F4F4', 'font_name': 'Arial'}
+
+    props_price = {'num_format': '[$$-409]#,##0.00', 'font_size': 10, 'align': 'right', 'color': '#171717',
+                   'bg_color': '#FFFFFF', 'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6',
+                   'valign': 'vcenter'}
+
+    props_event = {'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF',
+                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'}
+
+    props_table = {'font_size': 10, 'align': 'center', 'color': '#171717', 'bg_color': '#FFFFFF',
+                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'}
     # Styles
-    title = book.add_format({'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter'})
-    tthead = book.add_format({'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter',
-                              'color': '#171717', 'bg_color': '#F4F4F4'})
-    tbody = book.add_format({'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF', 'bottom': 1})
+    title = book.add_format(props_title)
+    tthead = book.add_format(props_header)
+    event_style = book.add_format(props_event)
+    tbody_style = book.add_format(props_table)
+    money_format = book.add_format(props_price)
 
-    tbody.set_bottom_color('#dee2e6')
-
-    title.set_font_name('Arial')
     sheet.set_column('B:B', 40)
-    sheet.set_column('C:D', 20)
-    sheet.merge_range('A2:D2', u"{0}".format(ugettext("Tickets Sold")), title)
+    sheet.set_column('D:E', 20)
+    sheet.set_row(1, 25)
+    sheet.set_default_row(30)
+    sheet.merge_range('A1:E1', u"{0}".format(ugettext("Tickets Sold")), title)
+    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).values_list('id',
+                                                                                       'event__name',
+                                                                                       'order_item__price',
+                                                                                       'created_at',
+                                                                                       'customer__first_name'
+                                                                                       ).order_by('-id')
 
-    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).\
-        values_list('id', 'event__name', 'created_at', 'customer__first_name').order_by('-id')
-
-    row_num = 2
-    columns = ['ID', 'Event', 'created_at', 'Customer']
+    row_num = 1
+    columns = ['Ticket', 'Event', 'Price', 'Date', 'Customer']
     for col_num in range(len(columns)):
         sheet.write(row_num, col_num, columns[col_num], tthead)
 
     for idx, data in enumerate(tickets):
-        row = 3 + idx
-        sheet.write_number(row, 0, data[0], tbody)
-        sheet.write_string(row, 1, data[1], tbody)
-        sheet.write(row, 2, data[2].strftime('%Y-%m-%d %H:%M'), tbody)
-        sheet.write_string(row, 3, data[3], tbody)
+        row = 2 + idx
+        sheet.write_number(row, 0, data[0], tbody_style)
+        sheet.write_string(row, 1, data[1], event_style)
+        sheet.write_number(row, 2, data[2], money_format, )
+        sheet.write(row, 3, data[3].strftime('%Y-%m-%d %H:%M'), tbody_style)
+        sheet.write_string(row, 4, data[4], tbody_style)
+
+    way = path.abspath("static")
+    logo = path.join(way, 'img', 'logo.png')
+    sheet.insert_image('A1', logo)
 
     book.close()
     output.seek(0)

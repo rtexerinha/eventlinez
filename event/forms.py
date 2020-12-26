@@ -23,8 +23,7 @@ class NewCategory(ModelForm):
 class NewEvent(ModelForm):
     event_date = DateTimeField(
         input_formats=['%d/%m/%Y %H:%M'],
-        widget=widgets.DateTimeInput(attrs={'id': 'datetimepicker', 'class': 'form_datetime'}))
-    # event_date = DateTimeField(widget=DateTimePicker(attrs={'class': 'form_datetime'}))
+        widget=widgets.DateTimeInput(attrs={'id': 'datetimepicker', 'type': 'text'}))
 
     class Meta:
         model = Event
@@ -32,6 +31,10 @@ class NewEvent(ModelForm):
 
 
 class UpdateEvent(ModelForm):
+    event_date = DateTimeField(
+        input_formats=['%d/%m/%Y %H:%M'],
+        widget=widgets.DateTimeInput(attrs={'id': 'datetimepicker', 'type': 'text'}))
+
     class Meta:
         model = Event
         exclude = ('slug', 'created', 'updated', 'promoter',)
