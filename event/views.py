@@ -2,7 +2,6 @@ import csv
 
 import xlsxwriter
 from io import BytesIO
-# from django.conf import settings
 from os import path
 
 from django.contrib.auth.decorators import login_required
@@ -114,11 +113,8 @@ def tickets_csv(request):
     writer_ticket = csv.writer(resp)
     writer_ticket.writerow(['Num', 'Event', 'Created', 'Customer', 'Order'])
     promoter = request.user.promoter
-    tickets = Ticket.objects.filter(event__promoter=promoter).values_list('id',
-                                                                          'event__name',
-                                                                          'created_at',
-                                                                          'customer__first_name',
-                                                                          'order_item_id')
+    tickets = Ticket.objects.filter(event__promoter=promoter).\
+        values_list('id', 'event__name', 'created_at', 'customer__first_name', 'order_item_id')
 
     for ticket_list in tickets:
         writer_ticket.writerow(ticket_list)
@@ -136,14 +132,15 @@ def tickets_excel(request):
     sheet = book.add_worksheet("Tickets List")
     sheet.set_tab_color('#FF9900')  # Orange
 
-    props_title = {'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter', 'font_name': 'Arial'}
+    props_title = {'bold': True, 'font_size': 14, 'align': 'center',
+                   'valign': 'vcenter', 'font_name': 'Arial'}
 
-    props_header = {'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter', 'color': '#171717',
-                    'bg_color': '#F4F4F4', 'font_name': 'Arial'}
+    props_header = {'bold': True, 'font_size': 10, 'align': 'center',  'valign': 'vcenter',
+                    'color': '#171717', 'bg_color': '#F4F4F4', 'font_name': 'Arial'}
 
     props_price = {'num_format': '[$$-409]#,##0.00', 'font_size': 10, 'align': 'right', 'color': '#171717',
-                   'bg_color': '#FFFFFF', 'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6',
-                   'valign': 'vcenter'}
+                   'bg_color': '#FFFFFF', 'font_name': 'Arial', 'bottom': 1,
+                   'bottom_color': '#dee2e6', 'valign': 'vcenter'}
 
     props_event = {'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF',
                    'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'}
@@ -162,12 +159,8 @@ def tickets_excel(request):
     sheet.set_row(1, 25)
     sheet.set_default_row(30)
     sheet.merge_range('A1:E1', u"{0}".format(ugettext("Tickets Sold")), title)
-    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).values_list('id',
-                                                                                       'event__name',
-                                                                                       'order_item__price',
-                                                                                       'created_at',
-                                                                                       'customer__first_name'
-                                                                                       ).order_by('-id')
+    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).\
+        values_list('id', 'event__name', 'order_item__price', 'created_at', 'customer__first_name').order_by('-id')
 
     row_num = 1
     columns = ['Ticket', 'Event', 'Price', 'Date', 'Customer']
