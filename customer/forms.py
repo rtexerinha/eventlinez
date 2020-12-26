@@ -90,14 +90,13 @@ class SignUpForm(forms.Form):
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
             raise ValidationError(
-                self.error_messages['password_mismatch'],
-                code='password_mismatch',
+                "The two password fields didn’t match."
             )
         return password2
 
     def clean_email(self):
         if self.cleaned_data.get("email").endswith("@test.com"):
-            raise ValidationError("Você não pode criar um usurio com @test")
+            raise ValidationError("You cannot create a user with @test")
         return self.cleaned_data.get("email")
 
     def save(self):
