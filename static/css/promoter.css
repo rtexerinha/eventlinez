@@ -9912,19 +9912,14 @@ body {
 }
 
 #button-adm{
-  width: 100px;
   height: 30px;
   background: #D90075;
-  border-radius: 10px;
   font-family: Nunito, 'serif';
   font-style: normal;
   font-weight: bold;
   font-size: 12px;
-  line-height: 1rem;
-  display: flex;
-  align-items: center;
-  color: #FFFFFF;
-  justify-content: center;
+  text-decoration: none;
+  border: #d90075;
 }
 
 .input-search-adm{

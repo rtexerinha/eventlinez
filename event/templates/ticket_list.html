@@ -11,7 +11,7 @@
         <h1 class="mt-4 title-dast">Tickets</h1>
 
         <header class="row">
-            <div class="col-lg-10 col-md-5">
+            <div class="col-lg-11 col-md-5">
                 <form method="POST" style="display: flex">
                     {% csrf_token %}
                     <label for="events_choice"
@@ -30,12 +30,16 @@
                         {% endfor %}
                     </select>
                     <button action="submit"
+                            id="button-adm"
                             class="btn btn-secondary"
-                            style="height: 35px; margin-top: 5px">Filter</button>
+                            style="margin-top: 8px;
+                                   background-color: #d90075">
+                        Filter
+                    </button>
                 </form>
             </div>
 
-            <div class="col-lg-2 col-md-7 div-adm-newevent" style="background-color: #9fcdff">
+            <div class="col-lg-1 col-md-7 div-adm-newevent">
 {#                <form class="form-search col-lg-9 col-md-9 col-sm-8 col-xl-8"#}
 {#                      action="{% url 'shop:search' %}"#}
 {#                      method="get">#}
@@ -50,7 +54,8 @@
 
                 <a href="{%  url 'tickets_excel' %}"
                    id="button-adm"
-                   style="height: 35px;text-decoration: none; border: #d90075;margin-top: 10px;">
+                   class="btn btn-secondary"
+                   style="margin-top: 10px;">
                     Export
                 </a>
             </div>
