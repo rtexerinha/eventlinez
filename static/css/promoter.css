@@ -9912,14 +9912,14 @@ body {
 }
 
 #button-adm{
-  width: 142px;
-  height: 31px;
+  width: 100px;
+  height: 30px;
   background: #D90075;
   border-radius: 10px;
   font-family: Nunito, 'serif';
   font-style: normal;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 12px;
   line-height: 1rem;
   display: flex;
   align-items: center;
@@ -10006,3 +10006,4 @@ input[type='file'] {
   font-size: 18px;
   color: #171717!important;
 }
+
