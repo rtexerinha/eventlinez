@@ -1,5 +1,6 @@
 body{
     font-family: Nunito, 'serif'!important;
+    font-size: 12px!important;
 }
 
 .lead {
@@ -9939,6 +9940,20 @@ body {
   line-height: 115.3%;
   text-align: justify;
   color: #B3B3B3;
+}
+
+.select-adm{
+  height: 35px;
+  background: #F8F8F8;
+  border: 1px solid #DDDDDD;
+  box-sizing: border-box;
+  font-family: Nunito, 'serif';
+  font-style: normal;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 115.3%;
+  text-align: justify;
+  color: #171717;
 }
 
 .div-adm-newevent{

@@ -36,7 +36,7 @@ urlpatterns = [
     path('promoter/ticket/<int:event_id>/', tickets_list, name='ticket_list'),
     path('promoter/ticket/export/', tickets_csv, name='tickets_csv'),
     path('promoter/ticket/excel/', tickets_excel, name='tickets_excel'),
-    path('promoter/ticket/excel/<int:event_id>/', tickets_excel, name='tickets_excel'),
+    # path('promoter/ticket/excel/<int:event_id>/', tickets_excel, name='tickets_excel'),
 
     # CRUD events
     path('promoter/events/new/', new_events, name='new_events'),

@@ -11,7 +11,26 @@
         <h1 class="mt-4 title-dast">Tickets</h1>
 
         <header class="row">
-            <div class="col-lg-10 col-md-5"></div>
+            <div class="col-lg-10 col-md-5">
+                <form method="POST" style="display: flex">
+                    {% csrf_token %}
+                    <label for="events_choice" style="font-size: 16px; margin-top: 10px">Events</label>
+                    <select class="form-control form-control-sm col-sm-3 col-md-3 col-lg-4 mt-2"
+                            name="events_choice"
+                            style="margin: 0 10px">
+                        {% if selected_event %}
+                            <option value="" selected="selected">{{ selected_event.name }}</option>
+                        {% else %}
+                            <option value="" selected="selected">All</option>
+                        {% endif %}
+                        {% for event in events %}
+                            <option value="{{event.id}}">{{event.name}}</option>
+                        {% endfor %}
+                    </select>
+                    <button action="submit" class="btn btn-secondary" style="height: 35px; margin-top: 5px">Filter</button>
+                </form>
+            </div>
+
             <div class="col-lg-2 col-md-7 div-adm-newevent">
 {#                <form class="form-search col-lg-9 col-md-9 col-sm-8 col-xl-8"#}
 {#                      action="{% url 'shop:search' %}"#}
@@ -23,6 +42,7 @@
 {#                           aria-label="Search"#}
 {#                           name="q">#}
 {#                </form>#}
+
 
                 <a href="{%  url 'tickets_excel' %}"
                    id="button-adm"

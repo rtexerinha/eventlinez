@@ -37,18 +37,22 @@ def events_promoter(request):
 
 @login_required(login_url='/promoter/account/login/')
 def tickets_list(request, event_id=None):
-    promoter = request.user.promoter
-    if event_id:
-        tickets = Ticket.objects.filter(event_id=event_id).order_by('-id')
-    else:
-        tickets = Ticket.objects.filter(event__promoter=promoter).order_by('-id')
+    events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
+    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).order_by('-id')
+    selected_event = None
+    if request.method == "POST":
+        event_id = request.POST.get('events_choice')
+        if event_id:
+            selected_event = Event.objects.get(pk=event_id)
+            tickets = tickets.filter(event=selected_event)
     paginator = Paginator(tickets, 6)
     page = int(request.GET.get('page', '1'))
     try:
         tickets = paginator.page(page)
     except (EmptyPage, InvalidPage):
         tickets = paginator.page(paginator.num_pages)
-    return render(request, 'ticket_list.html', {'tickets': tickets})
+    data = {'tickets': tickets, 'events': events, 'selected_event': selected_event}
+    return render(request, 'ticket_list.html', data)
 
 
 # @login_required(login_url='/promoter/account/login/')
