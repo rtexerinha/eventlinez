@@ -125,7 +125,7 @@ def tickets_csv(request):
 
 
 @login_required(login_url='/promoter/account/login/')
-def tickets_excel(request):
+def tickets_excel(request, event_id=None):
     output = BytesIO()
     response = StreamingHttpResponse(
         output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -162,8 +162,16 @@ def tickets_excel(request):
     sheet.set_row(1, 25)
     sheet.set_default_row(30)
     sheet.merge_range('A1:E1', u"{0}".format(ugettext("Tickets Sold")), title)
-    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).\
-        values_list('id', 'event__name', 'order_item__price', 'created_at', 'customer__first_name').order_by('-id')
+
+    if event_id:
+        tickets = Ticket.objects.filter(event_id=event_id).values_list('id',
+                                                                       'event__name',
+                                                                       'order_item__price',
+                                                                       'created_at',
+                                                                       'customer__first_name').order_by('-id')
+    else:
+        tickets = Ticket.objects.filter(event__promoter=request.user.promoter).\
+            values_list('id', 'event__name', 'order_item__price', 'created_at', 'customer__first_name').order_by('-id')
 
     row_num = 1
     columns = ['Ticket', 'Event', 'Price', 'Date', 'Customer']
