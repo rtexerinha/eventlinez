@@ -1678,7 +1678,6 @@ select.form-control:focus::-ms-value {
 .form-control-file,
 .form-control-range {
   border: 1px solid #A4B0CC !important;
-  border-radius: 10px!important;
 }
 
 .col-form-label {
@@ -1691,7 +1690,6 @@ select.form-control:focus::-ms-value {
 
 .form-control{
     border: 1px solid #A4B0CC!important;
-    border-radius: 10px!important;
 }
 
 .col-form-label-lg {
