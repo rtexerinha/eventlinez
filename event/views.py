@@ -1,31 +1,15 @@
-import csv
-
 import xlsxwriter
 from io import BytesIO
 from os import path
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.http import HttpResponse, StreamingHttpResponse
+from django.http import StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext
 
 from event.forms import NewEvent, UpdateEvent
 from event.models import Event, Ticket
-from order.models import Order
-
-
-@login_required(login_url='/promoter/account/login/')
-def order_promoter(request):
-    promoter = request.user.promoter
-    orders = Order.objects.filter(orderitem__event__promoter=promoter).order_by('-id')
-    paginator = Paginator(orders, 8)
-    page = int(request.GET.get('page', '1'))
-    try:
-        orders = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        orders = paginator.page(paginator.num_pages)
-    return render(request, 'orders_list.html', {'orders': orders})
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -36,7 +20,7 @@ def events_promoter(request):
 
 
 @login_required(login_url='/promoter/account/login/')
-def tickets_list(request, event_id=None):
+def tickets_list(request):
     events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
     tickets = Ticket.objects.filter(event__promoter=request.user.promoter).order_by('-id')
     selected_event = None
@@ -96,36 +80,6 @@ def remove_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     event.delete()
     return redirect('events_promoter')
-
-
-@login_required(login_url='/promoter/account/login/')
-def export_orders_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="orders.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Order', 'Customer', 'Email', 'Date', 'Total'])
-
-    orders = Order.objects.all().values_list('id', 'billingName', 'emailAddress', 'created', 'total')
-
-    for list_order in orders:
-        writer.writerow(list_order)
-
-    return response
-
-
-@login_required(login_url='/promoter/account/login/')
-def tickets_csv(request):
-    resp = HttpResponse(content_type='text/csv')
-    resp['Content-Disposition'] = 'attachment; filename="tickets.csv"'
-    writer_ticket = csv.writer(resp)
-    writer_ticket.writerow(['Num', 'Event', 'Created', 'Customer', 'Order'])
-    promoter = request.user.promoter
-    tickets = Ticket.objects.filter(event__promoter=promoter).\
-        values_list('id', 'event__name', 'created_at', 'customer__first_name', 'order_item_id')
-
-    for ticket_list in tickets:
-        writer_ticket.writerow(ticket_list)
-    return resp
 
 
 @login_required(login_url='/promoter/account/login/')

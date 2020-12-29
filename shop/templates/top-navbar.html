@@ -20,7 +20,7 @@
             {% if request.user.promoter %}
                 <a class="link-nav link-right nav__link"
                    style="color: #d90075;margin-left: auto;"
-                   href="{% url 'order_promoter' %}">
+                   href="{% url 'events_promoter' %}">
                 Panel Admin
                 </a>
 
@@ -51,7 +51,7 @@
                         <i class="fas fa-shopping-cart"></i>({{item_count}})
                     </a>
                 {% endif %}
-            <a class="link-nav link-right nav__link" style="color: #d90075" href="{% url 'order_promoter' %}">
+            <a class="link-nav link-right nav__link" style="color: #d90075" href="{% url 'events_promoter' %}">
                 Organize your event
             </a>
 
@@ -85,7 +85,7 @@
                         <i class="fas fa-user-circle"></i>
                         </a>
 				        <div class="dropdown-menu dropdown-menu-right">
-					        <a href="{% url 'order_promoter' %}"
+					        <a href="{% url 'events_promoter' %}"
                                class="dropdown-item nav__link">
                                 Panel Admin
                             </a>
@@ -126,7 +126,7 @@
 			    </li>
             {% else %}
                 <li class="nav__item">
-                    <a href="{% url 'order_promoter' %}"
+                    <a href="{% url 'events_promoter' %}"
                        class="nav__link"
                        style="color: #d90075">
                         <i class="far fa-list-alt" style="padding-right: 10px"></i>
