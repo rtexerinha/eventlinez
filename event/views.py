@@ -13,7 +13,7 @@ from event.models import Event, Ticket
 
 
 @login_required(login_url='/promoter/account/login/')
-def events_promoter(request):
+def event_list(request):
     promoter = request.user.promoter.id
     events = Event.objects.filter(promoter=promoter).order_by('-created')
     return render(request, 'events_list.html', {'events': events})
@@ -40,7 +40,7 @@ def tickets_list(request):
 
 
 @login_required(login_url='/promoter/account/login/')
-def new_events(request):
+def event_create(request):
     if request.method == 'POST':
         form = NewEvent(request.POST, request.FILES)
         if form.is_valid():
@@ -54,7 +54,7 @@ def new_events(request):
 
 
 @login_required(login_url='/promoter/account/login/')
-def update_event(request, event_id):
+def event_update(request, event_id):
     instance = get_object_or_404(Event, id=event_id)
     form = UpdateEvent(request.POST or None, instance=instance)
     if form.is_valid():
@@ -64,7 +64,7 @@ def update_event(request, event_id):
 
 
 @login_required(login_url='/promoter/account/login/')
-def remove_event(request, event_id):
+def event_remove(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     event.delete()
     return redirect('events_promoter')
