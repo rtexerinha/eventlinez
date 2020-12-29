@@ -1275,7 +1275,7 @@ div.content-right-signin {
     font-family: Nunito, serif;
     font-style: normal;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.8rem;
     line-height: 1.5rem;
     align-items: center;
     color: #171717;
@@ -1283,6 +1283,7 @@ div.content-right-signin {
 
 .link-order{
     color: #d90075;
+    font-size: 0.8rem;
 }
 
 .buttons{
@@ -1458,6 +1459,7 @@ div.content-right-signin {
 
 #myFooter .container{
     text-align: center;
+    padding-top: inherit;
 }
 
 #myFooter .footer-copyright{
