@@ -4,8 +4,6 @@ from django.forms import ModelForm, DateTimeField
 from event.models import Category, Event
 from address.models import City
 
-# from datetimepicker.widgets import DateTimePicker
-
 
 # TODO: Move this to address app
 class CityForm(ModelForm):

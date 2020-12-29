@@ -1,8 +1,5 @@
 {% extends "base_promoter.html" %}
-
 {% block title %} Panel Admin - Events{% endblock %}
-
-<!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
@@ -14,17 +11,6 @@
             <div class="row">
                 <div class="col-lg-10 col-md-5"></div>
                 <div class="col-lg-2 col-md-7 div-adm-newevent">
-{#                        <form class="form-search col-lg-9 col-md-9 col-sm-8 col-xl-8"#}
-{#                              action="{% url 'shop:search' %}"#}
-{#                              method="get">#}
-{#                            {% csrf_token %}#}
-{#                            <input class="input-search-adm col-11 col-sm-11 col-md-10 col-lg-10 col-xl-11"#}
-{#                                   type="search"#}
-{#                                   placeholder="Search"#}
-{#                                   aria-label="Search"#}
-{#                                   name="q">#}
-{#                        </form>#}
-
                     <a href="{% url 'new_events' %}"
                        id="button-adm"
                         class="btn btn-secondary"
