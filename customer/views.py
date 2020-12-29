@@ -16,7 +16,7 @@ def signup_view_promoter(request):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            return redirect('order_promoter')
+            return redirect('events_promoter')
     else:
         form = SignUpFormPromoter()
     return render(request, 'accounts/signup_promoter.html', {'form': form})
@@ -46,7 +46,7 @@ def signin_view_promoter(request):
             promoter = authenticate(username=username, password=password)
             if promoter is not None:
                 login(request, promoter)
-                return redirect('order_promoter')
+                return redirect('events_promoter')
             else:
                 return redirect('signup_promoter')
     else:
