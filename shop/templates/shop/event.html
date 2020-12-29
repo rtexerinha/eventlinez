@@ -14,7 +14,7 @@
                 <img src="{{event.image.url}}" alt="{{event.name}}" id="container-details-img"/>
             </div>
 
-            <div class="col-lg-12" id="div-description" style="height: 50%;">
+            <div class="col-lg-12" id="div-description" style="height: 50%; font-size: 16px">
                 <br>
                    {{ event.description|safe }}
                     <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
@@ -86,7 +86,7 @@
         </div>
         <div id="div-description-mobile" style="height: 100%;">
             <br>
-            <div style="padding-left: 30px; width: 95%">
+            <div style="padding-left: 30px; width: 95%;">
                     {{ event.description|safe }}
                 <br>
                 <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
