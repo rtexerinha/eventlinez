@@ -10002,3 +10002,16 @@ input[type='file'] {
   color: #171717!important;
 }
 
+#event-div{
+  width: 35vw;
+  margin: auto;
+  padding: 15vh 0;
+  text-align: center;
+}
+
+@media(max-width: 600px){
+  #event-div{
+    width: 85vw;
+  }
+}
+
