@@ -1451,11 +1451,14 @@ div.content-right-signin {
     }
 }
 
-
-
 #myFooter{
+   flex: 0 0 auto;
+   -webkit-flex: 0 0 auto;
+    background: #312046;
+    height: 220px;
     padding-top:32px;
 }
+
 
 #myFooter .container{
     text-align: center;
@@ -1466,6 +1469,7 @@ div.content-right-signin {
     margin-bottom: 35px;
     text-align: center;
     color: #777;
+    font-size: 12px;
 }
 
 
@@ -1528,11 +1532,4 @@ div.content-right-signin {
 
 #myFooter .fa-instagram:focus{
     color: #d90075;
-}
-
-#myFooter{
-   flex: 0 0 auto;
-   -webkit-flex: 0 0 auto;
-    background: #312046;
-    height: 200px;
 }
