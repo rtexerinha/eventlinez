@@ -6,7 +6,8 @@
 <main>
     <div class="container-fluid">
         <h1 class="mt-4 title-dast">Tickets</h1>
-
+        {% if tickets %}
+        <div>
         <header class="row">
             <div class="col-lg-11 col-md-5">
                 <form method="POST" style="display: flex">
@@ -46,7 +47,7 @@
             </div>
         </header>
 
-        <section class="table-responsive">
+            <section class="table-responsive">
             <table class="table table-bordered" id="dataTable">
                 <thead>
                     <tr style="background-color:#F4F4F4;">
@@ -73,7 +74,7 @@
             </table>
         </section>
 
-        <section class="col-12 mb-5">
+            <section class="col-12 mb-5">
             {% if tickets.paginator.num_pages > 1 %}
             <div class="row row-paginator">
                 <div class="col-lg-3 col-5">
@@ -103,6 +104,17 @@
             {% endif %}
             </div>
         </section>
+        </div>
+
+        {% else %}
+                <div style="width: 100%; margin: auto">
+                    <article id="event-div">
+                        <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
+                        <br>
+                        <h4 class="text-default">No tickets sold</h4>
+                    </article>
+                </div>
+            {% endif %}
     </div>
 </main>
 
