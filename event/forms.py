@@ -12,23 +12,13 @@ class CityForm(ModelForm):
         fields = ['name']
 
 
-class NewCategory(ModelForm):
+class CategoryForm(ModelForm):
     class Meta:
         model = Category
         fields = ['name']
 
 
-class NewEvent(ModelForm):
-    event_date = DateTimeField(
-        input_formats=['%d/%m/%Y %H:%M'],
-        widget=widgets.DateTimeInput(attrs={'id': 'datetimepicker', 'type': 'text'}))
-
-    class Meta:
-        model = Event
-        exclude = ('slug', 'created', 'updated', 'promoter',)
-
-
-class UpdateEvent(ModelForm):
+class EventForm(ModelForm):
     event_date = DateTimeField(
         input_formats=['%d/%m/%Y %H:%M'],
         widget=widgets.DateTimeInput(attrs={'id': 'datetimepicker', 'type': 'text'}))

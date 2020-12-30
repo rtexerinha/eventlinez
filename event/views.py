@@ -8,7 +8,7 @@ from django.http import StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext
 
-from event.forms import NewEvent, UpdateEvent
+from event.forms import EventForm
 from event.models import Event, Ticket
 
 
@@ -22,21 +22,21 @@ def event_list(request):
 @login_required(login_url='/promoter/account/login/')
 def event_create(request):
     if request.method == 'POST':
-        form = NewEvent(request.POST, request.FILES)
+        form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             events = Event(**form.cleaned_data)
             events.promoter = request.user.promoter
             events.save()
             return redirect('events_promoter')
     else:
-        form = NewEvent()
+        form = EventForm()
     return render(request, 'event_create.html', {'form': form})
 
 
 @login_required(login_url='/promoter/account/login/')
 def event_update(request, event_id):
     instance = get_object_or_404(Event, id=event_id)
-    form = UpdateEvent(request.POST or None, instance=instance)
+    form = EventForm(request.POST or None, instance=instance)
     if form.is_valid():
         form.save()
         return redirect('events_promoter')
