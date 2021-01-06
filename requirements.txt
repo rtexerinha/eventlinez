@@ -8,3 +8,4 @@ sentry-sdk
 celery[redis]
 xlsxwriter
 django-datetimepicker
+psycopg2
