@@ -39,9 +39,13 @@ class SignUpFormPromoter(forms.Form):
         return password2
 
     def clean_email(self):
-        if self.cleaned_data.get("email").endswith("@test.com"):
-            raise ValidationError("You cannot create a user with @test")
-        return self.cleaned_data.get("email")
+        email_promoter = self.cleaned_data.get("email")
+        if Promoter.objects.filter(email=email_promoter).exists():
+            raise ValidationError(
+                "This Email is already registered.",
+                code='user_existed'
+            )
+        return email_promoter
 
     def save(self):
         if not self.is_valid():
