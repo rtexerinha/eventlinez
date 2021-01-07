@@ -72,7 +72,7 @@ class SignUpFormPromoter(forms.Form):
 class SignUpForm(forms.Form):
     first_name = forms.CharField(max_length=100, required=True)
     last_name = forms.CharField(max_length=100, required=True)
-    email = forms.EmailField(label="Email", max_length=254, help_text='eg. youremail@anyemail.com', required=True)
+    email = forms.EmailField(label="Email", max_length=254, required=True)
     cellphone = forms.CharField(max_length=13)
     address = forms.CharField(max_length=255)
     password1 = forms.CharField(
@@ -98,9 +98,13 @@ class SignUpForm(forms.Form):
         return password2
 
     def clean_email(self):
-        if self.cleaned_data.get("email").endswith("@test.com"):
-            raise ValidationError("You cannot create a user with @test")
-        return self.cleaned_data.get("email")
+        email_customer = self.cleaned_data.get("email")
+        if Customer.objects.filter(email=email_customer).exists():
+            raise ValidationError(
+                "This Email has already existed.",
+                code='user_existed'
+            )
+        return email_customer
 
     def save(self):
         if not self.is_valid():
