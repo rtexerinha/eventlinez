@@ -16,7 +16,7 @@ class SignUpFormPromoter(forms.Form):
     address = forms.CharField(max_length=255)
     city = forms.CharField(max_length=250)
     zip = forms.CharField(max_length=11)
-    social_security = forms.CharField(max_length=12)
+    social_security  = forms.CharField(max_length=12)
     phone = forms.CharField(max_length=12)
 
     password1 = forms.CharField(
@@ -68,7 +68,7 @@ class SignUpFormPromoter(forms.Form):
                             address=self.cleaned_data['address'],
                             city=self.cleaned_data['city'],
                             zip=self.cleaned_data['zip'],
-                            social_security=self.cleaned_data['social_security'],
+                            ssn=self.cleaned_data['social_security'],
                             phone=self.cleaned_data['phone'],
                             user=user)
         promoter.save()

@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'datetimepicker',
     'stripe',
     'imagekit',
     'crispy_forms',
