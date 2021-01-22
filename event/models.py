@@ -33,6 +33,8 @@ class Promoter(models.Model):
     name = models.CharField(max_length=250)
     email = models.CharField(max_length=250, unique=True)
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='promoter', unique=True)
+    social_security = models.CharField(max_length=12, null=True, blank=True)
+    phone = models.CharField(max_length=12, null=True, blank=True)
     address = models.CharField(max_length=250)
     city = models.CharField(max_length=250)
     zip = models.CharField(max_length=11)
