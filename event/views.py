@@ -114,13 +114,16 @@ def tickets_excel(request, event_id=None):
                                                                        'event__name',
                                                                        'order_item__price',
                                                                        'created_at',
-                                                                       'customer__first_name').order_by('-id')
+                                                                       'customer__first_name',
+                                                                       'customer__last_name'
+                                                                       ).order_by('-id')
     else:
         tickets = Ticket.objects.filter(event__promoter=request.user.promoter).\
-            values_list('id', 'event__name', 'order_item__price', 'created_at', 'customer__first_name').order_by('-id')
+            values_list('id', 'event__name', 'order_item__price', 'created_at', 'customer__first_name',
+                        'customer__last_name').order_by('-id')
 
     row_num = 1
-    columns = ['Ticket', 'Event', 'Price', 'Date', 'Customer']
+    columns = ['Ticket', 'Event', 'Price', 'Date', 'First Name', 'Last Name']
     for col_num in range(len(columns)):
         sheet.write(row_num, col_num, columns[col_num], tthead)
 
@@ -131,6 +134,7 @@ def tickets_excel(request, event_id=None):
         sheet.write_number(row, 2, data[2], money_format, )
         sheet.write(row, 3, data[3].strftime('%Y-%m-%d %H:%M'), tbody_style)
         sheet.write_string(row, 4, data[4], tbody_style)
+        sheet.write_string(row, 5, data[5], tbody_style)
 
     way = path.abspath("static")
     logo = path.join(way, 'img', 'logo.png')
