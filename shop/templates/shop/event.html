@@ -71,9 +71,15 @@
                             <form action="/cart/add/{{ event.id }}/" method="post">
                                 {% csrf_token %}
                                 <div class="div_code_promo">
-                                    <label for="promo_code" id="label_promo_code">Promo code</label>
-                                    <input id="promo_code" type="text" name="promo_code" placeholder="Insert code"
-                                                           class="col-sm-12 col-lg-12 col-md-12 input_promo_code">
+                                    <input id="promo_code"
+                                           type="text"
+                                           name="promo_code"
+                                           placeholder="Insert code"
+                                           class="col-sm-12 col-lg-12 col-md-12 input_promo_code">
+                                     <label for="promo_code"
+                                            id="label_promo_code">
+                                         Promo code
+                                     </label>
                                 </div>
                                 <div id="buttons-pay-event-card-details">
                                     <input class="pay-event-card-details text-default" type="submit" value="Add to Cart">
