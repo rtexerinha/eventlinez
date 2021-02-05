@@ -16,7 +16,7 @@ class SignUpFormPromoter(forms.Form):
     address = forms.CharField(max_length=255)
     city = forms.CharField(max_length=250)
     zip = forms.CharField(max_length=11)
-    social_security  = forms.CharField(max_length=12)
+    social_security = forms.CharField(max_length=12, help_text='Social security information is used for taxes purposes. Your information will not be shared with any company.')
     phone = forms.CharField(max_length=12)
 
     password1 = forms.CharField(
