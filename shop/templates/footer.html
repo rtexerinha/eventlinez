@@ -1,23 +1,15 @@
 <footer id="myFooter">
-        <div class="container">
-            <ul>
-                <li><a class="footer-text footer-subtitle"
-                       href="{% url 'index' %}">Live the moment</a></li>
-                <li>
-                    <a href="{% url 'about' %}"
-                       class="footer-text footer-subtitle link-to-about">
-                        About us
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'contact' %}" class="footer-text footer-subtitle link-to-about">
-                        Contact us
-                    </a>
-                </li>
-
-            </ul>
-
-            <div class="footer-social">
+    <div class="container">
+        <ul>
+            <li><a class="footer-text footer-subtitle" href="{% url 'index' %}">Live the moment</a></li>
+            <li>
+                <a href="{% url 'about' %}" class="footer-text footer-subtitle link-to-about">About us</a>
+            </li>
+            <li>
+                <a href="{% url 'contact' %}" class="footer-text footer-subtitle link-to-about">Contact us</a>
+            </li>
+        </ul>
+        <div class="footer-social">
             <a href="https://www.instagram.com/eventlinez/" class="social-icons">
                 <i class="fab fa-facebook-f" style="color: #FFFFFF;"></i>
             </a>
@@ -25,8 +17,7 @@
                 <i class="fab fa-instagram"></i>
             </a>
         </div>
-
-        </div>
-        <p class="footer-copyright" style="padding-bottom: 0!important; ">© 2020 Copyright - Vortex</p>
-    </footer>
+    </div>
+    <p class="footer-copyright" style="padding-bottom: 0!important; ">Eventlinez {% now "Y" %} - All rights reserved</p>
+</footer>
 
