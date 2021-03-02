@@ -43,7 +43,8 @@ class SignUpFormPromoter(forms.Form):
 
     def clean_email(self):
         email_promoter = self.cleaned_data.get("email")
-        if Promoter.objects.filter(email=email_promoter).exists():
+        if User.objects.filter(username=email_promoter).exists() or \
+                Promoter.objects.filter(email=email_promoter).exists():
             raise ValidationError(
                 "This Email is already registered.",
                 code='user_existed'
@@ -104,7 +105,8 @@ class SignUpForm(forms.Form):
 
     def clean_email(self):
         email_customer = self.cleaned_data.get("email")
-        if Customer.objects.filter(email=email_customer).exists():
+        if User.objects.filter(username=email_customer).exists() or \
+                Customer.objects.filter(email=email_customer).exists():
             raise ValidationError(
                 "This Email has already existed.",
                 code='user_existed'
