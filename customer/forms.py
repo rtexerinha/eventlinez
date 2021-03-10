@@ -5,7 +5,6 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UsernameField
 from django.contrib.auth.models import User
 
-
 from customer.models import Customer
 from event.models import Promoter
 
@@ -152,3 +151,24 @@ class SignInPromoterForm(AuthenticationForm):
                 code='non_promoter'
             )
         return self.cleaned_data
+
+
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = '__all__'
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'cellphone': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['password']
+        widgets = {
+            'password': forms.TextInput(attrs={'class': 'form-control'}),
+        }
