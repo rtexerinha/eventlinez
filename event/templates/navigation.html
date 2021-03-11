@@ -19,6 +19,7 @@
                 <span class="dropdown-item">
                     {{ request.user.username }}
                 </span>
+                <a class="dropdown-item" href="{% url 'update_promoter' %}">My data</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="{% url 'signout_promoter' %}">Logout</a>
             </div>
