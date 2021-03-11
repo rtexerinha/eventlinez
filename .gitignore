@@ -23,6 +23,7 @@ sdist/
 var/
 wheels/
 share/python-wheels/
+eventlinez/media/
 *.egg-info/
 .installed.cfg
 *.egg
