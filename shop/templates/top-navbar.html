@@ -33,11 +33,12 @@
                 <a class="link-nav nav__link" href="#" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
                     {{ request.user.first_name }}
-                    <i class="fas fa-user-circle"></i>
+                    <i class="fas fa-user-circle" style="margin-left: 5px"></i>
                 </a>
 
                 <div class="dropdown-menu dropdown-menu-right">
 					<a href="{% url 'order:order_history' %}" class="dropdown-item">Order History</a>
+                    <a href="{% url 'customer_update' %}" class="dropdown-item">My data</a>
                 </div>
                 <a class="link-nav nav__link" href="{% url 'signout' %}">Sign Out
                     <i class="fas fa-sign-out-alt" id="icons-space-left"></i>
