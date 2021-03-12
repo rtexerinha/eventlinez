@@ -162,8 +162,6 @@ class CustomerForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'cellphone': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.HiddenInput(attrs={'required': False}),
-            'user': forms.HiddenInput(attrs={'required': False}),
         }
 
 
