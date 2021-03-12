@@ -42,51 +42,42 @@
                 {% csrf_token %}
 
                      <div class="form-row">
-                        <div class="form-group col-md-12 mb-0">
+                        <div class="form-group col-md-12 mb-0 my-1" >
                             <label>Name*</label>
                             {{ form.name }}
                         </div>
                     </div>
                     <br>
                     <div class="form-row">
-                        <div class="form-group col-md-6 mb-0">
+                        <div class="form-group col-md-6 mb-0 my-1">
                             <label>Social Security*</label>
                             {{ form.ssn }}
 
                         </div>
-                        <div class="form-group col-md-6 mb-0">
+                        <div class="form-group col-md-6 mb-0 my-1">
                             <label>Phone*</label>
                             {{ form.phone }}
                         </div>
                     </div>
                     <br>
                     <div class="form-row">
-                        <div class="form-group col-md-6 mb-0">
+                        <div class="form-group col-md-6 mb-0 my-1">
                             <label>Address*</label>
                             {{ form.address }}
                         </div>
 
-                        <div class="form-group col-md-4 mb-0">
+                        <div class="form-group col-md-4 mb-0 my-1">
                             <label>City*</label>
                             {{ form.city }}
 
                         </div>
 
-                        <div class="form-group col-md-2 mb-0">
+                        <div class="form-group col-md-2 mb-0 my-1">
                             <label>Zip*</label>
                             {{ form.zip }}
                         </div>
                     </div>
 
-
-                    <div class="form-row" >
-                        <div class="form-group col-md-6 mb-0">
-
-                        </div>
-                        <div class="form-group col-md-6 mb-0">
-
-                        </div>
-                    </div>
 
                     <button type="submit" class="text-default button-login"> Update Account Promoter</button>
                 </form>
