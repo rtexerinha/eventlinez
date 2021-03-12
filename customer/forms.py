@@ -156,12 +156,14 @@ class SignInPromoterForm(AuthenticationForm):
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        fields = '__all__'
+        fields = ['first_name', 'last_name', 'cellphone', 'address']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'cellphone': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.HiddenInput(attrs={'required': False}),
+            'user': forms.HiddenInput(attrs={'required': False}),
         }
 
 
