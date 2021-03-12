@@ -31,7 +31,7 @@ class EventForm(ModelForm):
 class PromoterForm(ModelForm):
     class Meta:
         model = Promoter
-        fields = '__all__'
+        fields = ['name', 'phone', 'city', 'address', 'zip', 'ssn']
         widgets = {
             'name': TextInput(attrs={'class': 'form-control'}),
             'phone': TextInput(attrs={'class': 'form-control'}),
