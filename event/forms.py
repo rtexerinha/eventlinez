@@ -1,8 +1,9 @@
 from datetimepicker import widgets
 from django.forms import ModelForm, DateTimeField, TextInput
-
+from django.contrib.auth.forms import PasswordChangeForm
 from event.models import Category, Event, Promoter
 from address.models import City
+from django import forms
 
 
 # TODO: Move this to address app
@@ -40,3 +41,11 @@ class PromoterForm(ModelForm):
             'zip': TextInput(attrs={'class': 'form-control'}),
             'ssn': TextInput(attrs={'class': 'form-control'}),
         }
+
+
+class ResetPasswordForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["old_password"].widget = forms.PasswordInput(attrs={"class": "form-control"})
+        self.fields["new_password1"].widget = forms.PasswordInput(attrs={"class": "form-control"})
+        self.fields["new_password2"].widget = forms.PasswordInput(attrs={"class": "form-control"})
