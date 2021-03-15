@@ -11,7 +11,10 @@ from django.utils.translation import ugettext
 from event.forms import EventForm
 from event.models import Event, Ticket
 from .models import Promoter
-from .forms import PromoterForm
+from .forms import PromoterForm, ResetPasswordForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
+
 
 @login_required(login_url='/promoter/account/login/')
 def event_list(request):
@@ -162,3 +165,22 @@ def update_promoter(request):
             return render(request, 'update_promoter.html', {'form': form})
     elif request.method == 'GET':
         return render(request, 'update_promoter.html', {'form': form})
+
+
+@login_required
+def reset_password(request):
+
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('events_promoter')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = ResetPasswordForm(request.user)
+    return render(request, 'reset_password.html', {
+        'form': form
+    })
