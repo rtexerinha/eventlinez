@@ -438,7 +438,7 @@
 
 @media (max-width: 400px) {
     .content-all {
-        margin: 0 auto;
+        margin: 0 auto 10px auto;
     }
 }
 
@@ -458,39 +458,57 @@
 .text-default{
     font-family: Nunito, serif;
     font-style: normal;
-    font-weight: 600;
-    font-size: 17px;
+    font-weight: bold;
+    font-size: 14px;
     line-height: 20px;
     display: flex;
     align-items: center;
     color: #171717;
 }
 
+.text-date{
+    font-size: 17px;
+    line-height: 20px;
+    margin-bottom: 0!important;
+    text-align: center;
+}
+
+@media(max-width: 600px){
+.text-date{
+    font-family: Nunito, serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    /*display: flex;*/
+    align-items: center;
+    color: #171717;
+}
+}
+
 .card-data{
-    width: 110px;
-    height: 20px;
-    margin-left: -131px;
-    margin-top: 125px;
-    background-color: #FFFFFF;
+    /*margin-left: 15px;*/
+    margin-top: 5px;
+    height: 80px;
+    /*background-color: #FFFFFF;*/
     color: #1C1C1C;
-    border-radius: 10px;
+    border-right: 1px solid grey;
     padding-left: 5px;
-    font-size: 15px;
+    /*font-size: 15px;*/
 }
 
 @media (max-width: 600px){
     .card-data{
-        width: 70px;
-        height: 16px;
-        margin-top: 85px;
-        margin-left: -90px;
+        /*width: 70px;*/
+        height: 58px;
+        /*margin-top: 85px;*/
+        /*margin-left: 90px;*/
         font-size: 10px;
     }
 }
 
 .card-event {
-    width: 223px;
-    height: 60px;
+    width: 253px;
+    height: 50%;
     margin-top: 160px;
     margin-left: -240px;
     display: flex;
@@ -513,7 +531,8 @@
 
 @media (max-width: 600px) {
     .event-name{
-        font-size: 12px;
+        font-size: 10px;
+        line-height: 10px;
     }
 
 }
