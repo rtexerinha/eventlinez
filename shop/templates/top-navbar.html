@@ -9,7 +9,7 @@
         <input class="input-form-search col-sm-10 col-md-7 col-lg-9 col-xl-8" type="search" placeholder="Search" aria-label="Search" name="q">
     </form>
 
-    <nav class=" col-lg-3 float-lg-right" style="height: 20px">
+    <nav class=" col-lg-3 float-lg-right" style="height: 33px">
         {% if request.user.is_authenticated %}
             <div class="header-right-log">
                 {% if item_count > 0 %}
@@ -39,7 +39,8 @@
 
                 <div class="dropdown-menu dropdown-menu-right" >
 					<a href="{% url 'order:order_history' %}" class="dropdown-item">Order History</a>
-                    <a href="{% url 'customer_update' %}" class="dropdown-item">My data</a>
+                    <a href="{% url 'customer_update' %}" class="dropdown-item">Profile</a>
+                     <a href="{% url 'reset_password_costomer' %}" class="dropdown-item">Reset Password</a>
                 </div>
                 <a class="link-nav nav__link" href="{% url 'signout' %}">Sign Out
                     <i class="fas fa-sign-out-alt" id="icons-space-left"></i>
@@ -107,7 +108,8 @@
                                class="dropdown-item nav__link">
                                 Order History
                             </a>
-                             <a href="{% url 'customer_update' %}" class="dropdown-item">My data</a>
+                             <a href="{% url 'customer_update' %}" class="dropdown-item">Profile</a>
+                             <a href="{% url 'reset_password_costomer' %}" class="dropdown-item">Reset Password</a>
 				        </div>
 			        </li>
 
