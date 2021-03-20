@@ -432,7 +432,7 @@
 @media (max-width: 600px) {
     .content-all {
         width: 130px;
-        height: 180px;
+        height: 200px;
     }
 }
 
@@ -517,10 +517,10 @@
 
 @media (max-width: 600px) {
     .card-event{
-        width: 125px;
-        height: 40px;
-        margin-left: -148px;
-        margin-top: 111px;
+        width: 130px;
+        height: 80px;
+        margin-left: -140px;
+        margin-top: 110px;
     }
 
 }
