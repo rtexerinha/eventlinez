@@ -445,7 +445,7 @@
 .item {
     width: 220px;
     height: 159px;
-    border-radius: 10px;
+    border-radius: 10px 10px 0 0;
 }
 
 @media (max-width: 600px) {
@@ -456,10 +456,10 @@
 }
 
 .text-default{
-    font-family: Nunito, serif;
+    font-family: Open Sans, serif;
     font-style: normal;
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: normal;
+    font-size: 12px;
     line-height: 20px;
     display: flex;
     align-items: center;
@@ -507,10 +507,10 @@
 }
 
 .card-event {
-    width: 253px;
-    height: 50%;
+    width: 220px;
+    height: 35%;
     margin-top: 160px;
-    margin-left: -240px;
+    margin-left: -230px;
     display: flex;
 }
 
@@ -1599,6 +1599,11 @@ div.content-right-signin {
 	transition: .3s ease-in-out;
 }
 .hover01:hover {
-	-webkit-transform: scale(1.1);
-	transform: scale(1.1);
+    border: 2px solid #FFFFFF;
+    box-sizing: border-box;
+    box-shadow: 10px 0 20px -5px rgba(115,115,115,0.75),  -10px 0 20px -5px rgba(115,115,115,0.75);
+    border-bottom-right-radius: 25px;
+    border-bottom-left-radius: 25px;
+	/*-webkit-transform: scale(1.1);*/
+	/*transform: scale(1.1);*/
 }
