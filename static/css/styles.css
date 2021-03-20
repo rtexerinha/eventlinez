@@ -1590,20 +1590,12 @@ div.content-right-signin {
 
 
 
-
-/* Zoom In #1 */
-.hover01{
-	-webkit-transform: scale(1);
-	transform: scale(1);
+.content-all:hover #hover01{
 	-webkit-transition: .3s ease-in-out;
 	transition: .3s ease-in-out;
-}
-.hover01:hover {
     border: 2px solid #FFFFFF;
     box-sizing: border-box;
     box-shadow: 10px 0 20px -5px rgba(115,115,115,0.75),  -10px 0 20px -5px rgba(115,115,115,0.75);
     border-bottom-right-radius: 25px;
     border-bottom-left-radius: 25px;
-	/*-webkit-transform: scale(1.1);*/
-	/*transform: scale(1.1);*/
 }
