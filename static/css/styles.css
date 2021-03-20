@@ -512,6 +512,7 @@
     margin-top: 160px;
     margin-left: -230px;
     display: flex;
+    border: 2px solid transparent;
 }
 
 @media (max-width: 600px) {
@@ -1588,7 +1589,9 @@ div.content-right-signin {
     color: #d90075;
 }
 
-
+#hover01:after{
+    border: 2px solid red;
+}
 
 .content-all:hover #hover01{
 	-webkit-transition: .3s ease-in-out;
@@ -1596,6 +1599,6 @@ div.content-right-signin {
     border: 2px solid #FFFFFF;
     box-sizing: border-box;
     box-shadow: 10px 0 20px -5px rgba(115,115,115,0.75),  -10px 0 20px -5px rgba(115,115,115,0.75);
-    border-bottom-right-radius: 25px;
-    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
 }
