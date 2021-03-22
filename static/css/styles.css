@@ -419,14 +419,16 @@
 }
 
 .content-all {
-    height: 300px;
+    height: 270px;
     width: 221px;
     display: grid;
     grid-gap: 10px;
     grid-auto-flow: column;
-    margin: 0 0 0 60px;
+    margin: 0 0 15px 60px;
     box-sizing: border-box;
     position: relative;
+    border-radius: 8px;
+    border: 1px solid #dae0e5;
 }
 
 @media (max-width: 600px) {
@@ -443,9 +445,11 @@
 }
 
 .item {
-    width: 220px;
+    width: 217px;
     height: 159px;
-    border-radius: 08px 08px 0 0;
+    border-radius: 8px 8px 0 0;
+    /*border: 1px solid #f5f5f5;*/
+    border-bottom-color: transparent;
 }
 
 @media (max-width: 600px) {
@@ -467,10 +471,13 @@
 }
 
 .text-date{
-    font-size: 17px;
+    font-size: 14px;
     line-height: 20px;
     margin-bottom: 0!important;
     text-align: center;
+}
+.text-date-time{
+    font-size: 10px!important;
 }
 
 @media(max-width: 600px){
@@ -513,6 +520,7 @@
     margin-left: -230px;
     display: flex;
     border: 2px solid transparent;
+    border-radius: 0 0 8px 8px;
 }
 
 @media (max-width: 600px) {
@@ -1589,16 +1597,26 @@ div.content-right-signin {
     color: #d90075;
 }
 
-#hover01:after{
-    border: 2px solid red;
-}
+/*#hover01:after{*/
+/*    border: 2px solid red;*/
+/*}*/
 
-.content-all:hover #hover01{
-	-webkit-transition: .3s ease-in-out;
-	transition: .3s ease-in-out;
-    border: 2px solid #FFFFFF;
-    box-sizing: border-box;
-    box-shadow: 10px 0 20px -5px rgba(115,115,115,0.75),  -10px 0 20px -5px rgba(115,115,115,0.75);
-    border-bottom-right-radius: 8px;
-    border-bottom-left-radius: 8px;
+/*.content-all:hover #hover01{*/
+/*	-webkit-transition: .3s ease-in-out;*/
+/*	transition: .3s ease-in-out;*/
+/*    border: 2px solid #FFFFFF;*/
+/*    !*box-sizing: border-box;*!*/
+/*    !*box-shadow: 5px 0 5px -5px rgba(115,115,115,0.75),  -5px 0 5px -5px rgba(115,115,115,0.75);*!*/
+/*    border-bottom-right-radius: 8px;*/
+/*    border-bottom-left-radius: 8px;*/
+/*}*/
+
+
+.content-all:hover{
+    /*-moz-box-shadow: 5px 0 10px -5px rgba(115,115,115,0.75),  -5px 0 10px -5px rgba(115,115,115,0.75);*/
+    /*-webkit-box-shadow: 5px 0 10px -5px rgba(115,115,115,0.75),  -5px 0 10px -5px rgba(115,115,115,0.75);*/
+    box-shadow: 5px 0 8px -5px rgba(115,115,115,0.5),  -5px 0 8px -5px rgba(115,115,115,0.75);
+    /*box-shadow: 1px 1px 1px 1px rgba(115,115,115,0.1),  1px 1px 1px 1px rgba(115,115,115,0.75);*/
+    border-radius: 8px;
+
 }
