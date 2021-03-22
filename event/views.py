@@ -149,7 +149,7 @@ def tickets_excel(request, event_id=None):
     return response
 
 
-@login_required
+@login_required(login_url='/promoter/account/login/')
 def update_promoter(request):
     user_id = request.user.id
     promoter = Promoter.objects.get(user_id=user_id)
@@ -167,7 +167,7 @@ def update_promoter(request):
         return render(request, 'update_promoter.html', {'form': form})
 
 
-@login_required
+@login_required(login_url='/promoter/account/login/')
 def reset_password(request):
 
     if request.method == 'POST':
@@ -176,10 +176,8 @@ def reset_password(request):
             user = form.save()
             update_session_auth_hash(request, user)  # Important!
             messages.success(request, 'Your password was successfully updated!')
-            if request.path == '/promoter/reset_password':
-                return redirect('events_promoter')
-            if request.path == '/costomer/reset_password':
-                return redirect('index')
+
+            return redirect('events_promoter')
 
         else:
             messages.error(request, 'Please correct the error below.')
