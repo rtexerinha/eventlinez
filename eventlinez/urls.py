@@ -30,8 +30,7 @@ urlpatterns = [
     path('promoter/update/', update_promoter, name='update_promoter'),
     path('promoter/reset_password', reset_password, name='reset_password'),
 
-    # Costomer
-    path('costomer/reset_password', reset_password, name='reset_password_costomer'),
+
 
 
     path('promoter/ticket/', tickets_list, name='ticket_list'),

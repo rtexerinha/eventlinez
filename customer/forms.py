@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UsernameField
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import PasswordChangeForm
 
 from customer.models import Customer
 from event.models import Promoter
@@ -172,3 +173,11 @@ class UserForm(forms.ModelForm):
         widgets = {
             'password': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+
+class ResetPasswordForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["old_password"].widget = forms.PasswordInput(attrs={"class": "form-control"})
+        self.fields["new_password1"].widget = forms.PasswordInput(attrs={"class": "form-control"})
+        self.fields["new_password2"].widget = forms.PasswordInput(attrs={"class": "form-control"})
