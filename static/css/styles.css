@@ -424,7 +424,7 @@
     display: grid;
     grid-gap: 10px;
     grid-auto-flow: column;
-    margin: 0 0 15px 60px;
+    margin: 0 0 40px 60px;
     box-sizing: border-box;
     position: relative;
     border-radius: 8px;
