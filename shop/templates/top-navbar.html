@@ -107,11 +107,13 @@
                         </a>
 				        <div class="dropdown-menu dropdown-menu-right">
 					        <a href="{% url 'order:order_history' %}"
-                               class="dropdown-item nav__link">
+                               class="dropdown-item nav__link item-name">
                                 Order History
                             </a>
-                             <a href="{% url 'customer_update' %}" class="dropdown-item">Profile</a>
-                             <a href="{% url 'reset_password_costomer' %}" class="dropdown-item">Reset Password</a>
+                            <div class="dropdown-divider"></div>
+                             <a href="{% url 'customer_update' %}" class="dropdown-item item-name">Profile</a>
+                            <div class="dropdown-divider"></div>
+                             <a href="{% url 'reset_password_costomer' %}" class="dropdown-item item-name">Reset Password</a>
 				        </div>
 			        </li>
 
