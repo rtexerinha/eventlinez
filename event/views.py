@@ -10,6 +10,10 @@ from django.utils.translation import ugettext
 
 from event.forms import EventForm
 from event.models import Event, Ticket
+from .models import Promoter
+from .forms import PromoterForm, ResetPasswordForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -84,7 +88,7 @@ def tickets_excel(request, event_id=None):
     props_title = {'bold': True, 'font_size': 14, 'align': 'center',
                    'valign': 'vcenter', 'font_name': 'Arial'}
 
-    props_header = {'bold': True, 'font_size': 10, 'align': 'center',  'valign': 'vcenter',
+    props_header = {'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter',
                     'color': '#171717', 'bg_color': '#F4F4F4', 'font_name': 'Arial'}
 
     props_price = {'num_format': '[$$-409]#,##0.00', 'font_size': 10, 'align': 'right', 'color': '#171717',
@@ -118,7 +122,7 @@ def tickets_excel(request, event_id=None):
                                                                        'customer__last_name'
                                                                        ).order_by('-id')
     else:
-        tickets = Ticket.objects.filter(event__promoter=request.user.promoter).\
+        tickets = Ticket.objects.filter(event__promoter=request.user.promoter). \
             values_list('id', 'event__name', 'order_item__price', 'created_at', 'customer__first_name',
                         'customer__last_name').order_by('-id')
 
@@ -143,3 +147,42 @@ def tickets_excel(request, event_id=None):
     book.close()
     output.seek(0)
     return response
+
+
+@login_required(login_url='/promoter/account/login/')
+def update_promoter(request):
+    user_id = request.user.id
+    promoter = Promoter.objects.get(user_id=user_id)
+    form = PromoterForm(instance=promoter)
+
+    if request.method == 'POST':
+        form = PromoterForm(request.POST, instance=promoter)
+
+        if form.is_valid():
+            form.save()
+            return redirect('events_promoter')
+        else:
+            return render(request, 'update_promoter.html', {'form': form})
+    elif request.method == 'GET':
+        return render(request, 'update_promoter.html', {'form': form})
+
+
+@login_required(login_url='/promoter/account/login/')
+def reset_password(request):
+
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+
+            return redirect('events_promoter')
+
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = ResetPasswordForm(request.user)
+    return render(request, 'reset_password.html', {
+        'form': form
+    })

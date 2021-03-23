@@ -140,5 +140,6 @@ dmypy.json
 cython_debug/
 
 .idea/
+
 eventlinez/media/CACHE/
 media/

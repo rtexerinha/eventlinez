@@ -1,8 +1,11 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .forms import SignUpForm, SignInForm, SignUpFormPromoter, SignInPromoterForm
+from .forms import SignUpForm, SignInForm, SignUpFormPromoter, SignInPromoterForm, CustomerForm, UserForm, \
+    ResetPasswordForm
 import logging
-
-from django.contrib.auth import login, authenticate, logout
+from .models import Customer
+from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
@@ -79,3 +82,43 @@ def signout_view_promoter(request):
 def signout_view(request):
     logout(request)
     return redirect('signin')
+
+
+@login_required
+def update_customer(request):
+    user_id = request.user.id
+    customer = Customer.objects.get(user_id=user_id)
+    form = CustomerForm(instance=customer)
+    user_form = UserForm(instance=request.user)
+
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, instance=customer)
+        
+        if form.is_valid():
+            form.save()
+            return redirect('shop:index')
+        else:
+            return render(request, 'accounts/update_customer.html', {'form': form, 'user': user_form})
+    elif request.method == 'GET':
+        return render(request, 'accounts/update_customer.html', {'form': form, 'user': user_form})
+
+
+@login_required
+def reset_password_customer(request):
+
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+
+            return redirect('shop:index')
+
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = ResetPasswordForm(request.user)
+    return render(request, 'accounts/reset_password_customer.html', {
+        'form': form
+    })

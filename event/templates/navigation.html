@@ -16,9 +16,9 @@
                 {{ request.user.username }}
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                <span class="dropdown-item">
-                    {{ request.user.username }}
-                </span>
+
+                <a class="dropdown-item" href="{% url 'update_promoter' %}">Profile</a>
+                 <a class="dropdown-item" href="{% url 'reset_password' %}">Reset Password</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="{% url 'signout_promoter' %}">Logout</a>
             </div>
