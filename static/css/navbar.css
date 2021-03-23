@@ -1,9 +1,8 @@
 .header {
     width: 100%;
-    overflow: hidden;
     background-color: #FFFFFF;
     padding: 30px 10px;
-  }
+}
 
 
 .header-left{
@@ -267,5 +266,8 @@
     padding-left: 0!important;
 }
 
-
+.item-name{
+   text-transform: none !important;
+    margin-top: 5px;
+}
 

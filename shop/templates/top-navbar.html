@@ -9,7 +9,7 @@
         <input class="input-form-search col-sm-10 col-md-7 col-lg-9 col-xl-8" type="search" placeholder="Search" aria-label="Search" name="q">
     </form>
 
-    <nav class=" col-lg-3 float-lg-right" style="height: 33px">
+    <nav class=" col-lg-3 float-lg-right" >
         {% if request.user.is_authenticated %}
             <div class="header-right-log">
                 {% if item_count > 0 %}
@@ -37,10 +37,12 @@
                     <i class="fas fa-user-circle" style="margin-left: 5px"></i>
                 </a>
 
-                <div class="dropdown-menu dropdown-menu-right" >
-					<a href="{% url 'order:order_history' %}" class="dropdown-item">Order History</a>
-                    <a href="{% url 'customer_update' %}" class="dropdown-item">Profile</a>
-                     <a href="{% url 'reset_password_costomer' %}" class="dropdown-item">Reset Password</a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown" onload="">
+					<a class="dropdown-item item-name"  href="{% url 'order:order_history' %}" >Order History</a>
+                     <div class="dropdown-divider"></div>
+                    <a class="dropdown-item item-name"  href="{% url 'customer_update' %}" >Profile</a>
+                     <div class="dropdown-divider"></div>
+                     <a class="dropdown-item item-name"  href="{% url 'reset_password_costomer' %}" >Reset Password</a>
                 </div>
                 <a class="link-nav nav__link" href="{% url 'signout' %}">Sign Out
                     <i class="fas fa-sign-out-alt" id="icons-space-left"></i>
@@ -72,7 +74,7 @@
         {% endif %}
     </nav>
 
-    <button class="nav-toggle" aria-label="toggle navigation">
+    <button class="nav-toggle" aria-label="toggle navigation" style="height: 15px">
         <span class="hamburger"></span>
     </button>
 
