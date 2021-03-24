@@ -679,6 +679,9 @@
         margin-bottom: 100px;
 
     }
+    #wrapper-log{
+        display: flex;
+    }
 }
 
 #wrapper-log {
