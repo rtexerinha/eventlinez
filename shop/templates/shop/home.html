@@ -21,7 +21,6 @@
         <div class="clearfix"></div>
     </main>
 
-
     <header class="row col-lg-12 col-sm-12 header-filter-home">
         <form class="col-lg-12 mobile"
               action="{% url 'shop:search' %}"
@@ -43,7 +42,8 @@
         <nav class="col-lg-2 col-sm-3 float-right text-center nav-filter">
             <ul>
                 <li class="nav-item dropdown{% if 'shop' in request.path %}active{% endif %}">
-                    <a class="nav-link dropdown-toggle text-bk" href="{% url 'shop:index' %}" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle text-bk" href="{% url 'shop:index' %}" id="navbarDropdown"
+                       role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         All
                     </a>
                     <div class="dropdown-menu text-mobile" aria-labelledby="navbarDropdown">
@@ -85,7 +85,7 @@
                                  style="padding-left: 5px !important; padding-right: 0 !important;"
                             >
                                 <h4 class="text-default event-name">{{event.name}}</h4>
-                                <h4 class="text-default event-name" style="color: #D90075">{{event.address}}, {{event.city}}</h4>
+                                <h4 class="text-default event-name" style="color: #D90075">{{event.city}}</h4>
                             </div>
 
                         </div>
