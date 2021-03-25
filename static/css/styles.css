@@ -671,6 +671,16 @@
 @media (max-width: 990px) {
     #wrapper-login {
         padding: 0;
+        display: flex;
+    }
+    #wrapper-profile{
+        padding: 0;
+        display: flex;
+        margin-bottom: 100px;
+
+    }
+    #wrapper-log{
+        display: flex;
     }
 }
 
