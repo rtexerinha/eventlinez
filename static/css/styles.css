@@ -759,7 +759,7 @@
     background-image: url("../../static/img/backgroundLoginMobile.jpg");
     background-repeat: no-repeat;
     background-size: cover;
-    margin: 0 0 0 30px;
+    margin-left: auto;
 }
 
 .ldrmp{
@@ -1628,5 +1628,14 @@ div.content-right-signin {
     box-shadow: 5px 0 8px -5px rgba(115,115,115,0.5),  -5px 0 8px -5px rgba(115,115,115,0.75);
     /*box-shadow: 1px 1px 1px 1px rgba(115,115,115,0.1),  1px 1px 1px 1px rgba(115,115,115,0.75);*/
     border-radius: 8px;
+}
 
+.border-login{
+    border-radius: 10px 0 0 10px;
+}
+
+@media (max-width: 900px) {
+    .border-login {
+        border-radius: 0 0 0 10px;
+    }
 }
