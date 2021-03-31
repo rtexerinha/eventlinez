@@ -9,18 +9,9 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from address.models import City
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+
 
 from customer.models import Customer
-
-
-def validate_image(image):
-    max_height = 838
-    max_width = 1600
-    height = image.height
-    width = image.width
-    if width > max_width or height > max_height:
-       raise ValidationError("Height or Width is larger than what is allowed")
 
 
 class Category(models.Model):
@@ -68,7 +59,10 @@ class Event(models.Model):
     address = models.CharField(max_length=300)
     city = models.ForeignKey(City, on_delete=models.PROTECT, null=True)
     promoter = models.ForeignKey(Promoter, on_delete=models.PROTECT)
-    image = models.ImageField(upload_to='event', blank=False, null=False, validators=[validate_image])
+    image = models.ImageField(upload_to='event', blank=False, null=False)
+    picture = ImageSpecField(source='image', processors=[ResizeToFill(1600, 838)], format='JPEG',
+                             options={'quality': 90})
+
     thumbnail = ImageSpecField(source='image',
                                processors=[ResizeToFill(200, 159)],
                                format='JPEG',
