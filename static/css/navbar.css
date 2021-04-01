@@ -265,9 +265,41 @@
 .nav-cart{
     padding-left: 0!important;
 }
+#menu{
+    display: flex;
 
-.item-name{
-   text-transform: none !important;
-    margin-top: 5px;
 }
-
+#menu li:hover > ul {
+    display: block;
+    position: absolute;
+    top:  35px;
+}
+#menu li:first-child{
+  display: flex;
+  flex-direction: column;
+    cursor: pointer;
+}
+#menu li{
+    width: 110px;
+}
+#menu li ul{
+    display: none;
+    z-index: 5;
+    border: solid 1px #d6d8d9;
+    background-color: #F9F9F9;
+    padding: 15px;
+    border-radius: 3px;
+}
+#menu li ul li{
+    margin-top: 8px;
+}
+#menu li ul li:first-child{
+    margin-top: 0px;
+}
+.item-link{
+    color: #6c757d;
+}
+.item-link:hover{
+    text-decoration: none;
+    color: #d90075;
+}
