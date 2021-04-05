@@ -21,7 +21,9 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ['event', 'created_at']
+    list_display = ['id', 'event', 'customer', 'guest_name', 'created_at']
+    list_filter = ['event']
+    search_fields = ['customer__first_name', 'guest_name']
 
     def has_delete_permission(self, request, obj=None):
         return False

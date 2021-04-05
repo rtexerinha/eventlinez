@@ -55,8 +55,7 @@
                         <th class="text-table text-bold">Event</th>
                         <th class="text-table text-bold">Price</th>
                         <th class="text-table text-bold">Created</th>
-                        <th class="text-table text-bold">Customer</th>
-
+                        <th class="text-table text-bold">Customer/Guest</th>
                     </tr>
                 </thead>
 
@@ -67,7 +66,11 @@
                         <td class="text-table">{{ticket.event}}</td>
                         <td class="text-table">{{ticket.order_item.price}}</td>
                         <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
-                        <td class="text-table">{{ticket.customer}}</td>
+                        {% if ticket.guest_name %}
+                            <td class="text-table">{{ticket.customer}}/{{ticket.guest_name}}</td>
+                        {% else %}
+                            <td class="text-table">{{ticket.customer}}</td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -78,7 +81,7 @@
             {% if tickets.paginator.num_pages > 1 %}
             <div class="row row-paginator">
                 <div class="col-lg-3 col-5">
-                    <span class="text-table" >
+                    <span class="text-table">
                         Showing {{ tickets.number }} - {{ tickets.paginator.num_pages }}
                     </span>
                 </div>
@@ -105,7 +108,6 @@
             </div>
         </section>
         </div>
-
         {% else %}
                 <div style="width: 100%; margin: auto">
                     <article id="event-div">
@@ -114,7 +116,7 @@
                         <h4 class="text-default">No tickets sold</h4>
                     </article>
                 </div>
-            {% endif %}
+        {% endif %}
     </div>
 </main>
 
