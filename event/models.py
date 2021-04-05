@@ -68,7 +68,7 @@ class Event(models.Model):
     address = models.CharField(max_length=300)
     city = models.ForeignKey(City, on_delete=models.PROTECT, null=True)
     promoter = models.ForeignKey(Promoter, on_delete=models.PROTECT)
-    image = models.ImageField(upload_to='event', blank=False, null=False, validators=[validate_image])
+    image = models.ImageField(upload_to='event', blank=False, null=False)
     thumbnail = ImageSpecField(source='image',
                                processors=[ResizeToFill(200, 159)],
                                format='JPEG',
