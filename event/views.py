@@ -64,7 +64,7 @@ def tickets_list(request):
         if event_id:
             selected_event = Event.objects.get(pk=event_id)
             tickets = tickets.filter(event=selected_event)
-    paginator = Paginator(tickets, 6)
+    paginator = Paginator(tickets, 100)
     page = int(request.GET.get('page', '1'))
     try:
         tickets = paginator.page(page)
