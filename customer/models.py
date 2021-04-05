@@ -4,8 +4,8 @@ from django.db import models
 
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='customer', unique=True)
-    first_name = models.CharField(max_length=16)
-    last_name = models.CharField(max_length=16)
+    first_name = models.CharField(max_length=40)
+    last_name = models.CharField(max_length=120)
     address = models.CharField(max_length=250, null=True, blank=True)
     cellphone = models.CharField(max_length=13, null=True, blank=True)
     email = models.CharField(max_length=32, unique=True)
