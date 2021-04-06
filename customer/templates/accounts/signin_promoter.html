@@ -32,14 +32,14 @@
                     {% csrf_token %}
                     <p>{{ form | crispy }}</p>
                     <button type="submit" class="text-default button-login">Login Promoter</button>
-                    <p class="text-default text-small-login">Don’t  have an account?
-                        <a href="{% url 'signup_promoter' %}"
-                           style="color: #d90075;
-                           text-decoration-line: none;
-                           margin-left: 5px;
-                        "> Sing up now</a>
-                      </p>
+
                 </form>
+                <div class="item-div">
+                        <p>Don’t  have an account?
+                        <a href="{% url 'signup_promoter' %}" class="links">Sing up now</a>
+                        </p>
+                        <a href="{% url 'recover_password' %}" class="links" >Forgot Your Password?</a>
+                </div>
 
             </main>
 
