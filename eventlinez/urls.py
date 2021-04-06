@@ -5,7 +5,7 @@ from django.urls import path, include
 
 import shop
 from shop.views import index
-from event.views import event_list, event_create, event_remove, event_update, tickets_list, tickets_excel, update_promoter, reset_password
+from event.views import event_list, event_create, event_remove, event_update, tickets_list, tickets_excel, update_promoter, reset_password, recover_password
 from customer.views import signup_view_promoter, signin_view_promoter, signout_view_promoter, signin_view
 
 urlpatterns = [
@@ -44,6 +44,8 @@ urlpatterns = [
     path('promoter/events/update/<int:event_id>/', event_update, name='update_event'),
     path('promoter/events/full_remove/<int:event_id>/', event_remove, name='remove_event'),
 
+    #recover password
+    path('recover_password/', recover_password, name='recover_password')
 ]
 
 
