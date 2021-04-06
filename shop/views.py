@@ -1,6 +1,5 @@
 import logging
 
-# from django.contrib.auth import login, authenticate, logout
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.db.models import Q
@@ -13,6 +12,10 @@ from .forms import ContactForm
 
 
 logger = logging.getLogger(__name__)
+
+
+def about(request):
+    return render(request, 'pages/about.html')
 
 
 def index(request, c_slug=None):
@@ -34,46 +37,37 @@ def index(request, c_slug=None):
     return render(request, 'shop/home.html', {'category': c_page, 'events': events})
 
 
-def about(request):
-    return render(request, 'pages/about.html')
-
-
 def contact(request):
     if request.method == 'GET':
         form = ContactForm()
-    else:
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            subject = form.cleaned_data['subject']
-            cellphone = form.cleaned_data['cellphone']
-            mail = form.cleaned_data['mail']
-            message = form.cleaned_data['message']
+        return render(request, 'pages/contactus.html', {'form': form})
+    form = ContactForm(request.POST)
+    if form.is_valid():
+        subject = form.cleaned_data['subject']
+        cellphone = form.cleaned_data['cellphone']
+        mail = form.cleaned_data['mail']
+        message = form.cleaned_data['message']
 
-            subject_select = "Subject: {0}".format(subject)
+        subject_select = "Subject: {0}".format(subject)
+        mail_params = dict(mail=mail, cellphone=cellphone, subject=subject_select, message=message)
 
-            msg = "# Eventlinez - New Contact \n  \n \n Mail: {0} \n Cellphone: {1} \n Subject: {2} " \
-                  "\n Message: {3}".format(mail,
-                                           cellphone,
-                                           subject_select,
-                                           message)
+        msg = "# Eventlinez - New Contact \n  \n \n Mail: {0} \n Cellphone: {1} \n Subject: {2} " \
+              "\n Message: {3}".format(mail, cellphone, subject_select, message)
 
-            html_message = render_to_string('shop/email/email_contact.html', dict(mail=mail,
-                                                                                  cellphone=cellphone,
-                                                                                  subject=subject_select,
-                                                                                  message=message))
+        html_message = render_to_string('shop/email/email_contact.html', mail_params)
 
-            try:
-                send_mail(subject_select,
-                          msg,
-                          mail,
-                          ['Info@eventlinez.com'],
-                          fail_silently=False,
-                          html_message=html_message,
-                          )
-            except BadHeaderError:
-                return HttpResponse('Invalid header found.')
-            # logger.info("We received your message and will contact you soon.")
-            return redirect('shop:index')
+        try:
+            send_mail(
+                subject=subject_select,
+                message=msg,
+                from_email="noreply@eventlinez.com",
+                recipient_list=["eventlinez.adm@gmail.com"],
+                fail_silently=False,
+                html_message=html_message
+            )
+        except BadHeaderError:
+            return HttpResponse('Invalid header found.')
+        return redirect('shop:index')
     return render(request, 'pages/contactus.html', {'form': form})
 
 
