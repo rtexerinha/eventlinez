@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'order',
 ]
 
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -70,7 +72,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'shop', 'templates/'),
                  os.path.join(BASE_DIR, 'cart', 'templates/'),
-                 os.path.join(BASE_DIR, 'order', 'templates/')],
+                 os.path.join(BASE_DIR, 'order', 'templates/'),
+                 os.path.join(BASE_DIR, '', 'templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
