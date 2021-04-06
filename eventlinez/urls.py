@@ -2,10 +2,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
+
 
 import shop
 from shop.views import index
-from event.views import event_list, event_create, event_remove, event_update, tickets_list, tickets_excel, update_promoter, reset_password, recover_password
+from event.views import event_list, event_create, event_remove, event_update, tickets_list, tickets_excel, update_promoter, reset_password
 from customer.views import signup_view_promoter, signin_view_promoter, signout_view_promoter, signin_view
 
 urlpatterns = [
@@ -45,7 +47,11 @@ urlpatterns = [
     path('promoter/events/full_remove/<int:event_id>/', event_remove, name='remove_event'),
 
     #recover password
-    path('recover_password/', recover_password, name='recover_password')
+    path('reset_password/', auth_views.PasswordResetView.as_view(), name="password_reset"),
+    path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
+    path('reset/<uidb64>/<token>', auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+    path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
+
 ]
 
 

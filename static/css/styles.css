@@ -1639,3 +1639,32 @@ div.content-right-signin {
         border-radius: 0 0 0 10px;
     }
 }
+
+.item-div{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.links{
+    color: #d90075;
+    text-decoration-line: none;
+    margin-left: 5px;
+}
+
+.links:hover{
+    color: #d90075;
+    text-decoration-line: none;
+}
+
+.limit{
+    max-width: 500px;
+    min-height: 340px;
+}
+
+
+.form-limit{
+    max-width: 500px;
+}
+
