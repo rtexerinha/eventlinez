@@ -50,8 +50,12 @@ def event_update(request, event_id):
 @login_required(login_url='/promoter/account/login/')
 def event_remove(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    event.delete()
-    return redirect('events_promoter')
+    tickets = Ticket.objects.filter(event_id=event_id)
+    if not tickets:
+        event.delete()
+        return redirect('events_promoter')
+    else:
+        return redirect('events_promoter')
 
 
 @login_required(login_url='/promoter/account/login/')
