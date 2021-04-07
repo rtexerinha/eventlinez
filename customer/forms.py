@@ -142,18 +142,6 @@ class SignUpForm(forms.Form):
 class SignInForm(AuthenticationForm):
     username = UsernameField(label="Email", widget=forms.EmailInput())
 
-    def clean(self):
-        super(SignInForm, self).clean()
-        try:
-            customer = self.user_cache.customer
-        except Customer.DoesNotExist:
-            raise ValidationError(
-                "The user is not a Customer",
-                code='non_customer'
-            )
-        return self.cleaned_data
-
-
 
 class SignInPromoterForm(AuthenticationForm):
     username = UsernameField(label="Email", widget=forms.EmailInput())
