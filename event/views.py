@@ -55,7 +55,7 @@ def event_remove(request, event_id):
         event.delete()
         return redirect('events_promoter')
     else:
-        return redirect('events_promoter')
+        return render(request, 'erro_event_delete.html', {'event': event})
 
 
 @login_required(login_url='/promoter/account/login/')
