@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from .forms import SignUpForm, SignInForm, SignUpFormPromoter, SignInPromoterForm, CustomerForm, UserForm, \
     ResetPasswordForm
@@ -7,7 +6,7 @@ import logging
 from .models import Customer
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib import messages
-from django.db import transaction, DatabaseError
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,25 +29,12 @@ def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
+            form.save()
             username = form.cleaned_data['email']
             password = form.cleaned_data['password1']
-            first_name = form.cleaned_data["first_name"]
-            last_name = form.cleaned_data['last_name']
-            cellphone = form.cleaned_data['cellphone']
-            address = form.cleaned_data['address']
-
-            try:
-                with transaction.atomic():
-                    user = User.objects.create_user(email=email, username=username, password=password,
-                                                    first_name=first_name)
-                    customer = Customer.objects.create(user=user, email=email, first_name=first_name,
-                                                       last_name=last_name, cellphone=cellphone, address=address)
-                user_auth = authenticate(username=username, password=password)
-                login(request, user_auth)
-                return redirect('shop:index')
-            except DatabaseError:
-                pass
+            user_auth = authenticate(username=username, password=password)
+            login(request, user_auth)
+            return redirect('shop:index')
     else:
         form = SignUpForm()
     return render(request, 'accounts/signup_customer.html', {'form': form})

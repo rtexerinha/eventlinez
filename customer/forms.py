@@ -1,4 +1,5 @@
 from django import forms
+from django.db import transaction, DatabaseError
 from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm
@@ -116,6 +117,30 @@ class SignUpForm(forms.Form):
                 code='user_existed'
             )
         return email_customer
+
+    def save(self):
+        if not self.is_valid():
+            # Todo: melhorar esse erro
+            raise ValidationError("Este form não é válido")
+
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    self.cleaned_data["email"],
+                    self.cleaned_data["email"],
+                    self.cleaned_data["password1"],
+                    first_name=self.cleaned_data["first_name"]
+                )
+                user.save()
+                customer = Customer(first_name=self.cleaned_data["first_name"],
+                                    email=self.cleaned_data["email"],
+                                    last_name=self.cleaned_data["last_name"],
+                                    cellphone=self.cleaned_data['cellphone'],
+                                    address=self.cleaned_data['address'],
+                                    user=user)
+                customer.save()
+        except DatabaseError:
+            pass
 
 
 class SignInForm(AuthenticationForm):
