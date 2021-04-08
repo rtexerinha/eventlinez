@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 from .forms import SignUpForm
 
@@ -31,3 +32,14 @@ class SignUpFormTest(TestCase):
                 }
         form = SignUpForm(data)
         self.assertFalse(form.is_valid())
+
+    def test_save_deve_falhar_se_dados_forem_invalidos(self):
+        data = {'first_name': 'Rafael Reuber',
+                'last_name': 'Bezerra Nogueira',
+                'password1': 'qpp1p2o3po23',
+                'password2': 'qpp1p2o3po23',
+                'email': 'rafaelreuber@test.com'
+                }
+        form = SignUpForm(data)
+        with self.assertRaises(ValidationError) as err:
+            form.save()
