@@ -69,14 +69,16 @@ class SignUpFormPromoter(forms.Form):
         )
 
         user.save()
-        promoter = Promoter(name=self.cleaned_data["name"],
-                            email=self.cleaned_data["email"],
-                            address=self.cleaned_data['address'],
-                            city=self.cleaned_data['city'],
-                            zip=self.cleaned_data['zip'],
-                            ssn=self.cleaned_data['social_security'],
-                            phone=self.cleaned_data['phone'],
-                            user=user)
+        promoter = Promoter(
+            name=self.cleaned_data["name"],
+            email=self.cleaned_data["email"],
+            address=self.cleaned_data['address'],
+            city=self.cleaned_data['city'],
+            zip=self.cleaned_data['zip'],
+            ssn=self.cleaned_data['social_security'],
+            phone=self.cleaned_data['phone'],
+            user=user
+        )
         promoter.save()
 
 
@@ -120,23 +122,22 @@ class SignUpForm(forms.Form):
 
     def save(self):
         if not self.is_valid():
-            # Todo: melhorar esse erro
-            raise ValidationError("Este form não é válido")
-
+            raise ValidationError("Could not be saved because the data didn't validate.")
         with transaction.atomic():
             user = User.objects.create_user(
-                self.cleaned_data["email"],
-                self.cleaned_data["email"],
-                self.cleaned_data["password1"],
+                username=self.cleaned_data["email"],
+                email=self.cleaned_data["email"],
+                password=self.cleaned_data["password1"],
                 first_name=self.cleaned_data["first_name"]
             )
             user.save()
-            customer = Customer(first_name=self.cleaned_data["first_name"],
-                                email=self.cleaned_data["email"],
-                                last_name=self.cleaned_data["last_name"],
-                                cellphone=self.cleaned_data['cellphone'],
-                                address=self.cleaned_data['address'],
-                                user=user)
+            customer = Customer(
+                first_name=self.cleaned_data["first_name"],
+                email=self.cleaned_data["email"],
+                last_name=self.cleaned_data["last_name"],
+                cellphone=self.cleaned_data['cellphone'],
+                address=self.cleaned_data['address'],
+                user=user)
             customer.save()
 
 
