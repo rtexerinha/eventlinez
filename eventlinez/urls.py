@@ -47,10 +47,10 @@ urlpatterns = [
     path('promoter/events/full_remove/<int:event_id>/', event_remove, name='remove_event'),
 
     #recover password
-    path('reset_password/', auth_views.PasswordResetView.as_view(), name="password_reset"),
-    path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
-    path('reset/<uidb64>/<token>', auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
-    path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
+    path('account/reset_password/', auth_views.PasswordResetView.as_view(), name="password_reset"),
+    path('account/reset_password_sent/', auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
+    path('account/reset/<uidb64>/<token>', auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+    path('account/reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
 
 ]
 
