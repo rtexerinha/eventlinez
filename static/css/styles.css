@@ -468,7 +468,9 @@
     display: flex;
     align-items: center;
     color: #171717;
+    justify-content: center
 }
+
 
 .text-date{
     font-size: 14px;
