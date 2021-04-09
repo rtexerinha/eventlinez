@@ -21,7 +21,6 @@
                     </div>
                 </div>
 
-
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" style="width: 99%">
                         <thead>
@@ -46,19 +45,13 @@
                                     <td class="text-table">{{ events.unit_price}}</td>
                                     <td class="text-table">{{ events.sales_info.qtd_sould}}/{{ events.sales_info.qtd_available}}</td>
                                     <td class="text-table">{{ events.sales_info.amount_sould}}</td>
-    {#                                    <td class="text-table">{{ events.stock }}</td>#}
                                     <td colspan="3">
                                         <div class="div-button-table">
-
-    {#                                            <a id="button-adm" href="{% url 'ticket_list' events.id %}" >#}
-    {#                                                Tickets#}
-    {#                                            </a>#}
                                             <button class="button-link">
                                                  <a href="{% url 'update_event'  events.id%}" class="icon_remove_a">
                                                     <i style="color: #d90075" class="far fa-edit icon_remove"></i>
                                                 </a>
                                             </button>
-
                                             {% if  events.sales_info.amount_sould != 0 %}
                                                <button class="button-link" data-toggle="modal" data-target="#exampleModal">
                                                 <i style="color: #d90075" class="fas fa-trash-alt icon_remove"></i>
@@ -70,7 +63,6 @@
                                                         <i style=" color: #d90075" class="fas fa-trash-alt icon_remove"></i>
                                                     </a>
                                                 </button>
-
                                             {% endif %}
                                         </div>
                                     </td>
@@ -83,17 +75,12 @@
             {% else %}
                 <div style="width: 100%; margin: auto">
                     <article id="event-div">
-{#                        <i class="far fa-calendar-plus fa-5x" style="color: #d90075; padding-bottom: 20px"></i>#}
                         <img src="{% static 'img/icon-calendar-updated.svg' %}" alt="caledar" style="padding-bottom: 20px"/>
                         <br>
                         <h4 class="text-default">Create your first event</h4>
                         <p class="text-default">You do not have any events created yet.</p>
-                        <a href="{% url 'new_events' %}"
-                               id="button-adm"
-                                class="btn btn-secondary"
-                               style="margin-top: 10px;">
-                                New Event
-                            </a>
+                        <a href="{% url 'new_events' %}" id="button-adm"
+                           class="btn btn-secondary" style="margin-top: 10px;">New Event</a>
                     </article>
                 </div>
             {% endif %}
@@ -111,9 +98,7 @@
                 </button>
               </div>
               <div class="modal-body">
-                     <p>
-                         It is not possible to delete the event because the event {{ event.name }} has tickets sold.
-                     </p>
+                 <p>You cannot delete this event because it already have tickets sold</p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -122,5 +107,4 @@
           </div>
         </div>
     </main>
-
 {% endblock content %}
