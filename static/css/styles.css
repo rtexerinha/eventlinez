@@ -1644,3 +1644,13 @@ div.content-right-signin {
         border-radius: 0 0 0 10px;
     }
 }
+
+.button-link{
+   background-color: #ffffff;
+    border: none;
+}
+
+.div-button-table{
+    display: flex;
+    align-items: center;
+}
