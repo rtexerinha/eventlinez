@@ -47,32 +47,6 @@
                          <b>Date: </b>{{ order.created|date:"d M Y" }}
                     </td>
                   </tr>
-                  <tr>
-                      <td class="tg-baqh" colspan="4">
-                          <span style="font-weight:bolder;font-style:normal">
-                              Bill to:
-                          </span>
-                          <br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.billingName }}
-                          </span>
-                          <br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.billingAddress1 }}
-                          </span>
-                          <br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.billingCity }}
-                          </span>
-                          <br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.billingPostcode }}
-                          </span><br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.shippingCountry }}
-                          </span>
-                      </td>
-                  </tr>
 
                   <tr>
                     <td class="tg-73oq">
@@ -123,33 +97,6 @@
                     <td class="tg-l93j" colspan="2">Total</td>
                     <td class="tg-c3ow" colspan="2">${{ order.total }}</td>
                   </tr>
-                    <tr>
-                      <td class="tg-baqh" colspan="4">
-                          <span style="font-weight:bolder;font-style:normal">
-                              Ship to:
-                          </span>
-                          <br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.shippingName }}
-                          </span>
-                          <br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.shippingAddress1 }}
-                          </span>
-                          <br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.shippingCity }}
-                          </span>
-                          <br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.shippingPostcode }}
-                          </span><br><br>
-                          <span style="font-weight:400;font-style:normal">
-                              {{ order.shippingCountry }}
-                          </span>
-                      </td>
-                  </tr>
-
                   <tr>
                     <td class="tg-ob96" colspan="4">
                         <span style="font-weight:bolder;font-style:normal">
