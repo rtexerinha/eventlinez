@@ -48,17 +48,30 @@
                                     <td class="text-table">{{ events.sales_info.amount_sould}}</td>
     {#                                    <td class="text-table">{{ events.stock }}</td>#}
                                     <td colspan="3">
-                                        <div style="display: flex; justify-content: center;">
+                                        <div class="div-button-table">
 
     {#                                            <a id="button-adm" href="{% url 'ticket_list' events.id %}" >#}
     {#                                                Tickets#}
     {#                                            </a>#}
-                                            <a href="{% url 'update_event'  events.id%}" class="icon_remove_a">
-                                                <i style="padding-left: 15px; padding-top: 5px; color: #d90075" class="far fa-edit icon_remove"></i>
-                                            </a>
-                                            <a href="{% url 'remove_event'  events.id%}" class="icon_remove_a">
-                                                <i style="padding-left: 15px; padding-top: 5px; color: #d90075" class="fas fa-trash-alt icon_remove"></i>
-                                            </a>
+                                            <button class="button-link">
+                                                 <a href="{% url 'update_event'  events.id%}" class="icon_remove_a">
+                                                    <i style="color: #d90075" class="far fa-edit icon_remove"></i>
+                                                </a>
+                                            </button>
+
+                                            {% if  events.sales_info.amount_sould != 0 %}
+                                               <button class="button-link" data-toggle="modal" data-target="#exampleModal">
+                                                <i style="color: #d90075" class="fas fa-trash-alt icon_remove"></i>
+                                               </button>
+                                            {%  endif %}
+                                            {% if events.sales_info.amount_sould == 0 %}
+                                                <button class="button-link">
+                                                    <a href="{% url 'remove_event'  events.id%}" class="icon_remove_a">
+                                                        <i style=" color: #d90075" class="fas fa-trash-alt icon_remove"></i>
+                                                    </a>
+                                                </button>
+
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
@@ -84,6 +97,33 @@
                     </article>
                 </div>
             {% endif %}
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Error</h5>
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                     <p>
+                         It is not possible to delete the event because the event {{ event.name }} has tickets sold.
+                     </p>
+                     <br>
+                     <p>
+                        Please edit event availability
+                     </p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
         </div>
     </main>
 
