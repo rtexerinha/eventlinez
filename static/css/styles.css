@@ -470,6 +470,11 @@
     color: #171717;
 }
 
+
+.centralized{
+    justify-content: center;
+}
+
 .text-date{
     font-size: 14px;
     line-height: 20px;
