@@ -60,7 +60,7 @@ class Event(models.Model):
                                      decimal_places=2,
                                      validators=[MinValueValidator(Decimal('0.00'))])
     stock = models.IntegerField()
-    category = models.ForeignKey(Category, on_delete=models.PROTECT, null=True)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT)
     description = RichTextField(blank=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -101,6 +101,7 @@ class Event(models.Model):
         return self
 
     def get_url(self):
+        # TODO: Entender a necessidade de ter a categoria como parâmetro da URL
         return reverse('shop:product_event_detail', args=[self.category.slug, self.slug])
 
     def __str__(self):
