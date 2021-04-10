@@ -1,10 +1,9 @@
 from django.urls import path
 from . import views
-# from event.views import dast path('admin/promoter', dast, name='dast'),
+
 app_name = 'shop'
 
 urlpatterns = [
-
     path('', views.index, name='index'),
     path('search', views.search_result, name='search'),
     path('<slug:c_slug>/', views.index, name='events_by_category'),
