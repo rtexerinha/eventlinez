@@ -85,9 +85,9 @@ class SignUpFormPromoter(forms.Form):
 class SignUpForm(forms.Form):
     first_name = forms.CharField(max_length=40, required=True)
     last_name = forms.CharField(max_length=120, required=True)
-    email = forms.EmailField(label="Email", max_length=254, required=True)
+    address = forms.CharField(max_length=250)
     cellphone = forms.CharField(max_length=13)
-    address = forms.CharField(max_length=255)
+    email = forms.EmailField(label="Email", required=True)
     password1 = forms.CharField(
         label=_("Password"),
         strip=False,
