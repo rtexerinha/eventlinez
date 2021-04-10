@@ -8,7 +8,7 @@ class Customer(models.Model):
     last_name = models.CharField(max_length=120)
     address = models.CharField(max_length=250, null=True, blank=True)
     cellphone = models.CharField(max_length=13, null=True, blank=True)
-    email = models.CharField(max_length=32, unique=True)
+    email = models.EmailField(unique=True)
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
