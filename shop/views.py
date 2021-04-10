@@ -1,4 +1,6 @@
 import logging
+from datetime import datetime
+import itertools
 
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
@@ -22,10 +24,14 @@ def index(request, c_slug=None):
     c_page = None
     if c_slug is not None:
         c_page = get_object_or_404(Category, slug=c_slug)
-        products_list = Event.objects.filter(category=c_page, available=True)
+        event_list = Event.objects.filter(category=c_page, available=True)
     else:
-        products_list = Event.objects.all().filter(available=True).order_by('-created')
-    paginator = Paginator(products_list, 8)
+        now = datetime.now()
+        future_events = Event.objects.all().filter(available=True, event_date__gte=now).order_by('event_date')
+        old_events = Event.objects.all().filter(available=True, event_date__lt=now).order_by('-event_date')
+        # event_list = future_events | old_events
+        event_list = list(itertools.chain(future_events, old_events))
+    paginator = Paginator(event_list, 8)
     try:
         page = int(request.GET.get('page', '1'))
     except:
