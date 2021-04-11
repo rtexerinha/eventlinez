@@ -68,16 +68,16 @@ def cart_detail(request, cart_items=None):
     if request.method == 'POST':
         token = request.POST['stripeToken']
         email = request.POST['stripeEmail']
-        billing_name = request.POST['stripeBillingName']
-        billing_address1 = request.POST['stripeBillingAddressLine1']
-        billingcity = request.POST['stripeBillingAddressCity']
-        billing_postcode = request.POST['stripeBillingAddressZip']
-        billing_country = request.POST['stripeBillingAddressCountryCode']
-        shipping_name = request.POST['stripeShippingName']
-        shipping_address1 = request.POST['stripeShippingAddressLine1']
-        shippingcity = request.POST['stripeShippingAddressCity']
-        shipping_postcode = request.POST['stripeShippingAddressZip']
-        shipping_country = request.POST['stripeShippingAddressCountryCode']
+        billing_name = request.user.get_full_name()
+        billing_address1 = request.user.customer.address
+        # billingcity = request.POST['stripeBillingAddressCity']
+        # billing_postcode = request.POST['stripeBillingAddressZip']
+        # billing_country = request.POST['stripeBillingAddressCountryCode']
+        shipping_name = request.user.customer.address
+        # shipping_address1 = request.POST['stripeShippingAddressLine1']
+        # shippingcity = request.POST['stripeShippingAddressCity']
+        # shipping_postcode = request.POST['stripeShippingAddressZip']
+        # shipping_country = request.POST['stripeShippingAddressCountryCode']
 
         try:
             customer = stripe.Customer.create(email=email, source=token)
@@ -92,7 +92,6 @@ def cart_detail(request, cart_items=None):
         except stripe.error.CardError as err:
             content = err.user_message
             return render(request, 'order/error_cart.html', {'content': content})
-        logger.info("Creating the order")
         try:
             order = Order.objects.create(
                 token=token,
@@ -100,15 +99,15 @@ def cart_detail(request, cart_items=None):
                 total=total,
                 emailAddress=email,
                 billingName=billing_name,
-                billingAddress1=billing_address1,
-                billingCity=billingcity,
-                billingPostcode=billing_postcode,
-                billingCountry=billing_country,
-                shippingName=shipping_name,
-                shippingAddress1=shipping_address1,
-                shippingCity=shippingcity,
-                shippingPostcode=shipping_postcode,
-                shippingCountry=shipping_country,
+                # billingAddress1=billing_address1,
+                # billingCity=billingcity,
+                # billingPostcode=billing_postcode,
+                # billingCountry=billing_country,
+                # shippingName=shipping_name,
+                # shippingAddress1=shipping_address1,
+                # shippingCity=shippingcity,
+                # shippingPostcode=shipping_postcode,
+                # shippingCountry=shipping_country,
                 customer=request.user.customer
             )
             for item in cart_items:
@@ -121,12 +120,10 @@ def cart_detail(request, cart_items=None):
                     promo_code=item.promo_code,
                     order=order
                 )
-            logger.info("The order %s has been created" % str(order))
 
             # Updates the stripe payment title
             charge.description = "%s (Order #%s)" % (cart_items.first().event.name, order.id)
             charge.save()
-
             cart.delete()
             send_mail.delay(order.id)
             return redirect('order:thanks', order.id)

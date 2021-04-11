@@ -265,18 +265,15 @@
                     <a href="{% url 'shop:index' %}" class="text-default button-cart">Continue Shopping</a>
 					<form action="" method="POST" style="margin: auto">
 						{% csrf_token %}
-					  <script src="https://checkout.stripe.com/checkout.js" class="stripe-button button-cart"
-					    data-key="{{ data_key }}"
-					    data-amount="{{ stripe_total }}"
-					    data-name="Eventlinez"
-                        data-email="{{ user.customer.email}}"
-					    data-description="{{ description }}"
-					    data-image="{% static 'img/logosmall.jpg' %}"
-					    data-locale="auto"
-					    data-currency="usd"
-					    data-shipping-address="true"
-					    data-billing-address="true"
-					    data-zip-code="true">
+					    <script src="https://checkout.stripe.com/checkout.js" class="stripe-button button-cart"
+                            data-key="{{ data_key }}"
+                            data-amount="{{ stripe_total }}"
+                            data-name="Eventlinez"
+                            data-email="{{ user.customer.email }}"
+                            data-description="{{ description }}"
+                            data-image="{% static 'img/logosmall.jpg' %}"
+                            data-locale="auto"
+                            data-currency="usd">
 					  </script>
 					</form>
 				</div>
