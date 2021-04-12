@@ -445,7 +445,7 @@
 }
 
 .item {
-    width: 217px;
+    width: 219px;
     height: 159px;
     border-radius: 8px 8px 0 0;
     /*border: 1px solid #f5f5f5;*/
@@ -454,7 +454,7 @@
 
 @media (max-width: 600px) {
     .item{
-        width: 130px;
+        width: 128px;
         height: 110px;
     }
 }
