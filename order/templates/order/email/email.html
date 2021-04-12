@@ -48,6 +48,17 @@
                          <b>Date: </b>{{ order.created|date:"d M Y" }}
                     </td>
                   </tr>
+                  <tr>
+                      <td class="tg-baqh" colspan="4">
+                          <span style="font-weight:bolder;font-style:normal">
+                              Bill to:
+                          </span>
+                          <br><br>
+                          <span style="font-weight:400;font-style:normal">
+                              {{ order.billingName }}
+                          </span>
+                      </td>
+                  </tr>
 
                   <tr>
                     <td class="tg-73oq">
