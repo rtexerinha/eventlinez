@@ -445,7 +445,7 @@
 }
 
 .item {
-    width: 217px;
+    width: 219px;
     height: 159px;
     border-radius: 8px 8px 0 0;
     /*border: 1px solid #f5f5f5;*/
@@ -454,7 +454,7 @@
 
 @media (max-width: 600px) {
     .item{
-        width: 130px;
+        width: 128px;
         height: 110px;
     }
 }
@@ -476,10 +476,11 @@
 }
 
 .text-date{
-    font-size: 14px;
+    font-size: 12px;
     line-height: 20px;
     margin-bottom: 0!important;
-    text-align: center;
+    padding-left: 5px;
+    color: #D90075;
 }
 .text-date-time{
     font-size: 10px!important;
@@ -487,14 +488,8 @@
 
 @media(max-width: 600px){
 .text-date{
-    font-family: Nunito, serif;
-    font-style: normal;
-    font-weight: 600;
-    font-size: 12px;
-    /*display: flex;*/
-    align-items: center;
-    color: #171717;
-}
+    font-size: 10px;
+    }
 }
 
 .card-data{
@@ -541,6 +536,12 @@
 .event-name{
     color: #000000;
     margin-top: 5px;
+    padding-left: 5px;
+}
+
+.event-location{
+    color: #ACABAB;
+    padding-left: 5px;
 }
 
 @media (max-width: 600px) {
