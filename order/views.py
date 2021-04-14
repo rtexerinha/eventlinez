@@ -1,4 +1,6 @@
 from django.shortcuts import render, get_object_or_404
+
+from event.models import Ticket
 from .models import Order
 from django.contrib.auth.decorators import login_required
 
@@ -21,3 +23,11 @@ def order_list(request):
 def order_detail(request, order_id):
     order = Order.objects.get(id=order_id)
     return render(request, 'order/order_detail.html', {'order': order})
+
+
+@login_required()
+def ticket_list(request):
+    email = str(request.user.customer.id)
+    # tickets = [{'name': 'ze do fole', 'city': 'Iracema', 'quantity': '2', 'guest': 'Bruno'}]
+    tickets = Ticket.objects.filter(customer=email)
+    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets})
