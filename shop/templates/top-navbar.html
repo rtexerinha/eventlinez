@@ -31,6 +31,11 @@
                 </a>
             {% else %}
 
+                 <a class="link-nav nav__link" href="{% url 'order:ticket_list' %}">
+                    Ticket
+                     <i class="fas fa-ticket-alt" style="margin-left: 5px"></i>
+                </a>
+
                 <a class="link-nav nav__link" href="#" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
                     {{ request.user.first_name }}
@@ -99,12 +104,18 @@
 			        </li>
 
                  {% else %}
+                      <li style="margin-top: 5px">
+                         <a class="nav__link" href="{% url 'order:ticket_list' %}">
+                             Ticket
+                             <i class="fas fa-ticket-alt" style="margin-left: 5px"></i>
+                         </a>
+                      </li>
                      <li class="nav__item">
-                        <a style="color: #d90075; text-decoration: #d90075" href="#" class="dropdown-toggle" data-toggle="dropdown"
-                       aria-haspopup="true"
-                       aria-expanded="false">{{ request.user.first_name }}
-                        <i class="fas fa-user-circle"></i>
+                         <a style="color: #d90075; text-decoration: #d90075" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"  aria-expanded="false">
+                             {{ request.user.first_name }}
+                            <i class="fas fa-user-circle"></i>
                         </a>
+
 				        <div class="dropdown-menu dropdown-menu-right">
 					        <a href="{% url 'order:order_history' %}"
                                class="dropdown-item nav__link item-name">
