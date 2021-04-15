@@ -34,14 +34,15 @@ def ticket_list(request):
     orders = Order.objects.filter(customer=email)
     return render(request, 'ticket/ticket_customer.html', {'tickets': tickets, 'orders': orders})
 
+
 @csrf_exempt
-def saveTicket(request):
-    id=request.POST.get('id','')
-    type=request.POST.get('type','')
-    value=request.POST.get('value','')
-    ticket=Ticket.objects.get(id=id)
-    if type=="guest_name":
-       ticket.guest_name=value
+def edit_guest(request):
+    id = request.POST.get('id', '')
+    type = request.POST.get('type', '')
+    value = request.POST.get('value', '')
+    ticket = Ticket.objects.get(id=id)
+    if type == "guest_name":
+        ticket.guest_name = value
 
     ticket.save()
-    return JsonResponse({"success":"Updated"})
+    return JsonResponse({"success": "Updated"})

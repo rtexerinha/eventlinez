@@ -8,6 +8,6 @@ urlpatterns = [
 	path('history/', views.order_list, name='order_history'),
 	path('<int:order_id>/', views.order_detail, name='order_detail'),
 	path('ticket/', views.ticket_list, name='ticket_list'),
-	path('ticket/save/', views.saveTicket, name='saveTicket')
+	path('ticket/save/', views.edit_guest, name='saveTicket')
 
 ]
