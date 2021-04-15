@@ -34,8 +34,7 @@ def order_detail(request, order_id):
 def ticket_list(request):
     email = str(request.user.customer.id)
     tickets = Ticket.objects.filter(customer=email)
-    orders = Order.objects.filter(customer=email)
-    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets, 'orders': orders})
+    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets})
 
 
 @csrf_exempt
