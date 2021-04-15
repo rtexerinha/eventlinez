@@ -1655,3 +1655,60 @@ div.content-right-signin {
     display: flex;
     align-items: center;
 }
+
+.tab-ticket{
+    margin: 0 auto;
+    padding-left: 5px;
+}
+
+.text-secondary-default{
+    font-weight: bold;
+    font-size: 2rem;
+    line-height: 3rem;
+    color: #171717;
+}
+
+.bg-gray{
+    background: #F4F4F4;
+}
+
+.border-tab-ticket{
+    height: 32px;
+    border-bottom: 1px solid #D7D7D7;
+    justify-content: center;
+    text-align:center;
+    margin-bottom: 0;
+}
+
+.sect-tab-ticket{
+    margin: 0 auto;
+    padding-left: 45px!important;
+}
+
+.tab-ticket-div{
+    padding: 0.5rem 0!important;
+    height: 40px;
+}
+
+.border-input{
+    border: 1px solid transparent;
+    border-left: 1px solid #D7D7D7;
+}
+
+@media(max-width: 600px){
+    .text-secondary-default {
+        font-size: 1.5rem;
+        line-height: 1rem;
+    }
+    .sect-tab-ticket {
+        padding-left: 20px!important;
+    }
+    .border-tab-ticket{
+        height: 105px;
+        margin-bottom: 10px;
+        text-align:left;
+    }
+    .tab-ticket-div{
+        height: 113px;
+    }
+}

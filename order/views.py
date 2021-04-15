@@ -28,6 +28,6 @@ def order_detail(request, order_id):
 @login_required()
 def ticket_list(request):
     email = str(request.user.customer.id)
-    # tickets = [{'name': 'ze do fole', 'city': 'Iracema', 'quantity': '2', 'guest': 'Bruno'}]
     tickets = Ticket.objects.filter(customer=email)
-    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets})
+    orders = Order.objects.filter(customer=email)
+    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets, 'orders': orders})

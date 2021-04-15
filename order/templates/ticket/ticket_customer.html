@@ -7,70 +7,61 @@
 	<main style="min-height: 70vh;">
         <section class="col-lg-12 float-right" style="height: 254px;" id="background"></section>
         <div class="clearfix"></div>
-        <section class="col-lg-11 col-sm-12 m-auto">
-            <h2 class="text-default text-secondary-default pl-4">
-                Tickets
+        <section class="col-lg-11 col-sm-12 pt-4 pb-2 m-auto">
+            <h2 class="text-default text-secondary-default pl-lg-4 pl-0">
+                My Tickets
             </h2>
         </section>
 
-        <section class="col-lg-11" style="margin: 0 auto; padding-left: 45px">
-            <h6 class="text-default" style="font-size: 20px; line-height: 27px; color: #000000;">
-                Events
-            </h6>
+        <section class="col-lg-11 sect-tab-ticket">
+{#            <h6 class="text-default" style="font-size: 20px; line-height: 27px; color: #000000;">#}
+{#                Events#}
+{#            </h6>#}
 
-             <div class="col-lg-12 col-sm-12" style="border-top: 1px solid #D7D7D7; margin-bottom: 30px"></div>
+            <div class="col-lg-12 col-sm-12" style="border-top: 1px solid #D7D7D7; margin-bottom: 30px"></div>
 
+            <main class="col-lg-12 mb-5">
+                <aside class="col-lg-12">
+                    <div class="row">
+                        <div class="col-lg-2 col-2 bg-gray">
+                            <h6 class="text-default" style="justify-content: center">Tickets</h6>
+                        </div>
 
-              <div class="col-lg-11 mb-5">
-                <div class="row">
-                        <div class="col-lg-3">event</div>
-                             <br>
-                             <br>
+                        <div class="col-lg-5 col-4 bg-gray">
+                            <h6 class="text-default">Events</h6>
+                        </div>
 
-                        <main class="col-lg-9">
-                            <div class="row">
-                                <div class="col-lg-3 col-6" style="background: #F4F4F4;">
-                                    <h6 class="text-default" style="justify-content: center">Tickets</h6>
-                                </div>
+                        <div class="col-lg-5 col-6 bg-gray">
+                            <h6 class="text-default">Guest Name</h6>
+                        </div>
+                    </div>
 
-                                <div class="col-lg-9 col-6" style="background: #F4F4F4;">
-                                    <h6 class="text-default">Guest Name</h6>
-                                </div>
+                    <article class="row">
+                    {% for tickets in tickets %}
+                        <div class="tab-ticket-div col-lg-2 col-2">
+                            <p class="text-default border-tab-ticket" >
+                                {{ tickets.id }}
+                            </p>
+                        </div>
 
-                            </div>
+                        <div class="tab-ticket-div col-lg-5 col-4 ">
+                            <p class="text-default border-tab-ticket">
+                                {{ tickets.event }}
+                            </p>
+                        </div>
 
+                        <form class="tab-ticket-div col-lg-5 col-5" style="border-bottom: 1px solid #D7D7D7; ">
+                            <input class="col-12 border-input"
+                                   type="text"
+                                   value="{{ tickets.guest_name }}"
+                                   name="guest"
+                                   id="guest">
+                        </form>
 
-                            <article class="row">
-                            {% for tickets in tickets %}
-
-                                <div class="col-lg-3 col-6" style="padding: 0.5rem 0;">
-                                    <p class="text-default" style="height: 32px;
-                                                                   border-bottom: 1px solid #D7D7D7;
-                                                                   justify-content: center;
-                                                                   text-align:center;
-                                                                   margin-bottom: 0;">
-                                        {{ tickets.id }}
-                                    </p>
-                                </div>
-
-                                <form class="col-lg-9 col-6" style="border-bottom: 1px solid #D7D7D7;
-                                                              {#background: #00cc66;#}
-                                                              padding: 0.5rem 0; height: 40px; ">
-                                    <input class="col-12"
-                                           type="text"
-                                           value="{{ tickets.guest_name }}"
-                                           name="guest"
-                                           id="guest"
-                                           style="border: 1px solid transparent;
-                                                  border-left: 1px solid #D7D7D7;">
-
-                                </form>
-                            {% endfor %}
-                            </article>
-                        </main>
-
-                </div>
-              </div>
+                    {% endfor %}
+                    </article>
+                </aside>
+            </main>
         </section>
 	</main>
 
