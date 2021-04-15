@@ -1695,7 +1695,37 @@ div.content-right-signin {
     border-left: 1px solid #D7D7D7;
 }
 
+
+
+element.style {
+}
+.form-control-ticket {
+    display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
 @media(max-width: 600px){
+    .td-ticket{
+        padding: 0.5rem 0.2rem 0.2rem 0.2rem!important;
+    }
+    .form-control-ticket {
+        font-size: 0.625rem;
+    }
+    .text-default-mobile{
+        font-size: 10px!important;
+    }
+
     .text-secondary-default {
         font-size: 1.5rem;
         line-height: 1rem;
