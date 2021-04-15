@@ -3,6 +3,8 @@ from django.shortcuts import render, get_object_or_404
 from event.models import Ticket
 from .models import Order
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
 def thanks(request, order_id):
@@ -31,3 +33,15 @@ def ticket_list(request):
     tickets = Ticket.objects.filter(customer=email)
     orders = Order.objects.filter(customer=email)
     return render(request, 'ticket/ticket_customer.html', {'tickets': tickets, 'orders': orders})
+
+@csrf_exempt
+def saveTicket(request):
+    id=request.POST.get('id','')
+    type=request.POST.get('type','')
+    value=request.POST.get('value','')
+    ticket=Ticket.objects.get(id=id)
+    if type=="guest_name":
+       ticket.guest_name=value
+
+    ticket.save()
+    return JsonResponse({"success":"Updated"})
