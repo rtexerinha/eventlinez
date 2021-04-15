@@ -21,9 +21,10 @@
 .header-right-log{
     position:relative;
     float: right;
-    width: 315px;
+    width: 350px;
     margin-top: -40px;
     display: flex;
+    justify-content: flex-end;
   }
 
 @media (min-width: 770px) and (max-width:800px){
