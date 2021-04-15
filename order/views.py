@@ -9,9 +9,12 @@ from django.views.decorators.csrf import csrf_exempt
 
 def thanks(request, order_id):
     customer_order = None
+    tickets = None
     if order_id:
         customer_order = get_object_or_404(Order, id=order_id)
-    return render(request, 'thanks.html', {'customer_order': customer_order})
+        email = str(request.user.customer.id)
+        tickets = Ticket.objects.filter(customer=email, order_item__order_id__exact=customer_order)
+    return render(request, 'thanks.html', {'customer_order': customer_order, 'tickets': tickets})
 
 
 @login_required()

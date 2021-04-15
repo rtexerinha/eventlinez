@@ -4,25 +4,148 @@
 	Thanks - Eventlinez! We hope to see you soon.
 {% endblock %}
 {% block content %}
-	<div>
-		<div class="text-center" style="min-height: 60vh">
-			<br>
-			<br>
-			<h1 class="text-center my_title">
+    <main style="min-height: 70vh;">
+
+
+        {% if tickets %}
+        <section class="col-lg-12 float-right" style="height: 254px;" id="background">
+            <h1 class="text-secondary-default text-center mt-5 mb-3" style="color: white">
 				Thanks for placing your order
 			</h1>
-			<br>
-			<br>
-			        <div style="min-width: 18rem;">
-						<img src="{{product.image.url}}" alt="{{product.name}}">
-					</div>
-			<p>Your order number is: <b>{{ customer_order.id }}</b></p>
-			<br>
-			<p>
-				We have received your order and will begin processing right away. For your records an email confirmation has been sent to you. It contains details of the items you purchased.
+			<p class="text-default text-tertiary-default m-auto wd-50">
+				We have received your order and will begin processing right away.
+
+                For your records an email confirmation has been sent to you.
+
+                It contains details of the items you purchased.
 			</p>
-		</div>
-	</div>
-	<br>
-	<br>
+            <br>
+            <p class="text-default text-tertiary-default">
+                Your order number is: {{ customer_order.id }}
+            </p>
+        </section>
+        <div class="clearfix"></div>
+
+        <section class="col-lg-11 col-sm-12 pt-5 pb-4 m-auto">
+            <h2 class="text-default text-secondary-default pl-lg-4 pl-0" style="line-height: 2rem;">
+                As a matter of control, please inform whoever owns each ticket
+            </h2>
+        </section>
+
+        <section class="col-lg-11 sect-tab-ticket">
+{#            <h6 class="text-default" style="font-size: 20px; line-height: 27px; color: #000000;">#}
+{#                Events#}
+{#            </h6>#}
+
+            <div class="col-lg-12 col-sm-12" style="border-top: 1px solid #D7D7D7; margin-bottom: 30px"></div>
+
+
+                     <table class="table col-lg-12">
+                    <tr>
+                        <th>Tickets</th>
+                        <th>Event</th>
+                        <th>Guest Name</th>
+
+                    </tr>
+
+                    {% for tickets in tickets %}
+                        <tr>
+                            <td class="td-ticket">
+                                <p class="text-default text-default-mobile"> {{ tickets.id }}</p>
+                            </td>
+                            <td class="td-ticket">
+                                <p class="text-default text-default-mobile"> {{ tickets.event }}</p>
+                            </td>
+                            <td class="text-default editable td-ticket" data-id="{{ tickets.id }}" data-type="guest_name">
+                                <input type="guest_name" class="input-data form-control-ticket " value="{{ tickets.guest_name }}">
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                    </table>
+
+        </section>
+
+        {% else %}
+
+              <section class="col-lg-12">
+            <h1 class="text-secondary-default text-center mt-5 mb-3">
+				Thanks for placing your order
+			</h1>
+			<p class="text-default text-tertiary-default m-auto wd-50" style="color: black;font-weight: normal;">
+				We have received your order and will begin processing right away.
+
+                For your records an email confirmation has been sent to you.
+
+                It contains details of the items you purchased.
+			</p>
+            <br>
+            <p class="text-default text-tertiary-default" style="color: black">
+                Your order number is: {{ customer_order.id }}
+            </p>
+        </section>
+
+        {% endif %}
+	</main>
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script>
+        $(document).ready(function(){
+            $(document).on("dblclick", ".editable" ,function(){
+
+                let value=$(this).text();
+                let input_type="guest_name";
+                let input="<input type='"+input_type+"' class='input-data form-control' value='"+value+"' >";
+                $(this).html(input);
+                {#$(this).removeClass("editable")#}
+            }
+            );
+
+
+            $(document).on("blur",".input-data",function(){
+                let value=$(this).val();
+                let td=$(this).parent("td");
+                $(this).remove();
+                td.html(value);
+                td.addClass("editable");
+                let type=td.data("type");
+                sendToServer(td.data("id"),value,type);
+            });
+            $(document).on("keypress",".input-data",function(e){
+                let key=e.which;
+                if(key===13){
+                    let value=$(this).val();
+                    let td=$(this).parent("td");
+                    $(this).remove();
+                    td.html(value);
+                    td.addClass("editable");
+                    let type=td.data("type");
+                    sendToServer(td.data("id"),value,type);
+                }
+            });
+
+            function sendToServer(id,value,type){
+                console.log(id);
+                console.log(value);
+                console.log(type);
+                $.ajax({
+                    url:"http://127.0.0.1:8000/order/ticket/save/",
+                    type:"POST",
+                    data:{id:id,type:type,value:value},
+                })
+                .done(function(response){
+                    console.log(response);
+                })
+                .fail(function(){
+                   console.log("Error Occured");
+                });
+
+            }
+
+        });
+    </script>
+
 {% endblock %}

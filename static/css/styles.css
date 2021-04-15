@@ -1668,6 +1668,20 @@ div.content-right-signin {
     color: #171717;
 }
 
+.text-tertiary-default{
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 20px;
+    align-items: center;
+    text-align: center;
+    color: #FFFFFF;
+    justify-content: center;
+}
+
+.wd-50{
+    width: 50%;
+}
+
 .bg-gray{
     background: #F4F4F4;
 }
@@ -1695,10 +1709,6 @@ div.content-right-signin {
     border-left: 1px solid #D7D7D7;
 }
 
-
-
-element.style {
-}
 .form-control-ticket {
     display: block;
     width: 100%;
@@ -1716,6 +1726,11 @@ element.style {
 }
 
 @media(max-width: 600px){
+
+    .wd-50{
+        width: 100%;
+    }
+
     .td-ticket{
         padding: 0.5rem 0.2rem 0.2rem 0.2rem!important;
     }
