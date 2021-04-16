@@ -1664,7 +1664,8 @@ div.content-right-signin {
 .text-secondary-default{
     font-weight: bold;
     font-size: 2rem;
-    line-height: 3rem;
+    line-height: revert;
+    /*line-height: 3rem;*/
     color: #171717;
 }
 
@@ -1743,7 +1744,7 @@ div.content-right-signin {
 
     .text-secondary-default {
         font-size: 1.5rem;
-        line-height: 1rem;
+        /*line-height: 1rem;*/
     }
     .sect-tab-ticket {
         padding-left: 20px!important;
