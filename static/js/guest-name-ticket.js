@@ -17,10 +17,8 @@ $(document).ready(function(){
     });
 
     function sendToServer(id,value,type){
-        let endpoint = document.getElementById('endpoint-url-div').getAttribute('url');
         $.ajax({
-            // url:"http://127.0.0.1:8000/order/ticket/save/",
-            url: endpoint,
+            url: "/order/ticket/save/",
             type:"POST",
             data:{id:id,type:type,value:value},
         })
