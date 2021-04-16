@@ -6,6 +6,10 @@ $(document).ready(function(){
         saveGuestName(td.data("id"),value,type);
     });
 
+    $(function() {
+        $('.tooltip-wrapper').tooltip({position: "bottom"});
+    });
+
     $(document).on("keypress",".input-data",function(e){
         let key=e.which;
         if(key===13){
