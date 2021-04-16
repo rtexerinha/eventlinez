@@ -55,9 +55,9 @@
                                      style="width: 100%"
                                      data-title="It is no longer possible to change the guest name">
 
-                                    <input disabled type="guest_name" placeholder="Type it Guest Name"
-                                           class="input-data form-control-ticket "
-                                           value="{{ tickets.guest_name|default_if_none:'' }}">
+                                    <p disabled class="text-default">
+                                         {{ tickets.guest_name|default_if_none:'' }}
+                                    </p>
                                 </div>
                             </td>
                             {% endif %}
