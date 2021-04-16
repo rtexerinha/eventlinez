@@ -81,25 +81,13 @@
 {% endblock %}
 
 
+
 {% block custom_js %}
     <script>
         $(document).ready(function(){
-            $(document).on("dblclick", ".editable" ,function(){
-
-                let value=$(this).text();
-                let input_type="guest_name";
-                let input="<input type='"+input_type+"' class='input-data form-control' value='"+value+"' >";
-                $(this).html(input);
-                {#$(this).removeClass("editable")#}
-            }
-            );
-
             $(document).on("blur",".input-data",function(){
                 let value=$(this).val();
                 let td=$(this).parent("td");
-                $(this).remove();
-                td.html(value);
-                td.addClass("editable");
                 let type=td.data("type");
                 sendToServer(td.data("id"),value,type);
             });
@@ -109,18 +97,12 @@
                 if(key===13){
                     let value=$(this).val();
                     let td=$(this).parent("td");
-                    $(this).remove();
-                    td.html(value);
-                    td.addClass("editable");
                     let type=td.data("type");
                     sendToServer(td.data("id"),value,type);
                 }
             });
 
             function sendToServer(id,value,type){
-                console.log(id);
-                console.log(value);
-                console.log(type);
                 $.ajax({
                     url:"http://127.0.0.1:8000/order/ticket/save/",
                     type:"POST",
@@ -132,8 +114,9 @@
                 .fail(function(){
                    console.log("Error Occured");
                 });
+
             }
+
         });
     </script>
-
-{% endblock %}
+{% endblock custom_js %}
