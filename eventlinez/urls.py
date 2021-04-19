@@ -44,13 +44,17 @@ urlpatterns = [
     path('promoter/events/update/<int:event_id>/', event_update, name='update_event'),
     path('promoter/events/full_remove/<int:event_id>/', event_remove, name='remove_event'),
 
+
 ]
+
+
 
 
 admin.site.site_header = 'Eventlinez'
 admin.site.index_title = 'Admin Panel'
 admin.site.site_title = 'Welcome Eventlinez'
 handler404 = shop.views.handler404
+handler500 = shop.views.handler500
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
