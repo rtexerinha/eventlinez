@@ -98,3 +98,7 @@ def search_result(request):
 
 def handler404(request, exception):
     return render(request, 'pages/error.html')
+
+
+def handler500(request, *args, **argv):
+    return render(request, 'pages/500.html', status=500)
