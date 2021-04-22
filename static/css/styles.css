@@ -1676,7 +1676,17 @@ div.content-right-signin {
     border-radius: 10px;
     color: #FFFFFF;
     justify-content: center;
+}
 
+.d-pr{
+    display: flex;
+    padding-right: 70px!important;
+}
+
+@media (min-width: 1600px) {
+    .d-pr{
+        padding-right: 80px!important;
+    }
 }
 
 .button-tickets:hover {
