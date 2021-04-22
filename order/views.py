@@ -3,8 +3,6 @@ from django.shortcuts import render, get_object_or_404
 from event.models import Ticket
 from .models import Order
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 
 @login_required()
@@ -30,22 +28,3 @@ def order_detail(request, order_id):
     return render(request, 'order/order_detail.html', {'order': order})
 
 
-@login_required()
-def ticket_list(request):
-    email = str(request.user.customer.id)
-    tickets = Ticket.objects.filter(customer=email)
-    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets})
-
-
-@csrf_exempt
-@login_required
-def edit_guest(request):
-    id = request.POST.get('id', '')
-    type = request.POST.get('type', '')
-    value = request.POST.get('value', '')
-    ticket = Ticket.objects.get(id=id)
-    if type == "guest_name":
-        ticket.guest_name = value
-
-    ticket.save()
-    return JsonResponse({"success": "Updated"})
