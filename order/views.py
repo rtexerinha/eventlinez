@@ -38,6 +38,7 @@ def ticket_list(request):
 
 
 @csrf_exempt
+@login_required
 def edit_guest(request):
     id = request.POST.get('id', '')
     type = request.POST.get('type', '')
