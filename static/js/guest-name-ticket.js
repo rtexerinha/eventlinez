@@ -22,7 +22,7 @@ $(document).ready(function(){
 
     function saveGuestName(id, value, type){
         $.ajax({
-            url: "/order/ticket/save/",
+            url: "/customer/ticket/save/",
             type:"POST",
             data:{id:id, type:type, value:value},
         })
