@@ -11,7 +11,7 @@ def thanks(request, order_id):
     tickets = None
     if order_id:
         customer_order = get_object_or_404(Order, id=order_id)
-        tickets = Ticket.objects.filter(order_item__order=customer_order)
+        tickets = Ticket.objects.filter(order_item__order=customer_order).order_by('created_at')
     return render(request, 'thanks.html', {'customer_order': customer_order, 'tickets': tickets})
 
 
