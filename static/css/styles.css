@@ -1655,3 +1655,132 @@ div.content-right-signin {
     display: flex;
     align-items: center;
 }
+
+.tab-ticket{
+    margin: 0 auto;
+    padding-left: 5px;
+}
+
+.text-secondary-default{
+    font-weight: bold;
+    font-size: 2rem;
+    line-height: revert;
+    /*line-height: 3rem;*/
+    color: #171717;
+}
+
+.button-tickets{
+    width: 100%;
+    height: 40px;
+    background: #D90075;
+    border-radius: 10px;
+    color: #FFFFFF;
+    justify-content: center;
+}
+
+.d-pr{
+    display: flex;
+    padding-right: 70px!important;
+}
+
+@media (min-width: 1600px) {
+    .d-pr{
+        padding-right: 80px!important;
+    }
+}
+
+.button-tickets:hover {
+    background: rgba(217, 0, 117, 0.8);
+    text-decoration: none;
+     color: #FFFFFF;
+}
+
+.text-tertiary-default{
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 20px;
+    align-items: center;
+    text-align: center;
+    color: #FFFFFF;
+    justify-content: center;
+}
+
+.wd-50{
+    width: 50%;
+}
+
+.bg-gray{
+    background: #F4F4F4;
+}
+
+.border-tab-ticket{
+    height: 32px;
+    border-bottom: 1px solid #D7D7D7;
+    justify-content: center;
+    text-align:center;
+    margin-bottom: 0;
+}
+
+.sect-tab-ticket{
+    margin: 0 auto;
+    padding-left: 45px!important;
+}
+
+.tab-ticket-div{
+    padding: 0.5rem 0!important;
+    height: 40px;
+}
+
+.border-input{
+    border: 1px solid transparent;
+    border-left: 1px solid #D7D7D7;
+}
+
+.form-control-ticket {
+    display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+@media(max-width: 600px){
+
+    .wd-50{
+        width: 100%;
+    }
+
+    .td-ticket{
+        padding: 0.5rem 0.2rem 0.2rem 0.2rem!important;
+    }
+    .form-control-ticket {
+        font-size: 0.625rem;
+    }
+    .text-default-mobile{
+        font-size: 10px!important;
+    }
+
+    .text-secondary-default {
+        font-size: 1.5rem;
+        /*line-height: 1rem;*/
+    }
+    .sect-tab-ticket {
+        padding-left: 20px!important;
+    }
+    .border-tab-ticket{
+        height: 105px;
+        margin-bottom: 10px;
+        text-align:left;
+    }
+    .tab-ticket-div{
+        height: 113px;
+    }
+}
