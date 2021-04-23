@@ -1696,17 +1696,17 @@ div.content-right-signin {
 }
 
 .text-tertiary-default{
-    font-weight: bold;
+
     font-size: 1rem;
     line-height: 20px;
     align-items: center;
-    text-align: center;
-    color: #FFFFFF;
-    justify-content: center;
+    text-align: left;
+    /*justify-content: center;*/
 }
 
 .wd-50{
     width: 50%;
+    background: #0b2e13;
 }
 
 .bg-gray{
