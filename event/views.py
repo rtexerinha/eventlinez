@@ -40,10 +40,13 @@ def event_create(request):
 @login_required(login_url='/promoter/account/login/')
 def event_update(request, event_id):
     instance = get_object_or_404(Event, id=event_id)
-    form = EventForm(request.POST or None, instance=instance)
-    if form.is_valid():
-        form.save()
-        return redirect('events_promoter')
+    if request.method == 'GET':
+        form = EventForm(instance=instance)
+    if request.method == 'POST':
+        form = EventForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect('events_promoter')
     return render(request, 'event_create.html', {'form': form})
 
 
@@ -186,3 +189,5 @@ def reset_password(request):
     return render(request, 'reset_password.html', {
         'form': form
     })
+
+
