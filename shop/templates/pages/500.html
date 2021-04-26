@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+{% block metadescription %}{% endblock %}
+{% block title %}
+	Error - Eventlinez!
+{% endblock %}
+
+
+{% block content %}
+    <div class="container" style="min-height: 70vh; justify-content: center; text-align: center">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="error-template" style="margin-top: 15vh">
+                <h1>Oops!</h1>
+                <h2>Sorry, internal server 500 error!</h2>
+
+                <div class="error-actions mt-2">
+                    <a href="{% url 'index' %}" class="btn btn-lg" style="background-color: #d90075; color: #FFFFFF">
+                    <span class="glyphicon glyphicon-home">
+                    </span>
+                        Take Me Home </a>
+                    <a href="{% url 'contact' %}" class="btn btn-lg" style="background-color: #FFFFFF; color: #d90075">
+                        <span class="glyphicon glyphicon-envelope"></span>
+                        Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
