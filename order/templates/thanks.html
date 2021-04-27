@@ -10,10 +10,16 @@
 
         {% if tickets|length > 1 %}
         <section class="col-lg-12 float-right" style="height: 254px;" id="background">
-            <h1 class="text-secondary-default text-center mt-5 mb-3" style="color: white">
+
+        </section>
+        <div class="clearfix"></div>
+
+        <section class="col-lg-11 col-sm-12 m-auto">
+            <h1 class="text-secondary-default pl-lg-4  mt-5 mb-3">
 				Thanks for placing your order
 			</h1>
-			<p class="text-default text-tertiary-default m-auto wd-50">
+
+            <p class="text-default text-tertiary-default pl-lg-4 m-auto">
 				We have received your order and will begin processing right away.
 
                 For your records an email confirmation has been sent to you.
@@ -21,13 +27,13 @@
                 It contains details of the items you purchased.
 			</p>
             <br>
-            <p class="text-default text-tertiary-default">
+            <p class="text-default pl-lg-4  text-tertiary-default">
                 Your order number is: {{ customer_order.id }}
             </p>
-        </section>
-        <div class="clearfix"></div>
 
-        <section class="col-lg-11 col-sm-12 pt-5 pb-4 m-auto">
+        </section>
+
+        <section class="col-lg-11 col-sm-12 pt-3 pb-4 m-auto">
             <h2 class="text-default text-secondary-default pl-lg-4 pl-0" style="line-height: 2rem;">
                 Enter the name of your guests on tickets.
             </h2>
