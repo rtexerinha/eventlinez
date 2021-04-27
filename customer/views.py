@@ -149,5 +149,4 @@ def guest_list(request):
     today = datetime.today()
     email = str(request.user.customer.id)
     tickets = Ticket.objects.filter(customer=email, event__event_date__gte=today)
-    past_tickets = Ticket.objects.filter(customer=email, event__event_date__lte=today)
-    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets, 'pastTickets': past_tickets})
+    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets})

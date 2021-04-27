@@ -8,24 +8,15 @@
 {% block content %}
 	<main style="min-height: 70vh;">
 
-        <section class="col-lg-12 float-right" style="height: 254px;" id="background"></section>
-        <div class="clearfix"></div>
-
-
-    {% if tickets or pastTickets%}
+    {% if tickets %}
         <section class="col-lg-11 col-sm-12 pt-4 pb-2 m-auto">
             <h2 class="text-default text-secondary-default pl-lg-4 pl-0">
                 My Tickets
             </h2>
         </section>
 
-    {% if tickets %}
+
         <section class="col-lg-11 sect-tab-ticket">
-            <div class="col-lg-12 col-sm-12 mt-lg-2 pl-0" style="border-bottom: 1px solid #D7D7D7; margin-bottom: 30px">
-                <h6 class="text-default" style="font-weight: 600; font-size: 1rem;">
-                    Upcoming events ou new events
-                </h6>
-            </div>
 
             <table class="table col-lg-12">
                 <tr>
@@ -47,15 +38,13 @@
 
                     <td class="text-default editable td-ticket" data-id="{{ tickets.id }}" data-type="guest_name">
                         <input type="guest_name" placeholder="Type it Guest Name"
-                               class="input-data form-control-ticket "
+                               class="input-data form-control-ticket"
                                value="{{ tickets.guest_name|default_if_none:'' }}">
                     </td>
-{#                           {% endif %}#}
                 </tr>
             {% endfor %}
 
             </table>
-
         </section>
 
         <section class="d-pr col-lg-12 mb-5" style="display: flex;">
@@ -67,52 +56,6 @@
             </div>
         </section>
 
-    {% endif %}
-
-
-    {% if pastTickets%}
-        <section class="col-lg-11 sect-tab-ticket">
-
-            <div class="col-lg-12 col-sm-12 mt-lg-2 pl-0" style="border-bottom: 1px solid #D7D7D7; margin-bottom: 30px">
-                <h6 class="text-default" style="font-weight: 600; font-size: 1rem;">
-                    Past events
-                </h6>
-            </div>
-
-            <table class="table col-lg-12">
-                <tr>
-                    <th style="border-top: transparent !important;">Tickets</th>
-                    <th style="border-top: transparent !important;">Events</th>
-                    <th style="border-top: transparent !important;">Guest Name</th>
-                </tr>
-
-            {% for pastTickets in pastTickets%}
-                <tr>
-                    <td class="td-ticket">
-                        <p class="text-default text-default-mobile"> {{ pastTickets.id }}</p>
-                            {{ tickets.created_at }}
-                    </td>
-
-                    <td class="td-ticket">
-                        <p class="text-default text-default-mobile"> {{ pastTickets.event }}</p>
-                            {{  tickets.event.event_date }}
-                    </td>
-
-                    <td class="td-ticket">
-                    {% if pastTickets.guest_name %}
-                        <p class="text-default text-default-mobile">{{ pastTickets.guest_name}}</p>
-                    {% else %}
-                     <p class="text-default text-default-mobile">
-                        No guest added
-                     </p>
-                    {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-
-            </table>
-        </section>
-    {% endif %}
 
 
     {% else %}
