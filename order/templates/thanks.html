@@ -13,17 +13,13 @@
 				Thanks for placing your order
 			</h1>
 
-            <p class="text-default text-tertiary-default pl-lg-4 m-auto">
+            <p class="text-default text-tertiary-default pl-lg-4 m-auto" style="line-height: 1.5rem;">
 				We have received your order and will begin processing right away.
 
                 For your records an email confirmation has been sent to you.
 
-                It contains details of the items you purchased.
+                It contains details of the items you purchased. Your order number is: {{ customer_order.id }}
 			</p>
-            <br>
-            <p class="text-default pl-lg-4  text-tertiary-default">
-                Your order number is: {{ customer_order.id }}
-            </p>
 
         </section>
 
@@ -32,10 +28,11 @@
             <h2 class="small-text text-default text-secondary-default pl-lg-4 pl-0"
                 style="line-height: 2rem;
                        display: inline-block;
+                       font-size: 1rem;
 ">
                 Please provide the Guest Names for their tickets
                 <span class="ml-0 pl-0">
-                    <i class="fas fa-ticket-alt fa-2x-lg"></i>
+                    <i class="fas fa-ticket-alt"></i>
                 </span>
 
             </h2>
@@ -66,7 +63,7 @@
 
         </section>
 
-            <div class="d-pr col-lg-12 mb-5">
+            <div class="d-pr col-lg-12 mb-5 pb-4">
                 <div class="col-lg-10"></div>
                 <div class="col-lg-2 col-12">
                 <a class="button-tickets text-default" href="{% url 'shop:index' %}"
