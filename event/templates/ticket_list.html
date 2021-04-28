@@ -54,6 +54,7 @@
                         <th class="text-table text-bold">Num</th>
                         <th class="text-table text-bold">Event</th>
                         <th class="text-table text-bold">Price</th>
+                        <th class="text-table text-bold">Promo Code</th>
                         <th class="text-table text-bold">Created</th>
                         <th class="text-table text-bold">Customer/Guest</th>
                     </tr>
@@ -65,6 +66,7 @@
                         <td class="text-table">{{ticket.id}}</td>
                         <td class="text-table">{{ticket.event}}</td>
                         <td class="text-table">{{ticket.order_item.price}}</td>
+                         <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>
                         <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
                         {% if ticket.guest_name %}
                             <td class="text-table">{{ticket.customer}}/{{ticket.guest_name}}</td>
