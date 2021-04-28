@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -144,6 +146,7 @@ def edit_guest(request):
 
 @login_required()
 def guest_list(request):
+    today = datetime.today()
     email = str(request.user.customer.id)
-    tickets = Ticket.objects.filter(customer=email)
+    tickets = Ticket.objects.filter(customer=email, event__event_date__gte=today)
     return render(request, 'ticket/ticket_customer.html', {'tickets': tickets})
