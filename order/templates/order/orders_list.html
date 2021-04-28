@@ -16,6 +16,7 @@
 						<th class="title-table-order">Order Number</th>
 						<th class="title-table-order">Order Date</th>
 						<th class="title-table-order">Total Amount</th>
+                        <th class="title-table-order">Tickets Qty</th>
 						<th class="title-table-order">Status</th>
 					</tr>
 				</thead>
@@ -32,6 +33,10 @@
                         </td>
 						<td class="text-body-table">
                             {{ orders.total }}
+                        </td>
+
+                        <td class="text-body-table">
+                            {{ orders.ticket_qty }}
                         </td>
 						<td class="text-body-table">
                             <i class="fas fa-check" style="color: #1e7e34"></i>&nbsp

@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core import mail
+from django.db.models import Sum
 
 from customer.models import Customer
 from event.models import Event, Ticket
@@ -28,6 +29,9 @@ class Order(models.Model):
     payment_code = models.CharField(max_length=200)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ['-created']
+
     def send_notification(self):
         subject = "Eventlinez - New Order #%s" % self.id
 
@@ -43,8 +47,12 @@ class Order(models.Model):
             html_message=message
         )
 
-    class Meta:
-        ordering = ['-created']
+    def ticket_qty(self):
+        result = self.orderitem_set.aggregate(Sum('quantity'))
+        if self.orderitem_set.count() == 0:
+            return 0
+        qty = result['quantity__sum']
+        return qty
 
     def __str__(self):
         return str(self.id)
