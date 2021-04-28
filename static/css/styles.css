@@ -471,6 +471,7 @@
 }
 
 
+
 .centralized{
     justify-content: center;
 }
@@ -1677,6 +1678,11 @@ div.content-right-signin {
     color: #171717;
 }
 
+.small-text{
+    font-size: 1.5rem;
+}
+
+
 .button-tickets{
     width: 100%;
     height: 40px;
@@ -1704,7 +1710,6 @@ div.content-right-signin {
 }
 
 .text-tertiary-default{
-
     font-size: 1rem;
     line-height: 20px;
     align-items: center;
@@ -1760,8 +1765,15 @@ div.content-right-signin {
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
-@media(max-width: 600px){
+.fa-2x-lg{
+    font-size: 1.4rem;
+      vertical-align: center;
+}
 
+@media(max-width: 600px){
+    .fa-2x-lg{
+        font-size: 1rem;
+    }
     .wd-50{
         width: 100%;
     }
@@ -1780,6 +1792,10 @@ div.content-right-signin {
         font-size: 1.5rem;
         /*line-height: 1rem;*/
     }
+
+    .small-text{
+        font-size: 1rem;
+    }
     .sect-tab-ticket {
         padding-left: 20px!important;
     }
@@ -1792,7 +1808,6 @@ div.content-right-signin {
         height: 113px;
     }
 }
-
 
 .item-div{
     display: flex;
