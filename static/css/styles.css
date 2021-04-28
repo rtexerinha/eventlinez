@@ -537,7 +537,15 @@
 .event-name{
     color: #000000;
     margin-top: 5px;
+    margin-bottom: 5px;
     padding-left: 5px;
+    line-height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* number of lines to show */
+    -webkit-box-orient: vertical;
+
 }
 
 .event-location{
@@ -548,7 +556,7 @@
 @media (max-width: 600px) {
     .event-name{
         font-size: 10px;
-        line-height: 10px;
+        line-height: 15px;
     }
 
 }
@@ -1799,4 +1807,31 @@ div.content-right-signin {
     .tab-ticket-div{
         height: 113px;
     }
+}
+
+.item-div{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.links{
+    color: #d90075;
+    text-decoration-line: none;
+    margin-left: 5px;
+}
+
+.links:hover{
+    color: #d90075;
+    text-decoration-line: none;
+}
+
+.limit{
+    max-width: 500px;
+    min-height: 70vh;
+}
+
+.form-limit{
+    max-width: 500px;
 }

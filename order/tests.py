@@ -2,7 +2,26 @@ from django.test import TestCase
 from django.core import mail
 from model_bakery import baker
 
+from .models import Order
 from .models import OrderItem
+
+
+class OrderModel(TestCase):
+
+    def test_ticket_qty(self):
+        event = baker.make('event.Event', description="foo", stock=10, unit_price=100)
+        order = baker.make('order.Order', emailAddress="me@gmail.com")
+        order_item1 = OrderItem(event=event, quantity=1, price=100, amount=100, fee=10, order=order)
+        order_item2 = OrderItem(event=event, quantity=3, price=100, amount=100, fee=10, order=order)
+        order_item1.save()
+        order_item2.save()
+
+        self.assertEqual(order.ticket_qty(), 4)
+
+    def test_ticket_qty_com_ordem_sem_linha(self):
+        event = baker.make('event.Event', description="foo", stock=10, unit_price=100)
+        order = baker.make('order.Order', emailAddress="me@gmail.com")
+        self.assertEqual(order.ticket_qty(), 0)
 
 
 class OrderMailTest(TestCase):
