@@ -113,7 +113,7 @@ class Ticket(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
     order_item = models.ForeignKey('order.OrderItem', on_delete=models.PROTECT)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
-    guest_name = models.CharField(max_length=150, blank=True, null=True)
+    guest_name = models.CharField(max_length=161, blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
 
 
