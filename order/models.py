@@ -77,9 +77,13 @@ class OrderItem(models.Model):
 @receiver(post_save, sender=OrderItem)
 def create_tickets(sender, instance, **kwargs):
     for i in range(0, instance.quantity):
+        guest_name = None
+        if instance.quantity == 1:
+            guest_name = instance.order.customer.first_name + " " + instance.order.customer.last_name
         Ticket.objects.create(
             event=instance.event,
             customer=instance.order.customer,
             order_item=instance,
-            price=instance.event.unit_price
+            price=instance.event.unit_price,
+            guest_name=guest_name
         )

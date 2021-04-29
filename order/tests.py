@@ -3,6 +3,7 @@ from django.core import mail
 from model_bakery import baker
 
 from .models import Order
+from event.models import Ticket
 from .models import OrderItem
 
 
@@ -22,6 +23,25 @@ class OrderModel(TestCase):
         event = baker.make('event.Event', description="foo", stock=10, unit_price=100)
         order = baker.make('order.Order', emailAddress="me@gmail.com")
         self.assertEqual(order.ticket_qty(), 0)
+
+    def test_guest_name_deve_ser_o_customer_quando_uma_ordem_tiver_apenas_um_ticket(self):
+        event = baker.make('event.Event', description="foo")
+        order = baker.make('order.Order', emailAddress="me@gmail.com")
+        item1 = baker.make(OrderItem, event=event, quantity=1, order=order)
+
+        tiket1 = Ticket.objects.get(order_item=item1)
+        self.assertEqual(tiket1.guest_name, order.customer.first_name + " " + order.customer.last_name)
+
+        event2 = baker.make('event.Event', description="foo2")
+        event3 = baker.make('event.Event', description="foo3")
+        order2 = baker.make('order.Order', emailAddress="me@gmail.com")
+        item1 = baker.make(OrderItem, event=event2, quantity=1, order=order2)
+        item2 = baker.make(OrderItem, event=event3, quantity=1, order=order2)
+
+        tiket1 = Ticket.objects.get(order_item=item1)
+        tiket2 = Ticket.objects.get(order_item=item2)
+        self.assertEqual(tiket1.guest_name, order2.customer.first_name + " " + order2.customer.last_name)
+        self.assertEqual(tiket2.guest_name, order2.customer.first_name + " " + order2.customer.last_name)
 
 
 class OrderMailTest(TestCase):
