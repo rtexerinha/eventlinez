@@ -112,6 +112,7 @@ def tickets_excel(request, event_id=None):
 
     sheet.set_column('B:B', 40)
     sheet.set_column('D:E', 20)
+    sheet.set_column('F:F', 40)
     sheet.set_row(1, 25)
     sheet.set_default_row(30)
     sheet.merge_range('A1:E1', u"{0}".format(ugettext("Tickets Sold")), title)
@@ -122,16 +123,15 @@ def tickets_excel(request, event_id=None):
                                                                        'order_item__price',
                                                                        'order_item__promo_code',
                                                                        'created_at',
-                                                                       'customer__first_name',
-                                                                       'customer__last_name'
+                                                                        'guest_name'
                                                                        ).order_by('-id')
     else:
         tickets = Ticket.objects.filter(event__promoter=request.user.promoter). \
-            values_list('id', 'event__name', 'order_item__price', 'order_item__promo_code', 'created_at', 'customer__first_name',
-                        'customer__last_name').order_by('-id')
+            values_list('id', 'event__name', 'order_item__price', 'order_item__promo_code', 'created_at',
+                        'guest_name').order_by('-id')
 
     row_num = 1
-    columns = ['Ticket', 'Event', 'Price', 'Promo Code',  'Date', 'First Name', 'Last Name']
+    columns = ['Ticket', 'Event', 'Price', 'Promo Code',  'Date', 'Guest Name']
     for col_num in range(len(columns)):
         sheet.write(row_num, col_num, columns[col_num], tthead)
 
@@ -145,8 +145,10 @@ def tickets_excel(request, event_id=None):
         else:
             sheet.write_string(row, 3, data[3], tbody_style, )
         sheet.write(row, 4, data[4].strftime('%Y-%m-%d %H:%M'), tbody_style)
-        sheet.write_string(row, 5, data[5], tbody_style)
-        sheet.write_string(row, 6, data[6], tbody_style)
+        if data[5] == None:
+            sheet.write_string(row, 5, '', tbody_style )
+        else:
+            sheet.write_string(row, 5, data[5], tbody_style)
 
     way = path.abspath("static")
     logo = path.join(way, 'img', 'logo.png')
