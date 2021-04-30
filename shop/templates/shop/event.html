@@ -56,9 +56,10 @@
                     </table>
 
                     {% if event.sales_info.qtd_available <= 0%}
-                        <p  class="d-flex justify-content-center" style="margin-top: 10%; font-size: 2rem">
-                            <b>Sold out</b>
-                        </p>
+                        <h4  class="text-default d-flex justify-content-center"
+                             style="margin-top: 10%; font-size: 2rem; color: #d90075">
+                            Sold Out
+                        </h4>
                     {% else %}
                         <br>
                         <form action="/cart/add/{{ event.id }}/" method="post">

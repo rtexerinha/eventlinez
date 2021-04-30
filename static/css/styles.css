@@ -1155,8 +1155,7 @@ div.content-right-signin {
 
 @media (max-width: 650px) {
     .container-cart{
-        margin: 0;
-        width: 100%;
+        margin: 0 auto;
         padding: 0;
     }
     /*#background-cart {*/
