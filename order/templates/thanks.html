@@ -55,7 +55,9 @@
                         <p class="text-default text-default-mobile"> {{ tickets.event }}</p>
                     </td>
                     <td class="text-default editable td-ticket" data-id="{{ tickets.id }}" data-type="guest_name">
-                        <input type="guest_name" class="input-data form-control-ticket " value="{{ tickets.guest_name|default_if_none:'' }}">
+                        <input type="guest_name" class="input-data form-control-ticket"
+                               placeholder="Enter Your Guest Name"
+                               value="{{ tickets.guest_name|default_if_none:'' }}">
                     </td>
                 </tr>
                 {% endfor %}
