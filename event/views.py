@@ -104,7 +104,7 @@ def tickets_excel(request, event_id=None):
     props_table = {'font_size': 10, 'align': 'center', 'color': '#171717', 'bg_color': '#FFFFFF',
                    'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'}
     # Styles
-    title = book.add_format(props_title)
+    title_format = book.add_format(props_title)
     tthead = book.add_format(props_header)
     event_style = book.add_format(props_event)
     tbody_style = book.add_format(props_table)
@@ -115,7 +115,7 @@ def tickets_excel(request, event_id=None):
     sheet.set_column('F:F', 40)
     sheet.set_row(1, 25)
     sheet.set_default_row(30)
-    sheet.merge_range('A1:E1', u"{0}".format(ugettext("Tickets Sold")), title)
+    sheet.merge_range('A1:F1', u"", title_format)
 
     if event_id:
         tickets = Ticket.objects.filter(event_id=event_id).values_list('id',
