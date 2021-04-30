@@ -72,9 +72,9 @@
                         </td>
 
 
-                        {% if cart_item.quantity <= cart_item.event.stock %}
+                        {% if cart_item.quantity <= cart_item.event.sales_info.qtd_available %}
                         <td>
-                            {% if cart_item.event.stock  == 1 %}
+                            {% if cart_item.event.sales_info.qtd_available  == 1 %}
                                 <a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a">
                                    <i class="fas fa-minus-circle custom_icon"></i>
                                 </a>&nbsp;
@@ -200,9 +200,9 @@
                             {% endif %}
                         </td>
 
-                        {% if cart_item.quantity <= cart_item.event.stock %}
+                        {% if cart_item.quantity <= cart_item.event.sales_info.qtd_available %}
                         <td>
-                            {% if cart_item.event.stock  == 1 %}
+                            {% if cart_item.event.sales_info.qtd_available  == 1 %}
                                 <a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a">
                                    <i class="fas fa-minus-circle custom_icon"></i>
                                 </a>&nbsp;
