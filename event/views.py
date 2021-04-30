@@ -118,18 +118,13 @@ def tickets_excel(request, event_id=None):
     sheet.merge_range('A1:F1', u"", title_format)
 
     if event_id:
-        tickets = Ticket.objects.filter(event_id=event_id).values_list('id',
-                                                                       'event__name',
-                                                                       'order_item__price',
-                                                                       'order_item__promo_code',
-                                                                       'created_at',
-                                                                        'guest_name'
-                                                                       ).order_by('-id')
+        tickets = Ticket.objects.filter(event_id=event_id).values_list(
+            'id', 'event__name', 'order_item__price', 'order_item__promo_code',
+            'created_at', 'guest_name').order_by('-id')
     else:
         tickets = Ticket.objects.filter(event__promoter=request.user.promoter). \
-            values_list('id', 'event__name', 'order_item__price', 'order_item__promo_code', 'created_at',
-                        'guest_name').order_by('-id')
-
+            values_list('id', 'event__name', 'order_item__price',
+                        'order_item__promo_code', 'created_at', 'guest_name').order_by('-id')
     row_num = 1
     columns = ['Ticket', 'Event', 'Price', 'Promo Code',  'Date', 'Guest Name']
     for col_num in range(len(columns)):
@@ -140,13 +135,14 @@ def tickets_excel(request, event_id=None):
         sheet.write_number(row, 0, data[0], tbody_style)
         sheet.write_string(row, 1, data[1], event_style)
         sheet.write_number(row, 2, data[2], money_format, )
-        if data[3] == None:
+
+        if data[3] is None:
             sheet.write_string(row, 3, '', tbody_style, )
         else:
             sheet.write_string(row, 3, data[3], tbody_style, )
         sheet.write(row, 4, data[4].strftime('%Y-%m-%d %H:%M'), tbody_style)
-        if data[5] == None:
-            sheet.write_string(row, 5, '', tbody_style )
+        if data[5] is None:
+            sheet.write_string(row, 5, '', tbody_style)
         else:
             sheet.write_string(row, 5, data[5], tbody_style)
 
