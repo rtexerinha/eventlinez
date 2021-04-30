@@ -38,15 +38,15 @@ def cart_add(request, event_id):
         cart.save()
     try:
         cart_item = CartItem.objects.get(event=event, cart=cart)
-        if cart_item.quantity < cart_item.event.stock:
+        qtd_available = event.sales_info()['qtd_available']
+        if cart_item.quantity >= qtd_available:
+            raise Exception('Quantity cannot be greater than %s' % qtd_available)
+        if cart_item.quantity < qtd_available:
             cart_item.quantity += 1
         cart_item.save()
     except CartItem.DoesNotExist:
-        cart_item = CartItem.objects.create(event=event,
-                                            quantity=1,
-                                            cart=cart,
-                                            promo_code=promo_code)
-        cart_item.save()
+        CartItem.objects.create(event=event, quantity=1,
+                                cart=cart,promo_code=promo_code)
     return redirect('cart:cart_detail')
 
 
