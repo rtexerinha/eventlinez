@@ -66,13 +66,9 @@
                         <td class="text-table">{{ticket.id}}</td>
                         <td class="text-table">{{ticket.event}}</td>
                         <td class="text-table">{{ticket.order_item.price}}</td>
-                         <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>
+                        <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>
                         <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
-                        {% if ticket.guest_name %}
-                            <td class="text-table">{{ticket.guest_name}}</td>
-                        {% else %}
-                            <td class="text-table">{{ticket.customer}}</td>
-                        {% endif %}
+                        <td class="text-table">{{ticket.guest_name|default_if_none:''}}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
