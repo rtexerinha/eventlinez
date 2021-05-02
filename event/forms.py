@@ -1,9 +1,11 @@
 from datetimepicker import widgets
-from django.forms import ModelForm, DateTimeField, TextInput
-from django.contrib.auth.forms import PasswordChangeForm
-from event.models import Category, Event, Promoter
-from address.models import City
 from django import forms
+from django.contrib.auth.forms import PasswordChangeForm
+from django.forms import ModelForm, DateTimeField, TextInput, ValidationError
+
+from address.models import City
+from event.models import Category, Event, Promoter
+
 
 
 # TODO: Move this to address app
@@ -22,11 +24,21 @@ class CategoryForm(ModelForm):
 class EventForm(ModelForm):
     event_date = DateTimeField(
         input_formats=['%d/%m/%Y %H:%M'],
-        widget=widgets.DateTimeInput(attrs={'id': 'datetimepicker', 'type': 'text'}))
+        widget=widgets.DateTimeInput(attrs={'id': 'datetimepicker', 'type': 'text'})
+    )
 
     class Meta:
         model = Event
         exclude = ('slug', 'created', 'updated', 'promoter',)
+
+    def clean_stock(self):
+        sales = self.instance.sales_info()
+        qtd_sould = sales['qtd_sould']
+        stock = self.cleaned_data['stock']
+
+        if stock < qtd_sould:
+            raise ValidationError("Ticket quantity cannot be less than quantity sold")
+        return stock
 
 
 class PromoterForm(ModelForm):
