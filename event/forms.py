@@ -32,9 +32,11 @@ class EventForm(ModelForm):
         exclude = ('slug', 'created', 'updated', 'promoter',)
 
     def clean_stock(self):
+        stock = self.cleaned_data['stock']
+        if not self.instance.id:
+            return stock
         sales = self.instance.sales_info()
         qtd_sould = sales['qtd_sould']
-        stock = self.cleaned_data['stock']
 
         if stock < qtd_sould:
             raise ValidationError("Ticket quantity cannot be less than quantity sold")
