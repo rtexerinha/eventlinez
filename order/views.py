@@ -1,8 +1,13 @@
-from django.shortcuts import render, get_object_or_404
-
-from event.models import Ticket
-from .models import Order
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect
+
+from cart.models import Cart
+from cart.views import _cart_id
+from event.models import Ticket
+from order.tasks import send_mail
+from .models import Order
+from .models import OrderItem
 
 
 @login_required()
@@ -28,3 +33,31 @@ def order_detail(request, order_id):
     return render(request, 'order/order_detail.html', {'order': order})
 
 
+@login_required()
+def create(request):
+    cart_id = _cart_id(request)
+    cart = Cart.objects.get(cart_id=cart_id)
+    session_id = request.GET.get('session_id')
+
+    order = Order.objects.create(
+        total=cart.amount(),
+        emailAddress=request.user.customer.email,
+        customer=request.user.customer,
+        token=session_id,
+        payment_code=session_id
+    )
+
+    items = cart.cartitem_set.filter(active=True)
+    for item in items:
+        OrderItem.objects.create(
+            event=item.event,
+            quantity=item.quantity,
+            price=item.event.unit_price,
+            amount=item.price_total(),
+            fee=item.fee(),
+            promo_code=item.promo_code,
+            order=order
+        )
+    cart.delete()
+    send_mail.delay(order.id)
+    return redirect('order:thanks', order.id)
