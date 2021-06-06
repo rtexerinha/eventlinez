@@ -1,17 +1,13 @@
 import logging
-
 import stripe
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-
-from order.models import Order, OrderItem
-from order.tasks import send_mail
+from django.http import JsonResponse
 from event.models import Event
 from .models import Cart, CartItem
 from .forms import AddItemToCardForm
+from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +42,7 @@ def cart_add(request, event_id):
         cart_item.save()
     except CartItem.DoesNotExist:
         CartItem.objects.create(event=event, quantity=1,
-                                cart=cart,promo_code=promo_code)
+                                cart=cart, promo_code=promo_code)
     return redirect('cart:cart_detail')
 
 
@@ -60,80 +56,7 @@ def cart_detail(request, cart_items=None):
         logger.error("The cart doest not exist.")
         total = 0
         pass
-
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-    stripe_total = int(total * 100)
-
-    data_key = settings.STRIPE_PUBLISHABLE_KEY
-    if request.method == 'POST':
-        token = request.POST['stripeToken']
-        email = request.POST['stripeEmail']
-        billing_name = request.user.get_full_name()
-        billing_address1 = request.user.customer.address
-        # billingcity = request.POST['stripeBillingAddressCity']
-        # billing_postcode = request.POST['stripeBillingAddressZip']
-        # billing_country = request.POST['stripeBillingAddressCountryCode']
-        shipping_name = request.user.customer.address
-        # shipping_address1 = request.POST['stripeShippingAddressLine1']
-        # shippingcity = request.POST['stripeShippingAddressCity']
-        # shipping_postcode = request.POST['stripeShippingAddressZip']
-        # shipping_country = request.POST['stripeShippingAddressCountryCode']
-
-        try:
-            customer = stripe.Customer.create(email=email, source=token)
-            logger.info("create customer")
-            description = 'New Order'
-            charge = stripe.Charge.create(
-                amount=stripe_total,
-                currency="usd",
-                description=description,
-                customer=customer.id
-            )
-        except stripe.error.CardError as err:
-            content = err.user_message
-            return render(request, 'order/error_cart.html', {'content': content})
-        try:
-            order = Order.objects.create(
-                token=token,
-                payment_code=charge.stripe_id,
-                total=total,
-                emailAddress=email,
-                billingName=billing_name,
-                # billingAddress1=billing_address1,
-                # billingCity=billingcity,
-                # billingPostcode=billing_postcode,
-                # billingCountry=billing_country,
-                # shippingName=shipping_name,
-                # shippingAddress1=shipping_address1,
-                # shippingCity=shippingcity,
-                # shippingPostcode=shipping_postcode,
-                # shippingCountry=shipping_country,
-                customer=request.user.customer
-            )
-            for item in cart_items:
-                OrderItem.objects.create(
-                    event=item.event,
-                    quantity=item.quantity,
-                    price=item.event.unit_price,
-                    amount=item.price_total(),
-                    fee=item.fee(),
-                    promo_code=item.promo_code,
-                    order=order
-                )
-
-            # Updates the stripe payment title
-            charge.description = "%s (Order #%s)" % (cart_items.first().event.name, order.id)
-            charge.save()
-            cart.delete()
-            send_mail.delay(order.id)
-            return redirect('order:thanks', order.id)
-        except ObjectDoesNotExist:
-            return HttpResponse(status=400, content="Page errada")
-
-    return render(request, 'cart.html', dict(cart_items=cart_items,
-                                             total=total,
-                                             data_key=data_key,
-                                             stripe_total=stripe_total))
+    return render(request, 'cart.html', dict(total=total, cart_items=cart_items))
 
 
 def cart_remove(request, event_id):
@@ -154,3 +77,42 @@ def full_remove(request, event_id):
     cart_item = CartItem.objects.get(event=event, cart=cart)
     cart_item.delete()
     return redirect('cart:cart_detail')
+
+
+@login_required
+@csrf_exempt
+def checkout(request):
+    cart = Cart.objects.get(cart_id=_cart_id(request))
+    cart_items = CartItem.objects.filter(cart=cart, active=True)
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    line_items = []
+
+    # https://stripe.com/docs/billing/subscriptions/decimal-amounts
+    cents = 100
+
+    for item in cart_items:
+        product = stripe.Product.create(name=item.event.name)
+        line_item = {
+            'price_data': {
+                'product': product.id,
+                'unit_amount_decimal': item.price_total() * cents,
+                'currency': 'usd'
+            },
+            'quantity': 1,
+        }
+        line_items.append(line_item)
+
+    server = request.get_raw_uri().replace(request.get_full_path(), "")
+    session = stripe.checkout.Session.create(
+        mode='payment',
+        payment_method_types=['card'],
+        success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}"',
+        cancel_url=server + '/cart/',
+        line_items=line_items,
+        customer_email=request.user.username,
+    )
+
+    return JsonResponse({
+        'session_id': session.id,
+        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY
+    })
