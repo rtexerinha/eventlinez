@@ -1,13 +1,17 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
-
+from django.views.decorators.csrf import csrf_exempt
 from cart.models import Cart
 from cart.views import _cart_id
 from event.models import Ticket
 from order.tasks import send_mail
 from .models import Order
 from .models import OrderItem
+import stripe
+from django.conf import settings
+from django.http import HttpResponse
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @login_required()
@@ -38,16 +42,28 @@ def create(request):
     cart_id = _cart_id(request)
     cart = Cart.objects.get(cart_id=cart_id)
     session_id = request.GET.get('session_id')
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    session = stripe.checkout.Session.retrieve(session_id)
+
+    if session.payment_status != "paid":
+        raise Exception('Payment not made')
+    if session.client_reference_id != str(cart.id):
+        raise Exception('The payment session is invalid for this cart %d')
 
     order = Order.objects.create(
         total=cart.amount(),
         emailAddress=request.user.customer.email,
         customer=request.user.customer,
         token=session_id,
-        payment_code=session_id
+        payment_code=session.payment_intent
     )
-
     items = cart.cartitem_set.filter(active=True)
+
+    stripe.PaymentIntent.modify(session.payment_intent,
+                                description="%s (Order #%s)" % (items.first().event.name, order.id),
+                                metadata={"order_id": order.id})
+
     for item in items:
         OrderItem.objects.create(
             event=item.event,
@@ -60,4 +76,5 @@ def create(request):
         )
     cart.delete()
     send_mail.delay(order.id)
+
     return redirect('order:thanks', order.id)

@@ -99,17 +99,22 @@ def checkout(request):
                 'currency': 'usd'
             },
             'quantity': 1,
+
         }
         line_items.append(line_item)
 
     server = request.get_raw_uri().replace(request.get_full_path(), "")
     session = stripe.checkout.Session.create(
+        payment_intent_data={
+            'setup_future_usage': 'off_session',
+        },
         mode='payment',
         payment_method_types=['card'],
-        success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}"',
+        success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
         cancel_url=server + '/cart/',
         line_items=line_items,
         customer_email=request.user.username,
+        client_reference_id=cart.id
     )
 
     return JsonResponse({
