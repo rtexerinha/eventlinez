@@ -1,6 +1,11 @@
 {% extends "base_promoter.html" %}
+{% load static %}
 {% block title %} Panel Admin - Events{% endblock %}
 {% block stylesheets %}{% endblock stylesheets %}
+{% block js-ticket %}
+     <script src="{% static 'js/ticket-export-excel.js' %}"></script>
+ {% endblock %}
+
 
 {% block content %}
 <main>
@@ -14,12 +19,12 @@
                     {% csrf_token %}
                     <label for="events_choice"
                            style="font-size: 16px; margin-top: 10px">Events</label>
-                    <select class="form-control form-control-sm col-sm-3 col-md-3 col-lg-4 mt-2"
+                    <select id="eventsChoice" class="form-control form-control-sm col-sm-3 col-md-3 col-lg-4 mt-2"
                             name="events_choice"
                             id="events_choice"
                             style="margin: 0 10px">
                         {% if selected_event %}
-                            <option value="" selected="selected">{{ selected_event.name }}</option>
+                            <option value="{{selected_event.id}}" selected="selected">{{ selected_event.name }}</option>
                         {% else %}
                             <option value="" selected="selected">All</option>
                         {% endif %}
@@ -38,12 +43,12 @@
             </div>
 
             <div class="col-lg-1 col-md-7 div-adm-newevent">
-                <a href="{%  url 'tickets_excel' %}"
+                <button onclick="exportTicket()"
                    id="button-adm"
                    class="btn btn-secondary"
                    style="margin-top: 10px;">
                     Export
-                </a>
+                </button>
             </div>
         </header>
 

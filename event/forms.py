@@ -7,7 +7,6 @@ from address.models import City
 from event.models import Category, Event, Promoter
 
 
-
 # TODO: Move this to address app
 class CityForm(ModelForm):
     class Meta:

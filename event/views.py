@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils.translation import ugettext
 
 from event.forms import EventForm
 from event.models import Event, Ticket
@@ -192,5 +191,3 @@ def reset_password(request):
     return render(request, 'reset_password.html', {
         'form': form
     })
-
-

@@ -29,6 +29,7 @@ urlpatterns = [
     path('promoter/reset_password', reset_password, name='reset_password'),
     path('promoter/ticket/', tickets_list, name='ticket_list'),
     path('promoter/ticket/<int:event_id>/', tickets_list, name='ticket_list'),
+    path('promoter/ticket/excel/<int:event_id>/', tickets_excel, name='tickets_excel'),
     path('promoter/ticket/excel/', tickets_excel, name='tickets_excel'),
     path('promoter/events/new/', event_create, name='new_events'),
     path('promoter/events/', event_list, name='events_promoter'),
