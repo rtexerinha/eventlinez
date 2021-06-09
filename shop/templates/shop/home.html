@@ -35,7 +35,11 @@
             {% if category %}
                 <h4  class="title-section"> {{ category.name }}</h4>
 	        {% else %}
-                <h4  class="title-section">Concerts</h4>
+                {% if events_all %}
+                    <h4  class="title-section">Concerts</h4>
+                {% else %}
+                    <h4  class="title-section">Upcoming events</h4>
+                {% endif %}
 	        {% endif %}
         </div>
 
@@ -59,10 +63,11 @@
         <div class="clearfix"></div>
     </header>
 
+    {% if events_all %}
     <section id="wrapper" class="col-xl-6">
 		<div class="row">
-            {% if events %}
-                {% for event in events %}
+            {% if events_all %}
+                {% for event in events_all %}
                     <div class="content-all">
                         <a href="{{event.get_url}}">
                             <img class="item" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
@@ -82,15 +87,98 @@
 		</div>
 
 		<div class="mx-auto">
-			{% if events.paginator.num_pages > 1 %}
+			{% if events_all.paginator.num_pages > 1 %}
 				<hr>
 				<div class="text-center">
-					{% for pg in events.paginator.page_range %}
-						<a href="?page={{pg}}" class="btn btn-light btn-sm {% if events.number == pg %}active{% endif %}">{{pg}}</a>
+					{% for pg in events_all.paginator.page_range %}
+						<a href="?page={{pg}}" class="btn btn-light btn-sm {% if events_all.number == pg %}active{% endif %}">{{pg}}</a>
 					{% endfor %}
 				</div>
 			{% endif %}
 		</div>
 		<br>
 	</section>
+
+
+    {% else %}
+        <section id="wrapper" class="col-xl-6">
+		<div class="row">
+            {% if events_futures %}
+                {% for event in events_futures %}
+                    <div class="content-all">
+                        <a href="{{event.get_url}}">
+                            <img class="item" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                        </a>
+                        <a href="{{event.get_url}}" style="text-decoration: none">
+                            <div class="text-default card-event" style="display: block;">
+                                <p class="text-default text-date" >{{event.event_date|date:"D, d M H:i"}}</p>
+                                <h4 class="text-default event-name">{{event.name}}</h4>
+                                <h4 class="text-default event-location">{{event.city}}</h4>
+                            </div>
+                        </a>
+                    </div>
+			    {% endfor %}
+            {% else %}
+                <h2>No events at the moment</h2>
+            {% endif %}
+		</div>
+
+		<div class="mx-auto">
+			{% if events_futures.paginator.num_pages > 1 %}
+				<hr>
+				<div class="text-center">
+					{% for pg in events_futures.paginator.page_range %}
+						<a href="?pag={{pg}}" class="btn btn-light btn-sm {% if events_futures.number == pg %}active{% endif %}">{{pg}}</a>
+					{% endfor %}
+				</div>
+			{% endif %}
+		</div>
+		<br>
+	</section>
+
+        <div class="col-lg-10 col-md-8 col-sm-9">
+            {% if category %}
+                <h4  class="title-section title-old mb-lg-5 mb-3 pl-2"> {{ category.name }}</h4>
+	        {% else %}
+                <h4  class="title-section title-old mb-lg-5 mb-3 pl-2">Past events</h4>
+	        {% endif %}
+        </div>
+
+
+     <section id="wrapper" class="col-xl-6">
+		<div class="row">
+            {% if events_old %}
+                {% for event in events_old %}
+                    <div class="content-all">
+                        <a href="{{event.get_url}}">
+                            <img class="item" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                        </a>
+                        <a href="{{event.get_url}}" style="text-decoration: none">
+                            <div class="text-default card-event" style="display: block;">
+                                <p class="text-default text-date" >{{event.event_date|date:"D, d M H:i"}}</p>
+                                <h4 class="text-default event-name">{{event.name}}</h4>
+                                <h4 class="text-default event-location">{{event.city}}</h4>
+                            </div>
+                        </a>
+                    </div>
+			    {% endfor %}
+            {% else %}
+                <h2>No events at the moment</h2>
+            {% endif %}
+		</div>
+
+		<div class="mx-auto">
+			{% if events_old.paginator.num_pages > 1 %}
+				<hr>
+				<div class="text-center">
+					{% for pg in events_old.paginator.page_range %}
+						<a href="?pages={{pg}}" class="btn btn-light btn-sm {% if events_old.number == pg %}active{% endif %}">{{pg}}</a>
+					{% endfor %}
+				</div>
+			{% endif %}
+		</div>
+		<br>
+	</section>
+
+    {% endif %}
 {% endblock %}

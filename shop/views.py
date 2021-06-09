@@ -24,23 +24,66 @@ def index(request, c_slug=None):
     c_page = None
     if c_slug is not None:
         c_page = get_object_or_404(Category, slug=c_slug)
-        event_list = Event.objects.filter(category=c_page, available=True)
-    else:
-        now = datetime.now()
-        future_events = Event.objects.all().filter(available=True, event_date__gte=now).order_by('event_date')
-        old_events = Event.objects.all().filter(available=True, event_date__lt=now).order_by('-event_date')
-        # event_list = future_events | old_events
+    lis = lists_events(c_slug)
+    page = pagination_home(request, lis)
+    return render(request, 'shop/home.html', {'category': c_page,
+                                              'events_futures': page[0],
+                                              'events_old': page[1],
+                                              'events_all': page[2]})
+
+
+def lists_events(slugs):
+    now = datetime.now()
+    if slugs is not None:
+        c_page = get_object_or_404(Category, slug=slugs)
+        future_events = Event.objects.all().filter(category=c_page, available=True,
+                                                   event_date__gte=now).order_by('event_date')
+        old_events = Event.objects.all().filter(category=c_page, available=True,
+                                                event_date__lt=now).order_by('-event_date')
         event_list = list(itertools.chain(future_events, old_events))
-    paginator = Paginator(event_list, 8)
-    try:
-        page = int(request.GET.get('page', '1'))
-    except:
-        page = 1
-    try:
-        events = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        events = paginator.page(paginator.num_pages)
-    return render(request, 'shop/home.html', {'category': c_page, 'events': events})
+    else:
+        future_events = Event.objects.all().filter(available=True,
+                                                   event_date__gte=now).order_by('event_date')
+        old_events = Event.objects.all().filter(available=True,
+                                                event_date__lt=now).order_by('-event_date')
+        event_list = list(itertools.chain(future_events, old_events))
+
+    lists_of_lists_events = [future_events, old_events, event_list]
+    return lists_of_lists_events
+
+
+def pagination_home(request, lists):
+    events_future = []
+    events_old = []
+    events_all = []
+    pagin = []
+    if len(lists[0]) < 4:
+        pagin.append(Paginator(lists[2], 4))
+        try:
+            page = int(request.GET.get('page', '1'))
+        except:
+            page = 1
+        try:
+            events_all = pagin[0].page(page)
+        except (EmptyPage, InvalidPage):
+            events_all = pagin[0].page(pagin[0].num_pages)
+    else:
+        try:
+            pag = int(request.GET.get('pag', '1'))
+            pages = int(request.GET.get('pages', '1'))
+        except:
+            pag = 1
+            pages = 1
+        pagin.append(Paginator(lists[0], 8))
+        pagin.append(Paginator(lists[1], 4))
+        try:
+            events_future = pagin[0].page(pag)
+            events_old = pagin[1].page(pages)
+        except (EmptyPage, InvalidPage):
+            events_future = pagin[0].page(pagin[0].num_pages)
+            events_old = pagin[1].page(pagin[1].num_pages)
+    eventsListsOfLists = [events_future, events_old, events_all]
+    return eventsListsOfLists
 
 
 def contact(request):

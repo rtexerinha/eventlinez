@@ -205,6 +205,10 @@
        margin-left: 30px!important;
        margin-top: 12px;
        font-size: 20px!important;
+       line-height: 28px !important;
+    }
+    .title-old {
+        margin-left: 0px!important;
     }
     .div-title-home{
         padding-left: 0!important;
@@ -224,7 +228,7 @@
 }
 
 .title-section{
-    height: 30px;
+    /*height: 30px;*/
     font-family: Nunito, serif;
     font-style: normal;
     font-weight: bold;
@@ -234,7 +238,7 @@
     align-items: center;
     color: #171717;
     margin-left: 80px;
-     text-transform: capitalize;
+    text-transform: capitalize;
 }
 
 #container-details{
