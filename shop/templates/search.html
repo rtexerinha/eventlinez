@@ -8,39 +8,43 @@
 {% endblock %}
 {% block content %}
     <aside style="min-height: 70vh;">
-	<div>
-		<p class="text-center my_search_text">You have searched for: <b>"{{ query }}"</b></p>
-	</div>
+        <div>
+            <p class="text-center my_search_text">You have searched for: <b>"{{ query }}"</b></p>
+        </div>
 
-        <section id="wrapper">
-		<div class="row">
-			{% for event in events %}
-            <div class="content-all">
-                <a href="{{event.get_url}}">
-                <img
-                    class="item"
-                    src="{{event.image.url}}" alt="{{event.name}}"/>
-                 </a>
-                    <p class="text-default card-data">{{ event.created|date:"d M Y"}}</p>
-                <div class="card-event">
-                    <h4 class="text-default event-name">{{event.name}}</h4>
-                </div>
+        <section id="wrapper" class="col-xl-6">
+            <div class="row">
+                {% if events %}
+                    {% for event in events %}
+                        <div class="content-all">
+                            <a href="{{event.get_url}}">
+                                <img class="item" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                            </a>
+                            <a href="{{event.get_url}}" style="text-decoration: none">
+                                <div class="text-default card-event" style="display: block;">
+                                    <p class="text-default text-date" >{{event.event_date|date:"D, d M H:i"}}</p>
+                                    <h4 class="text-default event-name">{{event.name}}</h4>
+                                    <h4 class="text-default event-location">{{event.city}}</h4>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <h2>No events at the moment</h2>
+                {% endif %}
             </div>
-			{% endfor %}
 
-		</div>
-
-		<div class="mx-auto">
-			{% if events.paginator.num_pages > 1 %}
-				<hr>
-				<div class="text-center">
-					{% for pg in events.paginator.page_range %}
-						<a href="?page={{pg}}" class="btn btn-light btn-sm {% if events.number == pg %}active{% endif %}">{{pg}}</a>
-					{% endfor %}
-				</div>
-			{% endif %}
-		</div>
-		<br>
-	</section>
+            <div class="mx-auto">
+                {% if events.paginator.num_pages > 1 %}
+                    <hr>
+                    <div class="text-center">
+                        {% for pg in events.paginator.page_range %}
+                            <a href="?page={{pg}}" class="btn btn-light btn-sm {% if events.number == pg %}active{% endif %}">{{pg}}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <br>
+        </section>
     </aside>
 {% endblock %}
