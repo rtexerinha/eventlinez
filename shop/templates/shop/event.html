@@ -76,7 +76,18 @@
                                  </label>
                             </div>
                             <div id="buttons-pay-event-card-details">
+                            {% now "YmdHis" as todays_date %}
+                            {% if todays_date >= event.event_date|date:"YmdHis" %}
+                                 <h6  class="text-default d-flex justify-content-center"
+                                      style="margin-top: 10%; font-size: 1rem; color: #d90075">
+                                    The event date has passed
+                                </h6>
+                                <input disabled
+                                       class="pay-event-card-details text-default"
+                                       type="submit" value="Add to Cart">
+                            {% else %}
                                 <input class="pay-event-card-details text-default" type="submit" value="Add to Cart">
+                            {% endif %}
                                 <a href="{% url 'shop:index' %}" class="pay-event-card-details text-default invert">Continue Shopping</a>
                             </div>
                         </form>

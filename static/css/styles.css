@@ -650,7 +650,11 @@
     text-decoration:none;
 }
 
-
+.pay-event-card-details:disabled, .pay-event-card-details:disabled:hover{
+    background: #CCC;
+    color: #FFFFFF;
+    border: none;
+}
 
 .pay-event-card-details:hover {
     border: 2px solid #D90075;
