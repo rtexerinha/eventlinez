@@ -20,6 +20,7 @@ urlpatterns = [
     path('shop/', include('shop.urls')),
     path('about/', shop.views.about, name='about'),
     path('contact/', shop.views.contact, name='contact'),
+    path('terms-of-service/', shop.views.terms, name='terms'),
 
     # Promoter
     path('promoter/account/create/', signup_view_promoter, name='signup_promoter'),

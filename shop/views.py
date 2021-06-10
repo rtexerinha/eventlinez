@@ -86,6 +86,10 @@ def pagination_home(request, lists):
     return eventsListsOfLists
 
 
+def terms(request):
+    return render(request, 'pages/terms.html')
+
+
 def contact(request):
     if request.method == 'GET':
         form = ContactForm()
