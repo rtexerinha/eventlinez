@@ -9,6 +9,7 @@ class Customer(models.Model):
     address = models.CharField(max_length=250, null=True, blank=True)
     cellphone = models.CharField(max_length=13, null=True, blank=True)
     email = models.EmailField(unique=True)
+    terms_confirmed = models.BooleanField(default=False, blank=False)
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name

@@ -1834,6 +1834,16 @@ div.content-right-signin {
     text-decoration-line: none;
 }
 
+.terms{
+    display: flex;
+}
+
+@media (max-width: 800px) {
+    .terms{
+        display: block;
+    }
+}
+
 .limit{
     max-width: 500px;
     min-height: 70vh;
@@ -1841,4 +1851,8 @@ div.content-right-signin {
 
 .form-limit{
     max-width: 500px;
+}
+
+#div_id_terms_confirmed .form-check-label .asteriskField{
+    display: none;
 }

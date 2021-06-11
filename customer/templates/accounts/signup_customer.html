@@ -10,7 +10,7 @@
 {% endblock %}
 {% block content %}
 
-    <div class="col-lg-12 col-12" id="wrapper-log">
+    <div class="col-lg-12 col-12" id="wrapper-log" style="min-height: 69vh">
         <section class="row row-mobile">
             <main class="col-lg-6">
                 <div class="col-lg-10 col-md-12 content-left-signin">
@@ -70,6 +70,14 @@
                             {{ form.password2|as_crispy_field }}
                         </div>
                     </div>
+
+                     <div class="form-group col-12 mb-lg-0 mb-3 pl-0 terms ">
+                        {{ form.terms_confirmed|as_crispy_field }}
+                        <a class="links ml-lg-1" href="{% url 'terms' %}">Terms</a>,
+                        <a class="links ml-lg-1" href="{% url 'terms' %}">Private Policy</a>,
+                        and
+                        <a class="links ml-lg-1" href="{% url 'terms' %}">E-Sign Consent</a>
+                     </div>
 
                     <button type="submit" class="text-default button-login mt-0">Register Account</button>
                 </form>
