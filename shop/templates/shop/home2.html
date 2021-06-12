@@ -1,0 +1,140 @@
+{% extends "base-new.html" %}
+{% load static %}
+{% block metadescription %}{% endblock %}
+{% block title %}
+	Eventlinez
+{% endblock %}
+
+{% block content %}
+    <main class="container container-center">
+    {% if detach %}
+        <section class="col-lg-12">
+            <div class="row">
+                <article class="col-lg-4">
+                    {{detach.event.name}}
+                </article>
+
+                <aside class="col-lg-8">
+                     <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                </aside>
+            </div>
+        </section>
+
+    {% else %}
+        <section class="col-lg-12">
+            <h1 id="title-home" class="text-default" style="width: max-content;">Enjoy the Experience</h1>
+            <p id="subtitle-home">
+                It is more than a ticket , it is an Experience!
+            </p>
+            <button class="button-container-body">
+                <a href="{% url 'about' %}" style="text-decoration: #FFFFFF; color: #FFFFFF;">
+                    About us
+                </a>
+            </button>
+        </section>
+        <div class="clearfix"></div>
+
+    {% endif %}
+    </main>
+
+
+    <main class="container container-center">
+        {% if events_all %}
+        <div class="col-lg-12 ml-0 mt-4 mb-4 pl-0">
+            <h2 class="h2-home">Events</h2>
+        </div>
+
+         <section class="slider">
+                <div class="m-slider swiper-container">
+                    <div class="swiper-wrapper">
+                    {% if events_all %}
+                        {% for event in events_all %}
+                            <aside class="m-slider__item swiper-slide">
+                                <div class="m-card" ontouchstart>
+                                    <a class="m-card__header" href="{{event.get_url}}">
+                                            <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                                    </a>
+
+                                    <a class="m-card__body" href="{{event.get_url}}">
+                                        <h4 class="h4-home">{{event.name}}</h4>
+
+                                        <h6 class="h6-home p-date">{{event.event_date|date:"D, d M H:i"}}</h6>
+                                        <h6 class="h6-home">{{event.city}}</h6>
+                                    </a>
+                                </div>
+                            </aside>
+                        {% endfor %}
+                    {% else %}
+                        <h2>No events at the moment</h2>
+                    {% endif %}
+                    </div>
+                </div><!-- .m-slider // -->
+            </section><!-- .slider // -->
+
+        {% else %}
+         <div class="col-lg-12 ml-0 mt-4 mb-4 pl-0">
+            <h2 class="h2-home">Upcoming Event</h2>
+        </div>
+
+        <section class="slider">
+            <div class="m-slider swiper-container">
+		        <div class="swiper-wrapper">
+                {% if events_futures %}
+                    {% for event in events_futures %}
+			            <aside class="m-slider__item swiper-slide">
+                            <div class="m-card" ontouchstart>
+					            <a class="m-card__header" href="{{event.get_url}}">
+                                        <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                                </a>
+
+                                <a class="m-card__body" href="{{event.get_url}}">
+						            <h4 class="h4-home">{{event.name}}</h4>
+
+                                    <h6 class="h6-home p-date">{{event.event_date|date:"D, d M H:i"}}</h6>
+                                    <h6 class="h6-home">{{event.city}}</h6>
+                                </a>
+				            </div>
+                        </aside>
+                    {% endfor %}
+                {% else %}
+                    <h2>No events at the moment</h2>
+                {% endif %}
+                </div>
+	        </div><!-- .m-slider // -->
+        </section><!-- .slider // -->
+
+        <div class="col-lg-12 ml-0 mt-4 mb-4 pl-0">
+            <h2 class="h2-home">Past Events</h2>
+        </div>
+
+
+        <section class="slider">
+            <div class="m-slider swiper-container">
+		        <div class="swiper-wrapper">
+                {% if events_old %}
+                    {% for event in events_old %}
+			            <aside class="m-slider__item swiper-slide" >
+                            <div class="m-card" ontouchstart>
+					            <a class="m-card__header" href="{{event.get_url}}">
+                                        <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                                </a>
+
+                                <a class="m-card__body" href="{{event.get_url}}">
+						            <h4 class="h4-home">{{event.name}}</h4>
+
+                                    <h6 class="h6-home p-date">{{event.event_date|date:"D, d M H:i"}}</h6>
+                                    <h6 class="h6-home">{{event.city}}</h6>
+                                </a>
+				            </div>
+                        </aside>
+                    {% endfor %}
+                {% else %}
+                    <h2>No events at the moment</h2>
+                {% endif %}
+                </div>
+	        </div><!-- .m-slider // -->
+        </section><!-- .slider // -->
+{% endif %}
+
+    </main>
+{% endblock %}
