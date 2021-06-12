@@ -17,16 +17,16 @@ class OrderItemAdmin(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'billingName', 'emailAddress', 'created']
-    list_display_links = ('id', 'billingName')
+    list_display = ['id', 'emailAddress', 'created']
+    list_display_links = ('id', 'emailAddress')
     search_fields = ['id', 'billingName', 'emailAddress']
     readonly_fields = ['id', 'token', 'total', 'emailAddress', 'created', 'billingName', 'billingAddress1',
                        'billingCity', 'billingPostcode', 'billingCountry', 'shippingName', 'shippingAddress1',
                        'shippingCity', 'shippingPostcode', 'shippingCountry']
     fieldsets = [
-        ('ORDER INFORMATION', {'fields': ['id', 'token', 'total', 'created']}),
+        ('ORDER INFORMATION', {'fields': ['id', 'token', 'total', 'created', 'emailAddress']}),
         ('BILLING INFORMATION', {'fields': ['billingName', 'billingAddress1', 'billingCity', 'billingPostcode',
-                                            'billingCountry', 'emailAddress']}),
+                                            'billingCountry']}),
         ('SHIPPING INFORMATION', {'fields': ['shippingName', 'shippingAddress1', 'shippingCity',
                                              'shippingPostcode', 'shippingCountry']}),
     ]

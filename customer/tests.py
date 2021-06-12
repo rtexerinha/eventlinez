@@ -14,6 +14,8 @@ class SignUpFormTest(TestCase):
                 'password2': 'qpp1p2o3po23',
                 'email': 'rafaelreuber@gmail.com',
                 'address': 'Rua A',
+                'city': 'Iracema',
+                'zip': '62000',
                 'cellphone': '9855445123'
                 }
         form = SignUpForm(data)

@@ -12,18 +12,16 @@ from django.template.loader import render_to_string
 from event.models import Category, Event
 from .forms import ContactForm
 
-
 logger = logging.getLogger(__name__)
-
-
-def about(request):
-    return render(request, 'pages/about.html')
 
 
 def index(request, c_slug=None):
     c_page = None
     if c_slug is not None:
         c_page = get_object_or_404(Category, slug=c_slug)
+        # lis = lists_events(c_page)
+        # page = pagination_home(request, lis)
+    # else:
     lis = lists_events(c_slug)
     page = pagination_home(request, lis)
     return render(request, 'shop/home.html', {'category': c_page,
@@ -86,6 +84,29 @@ def pagination_home(request, lists):
     return eventsListsOfLists
 
 
+def product_event_detail(request, c_slug, event_slug):
+    try:
+        event = Event.objects.get(category__slug=c_slug, slug=event_slug)
+        products_list = Event.objects.all().filter(available=True)
+    except Exception as e:
+        raise e
+    return render(request, 'shop/event.html', {'event': event, 'products_list': products_list})
+
+
+def search_result(request):
+    events = None
+    query = None
+    if 'q' in request.GET:
+        query = request.GET.get('q')
+        events = Event.objects.all().filter(
+            Q(name__icontains=query) | Q(description__icontains=query))
+    return render(request, 'search.html', {'query': query, 'events': events})
+
+
+def about(request):
+    return render(request, 'pages/about.html')
+
+
 def terms(request):
     return render(request, 'pages/terms.html')
 
@@ -122,25 +143,6 @@ def contact(request):
             return HttpResponse('Invalid header found.')
         return redirect('shop:index')
     return render(request, 'pages/contactus.html', {'form': form})
-
-
-def product_event_detail(request, c_slug, event_slug):
-    try:
-        event = Event.objects.get(category__slug=c_slug, slug=event_slug)
-        products_list = Event.objects.all().filter(available=True)
-    except Exception as e:
-        raise e
-    return render(request, 'shop/event.html', {'event': event, 'products_list': products_list})
-
-
-def search_result(request):
-    events = None
-    query = None
-    if 'q' in request.GET:
-        query = request.GET.get('q')
-        events = Event.objects.all().filter(
-            Q(name__icontains=query) | Q(description__icontains=query))
-    return render(request, 'search.html', {'query': query, 'events': events})
 
 
 def handler404(request, exception):

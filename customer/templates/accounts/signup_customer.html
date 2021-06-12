@@ -52,32 +52,49 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group col-md-6 mb-0">
+                        <div class="form-group col-md-5 mb-0">
                             {{ form.address|as_crispy_field }}
                         </div>
-                        <div class="form-group col-md-6 mb-0">
+                         <div class="form-group col-md-4 mb-0">
+                            {{ form.city|as_crispy_field }}
+                        </div>
+
+                        <div class="form-group col-md-3 mb-0">
+                            {{ form.zip|as_crispy_field }}
+                        </div>
+                    </div>
+
+
+                    <div class="form-row">
+
+                        <div class="form-group col-md-8 mb-0">
+                             {{ form.email|as_crispy_field }}
+                        </div>
+
+                        <div class="form-group col-md-4 mb-0">
                             {{ form.cellphone|as_crispy_field }}
                         </div>
                     </div>
 
 
-                     {{ form.email|as_crispy_field }}
                     <div class="form-row">
                         <div class="form-group col-md-6 mb-0">
                             {{ form.password1|as_crispy_field }}
                         </div>
+
                         <div class="form-group col-md-6 mb-0">
                             {{ form.password2|as_crispy_field }}
                         </div>
                     </div>
 
-                     <div class="form-group col-12 mb-lg-0 mb-3 pl-0 terms ">
+
+                    <div class="form-group col-12 mb-lg-0 mb-3 pl-0 terms ">
                         {{ form.terms_confirmed|as_crispy_field }}
                         <a class="links ml-lg-1" href="{% url 'terms' %}">Terms</a>,
                         <a class="links ml-lg-1" href="{% url 'terms' %}">Private Policy</a>,
                         and
                         <a class="links ml-lg-1" href="{% url 'terms' %}">E-Sign Consent</a>
-                     </div>
+                    </div>
 
                     <button type="submit" class="text-default button-login mt-0">Register Account</button>
                 </form>

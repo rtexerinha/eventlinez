@@ -1,13 +1,15 @@
 import logging
+
 import stripe
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from event.models import Event
-from .models import Cart, CartItem
-from .forms import AddItemToCardForm
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+
+from event.models import Event
+from .forms import AddItemToCardForm
+from .models import Cart, CartItem
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +44,8 @@ def cart_add(request, event_id):
         cart_item.save()
     except CartItem.DoesNotExist:
         CartItem.objects.create(event=event, quantity=1,
-                                cart=cart, promo_code=promo_code)
+                                cart=cart,
+                                promo_code=promo_code)
     return redirect('cart:cart_detail')
 
 
@@ -99,7 +102,6 @@ def checkout(request):
                 'currency': 'usd'
             },
             'quantity': 1,
-
         }
         line_items.append(line_item)
 

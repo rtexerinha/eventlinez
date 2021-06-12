@@ -85,8 +85,10 @@ class SignUpFormPromoter(forms.Form):
 class SignUpForm(forms.Form):
     first_name = forms.CharField(max_length=40, required=True)
     last_name = forms.CharField(max_length=120, required=True)
-    address = forms.CharField(max_length=250)
     cellphone = forms.CharField(max_length=13)
+    address = forms.CharField(max_length=250)
+    city = forms.CharField(max_length=250)
+    zip = forms.CharField(max_length=11)
     email = forms.EmailField(label="Email", required=True)
     password1 = forms.CharField(
         label=_("Password"),
@@ -138,6 +140,7 @@ class SignUpForm(forms.Form):
                 last_name=self.cleaned_data["last_name"],
                 cellphone=self.cleaned_data['cellphone'],
                 address=self.cleaned_data['address'],
+                city=self.cleaned_data['city'],
                 user=user)
             customer.save()
 
@@ -164,12 +167,14 @@ class SignInPromoterForm(AuthenticationForm):
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        fields = ['first_name', 'last_name', 'cellphone', 'address']
+        fields = ['first_name', 'last_name', 'cellphone', 'address', 'city', 'zip']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'cellphone': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
+            'city': forms.TextInput(attrs={'class': 'form-control'}),
+            'zip': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 

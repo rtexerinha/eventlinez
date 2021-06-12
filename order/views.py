@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
+
 from cart.models import Cart
 from cart.views import _cart_id
 from event.models import Ticket
@@ -58,6 +58,7 @@ def create(request):
         token=session_id,
         payment_code=session.payment_intent
     )
+
     items = cart.cartitem_set.filter(active=True)
 
     stripe.PaymentIntent.modify(session.payment_intent,
