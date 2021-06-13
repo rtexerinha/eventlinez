@@ -8,7 +8,8 @@ from django.core import mail
 from django.db.models import Sum
 
 from customer.models import Customer
-from event.models import Event, Ticket
+from event.models import Event
+from ticket.models import Ticket
 
 
 class Order(models.Model):

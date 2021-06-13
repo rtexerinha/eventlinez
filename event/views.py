@@ -8,7 +8,8 @@ from django.http import StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from event.forms import EventForm
-from event.models import Event, Ticket
+from event.models import Event
+from ticket.models import Ticket
 from .models import Promoter
 from .forms import PromoterForm, ResetPasswordForm
 from django.contrib.auth import update_session_auth_hash

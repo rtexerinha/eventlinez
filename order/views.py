@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 
 from cart.models import Cart
 from cart.views import _cart_id
-from event.models import Ticket
+from ticket.models import Ticket
 from order.tasks import send_mail
 from .models import Order
 from .models import OrderItem

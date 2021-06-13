@@ -3,7 +3,7 @@ from django.core import mail
 from model_bakery import baker
 
 from .models import Order
-from event.models import Ticket
+from ticket.models import Ticket
 from .models import OrderItem
 
 
