@@ -15,7 +15,46 @@
     border: 1px solid var(--first-color);
 }
 
+.button-login-new{
+    Width: 362px;
+    Height: 45px;
+    background: var(--first-color);
+    font-family: var(--body-font-family);
+    font-style: normal;
+    font-weight: var(--font-semi-bold);
+    font-size: var(--normal-font-size);
+    line-height: 17px;
+    align-items: center;
+    text-align: center;
+    vertical-align: center;
+    color: var(--white-color);
+    border-radius: 6px;
+    border: 1px solid var(--first-color);
+
+}
+
+
 .buttons-primary:hover{
     background: var(--first-color)!important;
     text-decoration: none!important;
+}
+
+
+.buttons-secondary{
+    height: 45px;
+    width: 362px;
+    left: 485px;
+    top: 714px;
+    border-radius: 6px;
+    border: solid 1px;
+    border-color: var(--first-color);
+    color: var(--first-color);
+    font-family: Lato;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 17px;
+    letter-spacing: 0em;
+    text-align: center;
+
 }
