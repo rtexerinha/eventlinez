@@ -13,6 +13,7 @@
     --body-color-bg: #FAFAFB;
     --body-color-bg-dark: #E5E5E5;
     --border-color-input: #E9E9E9;
+    --white-color: #FFFFFF;
 }
 
 .container-body{
@@ -59,18 +60,25 @@
 .m-card .m-card__header {
     height: 70%;
     width: 266px;
-    border-radius: 6px 6px 0px 0px;
+    border-radius: 6px 6px 0 0;
 }
+
 .m-card .m-card__body {
     height: 170px;
     padding: 0 20px!important;
     text-decoration: none;
     background: var(--body-color-bg-light);
-    border-radius: 0px 0px 6px 6px;
+    border-radius: 0 0 6px 6px;
 }
 .m-img-card{
     width: 100%;
-    border-radius: 6px 6px 0px 0px;
+    border-radius: 6px 6px 0 0;
+}
+
+.m-img-card-banner{
+    height: 400px;
+    width: 100%;
+    border-radius: 6px 6px 0 0;
 }
 
 .m-card:active {
@@ -114,45 +122,104 @@
   }
 }
 
-/*.swiper-button-next,*/
-/*.swiper-button-prev {*/
-/*    background-color: white;*/
-/*    background-color: rgba(255, 255, 255, 0.5);*/
-/*    right:30px;*/
-/*    padding: 30px;*/
-/*    color: #000 !important;*/
-/*    fill: black !important;*/
-/*    stroke: black !important;*/
+/*.div-home-banner{*/
+/*   */
 /*}*/
 
+.div-banner-home{
+    height: 304px;
+     background: linear-gradient(to right,  #FAFAFB 0%,#FAFAFB 20%,#E5E5E5 80%,#E5E5E5 100%);
+    /*background: #E5E5E5;*/
+    border-radius: 6px 0 0 6px;
+}
 
+.subcribe{
+    min-height: 400px;
+    background-image: url("../../static/img/party-concert.png"),
+    linear-gradient(89.39deg, #E10087 -29.61%, #007AFF 135.34%);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
 
-/*.card-event2 {*/
-/*    width: 220px;*/
-/*    height: 35%;*/
-/*    display: flex;*/
-/*    border: 2px solid transparent;*/
-/*    border-radius: 0 0 8px 8px;*/
-/*}*/
+.subcribe-intern{
+    margin: auto;
+    width: 50%;
+    padding: 10% 0 30px 0;
+}
+
+.input-subcribe{
+    height: 45px;
+    background: #FFFFFF;
+    border-radius: 6px;
+    border-color: var(--border-color-input);
+    font-family: var(--body-font-family);
+    font-style: normal;
+    font-weight: normal;
+    font-size: var(--normal-font-size);
+    line-height: 17px;
+    padding: 0 10px;
+    color: var(--gray-color-light);
+}
+
+.center-block {
+    margin: auto;
+    display: block;
+}
+
+.t-center{
+    text-align: center;
+}
 
 
 
 /* medias queries   */
 @media (min-width: 1200px){
-
+    .subcribe-intern{
+         padding: 5% 0 30px 0;
+    }
 }
 
 @media(min-width: 992px) {
 
 }
 
-@media(min-width: 768px) {
+@media(max-width: 768px) {
+      .subcribe-intern{
+      width: 100%;
+  }
+}
+
+
+@media (max-width: 576px){
+    .nav-link{
+        padding-left: 0.3rem!important;
+    }
 
 }
 
 
-@media (min-width: 576px){
-
+/*navbar new */
+.custom-toggler .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,102,203, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
 }
 
+.custom-toggler.navbar-toggler {
+    border-color: var(--first-color);
+}
+
+.nav-item {
+    letter-spacing: 0!important;
+    text-transform: capitalize!important;
+}
+
+.nav-link:hover{
+    color: var(--first-color) !important;
+}
+
+.form-control:focus {
+    color: var(--first-color) !important;
+    border-color: var(--first-color) !important;
+    box-shadow: 0 0 0 0 var(--first-color) !important;
+}
 

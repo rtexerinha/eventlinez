@@ -13,25 +13,21 @@
                   rel="stylesheet">
 
             <link rel="stylesheet" href="{% static 'css/resert.css' %}">
-            <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
             <link rel="stylesheet" href="{% static 'css/styles.css' %}">
             <link rel="stylesheet" href="{% static 'css/style2.css' %}">
             <link rel="stylesheet" href="{% static 'css/typography.css' %}">
             <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+            <link rel="stylesheet" href="{% static 'css/ux.css' %}">
             <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
             <link rel="stylesheet" type="text/css" href="{% static 'css/fontawesome-all.min.css' %}">
             <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.css" />
             <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 
             <title>{% block title %}{% endblock %}</title>
-{#                        <script  src="https://code.jquery.com/jquery-3.4.1.min.js"#}
-{#                     integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="#}
-{#                     crossorigin="anonymous">#}
-{#            </script>#}
         </head>
 
         <body class="container-body">
-                {% include 'top-navbar.html' %}
+                {% include 'navbar-new.html' %}
                 {% block content %}
                 {% endblock %}
                 {% include 'footer.html' %}
@@ -42,7 +38,6 @@
             <script src="{% static  'js/swiper.js' %}"></script>
             <script src="{% static  'js/jquery-3.4.1.js' %}"></script>
             {% block custom_js %}{% endblock %}
-            <script src="{% static 'js/index.js' %}"></script>
 {#            <script src="{% static 'js/jquery-3.4.1.slim.min.js' %}"></script>#}
             <script src="{% static 'js/popper.min.js' %}"></script>
             <script src="{% static 'js/bootstrap.min.js' %}"></script>

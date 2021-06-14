@@ -37,7 +37,9 @@ def index_new(request, c_slug=None):
         c_page = get_object_or_404(Category, slug=c_slug)
     lis = lists_events(c_slug)
     page = pagination_home(request, lis)
-    return render(request, 'shop/home2.html', {'category': c_page,
+    detach = Event.objects.all().filter(available=True).order_by('event_date').first()
+    return render(request, 'shop/home2.html', {'detach': detach,
+                                               'category': c_page,
                                                'events_futures': page[0],
                                                'events_old': page[1],
                                                'events_all': page[2]})

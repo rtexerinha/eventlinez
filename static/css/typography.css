@@ -4,7 +4,8 @@
 :root {
     /* .5rem = 8px, 1rem = 16px, 1.5rem = 24px ... */
     --big-font-size: 2rem;
-    --h2-font-size: 1.5rem;
+    --h2-font-size: 1.75rem;
+    --h3-font-size: 1.5rem;
     --h4-font-size: 1.125rem;
     --h5-font-size: 1rem;
     --normal-font-size: .938rem;
@@ -24,7 +25,8 @@
      /* .75rem = 12 .875rem=14 , 1rem=16px 1.125rem=18 ...*/
     :root {
         --big-font-size: 3rem;
-        --h2-font-size: 1.5625rem; /* 25px*/
+        --h2-font-size: 2rem;
+        --h3-font-size: 1.5625rem; /* 25px*/
         --h4-font-size: 1.125rem;/
         --h5-font-size: 1rem;
         --normal-font-size: .875rem;
@@ -36,7 +38,7 @@
     font-family: var(--body-font-family);
     font-size: var(--big-font-size);
     font-style: normal;
-    font-weight: var(--font-normal);
+    font-weight: var(--font-semi-bold);
     line-height: 55px;
     color: var(--gray-color-dark);
     text-align: left;
@@ -47,6 +49,15 @@
     font-style: normal;
     font-weight: var(--font-semi-bold);
     font-size: var(--h2-font-size);
+    line-height: 48px;
+    color: var(--body-color-bg-light);
+}
+
+.h3-home{
+    font-family: var(--body-font-family);
+    font-style: normal;
+    font-weight: var(--font-semi-bold);
+    font-size: var(--h3-font-size);
     line-height: 37px;
     color: var(--gray-color-dark);
 }
@@ -91,3 +102,7 @@
     color: var(--first-color);
 }
 
+.weight-height {
+    font-weight: 600;
+    line-height: 17px;
+}
