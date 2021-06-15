@@ -1,0 +1,116 @@
+{% extends "base-new.html" %}
+{% load static %}
+
+{% block title %}
+	{{ event.name }} - Eventlinez
+{% endblock %}
+
+{% block content %}
+<main class="container">
+    <div class="row col-lg-12 col-sm-12" id="reset-margin">
+        <div class="col-lg-7" style="height: 100%;">
+            <div class="col-lg-12 col-sm-12" id="container-details">
+                <img src="{{event.image.url}}" alt="{{event.name}}" id="container-details-img"/>
+            </div>
+
+            <div class="col-lg-12" id="div-description" style="height: 50%; font-size: 16px">
+                <br>
+                   {{ event.description|safe }}
+                    <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
+                    <div id="box-tags">
+                        <a class="box-tag" href="{% url 'shop:index' %}">Home</a>
+                        <a class="box-tag" href="{{ event.category.get_url }}">{{event.category}}</a>
+                    </div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-5 float-right">
+              <aside id="aside-event-details">
+                    <div style="margin-left: 10px; margin-top: 10px;">
+                        <h2 class="text-default title-event-card-details">{{event.name}}</h2>
+                        <h4 class="text-default" id="location-event-card-details">
+                            {{ event.address }},
+                            {{ event.city }},
+                            {{ event.city.state }}
+                        </h4>
+                    </div>
+                    <div style="margin-top: 80px">
+                        <p class="text-default day-event-card-details">{{ event.event_date|date:"d"}}</p>
+                        <p class="text-default date-event-card-details">{{ event.event_date|date:"M Y"}}</p>
+                        <p class="text-default date-event-card-details" style="font-size: 20px;">{{ event.event_date|date:"l H:i"}}</p>
+                    </div>
+                    <table id="table-event-details">
+                        <tr>
+                            <th class="text-default price-event-card-details table-price-bord table-left">Price</th>
+                            <th class="text-default price-event-card-details table-price-bord table-right">Quantity</th>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #D7D7D7;">
+                            <td class="text-default price-event-card-details table-left">$ {{event.unit_price }}</td>
+                            <td class="text-default price-event-card-details table-right">1</td>
+                        </tr>
+                        <tr>
+                            <td class="text-default price-event-card-details table-left">Total</td>
+                            <td class="text-default price-event-card-details table-right">${{event.unit_price }}</td>
+                        </tr>
+                    </table>
+
+                    {% if event.sales_info.qtd_available <= 0%}
+                        <h4  class="text-default d-flex justify-content-center"
+                             style="margin-top: 10%; font-size: 2rem; color: #d90075">
+                            Sold Out
+                        </h4>
+                    {% else %}
+                        <br>
+                        <form action="/cart/add/{{ event.id }}/" method="post">
+                            {% csrf_token %}
+                            <div class="div_code_promo">
+                                <input id="promo_code"
+                                       type="text"
+                                       name="promo_code"
+                                       placeholder="Insert code"
+                                       class="col-sm-12 col-lg-12 col-md-12 input_promo_code">
+                                 <label for="promo_code"
+                                        id="label_promo_code">
+                                     Promo code
+                                 </label>
+                            </div>
+                            <div id="buttons-pay-event-card-details">
+                            {% now "YmdHis" as todays_date %}
+                            {% if todays_date >= event.event_date|date:"YmdHis" %}
+                                 <h6  class="text-default d-flex justify-content-center"
+                                      style="margin-top: 10%; font-size: 1rem; color: #d90075">
+                                    The event date has passed
+                                </h6>
+                                <input disabled
+                                       class="pay-event-card-details text-default"
+                                       type="submit" value="Add to Cart">
+                            {% else %}
+                                <input class="pay-event-card-details text-default" type="submit" value="Add to Cart">
+                            {% endif %}
+                                <a href="{% url 'shop:index' %}" class="pay-event-card-details text-default invert">Continue Shopping</a>
+                            </div>
+                        </form>
+                    {% endif %}
+                </aside>
+
+        </div>
+        <div id="div-description-mobile" style="height: 100%;">
+            <br>
+            <div style="padding-left: 30px; width: 95%;">
+                    {{ event.description|safe }}
+                <br>
+                <h2 class="text-default title-event-card-details" style="margin-left: 0">Tags</h2>
+            <div id="box-tags">
+                <a class="box-tag" href="{% url 'shop:index' %}">Home</a>
+                <a class="box-tag" href="{{ event.category.get_url }}">{{event.category}}</a>
+                <p class="box-tag">{{event.name}}</p>
+            </div>
+            </div>
+        </div>
+
+    </div>
+
+    <br> <br>
+</main>
+{% endblock %}
