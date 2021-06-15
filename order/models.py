@@ -49,6 +49,9 @@ class Order(models.Model):
         )
 
     def ticket_qty(self):
+        """
+        :return: (int) Quantidade de tickets de um evento
+        """
         result = self.orderitem_set.aggregate(Sum('quantity'))
         if self.orderitem_set.count() == 0:
             return 0
@@ -61,18 +64,18 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    event_ticket = models.ForeignKey('event.Ticket', on_delete=models.CASCADE)
     promo_code = models.CharField(max_length=10, null=True)
     quantity = models.IntegerField(validators=[MinValueValidator(0)])
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     fee = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
-    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
 
     def sub_total(self):
-        return self.quantity * self.price
+        return self.quantity * self.unit_price
 
     def __str__(self):
-        return self.event.name
+        return self.ticket
 
 
 @receiver(post_save, sender=OrderItem)
@@ -81,10 +84,11 @@ def create_tickets(sender, instance, **kwargs):
         guest_name = None
         if instance.quantity == 1:
             guest_name = instance.order.customer.first_name + " " + instance.order.customer.last_name
+
         Ticket.objects.create(
-            event=instance.event,
+            event_ticket=instance.event_ticket,
             customer=instance.order.customer,
             order_item=instance,
-            price=instance.event.unit_price,
+            price=instance.amount,
             guest_name=guest_name
         )

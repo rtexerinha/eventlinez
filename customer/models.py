@@ -11,7 +11,7 @@ class Customer(models.Model):
     zip = models.CharField(max_length=11, default='00000')
     cellphone = models.CharField(max_length=13, null=True, blank=True)
     email = models.EmailField(unique=True)
-    terms_confirmed = models.BooleanField(default=False, blank=False)
+    terms_confirmed = models.BooleanField(default=False, blank=True, null=True)
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
