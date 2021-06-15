@@ -5,6 +5,14 @@
     min-height: 100vh;
 }
 
+.div-login-left-new{
+   padding-left: 12vw;
+}
+@media (min-width: 1500px){
+    .div-login-left-new{
+        padding-left: 20vw;
+    }
+}
 .logoimg-new > img{
     height: 33px;
     width: 215px;
@@ -24,14 +32,11 @@
 .links-new{
     color: var( --gray-color-mid);
     margin-top: 10px;
+    text-decoration: underline var(--gray-color-mid);
 }
 
 .links-new:hover{
     color: var(--first-color-alt);
-}
-
-.div-login-left-new{
-    padding-left: 20vw;
 }
 
 .login-item{
@@ -41,11 +46,23 @@
 .div-inline{
     display: flex;
     color: var( --gray-color-light);
-}
-.div-inline hr{
-    background: var( --gray-color-light);
+    align-items: center;
+    justify-content: space-around;
+    font-family: Lato;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 17px;
+    letter-spacing: 0em;
+    text-align: left;
+
 }
 
+.div-inline hr{
+    width: 47%;
+    color: var(--gray-color-light);
+
+}
 .button-login-new{
     height: 45px;
     width: 362px;
@@ -62,6 +79,11 @@
     color: var(--body-color-bg-light);
 }
 
+.button-login-new:hover{
+    background: var(--first-color-alt);
+    color: var(--body-color-bg-light);
+}
+
 .buttons-secondary{
     height: 45px;
     width: 362px;
@@ -75,4 +97,17 @@
     letter-spacing: 0em;
     text-align: center;
     color: var(--first-color);
+    background: var(--white-color);
+    transition: 200ms;
 }
+
+.buttons-secondary:hover{
+    color: var(--body-color-bg-light);
+    background: var(--first-color-alt);
+
+}
+
+.div-text{
+    margin-bottom: 34px;
+}
+
