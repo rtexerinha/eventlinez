@@ -224,3 +224,13 @@
 #myFooter-new .fa-instagram:focus{
     color: #d90075;
 }
+
+.h2-login{
+    font-family: Poppins;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 38px;
+    letter-spacing: -0.01em;
+    text-align: left;
+}

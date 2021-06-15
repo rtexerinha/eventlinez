@@ -80,6 +80,23 @@ def signin_view(request):
     return render(request, 'accounts/signin_customer.html', {'form': form})
 
 
+def signin_view_new(request):
+    if request.method == 'POST':
+        form = SignInForm(data=request.POST)
+        if form.is_valid():
+            username = request.POST['username']
+            password = request.POST['password']
+            customer = authenticate(username=username, password=password)
+            if customer is not None:
+                login(request, customer)
+                return redirect('shop:index')
+            else:
+                return redirect('signup')
+    else:
+        form = SignInForm()
+    return render(request, 'accounts/signin_customer_new.html', {'form': form})
+
+
 def signout_view_promoter(request):
     logout(request)
     return redirect('signin_promoter')
