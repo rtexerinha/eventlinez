@@ -1857,3 +1857,9 @@ div.content-right-signin {
 #div_id_terms_confirmed .form-check-label .asteriskField{
     display: none;
 }
+
+
+/* search*/
+.search_text {
+	padding-top: 20px;
+}
