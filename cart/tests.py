@@ -17,8 +17,8 @@ class TestCartItem(TestCase):
 
     def test_amount(self):
         cart = baker.make('cart.Cart')
-        event1 = baker.make('event.Event', description="foo", stock=10, unit_price=50)
-        event2 = baker.make('event.Event', description="foo", stock=10, unit_price=150)
+        event1 = baker.make('event.Event', description="foo")
+        event2 = baker.make('event.Event', description="foo")
 
         with self.settings(EVENTLINEZ_FEE=0.09):
             CartItem.objects.create(event=event1, quantity=2, cart=cart)

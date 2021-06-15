@@ -59,7 +59,6 @@ class Event(models.Model):
     unit_price = models.DecimalField(max_digits=10,
                                      decimal_places=2,
                                      validators=[MinValueValidator(Decimal('0.00'))])
-    stock = models.IntegerField()
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     description = RichTextField(blank=False)
     created = models.DateTimeField(auto_now_add=True)
@@ -106,3 +105,22 @@ class Event(models.Model):
 
     def __str__(self):
         return '{}'.format(self.name)
+
+
+class Ticket(models.Model):
+    name = models.CharField(max_length=80)
+    event = models.ForeignKey(Event, related_name="tickets", on_delete=models.RESTRICT)
+    quantity = models.IntegerField()
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))]
+    )
+
+    def qty_available(self):
+        qty_sold = self.qty_sold()
+        return self.quantity - qty_sold
+
+    def qty_sold(self):
+        _qty_sold = self.ticket_set.count()
+        return _qty_sold
