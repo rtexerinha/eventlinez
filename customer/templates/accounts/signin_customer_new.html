@@ -15,7 +15,7 @@
                     <div class="logoimg-new">
                         <img src="{% static 'img/Eventlinez.png' %}" alt="logo">
                     </div>
-                    <div>
+                    <div class="div-text">
                         <h2 class="h2-login">Login</h2>
                     </div>
 
@@ -28,9 +28,12 @@
                     <div class="login-item">
                         <a href="{% url 'password_reset' %}" class="links-new" >Forgot Your Password?</a>
                     </div>
+
                     <div class="div-inline">
                         <hr>
-                        or
+                        <div>
+                           or
+                        </div>
                         <hr>
                     </div>
                     <button class="buttons-secondary" onclick="window.open('/customer/account/create/')">
