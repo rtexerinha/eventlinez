@@ -19,7 +19,7 @@
         </form>
 
         <ul class="navbar-nav my-2 my-lg-0">
-            <li class="nav-item dropdown{% if 'shop' in request.path %}active{% endif %}">
+            <li class="nav-item mt-lg-2 mt-xl-2 dropdown{% if 'shop' in request.path %}active{% endif %}">
                 <a class="nav-link dropdown-toggle weight-height h6-home" href="{% url 'shop:index' %}" id="navbarDropdown"
                    role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Category
@@ -57,14 +57,14 @@
                     </a>
 
                 {% else %}
-                    <li class="nav-item">
+                    <li class="nav-item mt-lg-2 mt-xl-2">
                         <a class="nav-link" href="{% url 'guest_list' %}}" style="display: flex">
                              <i class="fas fa-ticket-alt" style="margin-right: 5px; color: #585858"></i>
                             <h6 class="weight-height h6-home">My Tickets</h6>
                         </a>
                     </li>
 
-                    <li class="nav-item dropdown">
+                    <li class="nav-item mt-lg-2 mt-xl-2 dropdown">
                         <a class="nav-link dropdown-toggle weight-height h6-home" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">
                         {{ request.user.first_name }}
@@ -94,7 +94,7 @@
 {#                     <div class="dropdown-divider"></div>#}
 {#                     <a class="dropdown-item item-name"  href="{% url 'reset_password_costomer' %}" >Reset Password</a>#}
 {#                </div>#}
-                    <li class="nav-item">
+                    <li class="nav-item mt-lg-2 mt-xl-2">
                         <a class="nav-link" href="{% url 'signout' %}}" style="display: flex">
                             <i class="fas fa-sign-out-alt" style="margin-right: 5px;  color: #585858"></i>
                             <h6 class="weight-height h6-home">Sign Out</h6>
@@ -105,20 +105,21 @@
 
             {% else %}
                 {% if item_count > 0 %}
-                    <a class="link-nav " href="{% url 'cart:cart_detail' %}">
-                        <i class="fas fa-shopping-cart"></i>
-                        <h6 class="weight-height h6-home">({{item_count}})</h6>
-
-                    </a>
+                    <li class="nav-item mt-lg-2 mt-xl-2">
+                        <a class="nav-link" href="{% url 'cart:cart_detail' %}">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h6 class="weight-height h6-home">({{item_count}})</h6>
+                        </a>
+                    </li>
                 {% endif %}
 
-                <li class="nav-item">
+                <li class="nav-item mt-lg-2 mt-xl-2">
                     <a class="nav-link" href="{% url 'signin' %}">
                         <h6 class="weight-height h6-home">Log in</h6>
                     </a>
                 </li>
 
-            <li class="nav-item">
+            <li class="nav-item mt-lg-2 mt-xl-2">
                 <a class="nav-link"  href="{% url 'signup' %}">
                     <h6 class="weight-height h6-home" style="padding-right: 1.5rem">Sign up</h6>
                 </a>

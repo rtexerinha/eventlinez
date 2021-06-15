@@ -7,16 +7,18 @@ var mySwiper = new Swiper ('.swiper-container', {
 	},
 
   	navigation: {
+		//  nextEl: '.swiper-button-next-unique',
+    	// prevEl: '.swiper-button-prev-unique'
     	nextEl: '.swiper-button-next',
     	prevEl: '.swiper-button-prev',
   	},
 	breakpoints: {
 	    // 320: {
-        //     slidesPerView: 1,
+        //     slidesPerView: 2,
         // },
-	    400: {
-            slidesPerView: 1,
-        },
+	    // 400: {
+        //     slidesPerView: 2,
+        // },
 		768: {
 			slidesPerView: 3
 		},

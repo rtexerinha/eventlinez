@@ -16,6 +16,7 @@
 }
 
 .buttons-primary:hover{
-    background: var(--first-color)!important;
+    background: var(--first-color-alt)!important;
     text-decoration: none!important;
+    color: var(--white-color);
 }
