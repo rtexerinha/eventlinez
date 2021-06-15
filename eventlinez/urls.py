@@ -8,14 +8,13 @@ from django.urls import reverse_lazy
 import shop
 from shop.views import index, index_new
 from event.views import event_list, event_create, event_remove, event_update, tickets_list, tickets_excel, update_promoter, reset_password
-from customer.views import signup_view_promoter, signin_view_promoter, signout_view_promoter, signin_view, signin_view_new
+from customer.views import signup_view_promoter, signin_view_promoter, signout_view_promoter, signin_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
     path('home/v2/', index_new, name='indexnew'),
     path('accounts/login/', signin_view, name='signin'),
-    path('accounts/login/v2/', signin_view_new, name='signin_new'),
     path('customer/', include('customer.urls')),
     path('cart/', include('cart.urls')),
     path('order/', include('order.urls')),
