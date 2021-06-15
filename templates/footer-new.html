@@ -1,0 +1,42 @@
+{% load static %}
+<footer id="myFooter-new">
+    <div class="container">
+        <div class="row">
+            <div class="column mb-3">
+                <a class="navbar-brand ml-lg-5 mr-lg-5" href="{% url 'index' %}">
+                    <img src="{% static 'img/Eventlinez-footer-new.png' %}" alt=" logo ">
+                </a>
+            </div>
+
+{#            <div class="column">#}
+                 <ul class="column" style="margin-top: 10px!important;">
+                    <li>
+                        <a href="{% url 'about' %}" class="h6-home height-17">About us</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'contact' %}" class="h6-home height-17">Contact us</a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'terms' %}" class="h6-home height-17">Terms of service</a>
+                    </li>
+                </ul>
+
+{#            </div>#}
+            <div class="column">
+                <div class="footer-social">
+            <a href="https://www.instagram.com/eventlinez/" class="social-icons">
+                <i class="fab fa-facebook-f" style="color: #909090;"></i>
+            </a>
+            <a href="https://www.instagram.com/eventlinez/" class="social-icons"
+               style="margin-left: 30px; color: #909090;">
+                <i class="fab fa-instagram"></i>
+            </a>
+        </div>
+            </div>
+        </div>
+
+    </div>
+{#    <p class="footer-copyright" style="padding-bottom: 0!important; ">Eventlinez {% now "Y" %} - All rights reserved</p>#}
+</footer>
+

@@ -18,4 +18,5 @@
 .buttons-primary:hover{
     background: var(--first-color)!important;
     text-decoration: none!important;
+    color: #E9E9E9;
 }

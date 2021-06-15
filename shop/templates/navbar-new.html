@@ -1,6 +1,6 @@
 {% load static %}
 
-<nav class="navbar pt-lg-4 pb-lg-4 navbar-expand-lg" style="background: #FFFFFF">
+<nav class="navbar pt-lg-2 pb-lg-3 navbar-expand-lg" style="background: #FFFFFF">
     <a class="navbar-brand ml-lg-5 mr-lg-5" href="{% url 'index' %}">
          <img src="{% static 'img/logo_eventlinez_new.png' %}" alt=" logo ">
     </a>
@@ -36,8 +36,8 @@
             {% if request.user.is_authenticated %}
                 {% if item_count > 0 %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'cart:cart_detail' %}">
-{#                            <i class="fas fa-shopping-cart"></i>#}
+                        <a class="nav-link" href="{% url 'cart:cart_detail' %}" style="display: flex">
+                            <i class="fas fa-shopping-cart" style="color: #585858; margin-right: 5px"></i>
                              <h6 class="weight-height h6-home">({{item_count}})</h6>
                         </a>
                      </li>
@@ -58,34 +58,49 @@
 
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'guest_list' %}}">
-{#                             <i class="fas fa-ticket-alt" style="margin-right: 5px"></i>#}
+                        <a class="nav-link" href="{% url 'guest_list' %}}" style="display: flex">
+                             <i class="fas fa-ticket-alt" style="margin-right: 5px; color: #585858"></i>
                             <h6 class="weight-height h6-home">My Tickets</h6>
                         </a>
                     </li>
 
-                    <a class="link-nav" href="#" data-toggle="dropdown"
-                       aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-user-circle" style="margin-right: 5px"></i>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle weight-height h6-home" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false">
                         {{ request.user.first_name }}
-                    </a>
+                        </a>
 
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown" onload="">
-                        <a class="dropdown-item item-name"  href="{% url 'order:order_history' %}" >Order History</a>
-                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item item-name"  href="{% url 'customer_update' %}" >Profile</a>
-                         <div class="dropdown-divider"></div>
-                         <a class="dropdown-item item-name"  href="{% url 'reset_password_costomer' %}" >Reset Password</a>
-                    </div>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dwop-item weight-height p-home" href="{% url 'order:order_history' %}">Order History</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dwop-item weight-height p-home" href="{% url 'customer_update' %}">Profile</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dwop-item weight-height p-home" href="{% url 'reset_password_costomer' %}">Reset Password</a>
+                        </div>
+                    </li>
 
-                    <a class="link-nav" href="{% url 'signout' %}">
-                        <i class="fas fa-sign-out-alt" style="margin-right: 5px"
-                           id="icons-space-left"></i>
-                        <h6 class="weight-height h6-home">
-                            Sign Out
-                        </h6>
+{#                    <a class="nav-link link-nav nav__link" href="#" style="display: flex" data-toggle="dropdown"#}
+{#                   aria-haspopup="true" aria-expanded="false">#}
+{#                    <i class="fas fa-user-circle" style="margin-right: 5px; color: #585858"></i>#}
+{#                    <h6 class="weight-height h6-home">#}
+{#                        {{ request.user.first_name }}#}
+{#                    </h6>#}
+{#                </a>#}
+{##}
+{#                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown" onload="">#}
+{#					<a class="dropdown-item item-name"  href="{% url 'order:order_history' %}" >Order History</a>#}
+{#                     <div class="dropdown-divider"></div>#}
+{#                    <a class="dropdown-item item-name"  href="{% url 'customer_update' %}" >Profile</a>#}
+{#                     <div class="dropdown-divider"></div>#}
+{#                     <a class="dropdown-item item-name"  href="{% url 'reset_password_costomer' %}" >Reset Password</a>#}
+{#                </div>#}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'signout' %}}" style="display: flex">
+                            <i class="fas fa-sign-out-alt" style="margin-right: 5px;  color: #585858"></i>
+                            <h6 class="weight-height h6-home">Sign Out</h6>
+                        </a>
+                    </li>
 
-                    </a>
                 {% endif %}
 
             {% else %}
@@ -109,6 +124,10 @@
                 </a>
             </li>
 
+            <a class="buttons-primary mr-lg-5 my-2 my-sm-0 buttons-primary" style="padding: 15px; text-decoration: none;" href="{% url 'events_promoter' %}">
+                Organize your event
+            </a>
+
             {% endif %}
 
 {#            <li class="nav-item dropdown">#}
@@ -127,8 +146,5 @@
 {#            </li>#}
         </ul>
 
-        <a class="buttons-primary mr-lg-5 my-2 my-sm-0 buttons-primary"
-           style="padding: 15px; text-decoration: none;"
-           href="{% url 'events_promoter' %}">Organize your event</a>
     </div>
 </nav>

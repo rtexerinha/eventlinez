@@ -102,7 +102,125 @@
     color: var(--first-color);
 }
 
+.height-17 {
+    line-height: 17px!important;
+}
+
+.height-17:hover{
+    color: var(--first-color);
+    text-decoration: none;
+}
+
 .weight-height {
     font-weight: 600;
-    line-height: 17px;
+    line-height: 14px;
+}
+
+.dwop-item{
+    white-space: nowrap;
+    padding: 0 0.5rem;
+}
+
+.weight-height:hover{
+    color: var(--first-color);
+    text-decoration: none;
+}
+
+
+
+
+/*FOOOTER */
+#myFooter-new{
+   flex: 0 0 auto;
+   -webkit-flex: 0 0 auto;
+    background: var(--gray-color-dark);
+    height: 137px;
+    padding-top: 1.5rem;
+}
+
+
+#myFooter-new .container{
+    text-align: center;
+    padding-top: inherit;
+}
+
+.column {
+    float: left;
+    width: 33.33%;
+}
+
+@media(max-width:700px) {
+    .column {
+        float: none;
+        width: 100%;
+    }
+}
+
+#myFooter-new .footer-copyright{
+    margin-bottom: 35px;
+    text-align: center;
+    color: #777;
+    font-size: 12px;
+}
+
+
+@media (max-width: 400px){
+    #myFooter-new {
+        padding-bottom: 5px!important;
+        height: 100% !important;
+    }
+}
+
+#myFooter-new ul{
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 18px;
+}
+
+
+#myFooter-new li{
+    display: inline-block;
+    margin: 0 15px;
+    line-height: 2;
+}
+
+#myFooter-new .footer-social{
+    text-align: center;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    background: var(--gray-color-dark);
+}
+
+#myFooter-new .fa{
+    font-size: 36px;
+    margin-right: 15px;
+    margin-left: 20px;
+    background-color: var(--gray-color-light);
+    color: #d0d0d0;
+    border-radius: 51%;
+    padding: 10px;
+    height: 60px;
+    width: 60px;
+    text-align: center;
+    line-height: 43px;
+    text-decoration: none;
+    transition:color 0.2s;
+}
+
+#myFooter-new .fa-facebook-b:hover{
+    color: #d90075;
+    text-decoration: #d90075;
+}
+
+#myFooter-new .fa-facebook:focus{
+    color: #d90075;
+}
+
+#myFooter-new .fa-instagram:hover{
+    color:#d90075;
+    text-decoration: #d90075;
+}
+
+#myFooter-new .fa-instagram:focus{
+    color: #d90075;
 }
