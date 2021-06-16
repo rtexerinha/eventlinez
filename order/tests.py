@@ -21,7 +21,7 @@ class OrderModel(TestCase):
         self.assertEqual(order.ticket_qty(), 4)
 
     def test_ticket_qty_com_ordem_sem_linha(self):
-        event = baker.make('event.Event', description="foo")
+        baker.make('event.Event', description="foo")
         order = baker.make('order.Order', emailAddress="me@gmail.com")
         self.assertEqual(order.ticket_qty(), 0)
 
