@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-new.html" %}
 {% load static %}
 {% block metadescription %}{% endblock %}
 {% block title %}
@@ -6,179 +6,163 @@
 {% endblock %}
 
 {% block content %}
-    <main class="col-lg-12 col-sm-12" style="padding-right: 0">
-        <section class="col-lg-12 float-right" id="background">
-            <h1 id="title-home" class="text-default" style="width: max-content;">Enjoy the Experience</h1>
-            <p id="subtitle-home">
-                It is more than a ticket , it is an Experience!
-            </p>
-            <button class="button-container-body">
-                <a href="{% url 'about' %}" style="text-decoration: #FFFFFF; color: #FFFFFF;">
-                    About us
-                </a>
-            </button>
-        </section>
-        <div class="clearfix"></div>
-    </main>
+    <section class="container container-center">
+    {% if detach %}
+        <div class="col-12 mt-0 mt-lg-5 div-article">
 
-    <header class="row col-lg-12 col-sm-12 header-filter-home">
-        <form class="col-lg-12 mobile" action="{% url 'shop:search' %}"
-              method="get" style="width: 100%;">
-            {% csrf_token %}
-            <input class="input-form-search col-sm-12 col-lg-10"
-                   type="search" placeholder="Search"
-                   aria-label="Search" name="q"
-                   style="width: 90%; margin: 20px 0 20px 20px">
-        </form>
+            <div class="row" style="margin: 0">
+                <article class="col-5" style="padding: 0!important;">
+                    <div class="col-12 float-right mt-0 mt-lg-5 div-banner-home">
+                        <h1 class="h1-home pt-2 pt-lg-5">{{detach.name}}</h1>
+                        <h6 class="h6-home p-date h6-banner mt-lg-4">{{detach.event_date|date:"D, d M H:i"}}</h6>
+                        <h6 class="h6-home h6-banner mt-lg-4">{{detach.city}}</h6>
+                    </div>
+                </article>
 
-        <div class="col-lg-10 col-md-8 col-sm-9 div-title-home">
-            {% if category %}
-                <h4  class="title-section"> {{ category.name }}</h4>
-	        {% else %}
-                {% if events_all %}
-                    <h4  class="title-section">Concerts</h4>
-                {% else %}
-                    <h4  class="title-section">Upcoming events</h4>
-                {% endif %}
-	        {% endif %}
+                <aside class="col-7" style="padding: 0!important;">
+                    <img class="m-img-card-banner desktop" src="{{detach.image.url}}" alt="{{detach.name}}"/>
+                    <img class="m-img-card-banner mobile" src="{{detach.thumbnail.url }}" alt="{{detach.name}}"/>
+                </aside>
+            </div>
+
         </div>
-
-        <nav class="col-lg-2 col-sm-3 float-right text-center nav-filter">
-            <ul>
-                <li class="nav-item dropdown{% if 'shop' in request.path %}active{% endif %}">
-                    <a class="nav-link dropdown-toggle text-bk" href="{% url 'shop:index' %}" id="navbarDropdown"
-                       role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        All
-                    </a>
-                    <div class="dropdown-menu text-mobile" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item text-mobile" href="{% url 'shop:index' %}">All Events</a>
-                    {% for cat in links %}
-                        <a class="dropdown-item text-mobile" href="{{cat.get_url}}">{{cat.name}}</a>
-                    {% endfor %}
-                    </div>
-                </li>
-            </ul>
-        </nav>
-
-        <div class="clearfix"></div>
-    </header>
-
-    {% if events_all %}
-    <section id="wrapper" class="col-xl-6">
-		<div class="row">
-            {% if events_all %}
-                {% for event in events_all %}
-                    <div class="content-all">
-                        <a href="{{event.get_url}}">
-                            <img class="item" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
-                        </a>
-                        <a href="{{event.get_url}}" style="text-decoration: none">
-                            <div class="text-default card-event" style="display: block;">
-                                <p class="text-default text-date" >{{event.event_date|date:"D, d M H:i"}}</p>
-                                <h4 class="text-default event-name">{{event.name}}</h4>
-                                <h4 class="text-default event-location">{{event.city}}</h4>
-                            </div>
-                        </a>
-                    </div>
-			    {% endfor %}
-            {% else %}
-                <h2>No events at the moment</h2>
-            {% endif %}
-		</div>
-
-		<div class="mx-auto">
-			{% if events_all.paginator.num_pages > 1 %}
-				<hr>
-				<div class="text-center">
-					{% for pg in events_all.paginator.page_range %}
-						<a href="?page={{pg}}" class="btn btn-light btn-sm {% if events_all.number == pg %}active{% endif %}">{{pg}}</a>
-					{% endfor %}
-				</div>
-			{% endif %}
-		</div>
-		<br>
-	</section>
-
 
     {% else %}
-        <section id="wrapper" class="col-xl-6">
-		<div class="row">
-            {% if events_futures %}
-                {% for event in events_futures %}
-                    <div class="content-all">
-                        <a href="{{event.get_url}}">
-                            <img class="item" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
-                        </a>
-                        <a href="{{event.get_url}}" style="text-decoration: none">
-                            <div class="text-default card-event" style="display: block;">
-                                <p class="text-default text-date" >{{event.event_date|date:"D, d M H:i"}}</p>
-                                <h4 class="text-default event-name">{{event.name}}</h4>
-                                <h4 class="text-default event-location">{{event.city}}</h4>
-                            </div>
-                        </a>
+        <section class="col-lg-12">
+            <h1 id="title-home" class="text-default" style="width: max-content;">Enjoy the Experience</h1>
+            <p id="subtitle-home">It is more than a ticket , it is an Experience!</p>
+            <button class="button-container-body">
+                <a href="{% url 'about' %}" style="text-decoration: #FFFFFF; color: #FFFFFF;">About us</a>
+            </button>
+        </section>
+
+        <div class="clearfix"></div>
+
+    {% endif %}
+    </section>
+
+
+    <section class="container container-center">
+        {% if events_all %}
+        <div class="col-lg-12 ml-0 mt-4 pl-0">
+            <h2 class="h3-home">Events</h2>
+        </div>
+
+         <section class="slider">
+                <div class="m-slider swiper-container">
+
+                    <!-- If we need navigation buttons -->
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+
+                    <div class="swiper-wrapper">
+                    {% if events_all %}
+                        {% for event in events_all %}
+                            <aside class="m-slider__item swiper-slide">
+                                <div class="m-card" ontouchstart>
+                                    <a class="m-card__header" href="{{event.get_url}}">
+                                        <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                                    </a>
+
+                                    <a class="m-card__body" href="{{event.get_url}}">
+                                        <h4 class="h4-home">{{event.name}}</h4>
+
+                                        <h6 class="h6-home p-date">{{event.event_date|date:"D, d M H:i"}}</h6>
+                                        <h6 class="h6-home">{{event.city}}</h6>
+                                    </a>
+                                </div>
+                            </aside>
+                        {% endfor %}
+                    {% else %}
+                        <h2>No events at the moment</h2>
+                    {% endif %}
                     </div>
-			    {% endfor %}
-            {% else %}
-                <h2>No events at the moment</h2>
-            {% endif %}
-		</div>
+                </div><!-- .m-slider // -->
+            </section><!-- .slider // -->
 
-		<div class="mx-auto">
-			{% if events_futures.paginator.num_pages > 1 %}
-				<hr>
-				<div class="text-center">
-					{% for pg in events_futures.paginator.page_range %}
-						<a href="?pag={{pg}}" class="btn btn-light btn-sm {% if events_futures.number == pg %}active{% endif %}">{{pg}}</a>
-					{% endfor %}
-				</div>
-			{% endif %}
-		</div>
-		<br>
-	</section>
+        {% else %}
+         <div class="col-lg-12 ml-0 mt-4 mb-4 pl-0">
+            <h2 class="h3-home">Upcoming Event</h2>
+        </div>
 
-        <div class="col-lg-10 col-md-8 col-sm-9">
-            {% if category %}
-                <h4  class="title-section title-old mb-lg-5 mb-3 pl-2"> {{ category.name }}</h4>
-	        {% else %}
-                <h4  class="title-section title-old mb-lg-5 mb-3 pl-2">Past events</h4>
-	        {% endif %}
+        <section class="slider">
+            <div class="m-slider swiper-container">
+
+              <!-- If we need navigation buttons -->
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-button-next"></div>
+
+		        <div class="swiper-wrapper">
+                {% if events_futures %}
+                    {% for event in events_futures %}
+			            <aside class="m-slider__item swiper-slide">
+                            <div class="m-card" ontouchstart>
+					            <a class="m-card__header" href="{{event.get_url}}">
+                                    <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                                </a>
+
+                                <a class="m-card__body" href="{{event.get_url}}">
+						            <h4 class="h4-home">{{event.name}}</h4>
+
+                                    <h6 class="h6-home p-date">{{event.event_date|date:"D, d M H:i"}}</h6>
+                                    <h6 class="h6-home">{{event.city}}</h6>
+                                </a>
+				            </div>
+                        </aside>
+                    {% endfor %}
+                {% else %}
+                    <h2>No events at the moment</h2>
+                {% endif %}
+                </div>
+	        </div><!-- .m-slider // -->
+        </section><!-- .slider // -->
+
+        <div class="col-lg-12 ml-0 mt-4 pl-0">
+            <h2 class="h3-home">Past Events</h2>
         </div>
 
 
-     <section id="wrapper" class="col-xl-6">
-		<div class="row">
-            {% if events_old %}
-                {% for event in events_old %}
-                    <div class="content-all">
-                        <a href="{{event.get_url}}">
-                            <img class="item" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
-                        </a>
-                        <a href="{{event.get_url}}" style="text-decoration: none">
-                            <div class="text-default card-event" style="display: block;">
-                                <p class="text-default text-date" >{{event.event_date|date:"D, d M H:i"}}</p>
-                                <h4 class="text-default event-name">{{event.name}}</h4>
-                                <h4 class="text-default event-location">{{event.city}}</h4>
-                            </div>
-                        </a>
-                    </div>
-			    {% endfor %}
-            {% else %}
-                <h2>No events at the moment</h2>
-            {% endif %}
-		</div>
+        <section class="slider">
+            <div class="m-slider swiper-container">
 
-		<div class="mx-auto">
-			{% if events_old.paginator.num_pages > 1 %}
-				<hr>
-				<div class="text-center">
-					{% for pg in events_old.paginator.page_range %}
-						<a href="?pages={{pg}}" class="btn btn-light btn-sm {% if events_old.number == pg %}active{% endif %}">{{pg}}</a>
-					{% endfor %}
-				</div>
-			{% endif %}
-		</div>
-		<br>
-	</section>
+            <!-- If we need navigation buttons -->
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-button-next"></div>
 
-    {% endif %}
+		        <div class="swiper-wrapper">
+                {% if events_old %}
+                    {% for event in events_old %}
+			            <aside class="m-slider__item swiper-slide" >
+                            <div class="m-card" ontouchstart>
+					            <a class="m-card__header" href="{{event.get_url}}">
+                                        <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                                </a>
+
+                                <a class="m-card__body" href="{{event.get_url}}">
+						            <h4 class="h4-home">{{event.name}}</h4>
+
+                                    <h6 class="h6-home p-date">{{event.event_date|date:"D, d M H:i"}}</h6>
+                                    <h6 class="h6-home">{{event.city}}</h6>
+                                </a>
+				            </div>
+                        </aside>
+                    {% endfor %}
+                {% else %}
+                    <h2>No events at the moment</h2>
+                {% endif %}
+                </div>
+	        </div><!-- .m-slider // -->
+        </section><!-- .slider // -->
+{% endif %}
+    </section>
+
+    <section class="col-12 mt-5 subcribe">
+        <form action="{% url 'shop:search' %}" method="get" class="subcribe-intern div-center">
+            <h2 class="h2-home t-center mb-4 mt-5">Not find what you were looking for?</h2>
+            {% csrf_token %}
+            <input class="col-lg-8 col-sm-10 input-subcribe center-block" type="text" placeholder="Search for events">
+        </form>
+    </section>
+
+
 {% endblock %}
