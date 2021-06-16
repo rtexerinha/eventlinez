@@ -4,7 +4,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.forms import ModelForm, DateTimeField, TextInput, ValidationError
 
 from address.models import City
-from event.models import Category, Event, Promoter
+from event.models import Category, Event, Promoter, Ticket
 
 
 # TODO: Move this to address app
@@ -12,6 +12,12 @@ class CityForm(ModelForm):
     class Meta:
         model = City
         fields = ['name']
+
+
+class TicketForm(ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ['name', 'quantity', 'price', 'event']
 
 
 class CategoryForm(ModelForm):

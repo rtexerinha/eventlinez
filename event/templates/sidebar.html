@@ -13,12 +13,20 @@
                         Events
                     </a>
 
+                    <a class="nav-link collapsed"
+                       href="{% url 'event_type_list' %}">
+                        <div class="sb-nav-link-icon">
+                            <i class="fas fa-ticket-alt" style="color: #383838;"></i>
+                        </div>
+                        Ticket type
+                    </a>
+
                     <a class="nav-link {% if 'index' in segment %} active {% endif %}"
                        href="{% url 'ticket_list' %}">
                         <div class="sb-nav-link-icon">
                             <i class="fas fa-ticket-alt" style="color: #383838;"></i>
                         </div>
-                        Tickets
+                        Tickets sold
                     </a>
                 </div>
             </div>

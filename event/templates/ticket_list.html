@@ -57,11 +57,11 @@
                 <thead>
                     <tr style="background-color:#F4F4F4;">
                         <th class="text-table text-bold">Num</th>
-                        <th class="text-table text-bold">Event</th>
-                        <th class="text-table text-bold">Price</th>
-                        <th class="text-table text-bold">Promo Code</th>
-                        <th class="text-table text-bold">Created</th>
-                        <th class="text-table text-bold">Guest Name</th>
+{#                        <th class="text-table text-bold">Event</th>#}
+{#                        <th class="text-table text-bold">Price</th>#}
+{#                        <th class="text-table text-bold">Promo Code</th>#}
+{#                        <th class="text-table text-bold">Created</th>#}
+{#                        <th class="text-table text-bold">Guest Name</th>#}
                     </tr>
                 </thead>
 
@@ -69,11 +69,11 @@
                 {% for ticket in tickets %}
                     <tr>
                         <td class="text-table">{{ticket.id}}</td>
-                        <td class="text-table">{{ticket.event}}</td>
-                        <td class="text-table">{{ticket.order_item.price}}</td>
-                        <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>
-                        <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
-                        <td class="text-table">{{ticket.guest_name|default_if_none:''}}</td>
+{#                        <td class="text-table">{{ticket.event}}</td>#}
+{#                        <td class="text-table">{{ticket.order_item.price}}</td>#}
+{#                        <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>#}
+{#                        <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>#}
+{#                        <td class="text-table">{{ticket.guest_name|default_if_none:''}}</td>#}
                     </tr>
                 {% endfor %}
                 </tbody>

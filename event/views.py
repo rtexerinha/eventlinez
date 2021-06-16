@@ -1,15 +1,9 @@
-import xlsxwriter
-from io import BytesIO
-from os import path
-
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.http import StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
-from event.forms import EventForm
-from event.models import Event
-from ticket.models import Ticket
+from event.forms import EventForm, TicketForm
+from event.models import Event, Ticket
+
 from .models import Promoter
 from .forms import PromoterForm, ResetPasswordForm
 from django.contrib.auth import update_session_auth_hash
@@ -28,7 +22,7 @@ def event_create(request):
     if request.method == 'POST':
         form = EventForm(request.POST, request.FILES)
         if form.is_valid():
-            events = Event(**form.cleaned_data)
+            events = Ticket(**form.cleaned_data)
             events.promoter = request.user.promoter
             events.save()
             return redirect('events_promoter')
@@ -58,101 +52,22 @@ def event_remove(request, event_id):
 
 
 @login_required(login_url='/promoter/account/login/')
-def tickets_list(request):
-    events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
-    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).order_by('-id')
-    selected_event = None
-    if request.method == "POST":
-        event_id = request.POST.get('events_choice')
-        if event_id:
-            selected_event = Event.objects.get(pk=event_id)
-            tickets = tickets.filter(event=selected_event)
-    paginator = Paginator(tickets, 100)
-    page = int(request.GET.get('page', '1'))
-    try:
-        tickets = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        tickets = paginator.page(paginator.num_pages)
-    data = {'tickets': tickets, 'events': events, 'selected_event': selected_event}
-    return render(request, 'ticket_list.html', data)
+def ticket_type_list(request):
+    tickets = Ticket.objects.all()
+    return render(request, 'ticket_type_list.html', {'tickets': tickets})
 
 
 @login_required(login_url='/promoter/account/login/')
-def tickets_excel(request, event_id=None):
-    output = BytesIO()
-    response = StreamingHttpResponse(
-        output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=tickets.xlsx'
-
-    book = xlsxwriter.Workbook(output)
-    sheet = book.add_worksheet("Tickets List")
-    sheet.set_tab_color('#FF9900')  # Orange
-
-    props_title = {'bold': True, 'font_size': 14, 'align': 'center',
-                   'valign': 'vcenter', 'font_name': 'Arial'}
-
-    props_header = {'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter',
-                    'color': '#171717', 'bg_color': '#F4F4F4', 'font_name': 'Arial'}
-
-    props_price = {'num_format': '[$$-409]#,##0.00', 'font_size': 10, 'align': 'right', 'color': '#171717',
-                   'bg_color': '#FFFFFF', 'font_name': 'Arial', 'bottom': 1,
-                   'bottom_color': '#dee2e6', 'valign': 'vcenter'}
-
-    props_event = {'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF',
-                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'}
-
-    props_table = {'font_size': 10, 'align': 'center', 'color': '#171717', 'bg_color': '#FFFFFF',
-                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'}
-    # Styles
-    title_format = book.add_format(props_title)
-    tthead = book.add_format(props_header)
-    event_style = book.add_format(props_event)
-    tbody_style = book.add_format(props_table)
-    money_format = book.add_format(props_price)
-
-    sheet.set_column('B:B', 40)
-    sheet.set_column('D:E', 20)
-    sheet.set_column('F:F', 40)
-    sheet.set_row(1, 25)
-    sheet.set_default_row(30)
-    sheet.merge_range('A1:F1', u"", title_format)
-
-    if event_id:
-        tickets = Ticket.objects.filter(event_id=event_id).values_list(
-            'id', 'event__name', 'order_item__price', 'order_item__promo_code',
-            'created_at', 'guest_name').order_by('-id')
+def ticket_create(request):
+    if request.method == 'POST':
+        form = TicketForm(request.POST)
+        if form.is_valid():
+            ticket = Ticket(**form.cleaned_data)
+            ticket.save()
+            return redirect('event_type_list')
     else:
-        tickets = Ticket.objects.filter(event__promoter=request.user.promoter). \
-            values_list('id', 'event__name', 'order_item__price',
-                        'order_item__promo_code', 'created_at', 'guest_name').order_by('-id')
-    row_num = 1
-    columns = ['Ticket', 'Event', 'Price', 'Promo Code',  'Date', 'Guest Name']
-    for col_num in range(len(columns)):
-        sheet.write(row_num, col_num, columns[col_num], tthead)
-
-    for idx, data in enumerate(tickets):
-        row = 2 + idx
-        sheet.write_number(row, 0, data[0], tbody_style)
-        sheet.write_string(row, 1, data[1], event_style)
-        sheet.write_number(row, 2, data[2], money_format, )
-
-        if data[3] is None:
-            sheet.write_string(row, 3, '', tbody_style, )
-        else:
-            sheet.write_string(row, 3, data[3], tbody_style, )
-        sheet.write(row, 4, data[4].strftime('%Y-%m-%d %H:%M'), tbody_style)
-        if data[5] is None:
-            sheet.write_string(row, 5, '', tbody_style)
-        else:
-            sheet.write_string(row, 5, data[5], tbody_style)
-
-    way = path.abspath("static")
-    logo = path.join(way, 'img', 'logo.png')
-    sheet.insert_image('A1', logo)
-
-    book.close()
-    output.seek(0)
-    return response
+        form = TicketForm()
+    return render(request, 'ticket_create.html', {'form': form})
 
 
 @login_required(login_url='/promoter/account/login/')
