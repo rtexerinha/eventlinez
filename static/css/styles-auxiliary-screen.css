@@ -116,6 +116,7 @@
 
 .row-links{
     display: flex;
+    flex-wrap: wrap;
 }
 
 .div-column{
@@ -132,7 +133,9 @@
     }
 
 }
-
+#div-row-form{
+    max-width: 362px !important;
+}
 
 @media (max-width: 920px){
     .new-container{
@@ -142,6 +145,12 @@
     .div-left-new{
         padding-left: 0.1rem !important;
         margin-bottom: 100px
+    }
+    #div-row-form{
+      max-width: 320px !important;
+    }
+    .row-links{
+        margin-bottom: 50px;
     }
     .div-column{
         min-height: 7px !important;
@@ -167,5 +176,9 @@
 
     .buttons-secondary{
         width: 300px !important;
+    }
+
+     #div-row-form{
+      max-width: 300px !important;
     }
 }

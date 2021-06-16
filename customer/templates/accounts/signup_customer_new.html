@@ -11,7 +11,7 @@
 {% block content %}
         <section class="new-container" >
             <main class="div-left-new">
-                <div style="max-width: 362px">
+                <div id="div-row-form">
                     <div class="logoimg-new">
                         <img src="{% static 'img/Eventlinez.png' %}" alt="logo">
                     </div>
@@ -43,11 +43,14 @@
                             {{ form.password2|as_crispy_field }}
                         </div>
                         <div class="row-links">
-                            {{ form.terms_confirmed|as_crispy_field }}
-                            <a class="links" href="{% url 'terms' %}">Terms</a>,
-                            <a class="links" href="{% url 'terms' %}">Private Policy</a>,
-                            and
-                            <a class="links" href="{% url 'terms' %}">E-Sign Consent</a>
+                            <p>
+                                {{ form.terms_confirmed|as_crispy_field }}
+                                <a class="links" href="{% url 'terms' %}">Terms</a>,
+                                <a class="links" href="{% url 'terms' %}">Private Policy</a>,
+                                and
+                                <a class="links" href="{% url 'terms' %}">E-Sign Consent</a>
+                            </p>
+
                          </div>
                         <button type="submit" class="button-primary-new">Register Account</button>
                     </form>
