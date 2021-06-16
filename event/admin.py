@@ -15,7 +15,7 @@ class PromoterAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['name', 'unit_price', 'available', 'event_date', 'promoter']
+    list_display = ['name', 'available', 'event_date', 'promoter']
     prepopulated_fields = {'slug': ('name',)}
 
 
