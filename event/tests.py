@@ -9,13 +9,19 @@ from .models import Event
 from .models import Ticket as EventTicket
 
 
-class EventFormTest(TestCase):
+class EventModelTest(TestCase):
 
-    def test_cria_novo_evento_nao_deve_validar_saldo_de_estoque_de_tickets(self):
+    def test_qty_available(self):
         event = baker.make(Event, description="foo")
-        form = EventForm(instance=event)
-        self.assertTrue(form.is_valid())
-        form.save()
+        baker.make(EventTicket, name="Camarote", event=event, quantity=10)
+        baker.make(EventTicket, name="Camarote", event=event, quantity=10)
+        self.assertEqual(event.qty_available(), 20)
+
+    def test_quantity(self):
+        event = baker.make(Event, description="foo")
+        baker.make(EventTicket, name="Camarote", event=event, quantity=10)
+        baker.make(EventTicket, name="Camarote", event=event, quantity=10)
+        self.assertEqual(event.quantity(), 20)
 
 
 class EventTicketTest(TestCase):
@@ -75,3 +81,5 @@ class EventTicketFormTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertEqual('Ticket quantity cannot be less than quantity sold', form.errors['quantity'][0])
 
+    # def test_cria_novo_evento_nao_deve_validar_saldo_de_estoque_de_tickets(self): event = baker.make(Event,
+    #     description="foo") form = EventForm(instance=event) self.assertTrue(form.is_valid()) form.save()

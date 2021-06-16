@@ -80,17 +80,23 @@ class Event(models.Model):
         self.slug = slugify(self.name)
         super(Event, self).save(*args, **kwargs)
 
-    def sales_info(self):
-        result = self.ticket_set.all().aggregate(
-            amount_sould=models.Sum('price'),
-            qtd_sould=models.Count('price')
-        )
-        if not result['amount_sould']:
-            result['amount_sould'] = 0
-        if not result['qtd_sould']:
-            result['qtd_sould'] = 0
-        result['qtd_available'] = self.stock - result['qtd_sould']
-        return result
+    def qty_available(self):
+        qty = 0
+        for ticket in self.tickets.all():
+            qty = qty + ticket.qty_available()
+        return qty
+
+    def qty_sould(self):
+        qty = 0
+        for ticket in self.tickets.all():
+            qty = qty + ticket.qty_sold()
+        return qty
+
+    def quantity(self):
+        qty = 0
+        for ticket in self.tickets.all():
+            qty = qty + ticket.quantity
+        return qty
 
     @property
     def code_promo(self):
