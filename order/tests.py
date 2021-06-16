@@ -69,7 +69,7 @@ class OrderMailTest(TestCase):
 class OrderTicketGeneration(TestCase):
 
     def test_create_order_item_should_create_a_ticket(self):
-        event = baker.make('event.Event', description="foo", unit_price=100)
+        event = baker.make('event.Event', description="foo")
         event_ticket = baker.make('event.Ticket', event=event, quantity=10, price=100)
         order = baker.make('order.Order')
 
