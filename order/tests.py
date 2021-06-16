@@ -81,12 +81,13 @@ class OrderTicketGeneration(TestCase):
         self.assertEqual(Ticket.objects.count(), 2)
 
     def test_create_order_should_decrease_ticket_quantity(self):
-        event = baker.make('event.Event', description="foo", unit_price=50)
+        event = baker.make('event.Event', description="foo")
+        event_ticket = baker.make('event.Ticket', event=event, quantity=1)
         order = baker.make('order.Order')
 
         with self.settings(EVENTLINEZ_FEE=0.10):
-            order_item1 = OrderItem(quantity=1, unit_price=100,  amount=100, fee=10, order=order, event=event)
+            order_item1 = OrderItem(quantity=1, unit_price=100,  amount=100, fee=10, order=order, event_ticket=event_ticket)
             order_item1.save()
 
         event.refresh_from_db()
-        self.assertEqual(event.stock, 0)
+        self.assertEqual(event_ticket.qty_available(), 0)
