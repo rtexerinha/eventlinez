@@ -1,0 +1,26 @@
+{#{% extends "base_promoter.html" %}#}
+{#{% load crispy_forms_filters %}#}
+{#{% load crispy_forms_tags %}#}
+{#{% crispy form form.helper %}#}
+{##}
+{#{% block title %} Panel Admin - New Events{% endblock %}#}
+{##}
+{#<!-- Specific Page CSS goes HERE  -->#}
+{#{% block stylesheets %}{% endblock stylesheets %}#}
+{##}
+{#{% block content %}#}
+{#    <ul class="nav nav-tabs">#}
+{#      <li class="active"><a data-toggle="tab" href="#event">Events</a></li>#}
+{#      <li><a data-toggle="tab" href="#ticket">Type ticket</a></li>#}
+{#    </ul>#}
+{##}
+{#    <div class="tab-content">#}
+{#        <div id="event" class="tab-pane fade in active">#}
+{#             {% include 'event_create.html' %}#}
+{#        </div>#}
+{#        <div id="ticket" class="tab-pane fade">#}
+{#            {% include 'ticket_type_list.html' %}#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{#{% endblock content %}#}
