@@ -47,7 +47,7 @@ class OrderModel(TestCase):
 class OrderMailTest(TestCase):
 
     def test_send_mail(self):
-        event = baker.make('event.Event', description="foo", stock=2, unit_price=100)
+        event = baker.make('event.Event', description="foo")
         event_ticket1 = baker.make('event.Ticket', event=event, quantity=10, price=100)
 
         self.order = baker.make('order.Order', emailAddress="me@gmail.com")
