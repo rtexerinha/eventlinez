@@ -10,7 +10,7 @@ from .models import OrderItem
 class OrderModel(TestCase):
 
     def setUp(self):
-        event = baker.make('event.Event', description="foo", stock=10, unit_price=100)
+        event = baker.make('event.Event', description="foo")
         self.event_ticket1 = baker.make('event.Ticket', event=event, quantity=10, price=100)
         self.event_ticket2 = baker.make('event.Ticket', event=event, quantity=5, price=200)
 
