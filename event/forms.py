@@ -4,7 +4,10 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.forms import ModelForm, DateTimeField, TextInput, ValidationError
 
 from address.models import City
-from event.models import Category, Event, Promoter, Ticket
+from event.models import Category
+from event.models import Event
+from event.models import Promoter
+from event.models import Ticket
 
 
 # TODO: Move this to address app
@@ -18,6 +21,14 @@ class TicketForm(ModelForm):
     class Meta:
         model = Ticket
         fields = ['name', 'quantity', 'price', 'event']
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data['quantity']
+        if not self.instance.id:
+            return quantity
+        if quantity < self.instance.qty_sold():
+            raise ValidationError("Ticket quantity cannot be less than quantity sold")
+        return quantity
 
 
 class CategoryForm(ModelForm):
@@ -35,17 +46,6 @@ class EventForm(ModelForm):
     class Meta:
         model = Event
         exclude = ('slug', 'created', 'updated', 'promoter',)
-
-    def clean_stock(self):
-        stock = self.cleaned_data['stock']
-        if not self.instance.id:
-            return stock
-        sales = self.instance.sales_info()
-        qtd_sould = sales['qtd_sould']
-
-        if stock < qtd_sould:
-            raise ValidationError("Ticket quantity cannot be less than quantity sold")
-        return stock
 
 
 class PromoterForm(ModelForm):

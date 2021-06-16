@@ -4,6 +4,7 @@ from model_bakery import baker
 from order.models import Order
 from order.models import OrderItem
 from .forms import EventForm
+from .forms import TicketForm
 from .models import Event
 from .models import Ticket as EventTicket
 
@@ -58,3 +59,19 @@ class EventTicketTest(TestCase):
 
         from ticket.models import Ticket
         self.assertEqual(3, Ticket.objects.count())
+
+
+class EventTicketFormTest(TestCase):
+
+    def test_quantidade_de_tickets_ofertados_nao_pode_ser_menor_que_a_quantidade_de_tickets_vendidos(self):
+        event = baker.make(Event, description="foo")
+        camarote = baker.make(EventTicket, event=event, quantity=10)
+
+        order = baker.make(Order)
+        baker.make(OrderItem, event_ticket=camarote, quantity=3, order=order)
+        self.assertEqual(7, camarote.qty_available())
+
+        form = TicketForm({"quantity": 2}, instance=camarote)
+        self.assertFalse(form.is_valid())
+        self.assertEqual('Ticket quantity cannot be less than quantity sold', form.errors['quantity'][0])
+
