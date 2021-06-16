@@ -98,6 +98,12 @@ class Event(models.Model):
             qty = qty + ticket.quantity
         return qty
 
+    def get_amount(self):
+        _amount = Decimal(0.0)
+        for ticket in self.tickets.all():
+            _amount = _amount + ticket.qty_sold() * ticket.price
+        return _amount
+
     @property
     def code_promo(self):
         return self
