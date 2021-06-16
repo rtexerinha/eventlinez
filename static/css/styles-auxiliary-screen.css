@@ -8,11 +8,6 @@
 .div-left-new{
    padding-left: 12vw;
 }
-@media (min-width: 1500px){
-    .div-login-left-new{
-        padding-left: 20vw;
-    }
-}
 .logoimg-new > img{
     height: 33px;
     width: 215px;
@@ -23,8 +18,7 @@
     min-height: 100vh;
     width: 50vw;
     background-color: transparent;
-    background-image: url("../../static/img/Mask Group.png"),
-    linear-gradient(89.39deg, #E10087 -29.61%, #007AFF 135.34%);
+    background-image: url("../../static/img/Mask Group.jpg");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -127,9 +121,51 @@
 .div-column{
     min-height: 150vh;
 }
+
+/*responsividade */
 @media (min-width:1500px) {
     .div-column{
         min-height: 100vh;
     }
+    .div-left-new{
+        padding-left: 20vw;
+    }
 
+}
+
+
+@media (max-width: 920px){
+    .new-container{
+        flex-direction: column-reverse;
+        min-height: auto;
+    }
+    .div-left-new{
+        padding-left: 0.1rem !important;
+        margin-bottom: 100px
+    }
+    .div-column{
+        min-height: 7px !important;
+    }
+    .div-right-new{
+        min-height: 7px !important;
+        width: 100% !important;
+        margin-bottom: 100px
+    }
+    .button-primary-new{
+        width: 324px !important;
+    }
+
+    .buttons-secondary{
+        width: 324px !important;
+    }
+}
+
+@media (max-width: 330px){
+    .button-primary-new{
+        width: 300px !important;
+    }
+
+    .buttons-secondary{
+        width: 300px !important;
+    }
 }

@@ -351,4 +351,8 @@
 }
 
 
-
+@media (min-width: 400px) and (max-width: 920px){
+    .row-top{
+        margin-top: -25px !important;
+    }
+}
