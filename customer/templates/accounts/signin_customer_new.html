@@ -9,23 +9,23 @@
 {% endblock %}
 
 {% block content %}
-        <section class="login-container" >
-            <main class="div-login-left-new">
+        <section class="new-container" >
+            <main class="div-left-new">
                 <div>
                     <div class="logoimg-new">
                         <img src="{% static 'img/Eventlinez.png' %}" alt="logo">
                     </div>
                     <div class="div-text">
-                        <h2 class="h2-login">Login</h2>
+                        <h2 class="h2-text">Login</h2>
                     </div>
 
                     <form method="post" >
                         {% csrf_token %}
                         <p>{{ form | crispy }}</p>
-                        <button type="submit" class="button-login-new">Login</button>
+                        <button type="submit" class="button-primary-new">Login</button>
                     </form>
 
-                    <div class="login-item">
+                    <div class="div-item">
                         <a href="{% url 'password_reset' %}" class="links-new" >Forgot Your Password?</a>
                     </div>
 
@@ -36,13 +36,13 @@
                         </div>
                         <hr>
                     </div>
-                    <button class="buttons-secondary" onclick="window.open('/customer/account/create/')">
+                    <button class="buttons-secondary" onclick="window.open('/customer/account/create/','_self')">
                         Sign up for Eventlinez
                     </button>
                 </div>
             </main>
 
-            <aside class="div-login-right-new">
+            <aside class="div-right-new">
 
             </aside>
         </section>
