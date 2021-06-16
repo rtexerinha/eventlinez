@@ -83,20 +83,25 @@ class SignUpFormPromoter(forms.Form):
 
 
 class SignUpForm(forms.Form):
-    first_name = forms.CharField(max_length=40, required=True)
-    last_name = forms.CharField(max_length=120, required=True)
-    address = forms.CharField(max_length=250)
-    cellphone = forms.CharField(max_length=13)
-    email = forms.EmailField(label="Email", required=True)
+    first_name = forms.CharField(label='', max_length=40, required=True,
+                                 widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
+    last_name = forms.CharField(label='', max_length=120, required=True,
+                                widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
+    address = forms.CharField(label='', max_length=250,
+                              widget=forms.TextInput(attrs={'placeholder': 'Address'}))
+    cellphone = forms.CharField(label='', max_length=13,
+                                widget=forms.TextInput(attrs={'placeholder': 'Cellphone'}))
+    email = forms.EmailField(label="", required=True,
+                             widget=forms.TextInput(attrs={'placeholder': 'Email'}))
     password1 = forms.CharField(
-        label=_("Password"),
+        label=_(""),
         strip=False,
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'placeholder': 'Password'}),
         help_text=_("Your password must contain at least 8 characters, cannot password be entirely numeric."),
     )
     password2 = forms.CharField(
-        label=_("Password confirmation"),
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        label=_(""),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'placeholder': 'Password confirmation'}),
         strip=False,
         help_text=_("Enter the same password as before, for verification."),
     )
@@ -144,10 +149,10 @@ class SignUpForm(forms.Form):
 
 class SignInForm(AuthenticationForm):
     username = UsernameField(label='', widget=forms.EmailInput(attrs={
-                'placeholder': _('Email')
-            }))
+        'placeholder': _('Email')
+    }))
     password = forms.CharField(label=_(""), widget=forms.PasswordInput(attrs={
-                'placeholder': _('Password')
+        'placeholder': _('Password')
     }))
 
 
