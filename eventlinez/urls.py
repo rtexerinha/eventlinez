@@ -7,10 +7,9 @@ from django.urls import reverse_lazy
 
 import shop
 from shop.views import index
-from event.views import event_list, event_create, event_remove, event_update, \
-    update_promoter, reset_password, ticket_type_create, ticket_type_list, ticket_type_update
+from event.views import ticket_type_create, ticket_type_list, ticket_type_update
 from ticket.views import tickets_sold_list, tickets_excel
-from event.views import event_list, event_create, event_remove, event_update, tickets_list, tickets_excel, update_promoter, reset_password
+from event.views import event_list, event_create, event_remove, event_update, update_promoter, reset_password
 from customer.views import signup_view_promoter, signin_view_promoter, signout_view_promoter, signin_view
 from shop.views import index
 
