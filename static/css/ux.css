@@ -1,5 +1,5 @@
 .buttons-primary{
-    Width:185px;
+    width:185px;
     Height: 45px;
     background: var(--first-color);
     font-family: var(--body-font-family);
@@ -41,4 +41,14 @@
     background: #007AFF;
     color: #FFFFFF;
     border: 1px solid #007AFF;
+}
+
+.button-details-width{
+    width: 330px!important;
+}
+
+@media (max-width: 800px) {
+    .button-details-width{
+        width: 100%!important;
+    }
 }

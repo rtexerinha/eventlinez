@@ -98,8 +98,20 @@
     color: var(--gray-color-mid);
 }
 
+.h3-detail-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 7%;
+    color: #fff0ff;
+}
+
 .p-date{
     color: var(--first-color);
+}
+
+.p-dark{
+    color: var(--gray-color-dark)!important;
 }
 
 .height-17 {
@@ -155,4 +167,9 @@
 
 .span-blue{
     color: var(--second-color) !important;
+}
+
+
+.decoration-none{
+    text-decoration: none!important;
 }

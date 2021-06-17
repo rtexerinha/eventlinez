@@ -16,6 +16,14 @@
     --white-color: #FFFFFF;
 }
 
+.i-icons{
+  color: var(--gray-color-light);
+}
+
+.i-icons:hover{
+    color: var(--first-color);
+}
+
 .container-body{
   background: var(--body-color-bg);
 }
@@ -354,5 +362,21 @@
 @media (min-width: 400px) and (max-width: 920px){
     .row-top{
         margin-top: -25px !important;
+    }
+}
+
+
+
+/* details*/
+.card-details{
+    background: #FFFFFF;
+    margin-left: 30px;
+    padding: 0!important;
+    height: 645px;
+}
+
+@media (max-width: 800px) {
+    .card-details{
+        margin-left: 0px!important;
     }
 }
