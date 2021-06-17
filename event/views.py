@@ -25,7 +25,8 @@ def event_create(request):
             events = Event(**form.cleaned_data)
             events.promoter = request.user.promoter
             events.save()
-            return redirect('ticket_type_list')
+            tickets = Ticket.objects.filter(event=events.pk)
+            return render(request, 'ticket_type_list.html', {'tickets': tickets})
     else:
         form = EventForm()
     return render(request, 'event_create.html', {'form': form})
@@ -65,7 +66,9 @@ def ticket_type_create(request):
         if form.is_valid():
             ticket = Ticket(**form.cleaned_data)
             ticket.save()
-            return redirect('ticket_type_list')
+            tickets = Ticket.objects.filter(event=ticket.event_id)
+            return render(request, 'ticket_type_list.html', {'tickets': tickets})
+            # return redirect('ticket_type_list')
     else:
         form = TicketForm()
     return render(request, 'ticket_type_create.html', {'form': form})
@@ -80,7 +83,8 @@ def ticket_type_update(request, ticket_id):
         form = TicketForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
-            return redirect('ticket_type_list')
+            tickets = Ticket.objects.filter(event=instance.event_id)
+            return render(request, 'ticket_type_list.html', {'tickets': tickets})
     return render(request, 'ticket_type_create.html', {'form': form})
 
 

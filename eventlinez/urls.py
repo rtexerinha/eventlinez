@@ -31,14 +31,21 @@ urlpatterns = [
     path('promoter/account/logout/', signout_view_promoter, name='signout_promoter'),
     path('promoter/update/', update_promoter, name='update_promoter'),
     path('promoter/reset_password', reset_password, name='reset_password'),
+
+    # Type Ticket
     path('promoter/ticket/new/', ticket_type_create, name='ticket_create'),
     path('promoter/ticket/update/<int:ticket_id>/', ticket_type_update, name='ticket_update'),
-    path('promoter/ticket/type/list', ticket_type_list, name='ticket_type_list'),
+    path('promoter/ticket/type/list/<int:ticket_id>/', ticket_type_list, name='ticket_type_list'),
+    path('promoter/ticket/type/list/', ticket_type_list, name='ticket_type_list'),
+
+
+    # Ticket sold in panel promoter
     path('promoter/ticket/', tickets_sold_list, name='ticket_list'),
     path('promoter/ticket/<int:event_id>/', tickets_sold_list, name='ticket_list'),
     path('promoter/ticket/excel/<int:event_id>/', tickets_excel, name='tickets_excel'),
     path('promoter/ticket/excel/', tickets_excel, name='tickets_excel'),
-    # path('promoter/events/new/', event_create, name='new_events'),
+
+    # events
     path('promoter/events/new/', event_create, name='new_events'),
     path('promoter/events/', event_list, name='events_promoter'),
     path('promoter/events/update/<int:event_id>/', event_update, name='update_event'),
