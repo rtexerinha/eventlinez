@@ -25,7 +25,7 @@ def event_create(request):
             events = Event(**form.cleaned_data)
             events.promoter = request.user.promoter
             events.save()
-            return redirect('event_type_list')
+            return redirect('ticket_type_list')
     else:
         form = EventForm()
     return render(request, 'event_create.html', {'form': form})
@@ -33,7 +33,7 @@ def event_create(request):
 
 @login_required(login_url='/promoter/account/login/')
 def event_update(request, event_id):
-    tickets = Ticket.objects.all()
+    tickets = Ticket.objects.filter(event=event_id)
     instance = get_object_or_404(Event, id=event_id)
     if request.method == 'GET':
         form = EventForm(instance=instance)
@@ -54,7 +54,6 @@ def event_remove(request, event_id):
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_list(request):
-    from ticket.models import Ticket
     tickets = Ticket.objects.all()
     return render(request, 'ticket_type_list.html', {'tickets': tickets})
 
@@ -66,7 +65,7 @@ def ticket_create(request):
         if form.is_valid():
             ticket = Ticket(**form.cleaned_data)
             ticket.save()
-            return redirect('event_type_list')
+            return redirect('ticket_type_list')
     else:
         form = TicketForm()
     return render(request, 'ticket_create.html', {'form': form})
@@ -78,10 +77,10 @@ def ticket_update(request, ticket_id):
     if request.method == 'GET':
         form = TicketForm(instance=instance)
     if request.method == 'POST':
-        form = TicketForm(request.POST, request.FILES, instance=instance)
+        form = TicketForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
-            return redirect('events_promoter')
+            return redirect('ticket_type_list')
     return render(request, 'ticket_create.html', {'form': form})
 
 
