@@ -6,32 +6,142 @@
 {% endblock %}
 
 {% block content %}
-<main class="container mt-5">
+<main class="container mt-lg-5 mb-lg-5">
     <div class="row" style="margin: 0; min-height: 70vh">
 
-         <aside class="col-8" style="padding: 0!important;">
+         <aside class="col-lg-8" style="padding: 0!important;">
             <img class="m-img-card-banner desktop" style="border-radius: 6px;" src="{{event.image.url}}" alt="{{event.name}}"/>
             <img class="m-img-card-banner mobile" src="{{event.thumbnail.url }}" alt="{{event.name}}"/>
+
+             <div class="col-lg-8">
+                 <h3 class="h3-home pt-2 pt-lg-5">{{event.name}}</h3>
+                 <h4 class="height-21 h4-home p-date">{{event.event_date|date:"D, d M H:i"}}</h4>
+                 <h4 class="height-21 h4-home">{{event.city}}</h4>
+             </div>
+
+             <div class="col-lg-8 mt-lg-3">
+                     {{ event.description|safe }}
+             </div>
         </aside>
 
-        <article class="col-4" style="padding: 0!important;">
-            <div class="col-12" style="background: #FFFFFF; margin-left: 30px; padding: 0!important; height: 645px">
-                <aside class="col-12" style="background: linear-gradient(89.39deg, #E10087 -29.61%, #007AFF 135.34%);
-                  border-radius: 6px 6px 0px 0px; height: 85px;">
+        <article class="col-lg-4" style="padding: 0!important;">
+            <div class="col-lg-12" style="background: #FFFFFF; margin-left: 30px; padding: 0!important; height: 645px">
+                <aside class="col-lg-12" style="background: linear-gradient(89.39deg, #E10087 -29.61%, #007AFF 135.34%);
+                  border-radius: 6px 6px 0 0; height: 85px;">
                     <h3 class="h3-home" style="color: #fff0ff;">
                         Select the ticket type
                     </h3>
                 </aside>
 
-                <div class="col-12">
-                    <h1 class="h1-home pt-2 pt-lg-5">{{event.name}}</h1>
-                    <h6 class="h6-home p-date h6-banner mt-lg-4">{{event.event_date|date:"D, d M H:i"}}</h6>
-                    <h6 class="h6-home h6-banner mt-lg-4">{{event.city}}</h6>
-                </div>
+                <aside class="col-lg-12 mt-lg-4">
+                    <div class="row">
+                        <div class="col-lg-8 " style="display: block">
+                            <h6 class="weight-height h6-home">CAMAROTE
+                                <br>
+                                <br>
+                                <span class="span-blue" style="color: #007AFF">R$ 250,00</span>
+
+                            </h6>
+                        </div>
+
+                        <div class="col-lg-4 mt-2" style="display: flex">
+                            <button type="button" class="button-increment mr-lg-2">-</button>
+                            <h6 class="h6-home">2</h6>
+                            <button type="button" class="plus button-increment ml-lg-2">+</button>
+                        </div>
+                    </div>
+                </aside>
+
+                                <aside class="col-lg-12 mt-lg-4">
+                    <div class="row">
+                        <div class="col-lg-8 " style="display: block">
+                            <h6 class="weight-height h6-home">CAMAROTE
+                                <br>
+                                <br>
+                                <span class="span-blue" style="color: #007AFF">R$ 250,00</span>
+
+                            </h6>
+                        </div>
+
+                        <div class="col-lg-4 mt-2" style="display: flex">
+                            <button type="button" class="button-increment mr-lg-2">-</button>
+                            <h6 class="h6-home">2</h6>
+                            <button type="button" class="plus button-increment ml-lg-2">+</button>
+                        </div>
+                    </div>
+                </aside>
+
+                <aside class="col-lg-12 mt-lg-4">
+                    <div class="row">
+                        <div class="col-lg-8 " style="display: block">
+                            <h6 class="weight-height h6-home">CAMAROTE
+                                <br>
+                                <br>
+                                <span class="span-blue" style="color: #007AFF">R$ 250,00</span>
+
+                            </h6>
+                        </div>
+
+                        <div class="col-lg-4 mt-2" style="display: flex">
+                            <button type="button" class="button-increment mr-lg-2">-</button>
+                            <h6 class="h6-home">2</h6>
+                            <button type="button" class="plus button-increment ml-lg-2">+</button>
+                        </div>
+                    </div>
+                </aside>
+
+            {% if event.sales_info.qtd_available <= 0%}
+                <h4  class="text-default d-flex justify-content-center" style="margin-top: 10%; font-size: 2rem; color: #d90075">
+                    Sold Out
+                </h4>
+            {% else %}
+                <br>
+
+                <form action="/cart/add/{{ event.id }}/" method="post">
+                    {% csrf_token %}
+                    <div class="col-lg-12">
+                        <label for="promo_code" class="h6-home">Promo code</label>
+                        <input id="promo_code"
+                               type="text"
+                               name="promo_code"
+                               placeholder="Insert code"
+                               style="border: 1px solid #E9E9E9;border-radius: 6px;"
+                               class="col-sm-12 col-lg-12 col-md-12 input-subcribe">
+                    </div>
+
+                                 <aside class="col-lg-12 mt-lg-4">
+                    <div class="row">
+                        <div class="col-lg-8 " style="display: block">
+                            <h6 class="weight-height h6-home">Total
+                            </h6>
+                        </div>
+
+                        <div class="col-lg-4 " style="display: flex">
+                            <h6 class="h6-home">R$ 380,00</h6>
+                        </div>
+                    </div>
+                </aside>
+
+                    <div id="buttons-pay-event-card-details">
+
+                    {% now "YmdHis" as todays_date %}
+                    {% if todays_date >= event.event_date|date:"YmdHis" %}
+                            <h6  class="text-default d-flex justify-content-center" style="margin-top: 10%; font-size: 1rem; color: #d90075">
+                                The event date has passed
+                            </h6>
+
+                        <input disabled class="buttons-primary h5-home"
+                               type="submit" value="Add to Cart">
+                    {% else %}
+                        <input style="width: 330px" class="buttons-primary h5-home" type="submit" value="Add to Cart">
+                    {% endif %}
+
+                    </div>
+                </form>
+            {% endif %}
+
             </div>
         </article>
-
     </div>
-
 </main>
 {% endblock %}

@@ -20,3 +20,25 @@
     text-decoration: none!important;
     color: var(--white-color);
 }
+
+.button-increment{
+    width: 24px;
+    height: 24px;
+    border: 1px solid #909090;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-family: var(--body-font-family-lato);
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    /*line-height: 22px;*/
+    /*text-align: center;*/
+    text-transform: uppercase;
+    color: #909090;
+}
+
+.plus{
+    background: #007AFF;
+    color: #FFFFFF;
+    border: 1px solid #007AFF;
+}

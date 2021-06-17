@@ -106,6 +106,10 @@
     line-height: 17px!important;
 }
 
+.height-21 {
+    line-height: 21px!important;
+}
+
 .height-17:hover{
     color: var(--first-color);
     text-decoration: none;
@@ -146,4 +150,9 @@
     .h6-banner{
         font-size: var(--h4-font-size)!important;
     }
+}
+
+
+.span-blue{
+    color: var(--second-color) !important;
 }
