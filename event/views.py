@@ -59,7 +59,7 @@ def ticket_type_list(request):
 
 
 @login_required(login_url='/promoter/account/login/')
-def ticket_create(request):
+def ticket_type_create(request):
     if request.method == 'POST':
         form = TicketForm(request.POST)
         if form.is_valid():
@@ -68,11 +68,11 @@ def ticket_create(request):
             return redirect('ticket_type_list')
     else:
         form = TicketForm()
-    return render(request, 'ticket_create.html', {'form': form})
+    return render(request, 'ticket_type_create.html', {'form': form})
 
 
 @login_required(login_url='/promoter/account/login/')
-def ticket_update(request, ticket_id):
+def ticket_type_update(request, ticket_id):
     instance = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'GET':
         form = TicketForm(instance=instance)
@@ -81,7 +81,7 @@ def ticket_update(request, ticket_id):
         if form.is_valid():
             form.save()
             return redirect('ticket_type_list')
-    return render(request, 'ticket_create.html', {'form': form})
+    return render(request, 'ticket_type_create.html', {'form': form})
 
 
 @login_required(login_url='/promoter/account/login/')

@@ -11,7 +11,7 @@ from event.models import Event
 
 
 @login_required(login_url='/promoter/account/login/')
-def tickets_list(request):
+def tickets_sold_list(request):
     from ticket.models import Ticket
     events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
     tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter).order_by('-id')
@@ -28,7 +28,7 @@ def tickets_list(request):
     except (EmptyPage, InvalidPage):
         tickets = paginator.page(paginator.num_pages)
     data = {'tickets': tickets, 'events': events, 'selected_event': selected_event}
-    return render(request, 'ticket_list.html', data)
+    return render(request, 'ticket_sold_list.html', data)
 
 
 @login_required(login_url='/promoter/account/login/')
