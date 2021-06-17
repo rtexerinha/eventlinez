@@ -16,7 +16,8 @@ class SignUpFormTest(TestCase):
                 'address': 'Rua A',
                 'city': 'Iracema',
                 'zip': '62000',
-                'cellphone': '9855445123'
+                'cellphone': '9855445123',
+                'terms_confirmed': True
                 }
         form = SignUpForm(data)
         self.assertTrue(form.is_valid())

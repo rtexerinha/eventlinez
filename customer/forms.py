@@ -102,6 +102,7 @@ class SignUpForm(forms.Form):
         strip=False,
         help_text=_("Enter the same password as before, for verification."),
     )
+    terms_confirmed = forms.BooleanField(label='I agree to')
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
