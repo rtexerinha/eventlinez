@@ -43,7 +43,7 @@ def signup_view(request):
             return redirect('shop:index')
     else:
         form = SignUpForm()
-    return render(request, 'accounts/signup_customer.html', {'form': form})
+    return render(request, 'accounts/signup_customer_new.html', {'form': form})
 
 
 def signin_view_promoter(request):
@@ -77,7 +77,7 @@ def signin_view(request):
                 return redirect('signup')
     else:
         form = SignInForm()
-    return render(request, 'accounts/signin_customer.html', {'form': form})
+    return render(request, 'accounts/signin_customer_new.html', {'form': form})
 
 
 def signout_view_promoter(request):

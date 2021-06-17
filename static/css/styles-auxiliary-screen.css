@@ -1,0 +1,184 @@
+.new-container{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 100vh;
+}
+
+.div-left-new{
+   padding-left: 12vw;
+}
+.logoimg-new > img{
+    height: 33px;
+    width: 215px;
+    border-radius: 0px;
+    margin-bottom: 80px;
+}
+.div-right-new{
+    min-height: 100vh;
+    width: 50vw;
+    background-color: transparent;
+    background-image: url("../../static/img/Mask Group.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+}
+
+.links-new{
+    color: var( --gray-color-mid);
+    margin-top: 10px;
+    text-decoration: underline var(--gray-color-mid);
+}
+
+.links-new:hover{
+    color: var(--first-color-alt);
+}
+
+.div-item{
+    margin-top: 15px;
+}
+
+.div-inline{
+    display: flex;
+    color: var( --gray-color-light);
+    align-items: center;
+    justify-content: space-around;
+    font-family: Lato;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 17px;
+    letter-spacing: 0em;
+    text-align: left;
+     margin-top: 20px;
+    margin-bottom: 20px;
+
+}
+
+.div-inline hr{
+    width: 47%;
+    color: var(--gray-color-light);
+
+}
+.button-primary-new{
+    height: 45px;
+    width: 362px;
+    border-radius: 6px;
+    border: none;
+    background: var(--first-color);
+    font-family: Lato;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 17px;
+    letter-spacing: 0em;
+    text-align: center;
+    color: var(--body-color-bg-light);
+}
+
+.button-primary-new:hover{
+    background: var(--first-color-alt);
+    color: var(--body-color-bg-light);
+}
+
+.buttons-secondary{
+    height: 45px;
+    width: 362px;
+    border-radius: 6px;
+    border: solid 1px var(--first-color);
+    font-family: Lato;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 17px;
+    letter-spacing: 0em;
+    text-align: center;
+    color: var(--first-color);
+    background: var(--white-color);
+    transition: 200ms;
+}
+
+.buttons-secondary:hover{
+    color: var(--body-color-bg-light);
+    background: var(--first-color-alt);
+
+}
+
+.div-text{
+    margin-bottom: 34px;
+}
+
+.form-row{
+    display: flex;
+    flex-direction: column;
+}
+
+.row-links{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.div-column{
+    min-height: 150vh;
+}
+
+/*responsividade */
+@media (min-width:1500px) {
+    .div-column{
+        min-height: 100vh;
+    }
+    .div-left-new{
+        padding-left: 20vw;
+    }
+
+}
+#div-row-form{
+    max-width: 362px !important;
+}
+
+@media (max-width: 920px){
+    .new-container{
+        flex-direction: column-reverse;
+        min-height: auto;
+    }
+    .div-left-new{
+        padding-left: 0.1rem !important;
+        margin-bottom: 100px
+    }
+    #div-row-form{
+      max-width: 320px !important;
+    }
+    .row-links{
+        margin-bottom: 50px;
+    }
+    .div-column{
+        min-height: 7px !important;
+    }
+    .div-right-new{
+        min-height: 7px !important;
+        width: 100% !important;
+        margin-bottom: 100px
+    }
+    .button-primary-new{
+        width: 324px !important;
+    }
+
+    .buttons-secondary{
+        width: 324px !important;
+    }
+}
+
+@media (max-width: 330px){
+    .button-primary-new{
+        width: 300px !important;
+    }
+
+    .buttons-secondary{
+        width: 300px !important;
+    }
+
+     #div-row-form{
+      max-width: 300px !important;
+    }
+}

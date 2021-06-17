@@ -763,6 +763,7 @@
 
 
 .login-div-right{
+    height: 400px;
     background-image: url("../../static/img/backgroundLogin.png");
     background-repeat: no-repeat;
     background-size: cover;
@@ -1855,4 +1856,10 @@ div.content-right-signin {
 
 #div_id_terms_confirmed .form-check-label .asteriskField{
     display: none;
+}
+
+
+/* search*/
+.search_text {
+	padding-top: 20px;
 }

@@ -1,0 +1,60 @@
+.buttons-primary{
+    width:185px;
+    Height: 45px;
+    background: var(--first-color);
+    font-family: var(--body-font-family);
+    font-style: normal;
+    font-weight: var(--font-semi-bold);
+    font-size: var(--normal-font-size);
+    line-height: 17px;
+    align-items: center;
+    text-align: center;
+    vertical-align: center;
+    color: var(--white-color);
+    border-radius: 6px;
+    border: 1px solid var(--first-color);
+}
+
+.buttons-primary:hover{
+    background: var(--first-color-alt);
+    text-decoration: none!important;
+    color: var(--white-color);
+}
+
+.button-increment{
+    width: 24px;
+    height: 24px;
+    border: 1px solid #909090;
+    box-sizing: border-box;
+    border-radius: 4px;
+    font-family: var(--body-font-family-lato);
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    /*line-height: 22px;*/
+    /*text-align: center;*/
+    text-transform: uppercase;
+    color: #909090;
+}
+
+.plus{
+    background: #007AFF;
+    color: #FFFFFF;
+    border: 1px solid #007AFF;
+}
+
+.button-details-width{
+    width: 330px!important;
+}
+
+@media (max-width: 800px) {
+    .button-details-width{
+        width: 100%!important;
+    }
+}
+
+.buttons-primary:disabled{
+    color: var(--white-color);
+    background-color: var(--gray-color-light);
+    border: 1px solid var(--gray-color-light);
+}

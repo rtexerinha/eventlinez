@@ -6,9 +6,9 @@ from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 
 import shop
-from shop.views import index
 from event.views import event_list, event_create, event_remove, event_update, tickets_list, tickets_excel, update_promoter, reset_password
 from customer.views import signup_view_promoter, signin_view_promoter, signout_view_promoter, signin_view
+from shop.views import index
 
 urlpatterns = [
     path('admin/', admin.site.urls),
