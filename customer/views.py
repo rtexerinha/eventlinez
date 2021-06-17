@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
-from event.models import Ticket
+from ticket.models import Ticket
 from .forms import SignUpForm, SignInForm, SignUpFormPromoter, SignInPromoterForm, CustomerForm, UserForm, \
     ResetPasswordForm
 import logging

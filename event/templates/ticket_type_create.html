@@ -1,0 +1,62 @@
+{% extends "base_promoter.html" %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% crispy form form.helper %}
+
+{% block title %} Panel Admin -  Type Ticket{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <main>
+        <div class="container-fluid pb-5 mb-5">
+            <h1 class="mt-4 mb-4 title-dast">Type Ticket</h1>
+
+            <form enctype="multipart/form-data"
+                  method="post" class="col-lg-12 ml-sm-4"
+                  style="margin-left: 0!important;
+                          padding-left: 5px!important;">
+                {% csrf_token %}
+{#                <div class="form-row">#}
+{#                    <div class="form-group col-md-5 mb-0">#}
+{#                        {{ form|crispy }}#}
+{#                    </div>#}
+{##}
+{#                </div>#}
+          <div class="form-row">
+                    <div class="form-group col-md-12 mb-0">
+                        {{ form.event | as_crispy_field }}
+                    </div>
+
+                    <div class="form-group col-md-12 mb-0">
+                        {{ form.name | as_crispy_field }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-2 mb-0">
+                        {{ form.quantity | as_crispy_field }}
+                    </div>
+
+                    <div class="form-group col-md-2 mb-0">
+                        {{ form.price | as_crispy_field }}
+                    </div>
+                </div>
+
+                <button type="submit"
+                        id="button-adm"
+                        class="btn btn-secondary"
+                        style="height: 40px;
+                                width: 140px;
+                               float: right;
+                               margin-top: 10px;
+                               border: 1px solid #d90075;"
+                >
+                    Save
+                </button>
+             </form>
+        </div>
+    </main>
+
+{% endblock content %}

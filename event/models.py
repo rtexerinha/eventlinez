@@ -56,10 +56,6 @@ class Promoter(models.Model):
 class Event(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(max_length=250, unique=True)
-    unit_price = models.DecimalField(max_digits=10,
-                                     decimal_places=2,
-                                     validators=[MinValueValidator(Decimal('0.00'))])
-    stock = models.IntegerField()
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     description = RichTextField(blank=False)
     created = models.DateTimeField(auto_now_add=True)
@@ -84,17 +80,29 @@ class Event(models.Model):
         self.slug = slugify(self.name)
         super(Event, self).save(*args, **kwargs)
 
-    def sales_info(self):
-        result = self.ticket_set.all().aggregate(
-            amount_sould=models.Sum('price'),
-            qtd_sould=models.Count('price')
-        )
-        if not result['amount_sould']:
-            result['amount_sould'] = 0
-        if not result['qtd_sould']:
-            result['qtd_sould'] = 0
-        result['qtd_available'] = self.stock - result['qtd_sould']
-        return result
+    def qty_available(self):
+        qty = 0
+        for ticket in self.tickets.all():
+            qty = qty + ticket.qty_available()
+        return qty
+
+    def qty_sould(self):
+        qty = 0
+        for ticket in self.tickets.all():
+            qty = qty + ticket.qty_sold()
+        return qty
+
+    def quantity(self):
+        qty = 0
+        for ticket in self.tickets.all():
+            qty = qty + ticket.quantity
+        return qty
+
+    def get_amount(self):
+        _amount = Decimal(0.0)
+        for ticket in self.tickets.all():
+            _amount = _amount + ticket.qty_sold() * ticket.price
+        return _amount
 
     @property
     def code_promo(self):
@@ -109,12 +117,19 @@ class Event(models.Model):
 
 
 class Ticket(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.PROTECT)
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
-    order_item = models.ForeignKey('order.OrderItem', on_delete=models.PROTECT)
-    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
-    guest_name = models.CharField(max_length=161, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=80)
+    event = models.ForeignKey(Event, related_name="tickets", on_delete=models.RESTRICT)
+    quantity = models.IntegerField()
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal(0))]
+    )
 
+    def qty_available(self):
+        qty_sold = self.qty_sold()
+        return self.quantity - qty_sold
 
-
+    def qty_sold(self):
+        _qty_sold = self.ticket_set.count()
+        return _qty_sold

@@ -15,18 +15,12 @@ class PromoterAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['name', 'unit_price', 'stock', 'available', 'event_date', 'promoter']
+    list_display = ['name', 'available', 'event_date', 'promoter']
     prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ['id', 'event', 'customer', 'guest_name', 'created_at']
-    list_filter = ['event']
-    search_fields = ['customer__first_name', 'guest_name']
+    list_display = ['name', 'quantity', 'price', 'event']
 
-    def has_delete_permission(self, request, obj=None):
-        return False
 
-    def has_add_permission(self, request):
-        return False
