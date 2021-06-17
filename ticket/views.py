@@ -12,8 +12,9 @@ from event.models import Event
 
 @login_required(login_url='/promoter/account/login/')
 def tickets_list(request):
+    from ticket.models import Ticket
     events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
-    tickets = Ticket.objects.filter(event__promoter=request.user.promoter).order_by('-id')
+    tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter).order_by('-id')
     selected_event = None
     if request.method == "POST":
         event_id = request.POST.get('events_choice')

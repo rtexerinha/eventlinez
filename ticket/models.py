@@ -14,3 +14,6 @@ class Ticket(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     guest_name = models.CharField(max_length=161, blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)

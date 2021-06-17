@@ -57,7 +57,7 @@
                 <thead>
                     <tr style="background-color:#F4F4F4;">
                         <th class="text-table text-bold">Num</th>
-{#                        <th class="text-table text-bold">Event</th>#}
+                        <th class="text-table text-bold">Event</th>
 {#                        <th class="text-table text-bold">Price</th>#}
 {#                        <th class="text-table text-bold">Promo Code</th>#}
 {#                        <th class="text-table text-bold">Created</th>#}
@@ -69,7 +69,7 @@
                 {% for ticket in tickets %}
                     <tr>
                         <td class="text-table">{{ticket.id}}</td>
-{#                        <td class="text-table">{{ticket.event}}</td>#}
+                        <td class="text-table">{{ticket.event}}</td>
 {#                        <td class="text-table">{{ticket.order_item.price}}</td>#}
 {#                        <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>#}
 {#                        <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>#}

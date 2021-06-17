@@ -54,6 +54,7 @@ def event_remove(request, event_id):
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_list(request):
+    from ticket.models import Ticket
     tickets = Ticket.objects.all()
     return render(request, 'ticket_type_list.html', {'tickets': tickets})
 
