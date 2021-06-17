@@ -134,15 +134,6 @@ def product_event_detail(request, c_slug, event_slug):
     return render(request, 'shop/event.html', {'event': event, 'products_list': products_list})
 
 
-def event_detail_new(request, c_slug, event_slug):
-    try:
-        event = Event.objects.get(category__slug=c_slug, slug=event_slug)
-        events_list = Event.objects.all().filter(available=True)
-    except Exception as e:
-        raise e
-    return render(request, 'shop/event-new.html', {'event': event, 'products_list': events_list})
-
-
 def search_result(request):
     events = None
     query = None

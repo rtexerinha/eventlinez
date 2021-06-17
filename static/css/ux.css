@@ -16,7 +16,7 @@
 }
 
 .buttons-primary:hover{
-    background: var(--first-color-alt)!important;
+    background: var(--first-color-alt);
     text-decoration: none!important;
     color: var(--white-color);
 }
@@ -51,4 +51,10 @@
     .button-details-width{
         width: 100%!important;
     }
+}
+
+.buttons-primary:disabled{
+    color: var(--white-color);
+    background-color: var(--gray-color-light);
+    border: 1px solid var(--gray-color-light);
 }

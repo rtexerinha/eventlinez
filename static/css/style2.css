@@ -87,12 +87,13 @@
 .m-img-card-banner{
     height: 400px;
     width: 100%;
-    border-radius: 6px 6px 0 0;
+    border-radius: 6px;
 }
 
 @media (max-width: 790px){
     .m-img-card-banner{
         height: 200px;
+        border-radius: 0;
     }
     .div-article{
         height: 100px;
@@ -201,8 +202,7 @@
     }
 }
 
-@media(min-width: 992px) {
-
+@media(max-width: 992px) {
 }
 
 @media(max-width: 768px) {
