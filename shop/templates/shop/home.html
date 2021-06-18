@@ -12,11 +12,16 @@
 
             <div class="row" style="margin: 0">
                 <article class="col-lg-5 desktop" style="padding: 0!important;">
-                    <div class="col-12 float-right mt-0 mt-lg-5 div-banner-home">
+                    <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
                         <h1 class="h1-home pt-2 pt-lg-5">{{detach.name}}</h1>
                         <h6 class="h6-home p-date h6-banner mt-lg-4">{{detach.event_date|date:"D, d M H:i"}}</h6>
                         <h6 class="h6-home h6-banner mt-lg-4">{{detach.city}}</h6>
+                        <button class="buttons-primary h6-home height-17 float-right" style="width: 138px!important;">
+                            <i class="fas fa-plus-circle"></i>
+                          <a href="{{detach.get_url}}" style="text-decoration: #FFFFFF; color: #FFFFFF;">See details</a>
+                        </button>
                     </div>
+
                 </article>
 
                 <a href="{{detach.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
@@ -166,6 +171,7 @@
             <h2 class="h2-home t-center mb-4 mt-5">Not find what you were looking for?</h2>
             {% csrf_token %}
             <input class="col-lg-8 col-sm-10 input-subcribe center-block"
+                   style="width: 90%"
                    type="search" placeholder="Search for events" aria-label="Search" name="q">
         </form>
     </section>
