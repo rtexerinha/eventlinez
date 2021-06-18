@@ -148,5 +148,5 @@ def edit_guest(request):
 def guest_list(request):
     today = datetime.today()
     email = str(request.user.customer.id)
-    tickets = Ticket.objects.filter(customer=email, event__event_date__gte=today)
+    tickets = Ticket.objects.filter(customer=email, event_ticket__event__event_date__gte=today)
     return render(request, 'ticket/ticket_customer.html', {'tickets': tickets})
