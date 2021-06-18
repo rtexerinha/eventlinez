@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 
 import shop
 from shop.views import index
-from event.views import ticket_type_create, ticket_type_list, ticket_type_update
+from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel
 from event.views import event_list, event_create, event_remove, event_update, update_promoter, reset_password
 from customer.views import signup_view_promoter, signin_view_promoter, signout_view_promoter, signin_view
@@ -37,6 +37,7 @@ urlpatterns = [
     path('promoter/ticket/update/<int:ticket_id>/', ticket_type_update, name='ticket_update'),
     path('promoter/ticket/type/list/<int:ticket_id>/', ticket_type_list, name='ticket_type_list'),
     path('promoter/ticket/type/list/', ticket_type_list, name='ticket_type_list'),
+    path('promoter/ticket/type/event/<int:event_id>/', ticket_type_list_per_event, name='ticket_type_list_per_event'),
 
 
     # Ticket sold in panel promoter

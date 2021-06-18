@@ -60,6 +60,12 @@ def ticket_type_list(request):
 
 
 @login_required(login_url='/promoter/account/login/')
+def ticket_type_list_per_event(request, event_id):
+    tickets = Ticket.objects.filter(event=event_id)
+    return render(request, 'ticket_type_list.html', {'tickets': tickets})
+
+
+@login_required(login_url='/promoter/account/login/')
 def ticket_type_create(request):
     if request.method == 'POST':
         form = TicketForm(request.POST)
@@ -108,7 +114,6 @@ def update_promoter(request):
 
 @login_required(login_url='/promoter/account/login/')
 def reset_password(request):
-
     if request.method == 'POST':
         form = ResetPasswordForm(request.user, request.POST)
         if form.is_valid():
