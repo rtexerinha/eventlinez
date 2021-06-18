@@ -60,7 +60,7 @@ def signin_view_promoter(request):
                 return redirect('signup_promoter')
     else:
         form = SignInPromoterForm()
-    return render(request, 'accounts/signin_promoter.html', {'form': form})
+    return render(request, 'accounts/signin_promoter_new.html', {'form': form})
 
 
 def signin_view(request):
