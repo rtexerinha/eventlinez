@@ -48,65 +48,28 @@
                 </aside>
 
             <div class="col-12" style="padding: 0!important; min-height: 250px">
+                {% for ticket in event.tickets.all %}
                 <aside class="col-12 mt-4">
                     <div class="row">
                         <div class="col-8" style="display: block">
-                            <h6 class="weight-height h6-home">CAMAROTE
+                            <h6 class="weight-height h6-home">{{ ticket.name }}
                                 <br>
                                 <br>
-                                <span class="span-blue" style="color: #007AFF">$ 250,00</span>
-
+                                <span class="span-blue" style="color: #007AFF">$ {{ ticket.price }}</span>
                             </h6>
                         </div>
 
                         <div class="col-4 mt-2" style="display: flex">
                             <button type="button" class="button-increment mr-2">-</button>
-                            <h6 class="h6-home">2</h6>
+                            <h6 class="h6-home">0</h6>
                             <button type="button" class="plus button-increment ml-2">+</button>
                         </div>
                     </div>
                 </aside>
-
-                <aside class="col-12 mt-4">
-                    <div class="row">
-                        <div class="col-8 " style="display: block">
-                            <h6 class="weight-height h6-home">CAMAROTE
-                                <br>
-                                <br>
-                                <span class="span-blue" style="color: #007AFF">R$ 250,00</span>
-
-                            </h6>
-                        </div>
-
-                        <div class="col-4 mt-2" style="display: flex">
-                            <button type="button" class="button-increment mr-2">-</button>
-                            <h6 class="h6-home">2</h6>
-                            <button type="button" class="plus button-increment ml-2">+</button>
-                        </div>
-                    </div>
-                </aside>
-
-                <aside class="col-12 mt-4">
-                    <div class="row">
-                        <div class="col-8 " style="display: block">
-                            <h6 class="weight-height h6-home">CAMAROTE
-                                <br>
-                                <br>
-                                <span class="span-blue" style="color: #007AFF">R$ 250,00</span>
-
-                            </h6>
-                        </div>
-
-                        <div class="col-4 mt-2" style="display: flex">
-                            <button type="button" class="button-increment mr-2">-</button>
-                            <h6 class="h6-home">3</h6>
-                            <button type="button" class="plus button-increment ml-2">+</button>
-                        </div>
-                    </div>
-                </aside>
+                {% endfor %}
             </div>
 
-            {% if event.sales_info.qtd_available <= 0%}
+            {% if event.qty_available <= 0%}
                 <h4  class="text-default d-flex justify-content-center" style="margin-top: 10%; font-size: 2rem; color: #d90075">
                     Sold Out
                 </h4>
