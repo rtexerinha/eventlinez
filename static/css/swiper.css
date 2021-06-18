@@ -164,23 +164,19 @@
 .swiper-button-next {
     background: #FAFAFB;border: 2px solid #909090;box-sizing: border-box;
     border-radius: 50%!important;
-    /*width: 32px!important;*/
-    /*height: 32px!important;*/
     top: 25px;
-  position: absolute;
-  /*top: 50%;*/
-  width: calc(var(--swiper-navigation-size) / 22 * 36);
-  width: calc(var(--swiper-navigation-size) / 22 * 36);
-  height: calc(var(--swiper-navigation-size) + 5);
-  margin-top: calc(0px - (var(--swiper-navigation-size) / 2));
-  padding-top: 5px;
-  padding-bottom: 5px;
-  z-index: 10;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--swiper-navigation-color, var(--swiper-theme-color));
+    position: absolute;
+    width: calc(var(--swiper-navigation-size) / 22 * 40);
+    height: calc(var(--swiper-navigation-size) / 22 * 40);
+    margin-top: calc(0px - (var(--swiper-navigation-size) / 2));
+    padding-top: 5px;
+    padding-bottom: 5px;
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--swiper-navigation-color, var(--swiper-theme-color));
 }
 .swiper-button-prev.swiper-button-disabled,
 .swiper-button-next.swiper-button-disabled {
