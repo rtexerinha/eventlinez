@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-new.html" %}
 {% load static %}
 {% block metadescription %}
 	We have a variety of stunning and Caps and Tshirts. Look for the one that suits your needs.
@@ -7,44 +7,48 @@
 	Search - Eventlinez
 {% endblock %}
 {% block content %}
-    <aside style="min-height: 70vh;">
-        <div>
-            <p class="text-center search_text">You have searched for: <b>"{{ query }}"</b></p>
+    <main class="container" style="min-height: 80vh;">
+{#        <div>#}
+{#            <p class="text-center search_text">You have searched for: <b>"{{ query }}"</b></p>#}
+{#        </div>#}
+
+        <div class="col-lg-12 ml-0 mt-4 pl-0">
+            <h2 class="h3-home">You have searched for:
+                <span class="h3-home p-date">{{ query }}</span>
+            </h2>
         </div>
 
-        <section id="wrapper" class="col-xl-6">
-            <div class="row">
-                {% if events %}
+        {% if events %}
+        <section class="slider">
+            <div class="m-slider swiper-container">
+
+            <!-- If we need navigation buttons -->
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-button-next"></div>
+
+		        <div class="swiper-wrapper">
                     {% for event in events %}
-                        <div class="content-all">
-                            <a href="{{event.get_url}}">
-                                <img class="item" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
-                            </a>
-                            <a href="{{event.get_url}}" style="text-decoration: none">
-                                <div class="text-default card-event" style="display: block;">
-                                    <p class="text-default text-date" >{{event.event_date|date:"D, d M H:i"}}</p>
-                                    <h4 class="text-default event-name">{{event.name}}</h4>
-                                    <h4 class="text-default event-location">{{event.city}}</h4>
-                                </div>
-                            </a>
-                        </div>
+			            <aside class="m-slider__item swiper-slide" >
+                            <div class="m-card" ontouchstart>
+					            <a class="m-card__header" href="{{event.get_url}}">
+                                        <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                                </a>
+
+                                <a class="m-card__body" href="{{event.get_url}}">
+						            <h4 class="h4-home">{{event.name}}</h4>
+                                    <h6 class="h6-home p-date">{{event.event_date|date:"D, d M H:i"}}</h6>
+                                    <h6 class="h6-home">{{event.city}}</h6>
+                                </a>
+				            </div>
+                        </aside>
                     {% endfor %}
                 {% else %}
-                    <h2>No events at the moment</h2>
-                {% endif %}
-            </div>
-
-            <div class="mx-auto">
-                {% if events.paginator.num_pages > 1 %}
-                    <hr>
-                    <div class="text-center">
-                        {% for pg in events.paginator.page_range %}
-                            <a href="?page={{pg}}" class="btn btn-light btn-sm {% if events.number == pg %}active{% endif %}">{{pg}}</a>
-                        {% endfor %}
+                    <div class="col-lg-12 ml-0 mt-5 pl-0">
+                        <h4 class="h4-home">No events found</h4>
                     </div>
                 {% endif %}
-            </div>
-            <br>
-        </section>
-    </aside>
+                </div>
+	        </div><!-- .m-slider // -->
+        </section><!-- .slider // -->
+    </main>
 {% endblock %}
