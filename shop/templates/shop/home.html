@@ -163,10 +163,11 @@
     </section>
 
     <section class="col-12 mt-5 subcribe">
-        <form action="{% url 'shop:search' %}" method="get" class="subcribe-intern div-center">
+        <form class="subcribe-intern div-center" action="{% url 'shop:search' %}" method="get">
             <h2 class="h2-home t-center mb-4 mt-5">Not find what you were looking for?</h2>
             {% csrf_token %}
-            <input class="col-lg-8 col-sm-10 input-subcribe center-block" type="text" placeholder="Search for events">
+            <input class="col-lg-8 col-sm-10 input-subcribe center-block"
+                   type="search" placeholder="Search for events" aria-label="Search" name="q">
         </form>
     </section>
 
