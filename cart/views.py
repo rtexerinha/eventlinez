@@ -1,4 +1,5 @@
 import logging
+import json
 
 import stripe
 from django.conf import settings
@@ -8,7 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
 from event.models import Event
-from .forms import AddItemToCardForm
+from event.models import Ticket
 from .models import Cart, CartItem
 
 logger = logging.getLogger(__name__)
@@ -21,31 +22,26 @@ def _cart_id(request):
     return cart
 
 
-def cart_add(request, event_id):
-    # TODO : Entender melhor a real utilidade do try/except e otimizar ainda mais essa view
-    event = Event.objects.get(id=event_id)
-    form = AddItemToCardForm(request.POST)
-    promo_code = None
-
-    if form.is_valid():
-        promo_code = form.cleaned_data.get("promo_code")
+def cart_add(request):
+    data = json.loads(request.body)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
     except Cart.DoesNotExist:
         cart = Cart.objects.create(cart_id=_cart_id(request))
         cart.save()
-    try:
-        cart_item = CartItem.objects.get(event=event, cart=cart)
-        qtd_available = event.sales_info()['qtd_available']
-        if cart_item.quantity >= qtd_available:
-            raise Exception('Quantity cannot be greater than %s' % qtd_available)
-        if cart_item.quantity < qtd_available:
-            cart_item.quantity += 1
-        cart_item.save()
-    except CartItem.DoesNotExist:
-        CartItem.objects.create(event=event, quantity=1,
-                                cart=cart,
-                                promo_code=promo_code)
+
+    for tkt in data['tickets']:
+        ticket = Ticket.objects.get(pk=tkt['id'])
+        quantity = tkt['quantity']
+        qtd_available = ticket.qty_available()
+
+        if tkt['quantity'] == 0:
+            continue
+        if tkt['quantity'] > qtd_available:
+            return JsonResponse({"message": 'Quantity cannot be greater than %s' % qtd_available}, status=400)
+        if tkt['quantity'] < 0:
+            return JsonResponse({"message": 'Quantity cannot be less than 0'}, status=400)
+        CartItem.objects.create(ticket=ticket, cart=cart, quantity=quantity)
     return redirect('cart:cart_detail')
 
 
