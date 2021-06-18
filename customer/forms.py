@@ -170,7 +170,12 @@ class SignInForm(AuthenticationForm):
 
 
 class SignInPromoterForm(AuthenticationForm):
-    username = UsernameField(label="Email", widget=forms.EmailInput())
+    username = UsernameField(label='', widget=forms.EmailInput(attrs={
+        'placeholder': _('Email')
+    }))
+    password = forms.CharField(label=_(""), widget=forms.PasswordInput(attrs={
+        'placeholder': _('Password')
+    }))
 
     def clean(self):
         super(SignInPromoterForm, self).clean()
