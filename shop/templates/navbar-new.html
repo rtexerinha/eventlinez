@@ -19,19 +19,21 @@
         </form>
 
         <ul class="navbar-nav my-2 my-lg-0">
-            <li class="nav-item mt-lg-2 mt-xl-2 dropdown{% if 'shop' in request.path %}active{% endif %}">
-                <a class="nav-link dropdown-toggle weight-height h6-home" href="{% url 'shop:index' %}" id="navbarDropdown"
-                   role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <li class="nav-item mt-lg-2 mt-xl-2 dropdown">
+                <a class="nav-link dropdown-toggle weight-height h6-home"
+                   href="{% url 'shop:index' %}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Category
                 </a>
 
-                <div class="dropdown-menu text-mobile" aria-labelledby="navbarDropdown">
+                <div class="dropdown-menu" aria-labelledby="userDropdown" onload=""
+                     style="position: absolute;transform: translate3d(5px, 20px, 0px); top: 10px;left: 0px;will-change: transform;">
                     <a class="dropdown-item text-mobile" href="{% url 'shop:index' %}">All Events</a>
                     {% for cat in links %}
                         <a class="dropdown-item text-mobile" href="{{cat.get_url}}">{{cat.name}}</a>
                     {% endfor %}
                 </div>
             </li>
+
 
             {% if request.user.is_authenticated %}
                 {% if item_count > 0 %}
@@ -67,12 +69,14 @@
                     </li>
 
                     <li class="nav-item mt-lg-2 mt-xl-2 dropdown">
-                        <a class="nav-link dropdown-toggle weight-height h6-home" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-                           aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle weight-height h6-home"
+                           href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user" style="margin-right: 5px;color: #585858"></i>
                         {{ request.user.first_name }}
                         </a>
 
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <div class="dropdown-menu" aria-labelledby="userDropdown" onload=""
+                             style="position: absolute;transform: translate3d(5px, 20px, 0px); top: 0px;left: 0px;will-change: transform;">
                             <a class="dwop-item weight-height p-home" href="{% url 'order:order_history' %}">Order History</a>
                             <div class="dropdown-divider"></div>
                             <a class="dwop-item weight-height p-home" href="{% url 'customer_update' %}">Profile</a>
@@ -81,21 +85,6 @@
                         </div>
                     </li>
 
-{#                    <a class="nav-link link-nav nav__link" href="#" style="display: flex" data-toggle="dropdown"#}
-{#                   aria-haspopup="true" aria-expanded="false">#}
-{#                    <i class="fas fa-user-circle" style="margin-right: 5px; color: #585858"></i>#}
-{#                    <h6 class="weight-height h6-home">#}
-{#                        {{ request.user.first_name }}#}
-{#                    </h6>#}
-{#                </a>#}
-{##}
-{#                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown" onload="">#}
-{#					<a class="dropdown-item item-name"  href="{% url 'order:order_history' %}" >Order History</a>#}
-{#                     <div class="dropdown-divider"></div>#}
-{#                    <a class="dropdown-item item-name"  href="{% url 'customer_update' %}" >Profile</a>#}
-{#                     <div class="dropdown-divider"></div>#}
-{#                     <a class="dropdown-item item-name"  href="{% url 'reset_password_costomer' %}" >Reset Password</a>#}
-{#                </div>#}
                     <li class="nav-item mt-lg-2 mt-xl-2">
                         <a class="nav-link" href="{% url 'signout' %}" style="display: flex">
                             <i class="fas fa-sign-out-alt" style="margin-right: 5px;  color: #585858"></i>
