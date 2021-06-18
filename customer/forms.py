@@ -83,13 +83,20 @@ class SignUpFormPromoter(forms.Form):
 
 
 class SignUpForm(forms.Form):
-    first_name = forms.CharField(max_length=40, required=True)
-    last_name = forms.CharField(max_length=120, required=True)
-    cellphone = forms.CharField(max_length=13)
-    address = forms.CharField(max_length=250)
-    city = forms.CharField(max_length=250)
-    zip = forms.CharField(max_length=11)
-    email = forms.EmailField(label="Email", required=True)
+    first_name = forms.CharField(label='', max_length=40, required=True,
+                                 widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
+    last_name = forms.CharField(label='', max_length=120, required=True,
+                                widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
+    address = forms.CharField(label='', max_length=250,
+                              widget=forms.TextInput(attrs={'placeholder': 'Address'}))
+    cellphone = forms.CharField(label='', max_length=13,
+                                widget=forms.TextInput(attrs={'placeholder': 'Cellphone'}))
+    city = forms.CharField(label='', max_length=250,
+                           widget=forms.TextInput(attrs={'placeholder': 'City'}))
+    zip = forms.CharField(label='', max_length=11,
+                          widget=forms.TextInput(attrs={'placeholder': 'Zip'}))
+    email = forms.EmailField(label="", required=True,
+                             widget=forms.TextInput(attrs={'placeholder': 'Email'}))
     password1 = forms.CharField(
         label=_(""),
         strip=False,
