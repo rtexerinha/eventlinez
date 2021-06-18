@@ -182,3 +182,12 @@
       max-width: 300px !important;
     }
 }
+
+@media (max-width: 1024px) and  (min-width: 930px) {
+    .div-column{
+         min-height: 100vh;
+    }
+    .div-left-new{
+         padding-left: 5vw;
+    }
+}
