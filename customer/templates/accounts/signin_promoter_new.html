@@ -1,0 +1,49 @@
+{% extends "base-new.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block metadescription %}
+	Sign in and enjoy the variety of stunning products.
+{% endblock %}
+{% block title %}
+	Login - Eventlinez
+{% endblock %}
+
+{% block content %}
+        <section class="new-container" >
+            <main class="div-left-new">
+                <div>
+                    <div class="logoimg-new">
+                        <img src="{% static 'img/Eventlinez.png' %}" alt="logo">
+                    </div>
+                    <div class="div-text">
+                        <h2 class="h2-text">Login Promoter</h2>
+                    </div>
+
+                    <form method="post" >
+                        {% csrf_token %}
+                        <p>{{ form | crispy }}</p>
+                        <button type="submit" class="button-primary-new">Login Promoter</button>
+                    </form>
+
+                    <div class="div-item">
+                        <a href="{% url 'password_reset_promoter' %}" class="links-new" >Forgot Your Password?</a>
+                    </div>
+
+                    <div class="div-inline">
+                        <hr>
+                        <div>
+                           or
+                        </div>
+                        <hr>
+                    </div>
+                    <button class="buttons-secondary" onclick="window.open('{% url 'signup_promoter' %}','_self')">
+                        Sing up now
+                    </button>
+                </div>
+            </main>
+
+            <aside class="div-right-new">
+
+            </aside>
+        </section>
+{% endblock %}

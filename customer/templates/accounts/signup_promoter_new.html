@@ -1,0 +1,66 @@
+{% extends "base-new.html" %}
+{% load crispy_forms_filters %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block metadescription %}
+	Sign up to get a new account with us. The Eventlinez has a variety of stunning products and tickets.
+{% endblock %}
+{% block title %}
+	Create a New Account Promoter- Eventlinez
+{% endblock %}
+{% block content %}
+
+    <div class="new-container">
+        <section class="div-left-new">
+            <aside id="div-row-form">
+             {% if not form_promoter.is_valid %}
+                 <div class="logoimg-new">
+                    <img src="{% static 'img/Eventlinez.png' %}" alt="logo">
+                </div>
+                <div class="div-text">
+                    <h2 class="h2-text">Create New Promoter Account</h2>
+                </div>
+                <form method="post">
+                {% csrf_token %}
+
+                     <div >
+                        <div>
+                            {{ form|crispy }}
+                        </div>
+
+                    </div>
+
+                    <button type="submit" class="button-primary-new" >Register Account Promoter</button>
+                </form>
+                 <div class="div-inline">
+                        <hr>
+                        <div>
+                           or
+                        </div>
+                        <hr>
+                 </div>
+                 <button class="buttons-secondary" onclick="window.open('{% url 'shop:index'  %}','_self')">
+                        Continue shopping
+                 </button>
+            {% else %}
+                 <h4 class="text-default">Your account has been successfully created</h4>
+                 <br>
+
+                 <div>
+                    <p>
+                        Dear Customer,
+                        <br><br>
+                        Your account has been created and it is ready to use.
+                        <br>
+                        <a href="{% url 'shop:index' %}">Continue shopping</a> and enjoy the variety of cushions that we have at the perfect cushion store.
+                    </p>
+                </div>
+
+            {% endif %}
+            </aside>
+        </section>
+        <section class="div-right-new div-column">
+
+        </section>
+    </div>
+{% endblock %}

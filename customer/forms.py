@@ -12,27 +12,35 @@ from event.models import Promoter
 
 
 class SignUpFormPromoter(forms.Form):
-    name = forms.CharField(max_length=100, required=True)
-    email = forms.EmailField(label="Email", max_length=254, help_text='eg. youremail@anyemail.com', required=True)
-    address = forms.CharField(max_length=255)
-    city = forms.CharField(max_length=250)
-    zip = forms.CharField(max_length=11)
+    name = forms.CharField(label='', max_length=100, required=True,
+                           widget=forms.TextInput(attrs={'placeholder': 'Name'}))
+    email = forms.EmailField(label='', max_length=254, help_text='eg. youremail@anyemail.com', required=True,
+                             widget=forms.TextInput(attrs={'placeholder': 'Email'}))
+    address = forms.CharField(label='', max_length=255,
+                              widget=forms.TextInput(attrs={'placeholder': 'Address'}))
+    city = forms.CharField(label='', max_length=250,
+                           widget=forms.TextInput(attrs={'placeholder': 'City'}))
+    zip = forms.CharField(label='', max_length=11,
+                          widget=forms.TextInput(attrs={'placeholder': 'Zip'}))
     social_security = forms.CharField(
+        label='',
         max_length=12,
         required=False,
-        help_text='SSN information is only used for Taxes purposes.'
+        help_text='SSN information is only used for Taxes purposes.',
+        widget=forms.TextInput(attrs={'placeholder': 'Social Security'})
     )
-    phone = forms.CharField(max_length=12)
+    phone = forms.CharField(label='', max_length=12,
+                            widget=forms.TextInput(attrs={'placeholder': 'Phone'}))
 
     password1 = forms.CharField(
-        label=_("Password"),
+        label=_(""),
         strip=False,
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'placeholder': 'Password'}),
         help_text=_("Your password must contain at least 8 characters, cannot password be entirely numeric."),
     )
     password2 = forms.CharField(
-        label=_("Password confirmation"),
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        label=_(""),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password', 'placeholder': 'Password Confirmation'}),
         strip=False,
         help_text=_("Enter the same password as before, for verification."),
     )
@@ -162,7 +170,12 @@ class SignInForm(AuthenticationForm):
 
 
 class SignInPromoterForm(AuthenticationForm):
-    username = UsernameField(label="Email", widget=forms.EmailInput())
+    username = UsernameField(label='', widget=forms.EmailInput(attrs={
+        'placeholder': _('Email')
+    }))
+    password = forms.CharField(label=_(""), widget=forms.PasswordInput(attrs={
+        'placeholder': _('Password')
+    }))
 
     def clean(self):
         super(SignInPromoterForm, self).clean()
