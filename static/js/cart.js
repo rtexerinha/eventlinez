@@ -1,3 +1,18 @@
+
+function _updateTotal(){
+    let itens = document.getElementsByClassName("ticket-price")
+    let total = 0.0
+
+    $(".ticket-row").each(function(index){
+        let qty = parseInt($(this).find(".ticket-qty").text())
+        let price = parseFloat($(this).find(".ticket-price").text())
+        total = total + price * qty
+    })
+
+    let amountField = document.getElementById("total")
+    amountField.textContent = total.toLocaleString();
+}
+
 function controlQty(ticket_id, command){
     let quantity = document.getElementById("ticket-" + ticket_id + "-qty");
     let value = parseInt(quantity.innerText, 10);
@@ -8,6 +23,8 @@ function controlQty(ticket_id, command){
     if (command === "decrease")
         value = --value;
     quantity.innerText = value.toString();
+
+    _updateTotal();
 }
 
 

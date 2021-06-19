@@ -50,18 +50,18 @@
             <div class="col-12" style="padding: 0!important; min-height: 250px">
                 {% for ticket in event.tickets.all %}
                     <aside class="col-12 mt-4">
-                        <div id="ticket-row-{{ ticket.id }}"class="ticket-row row">
+                        <div id="ticket-row-{{ ticket.id }}" class="ticket-row row">
                             <div class="col-8" style="display: block">
                                 <p class="ticket-id" id="ticket-id" style="display: none">{{ ticket.id }}</p>
                                 <h6 class="weight-height h6-home">
                                     {{ ticket.name }}
                                 </h6>
-                                <p class="editable span-blue" style="color: #007AFF">
+                                <p class="ticket-price editable span-blue" style="color: #007AFF">
                                     {{ ticket.price }}
                                 </p>
                             </div>
-
                             <div class="col-4 mt-2" style="display: flex">
+                                <!-- Quantity Buttons  -->
                                 <button onclick="controlQty({{ ticket.id }}, 'decrease')" type="button" class="button-increment mr-2">-</button>
                                 <h6 id="ticket-{{ ticket.id }}-qty" class="ticket-qty h6-home">0</h6>
                                 <button onclick="controlQty({{ ticket.id }}, 'increase')" type="button" class="plus button-increment ml-2">+</button>
@@ -72,9 +72,9 @@
             </div>
 
             {% if event.qty_available <= 0%}
-                <h4  class="text-default d-flex justify-content-center" style="margin-top: 10%; font-size: 2rem; color: #d90075">
+                <p  class="text-default d-flex justify-content-center" style="margin-top: 10%; font-size: 2rem; color: #d90075">
                     Sold Out
-                </h4>
+                </p>
             {% else %}
                 <br>
                     <div class="col-12">
@@ -88,11 +88,11 @@
                     <article class="col-12 mt-4">
                         <div class="row">
                             <div class="col-6">
-                                <h5 class="weight-height h5-home p-dark mt-2">Total</h5>
+                                <p class="weight-height h5-home p-dark mt-2">Total</p>
                         </div>
 
                         <div class="col-6" style="display: flex;">
-                            <h3 class="h3-home p-dark">R$ 380,00</h3>
+                            <p id="total" class="h3-home p-dark">0.00</p>
                         </div>
                     </div>
                 </article>
@@ -105,9 +105,7 @@
                                  style="margin-top: 5%; font-size: 1rem; color: #E10087">
                                 The event date has passed
                             </h6>
-
-                        <input disabled class="buttons-primary button-details-width h5-home"
-                               type="submit" value="Add to Cart">
+                        <input disabled class="buttons-primary button-details-width h5-home" type="submit" value="Add to Cart">
                         {% else %}
                             <input onclick="doFunction()" id="addToCartBtn" class="buttons-primary button-details-width h5-home"
                                    type="submit" value="Add to Cart">
