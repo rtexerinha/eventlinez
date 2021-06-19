@@ -46,99 +46,100 @@
         </aside>
 
         <main class="row">
-            <!---Table MOBILE------>
-            <article class="mobile-cart col-12 col-sm-11 col-md-12 col-lg-12 text-center">
-				<table class="table" style="margin: auto">
-                    <tbody>
-                {% for cart_item in cart_items %}
-                    <tr>
-                        <td class="float-left">
-                            <a href="{% url 'cart:remove-item' cart_item.ticket.event.id %}" class="icon_remove_a">
-                                <i style="padding-right: 10px" class="fas fa-trash-alt icon_remove"></i>
-                            </a>
-
-                            <a href="{{cart_item.ticket.event.get_url}}">
-                                <img src="{{cart_item.ticket.event.image.url}}" alt="" class="rounded custom_image">
-                            </a>
-                        </td>
-
-                    {% if cart_item.quantity < cart_item.ticket.event.qtyin_available %}
-                        <td>
-                            <a href="{% url 'cart:cart_remove' cart_item.ticket.id %}" class="custom_a">
-                                <i class="fas fa-minus-circle custom_icon"></i>
-                            </a>&nbsp;
-
-                            {{cart_item.quantity }}&nbsp;
-
-                        {% if cart_item.ticket.event.qty_available  == 1 %}
-                            <a style="pointer-events: none; cursor: not-allowed;" href="{% url 'cart:add_cart' cart_item.id 'increase' %}" class="custom_a">
-                                <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
-                            </a>
-                             <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">Only one ticket available</p>&nbsp;
-                        {% else %}
-                            <a href="{% url 'cart:add_cart' cart_item.id 'decrement' %}" class="custom_a">
-                                <i class="fas fa-plus-circle custom_icon"></i>
-                            </a>
-                        {% endif %}
-                        </td>
-
-                        <td class="cart-details-quantity">
-                            ${{cart_item.price_total| floatformat:2 }}
-                        </td>
-                    {% else %}
-                        <td>
-                            <a href="{% url 'cart:cart_remove' cart_item.ticket.event.id %}" class="custom_a">
-                                <i class="fas fa-minus-circle custom_icon"></i>
-                            </a>&nbsp;
-                            {{cart_item.quantity }}&nbsp;
+{#            <!--Mobile--->#}
+{#            <article class="mobile-cart col-12 col-sm-11 col-md-12 col-lg-12 text-center">#}
+{#				<table class="table" style="margin: auto">#}
+{#                    <tbody>#}
+{#                {% for cart_item in cart_items %}#}
+{#                    <tr>#}
+{#                        <td class="float-left">#}
+{#                            <a href="{% url 'cart:remove-item' cart_item.ticket.id %}" class="icon_remove_a">#}
+{#                                <i style="padding-right: 10px" class="fas fa-trash-alt icon_remove"></i>#}
+{#                            </a>#}
+{##}
+{#                            <a href="{{cart_item.ticket.event.get_url}}">#}
+{#                                <img src="{{cart_item.ticket.event.image.url}}" alt="" class="rounded custom_image">#}
+{#                            </a>#}
+{#                        </td>#}
+{##}
+{#                    {% if cart_item.quantity < cart_item.ticket.qty_available %}#}
+{#                        <td>#}
+{#                            <a href="{% url 'cart:cart_remove' cart_item.ticket.id %}" class="custom_a">#}
+{#                                <i class="fas fa-minus-circle custom_icon"></i>#}
+{#                            </a>&nbsp;#}
+{##}
+{#                            {{cart_item.quantity }}&nbsp;#}
+{##}
+{#                        {% if cart_item.ticket.event.qty_available  == 1 %}#}
+{#                            <a style="pointer-events: none; cursor: not-allowed;" href="{% url 'cart:add_cart' cart_item.id 'increase' %}" class="custom_a">#}
+{#                                <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>#}
+{#                            </a>#}
+{#                             <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">Only one ticket available</p>&nbsp;#}
+{#                        {% else %}#}
+{#                            <a href="{% url 'cart:add_cart' %}" class="custom_a">#}
+{#                                <i class="fas fa-plus-circle custom_icon"></i>#}
+{#                            </a>#}
+{#                        {% endif %}#}
+{#                        </td>#}
+{##}
+{#                        <td class="cart-details-quantity">#}
+{#                            ${{cart_item.price_total| floatformat:2 }}#}
+{#                        </td>#}
+{#                    {% else %}#}
+{#                        <td>#}
+{#                            <a href="{% url 'cart:cart_remove' cart_item.ticket.id %}" class="custom_a">#}
+{#                                <i class="fas fa-minus-circle custom_icon"></i>#}
+{#                            </a>&nbsp;#}
+{#                            {{cart_item.quantity }}&nbsp;#}
 {#                            <a style="pointer-events: none; cursor: not-allowed;"#}
-{#                               href="{% url 'cart:add_cart' cart_item.ticket.event.id %}" class="custom_a">#}
+{#                               href="{% url 'cart:add_cart' cart_item.ticket.id %}" class="custom_a">#}
 {#                                <i class="fas fa-plus-circle"  style=" color: gray!important; text-decoration: none"></i>#}
 {#                            </a>#}
-                            <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
-                                There are only {{cart_item.quantity }} tickets available
-                            </p>&nbsp;
-                        </td>
-                    {% endif %}
-                    </tr>
+{#                            <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">#}
+{#                                There are only {{cart_item.quantity }} tickets available#}
+{#                            </p>&nbsp;#}
+{#                        </td>#}
+{#                    {% endif %}#}
+{#                    </tr>#}
+{##}
+{#                    <tr>#}
+{#                        <td>#}
+{#                            <div style="float: left;">#}
+{#                                <p class="text-default cart-title">#}
+{#                                   	{{cart_item.ticket.e.name}}#}
+{#                                </p>#}
+{#                                <p class="event-localization">#}
+{#                                    {{ cart_item.ticket.event.address }},#}
+{#                                    {{ cart_item.ticket.event.city }}#}
+{#                                </p>#}
+{#                            </div>#}
+{#                        </td>#}
+{##}
+{#                        <td>#}
+{#                            <p class="text-left"><b>Unit Price</b></p>#}
+{#                            <p class="cart-details-quantity">#}
+{#                                ${{cart_item.sub_total }}cart_remove#}
+{#                            </p>#}
+{#                        </td>#}
+{##}
+{#                        <td>#}
+{#                            {% if cart_item.promo_code %}#}
+{#                                <p>#}
+{#                                    <b>Promo Code</b>#}
+{#                                </p>#}
+{#                                <p>#}
+{#                                    {{ cart_item.promo_code }}#}
+{#                                </p>#}
+{#                            {% endif %}#}
+{#                        </td>#}
+{#                        </tr>#}
+{#                {% endfor %}#}
+{#                    </tbody>#}
+{#				</table>#}
+{#			</article>#}
+{#            <!--End of Mobile-->#}
 
-                    <tr>
-                        <td>
-                            <div style="float: left;">
-                                <p class="text-default cart-title">
-                                   	{{cart_item.ticket.event.name}}
-                                </p>
-                                <p class="event-localization">
-                                    {{ cart_item.ticket.event.address }},
-                                    {{ cart_item.ticket.event.city }}
-                                </p>
-                            </div>
-                        </td>
-
-                        <td>
-                            <p class="text-left"><b>Unit Price</b></p>
-                            <p class="cart-details-quantity">
-                                ${{cart_item.sub_total }}
-                            </p>
-                        </td>
-
-                        <td>
-                            {% if cart_item.promo_code %}
-                                <p>
-                                    <b>Promo Code</b>
-                                </p>
-                                <p>
-                                    {{ cart_item.promo_code }}
-                                </p>
-                            {% endif %}
-                        </td>
-                        </tr>
-                {% endfor %}
-                    </tbody>
-				</table>
-			</article>
-
-            <!--Destop-->
+            <!--Desktop-->
             <aside class="desktop-cart col-12 mt-4">
 				<table class="table">
 				    <thead class="col-12">
@@ -155,68 +156,60 @@
                         {% for item in cart_items %}
                             <tr>
                                 <td class="float-left">
-                                    <a href="{% url 'cart:full_remove' item.ticket.id %}" class="icon_remove_a">
+                                    <!-- Remove item button -->
+                                    <a href="{% url 'cart:remove-item' item.id %}" class="icon_remove_a">
                                         <i style="padding-right: 10px" class="fas fa-trash-alt icon_remove"></i>
                                     </a>
-
                                     <a href="{{item.ticket.event.get_url}}">
                                         <img src="{{item.ticket.event.image.url}}" alt="" class="rounded custom_image">
                                     </a>
-
                                     <div style="float: right; margin-left: 10px">
                                         <h6 class="h6-home">
-                                            Nome do evento Lorem Ipsum Dolor
                                             {{item.ticket.event.name}}
                                         </h6>
                                         <p class="p-home">
-                                            17 de Junho de 2021 - 20h
-                                            Fortaleza-CE
                                             {{ item.ticket.event.address }},
                                             {{ item.ticket.event.city }}
                                         </p>
                                     </div>
                                 </td>
 
-{#                                <td>#}
-{#                                    {% if cart_item.promo_code %}#}
-{#                                        {{ cart_item.promo_code }}#}
-{#                                    {% endif %}#}
-{#                                </td>#}
+                                <td>
+                                    {% if cart_item.promo_code %}
+                                        {{ cart_item.promo_code }}
+                                    {% endif %}
+                                </td>
 
                             {% if item.quantity < item.ticket.qty_available %}
                                 <td>
-                                    <a href="{% url 'cart:cart_remove' item.ticket.event.id %}" class="custom_a">
+                                    <a href="{% url 'cart:change-quantity' item.ticket.id "decrement" %}" class="custom_a">
                                         <i class="fas fa-minus-circle custom_icon"></i>
                                     </a>&nbsp;
                                     {{item.quantity }}&nbsp;
 
                                     {% if item.ticket.qty_available  == 1 %}
-{#                                        <a style="pointer-events: none; cursor: not-allowed;" class="custom_a"#}
-{#                                           href="{% url 'cart:add_cart' item.ticket.event.id %}">#}
-{#                                            <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>#}
-{#                                        </a>#}
+                                        <a style="pointer-events: none; cursor: not-allowed;" class="custom_a"
+                                           href="{% url 'cart:change-quantity' item.ticket.id "increment" %}">
+                                            <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
+                                        </a>
                                          <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
-
                                     {% else %}
-{#                                        <a href="{% url 'cart:add_cart' item.ticket.event.id %}" class="custom_a">#}
-{#                                            <i class="fas fa-plus-circle custom_icon"></i>#}
-{#                                        </a>#}
-
+                                        <a href="{% url 'cart:change-quantity' item.ticket.id "increment" %}" class="custom_a">
+                                            <i class="fas fa-plus-circle custom_icon"></i>
+                                        </a>
                                     {% endif %}
                                 </td>
-
                             {% else %}
                                 <td>
-                                    <a href="{% url 'cart:cart_remove' item.ticket.event.id %}" class="custom_a">
+                                    <a href="{% url 'cart:change-quantity' item.ticket.id "increment" %}" class="custom_a">
                                         <i class="fas fa-minus-circle custom_icon"></i>
                                     </a>&nbsp;
-
                                     {{item.quantity }}&nbsp;
 
-{#                                    <a style="pointer-events: none; cursor: not-allowed;"#}
-{#                                       href="{% url 'cart:add_cart' item.ticket.event.id %}" class="custom_a">#}
-{#                                        <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>#}
-{#                                    </a>#}
+                                    <a style="pointer-events: none; cursor: not-allowed;"
+                                       href="{% url 'cart:change-quantity' item.ticket.id "increment" class="custom_a">
+                                        <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
+                                    </a>
 
                                     <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
                                         There are only {{item.quantity }} tickets available
@@ -239,10 +232,10 @@
                     </tbody>
 				</table>
 			</aside>
+            <!--End of Desktop-->
 
-            <!--- Pays -->
+            <!-- Promocode -->
             <article class="col-lg-6 col-12">
-
                 <div class="col-lg-7 col-12 pt-4 pb-4 pb-lg-0">
                     <label for="promo_code" class="h6-home">Promo code</label>
                     <input id="promo_code" type="text"
@@ -252,6 +245,7 @@
                 </div>
             </article>
 
+            <!-- Total -->
             <div class="col-lg-6 col-12">
 				<table class="table" style="min-width: 320px!important;">
 					<thead class="my_custom_thead">
@@ -263,7 +257,6 @@
                                     <strong class="col-8 h4-home">
                                         Your total is:
                                     </strong>
-
 								    <strong class="col-4 h3-home">${{ total|floatformat:2 }}</strong>
                                 </div>
 							</td>
@@ -271,13 +264,12 @@
 					</tbody>
 				</table>
 
+                <!-- Checkout Button-->
                 <div class="col-lg-12">
                     <main class="d-lg-flex d-block justify-content-lg-end">
-
                     <button class="buttons-primary h5-home mb-3 w-10">
                         <a href="{% url 'shop:index' %}" class="buttons-primary h5-home">Continue Shopping</a>
                     </button>
-
                     <button id="checkout-btn"  class="ml-lg-5 ml-0 buttons-primary h5-home w-10" type="submit">Checkout</button>
                     </main>
                 </div>

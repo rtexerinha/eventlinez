@@ -1,3 +1,4 @@
+import tempfile
 from decimal import Decimal
 
 from django.test import TestCase
@@ -6,8 +7,8 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
-from .models import CartItem
 from .models import Cart
+from .models import CartItem
 from event.models import Event
 from event.models import Ticket
 
@@ -97,7 +98,8 @@ class CardAddViewTest(TestCase):
 class CardDetailViewTest(TestCase):
 
     def setUp(self):
-        event = baker.make(Event, description="foo")
+        image = tempfile.NamedTemporaryFile(suffix=".jpg").name
+        event = baker.make(Event, description="foo", image=image)
         self.pista = baker.make(Ticket, event=event, quantity=40, price=10)
         self.frontstage = baker.make(Ticket, event=event, quantity=20, price=20)
         self.camarote = baker.make(Ticket, event=event, quantity=10, price=40)
@@ -164,3 +166,44 @@ class CardRemoveItemViewTest(TestCase):
 
         self.client.post(reverse('cart:remove-item', args=[item.id]))
         self.assertEqual(1, CartItem.objects.filter(cart__cart_id=self.client.session.session_key).count())
+
+
+class CardChangeQuantityViewTest(TestCase):
+
+    def setUp(self):
+        image = tempfile.NamedTemporaryFile(suffix=".jpg").name
+        event = baker.make(Event, description="foo", image=image)
+        self.pista = baker.make(Ticket, event=event, quantity=40, price=10)
+        self.frontstage = baker.make(Ticket, event=event, quantity=20, price=20)
+        self.camarote = baker.make(Ticket, event=event, quantity=10, price=40)
+        self.user = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
+
+    def test_increment_quantity(self):
+        payload = {
+            "promocode": None,
+            "tickets": [
+                {"id": self.camarote.id, "quantity": 1},
+                {"id": self.frontstage.id, "quantity": 1},
+                {"id": self.pista.id, "quantity": 0},
+            ]
+        }
+        self.client.login(username='john', password='johnpassword')
+        self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+        self.assertEqual(2, CartItem.objects.filter(cart__cart_id=self.client.session.session_key).count())
+
+        # item  a ser incrementado
+        item = CartItem.objects.filter(cart__cart_id=self.client.session.session_key)[0]
+
+        # Incrementa a quantidade de tickets
+        self.client.post(reverse('cart:change-quantity', args=[item.id, 'increment']))
+        item.refresh_from_db()
+        self.assertEqual(item.quantity, 2)
+
+        self.assertEqual(
+            CartItem.objects.filter(cart__cart_id=self.client.session.session_key)[1].quantity,
+            1, "Demais tickests não devem ter suas quantidades incrementadas")
+
+        # Decrementa a quantidade de tickets
+        self.client.post(reverse('cart:change-quantity', args=[item.id, 'decrement']))
+        item.refresh_from_db()
+        self.assertEqual(item.quantity, 1)

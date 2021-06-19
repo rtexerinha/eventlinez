@@ -5,6 +5,7 @@ import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
@@ -24,6 +25,9 @@ def _cart_id(request):
 
 @csrf_exempt
 def cart_add(request):
+    """
+    Adiciona cria o carrinho e adiciona os tickets ao carrinho.
+    """
     data = json.loads(request.body)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
@@ -47,11 +51,25 @@ def cart_add(request):
 
 
 @login_required()
-def change_quantity(request, line_id, command):
+def change_quantity(request, item_id, operation):
+    """
+    Altera (incrementa ou decrementa) a quantidade de um item no carrinho.
+    :param item_id: Id da linha
+    :param operation: Operaçãoque será realizada. Os valores possíveis são "increment" ou "decrement"
+    :return:
+    """
     cart = Cart.objects.get(cart_id=_cart_id(request))
-    cart_items = CartItem.objects.filter(cart=cart, active=True)
+    item = CartItem.objects.get(pk=item_id, cart=cart, active=True)
+    if operation == "increment":
+        item.quantity = item.quantity + 1
+    elif operation == "decrement":
+        item.quantity = item.quantity - 1
+    else:
+        return HttpResponse("Invalid cart iperation", status=400)
+    item.save()
     total = cart.amount()
-    return render(request, 'cart.html', dict(total=total, cart_items=cart_items))
+    items = cart.cartitem_set.all()
+    return render(request, 'cart.html', dict(total=total, cart_items=items))
 
 
 @login_required
