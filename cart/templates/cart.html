@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-new.html" %}
 {% load static %}
 {% block metadescription %}
 	This is the shopping cart page. Proceed to review your items and place the order.
@@ -62,27 +62,27 @@
                 {% for cart_item in cart_items %}
                     <tr>
                         <td class="float-left">
-                            <a href="{% url 'cart:full_remove' cart_item.event.id %}" class="icon_remove_a">
+                            <a href="{% url 'cart:full_remove' cart_item.ticket.id %}" class="icon_remove_a">
                                 <i style="padding-right: 10px" class="fas fa-trash-alt icon_remove"></i>
                             </a>
 
-                            <a href="{{cart_item.event.get_url}}">
-                                <img src="{{cart_item.event.image.url}}" alt="" class="rounded custom_image">
+                            <a href="{{cart_item.ticket.event.get_url}}">
+                                <img src="{{cart_item.ticket.event.image.url}}" alt="" class="rounded custom_image">
                             </a>
                         </td>
 
 
-                    {% if cart_item.quantity < cart_item.event.sales_info.qtd_available %}
+                    {% if cart_item.quantity < cart_item.ticket.event.qtyin_available %}
                         <td>
-                            <a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a">
+                            <a href="{% url 'cart:cart_remove' cart_item.ticket.id %}" class="custom_a">
                                 <i class="fas fa-minus-circle custom_icon"></i>
                             </a>&nbsp;
 
                             {{cart_item.quantity }}&nbsp;
 
-                        {% if cart_item.event.sales_info.qtd_available  == 1 %}
+                        {% if cart_item.ticket.event.qty_available  == 1 %}
                             <a style="pointer-events: none; cursor: not-allowed;"
-                               href="{% url 'cart:add_cart' cart_item.event.id %}"
+                               href="{% url 'cart:add_cart' cart_item.ticket.id %}"
                                class="custom_a">
                                 <i class="fas fa-plus-circle"
                                    style=" color: gray!important; text-decoration: none"></i>
@@ -90,7 +90,7 @@
                              <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">Only one ticket available</p>&nbsp;
 
                         {% else %}
-                            <a href="{% url 'cart:add_cart' cart_item.event.id %}" class="custom_a">
+                            <a href="{% url 'cart:add_cart' cart_item.ticket.id %}" class="custom_a">
                                 <i class="fas fa-plus-circle custom_icon"></i>
                             </a>
 
@@ -103,13 +103,13 @@
 
                     {% else %}
                         <td>
-                            <a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a">
+                            <a href="{% url 'cart:cart_remove' cart_item.ticket.event.id %}" class="custom_a">
                                 <i class="fas fa-minus-circle custom_icon"></i>
                             </a>&nbsp;
                             {{cart_item.quantity }}&nbsp;
 
                             <a style="pointer-events: none; cursor: not-allowed;"
-                               href="{% url 'cart:add_cart' cart_item.event.id %}" class="custom_a">
+                               href="{% url 'cart:add_cart' cart_item.ticket.id %}" class="custom_a">
                                 <i class="fas fa-plus-circle"  style=" color: gray!important; text-decoration: none"></i>
                             </a>
                             <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
@@ -123,11 +123,11 @@
                         <td>
                             <div style="float: left;">
                                 <p class="text-default cart-title">
-                                   	{{cart_item.event.name}}
+                                   	{{cart_item.ticket.event.name}}
                                 </p>
                                 <p class="event-localization">
-                                    {{ cart_item.event.address }},
-                                    {{ cart_item.event.city }}
+                                    {{ cart_item.ticket.event.address }},
+                                    {{ cart_item.ticket.event.city }}
                                 </p>
                             </div>
                         </td>
@@ -189,21 +189,21 @@
                     {% for cart_item in cart_items %}
                     <tr>
                         <td class="float-left">
-                            <a href="{% url 'cart:full_remove' cart_item.event.id %}" class="icon_remove_a">
+                            <a href="{% url 'cart:full_remove' cart_item.ticket.id %}" class="icon_remove_a">
                                 <i style="padding-right: 10px" class="fas fa-trash-alt icon_remove"></i>
                             </a>
 
-                            <a href="{{cart_item.event.get_url}}">
-                                <img src="{{cart_item.event.image.url}}" alt="" class="rounded custom_image">
+                            <a href="{{cart_item.ticket.event.get_url}}">
+                                <img src="{{cart_item.ticket.event.image.url}}" alt="" class="rounded custom_image">
                             </a>
 
                             <div style="float: right; margin-left: 10px">
                                 <p class="text-default cart-title">
-                                   	{{cart_item.event.name}}
+                                   	{{cart_item.ticket.event.name}}
                                 </p>
                                 <p class="event-localization">
-                                    {{ cart_item.event.address }},
-                                    {{ cart_item.event.city }}
+                                    {{ cart_item.ticket.event.address }},
+                                    {{ cart_item.ticket.event.city }}
                                 </p>
                             </div>
                         </td>
@@ -214,22 +214,22 @@
                             {% endif %}
                         </td>
 
-                    {% if cart_item.quantity < cart_item.event.sales_info.qtd_available %}
+                    {% if cart_item.quantity < cart_item.ticket.event.qty_available %}
                         <td>
-                            <a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a">
+                            <a href="{% url 'cart:cart_remove' cart_item.ticket.event.id %}" class="custom_a">
                                 <i class="fas fa-minus-circle custom_icon"></i>
                             </a>&nbsp;
                             {{cart_item.quantity }}&nbsp;
-                        {% if cart_item.event.sales_info.qtd_available  == 1 %}
+                        {% if cart_item.ticket.qty_available  == 1 %}
 
                             <a style="pointer-events: none; cursor: not-allowed;" class="custom_a"
-                               href="{% url 'cart:add_cart' cart_item.event.id %}">
+                               href="{% url 'cart:add_cart' cart_item.ticket.event.id %}">
                                 <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
                             </a>
                              <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
 
                         {% else %}
-                            <a href="{% url 'cart:add_cart' cart_item.event.id %}" class="custom_a">
+                            <a href="{% url 'cart:add_cart' cart_item.ticket.event.id %}" class="custom_a">
                                 <i class="fas fa-plus-circle custom_icon"></i>
                             </a>
 
@@ -238,14 +238,14 @@
 
                     {% else %}
                         <td>
-                            <a href="{% url 'cart:cart_remove' cart_item.event.id %}" class="custom_a">
+                            <a href="{% url 'cart:cart_remove' cart_item.ticket.event.id %}" class="custom_a">
                                 <i class="fas fa-minus-circle custom_icon"></i>
                             </a>&nbsp;
 
                             {{cart_item.quantity }}&nbsp;
 
                             <a style="pointer-events: none; cursor: not-allowed;"
-                               href="{% url 'cart:add_cart' cart_item.event.id %}" class="custom_a">
+                               href="{% url 'cart:add_cart' cart_item.ticket.event.id %}" class="custom_a">
                                 <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
                             </a>
 
@@ -299,8 +299,7 @@
             <script src="https://js.stripe.com/v3/"></script>
             <script type="text/javascript">
                 var checkoutButton = document.getElementById('checkout-btn');
-
-                 checkoutButton.addEventListener('click', function() {
+                checkoutButton.addEventListener('click', function() {
                      fetch('/cart/checkout/', {
                          method: 'POST'
                      })
@@ -315,7 +314,7 @@
                     .catch(function(error) {
                         console.error('Error:', error);
                     });
-                 });
+                });
             </script>
         </main>
 

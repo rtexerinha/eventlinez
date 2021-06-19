@@ -22,7 +22,8 @@ def _cart_id(request):
     return cart
 
 
-def cart_add(request):
+@csrf_exempt
+def cart_add(request, event_id=None):
     data = json.loads(request.body)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
@@ -42,7 +43,7 @@ def cart_add(request):
         if tkt['quantity'] < 0:
             return JsonResponse({"message": 'Quantity cannot be less than 0'}, status=400)
         CartItem.objects.create(ticket=ticket, cart=cart, quantity=quantity)
-    return redirect('cart:cart_detail')
+    return JsonResponse({"status": "ok"})
 
 
 @login_required
@@ -58,9 +59,9 @@ def cart_detail(request, cart_items=None):
     return render(request, 'cart.html', dict(total=total, cart_items=cart_items))
 
 
-def cart_remove(request, event_id):
+def cart_remove(request, ticket_id):
     cart = Cart.objects.get(cart_id=_cart_id(request))
-    event = get_object_or_404(Event, id=event_id)
+    event = get_object_or_404(Ticket, id=ticket_id)
     cart_item = CartItem.objects.get(event=event, cart=cart)
     if cart_item.quantity > 1:
         cart_item.quantity -= 1

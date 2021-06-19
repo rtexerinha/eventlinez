@@ -28,6 +28,7 @@
             <img class="m-img-card-banner mobile" src="{{event.thumbnail.url }}" alt="{{event.name}}"/>
 
              <div class="col-lg-8">
+                 <div style="display: none" id="events">{{event.id}}</div>
                  <h3 class="h3-home pt-2 pt-lg-5">{{event.name}}</h3>
                  <h4 class="height-21 h4-home p-date">{{event.event_date|date:"D, d M H:i"}}</h4>
                  <h6 class="height-21 h6-home">{{event.city}}</h6>
@@ -49,43 +50,40 @@
 
             <div class="col-12" style="padding: 0!important; min-height: 250px">
                 {% for ticket in event.tickets.all %}
-                <aside class="col-12 mt-4">
-                    <div class="row">
-                        <div class="col-8" style="display: block">
-                            <h6 class="weight-height h6-home">{{ ticket.name }}
-                                <br>
-                                <br>
-                                <span class="span-blue" style="color: #007AFF">$ {{ ticket.price }}</span>
-                            </h6>
-                        </div>
+                    <aside class="col-12 mt-4">
+                        <div id="ticket-row-{{ ticket.id }}"class="ticket-row row">
+                            <div class="col-8" style="display: block">
+                                <p class="ticket-id" id="ticket-id" style="display: none">{{ ticket.id }}</p>
+                                <h6 class="weight-height h6-home">
+                                    {{ ticket.name }}
+                                </h6>
+                                <p class="editable span-blue" style="color: #007AFF">
+                                    {{ ticket.price }}
+                                </p>
+                            </div>
 
-                        <div class="col-4 mt-2" style="display: flex">
-                            <button type="button" class="button-increment mr-2">-</button>
-                            <h6 class="h6-home">0</h6>
-                            <button type="button" class="plus button-increment ml-2">+</button>
+                            <div class="col-4 mt-2" style="display: flex">
+                                <button onclick="controlQty({{ ticket.id }}, 'decrease')" type="button" class="button-increment mr-2">-</button>
+                                <h6 id="ticket-{{ ticket.id }}-qty" class="ticket-qty h6-home">0</h6>
+                                <button onclick="controlQty({{ ticket.id }}, 'increase')" type="button" class="plus button-increment ml-2">+</button>
+                            </div>
                         </div>
-                    </div>
-                </aside>
+                    </aside>
                 {% endfor %}
             </div>
-
+{##}
             {% if event.qty_available <= 0%}
                 <h4  class="text-default d-flex justify-content-center" style="margin-top: 10%; font-size: 2rem; color: #d90075">
                     Sold Out
                 </h4>
             {% else %}
                 <br>
-
-                <form action="/cart/add/{{ event.id }}/" method="post">
-                    {% csrf_token %}
                     <div class="col-12">
                         <label for="promo_code" class="h6-home">Promo code</label>
-                        <input id="promo_code"
-                               type="text"
+                        <input id="promo_code" type="text"
                                name="promo_code"
-                               placeholder="Insert code"
-                               style="border: 1px solid #E9E9E9;border-radius: 6px;"
-                               class="col-sm-12 col-lg-12 col-md-12 input-subcribe">
+                               placeholder="Insert code" style="border: 1px solid #E9E9E9;border-radius: 6px;"
+                               class="col-12 input-subcribe">
                     </div>
 
                     <article class="col-12 mt-4">
@@ -112,16 +110,19 @@
                         <input disabled class="buttons-primary button-details-width h5-home"
                                type="submit" value="Add to Cart">
                         {% else %}
-                            <input class="buttons-primary button-details-width h5-home"
+                            <input onclick="doFunction()" id="addToCartBtn" class="buttons-primary button-details-width h5-home"
                                    type="submit" value="Add to Cart">
                         {% endif %}
 
                     </div>
-                </form>
             {% endif %}
 
             </div>
         </article>
     </div>
 </main>
+{% endblock %}
+
+{% block cart_js %}
+    <script src="{% static 'js/cart.js' %}"></script>
 {% endblock %}
