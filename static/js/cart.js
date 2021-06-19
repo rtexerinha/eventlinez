@@ -1,8 +1,6 @@
 
 function _updateTotal(){
-    let itens = document.getElementsByClassName("ticket-price")
     let total = 0.0
-
     $(".ticket-row").each(function(index){
         let qty = parseInt($(this).find(".ticket-qty").text())
         let price = parseFloat($(this).find(".ticket-price").text())
@@ -10,7 +8,15 @@ function _updateTotal(){
     })
 
     let amountField = document.getElementById("total")
-    amountField.textContent = total.toLocaleString();
+
+    let fmt = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: '2',
+        maximumFractionDigits: '2'
+    });
+
+    amountField.textContent = fmt.format(total);
 }
 
 function controlQty(ticket_id, command){
