@@ -19,6 +19,7 @@ function _updateTotal(){
     amountField.textContent = fmt.format(total);
 }
 
+
 function controlQty(ticket_id, command){
     let quantity = document.getElementById("ticket-" + ticket_id + "-qty");
     let value = parseInt(quantity.innerText, 10);
@@ -34,7 +35,7 @@ function controlQty(ticket_id, command){
 }
 
 
-function doFunction() {
+function addToCard() {
     let linhas = document.getElementsByClassName("ticket-row");
     let tickets = []
     for (let i = 0; i < linhas.length; i++) {
@@ -57,4 +58,21 @@ function doFunction() {
     });
 }
 
+
+function doCheckout() {
+     fetch('/cart/checkout/', {
+         method: 'POST'
+     })
+    .then((result) => { return result.json() })
+    .then((data) => {
+        return Stripe(data.stripe_public_key).redirectToCheckout({
+            sessionId: data.session_id
+        });
+    })
+    .then(function (result) {
+    })
+    .catch(function(error) {
+        console.error('Error:', error);
+    });
+}
 

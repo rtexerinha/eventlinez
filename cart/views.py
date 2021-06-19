@@ -105,15 +105,15 @@ def checkout(request):
     Faz o redirecionamento do carrinho para processo de checkout no Stripe
     """
     cart = Cart.objects.get(cart_id=_cart_id(request))
-    cart_items = CartItem.objects.filter(cart=cart, active=True)
+    items = CartItem.objects.filter(cart=cart, active=True)
     stripe.api_key = settings.STRIPE_SECRET_KEY
     line_items = []
 
     # https://stripe.com/docs/billing/subscriptions/decimal-amounts
     cents = 100
 
-    for item in cart_items:
-        product = stripe.Product.create(name=item.event.name)
+    for item in items:
+        product = stripe.Product.create(name=str(item.ticket))
         line_item = {
             'price_data': {
                 'product': product.id,

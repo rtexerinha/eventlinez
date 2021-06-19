@@ -133,3 +133,6 @@ class Ticket(models.Model):
     def qty_sold(self):
         _qty_sold = self.ticket_set.count()
         return _qty_sold
+
+    def __str__(self):
+        return "%s/%s" % (self.event.name, self.name)
