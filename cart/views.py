@@ -43,7 +43,15 @@ def cart_add(request):
         if tkt['quantity'] < 0:
             return JsonResponse({"message": 'Quantity cannot be less than 0'}, status=400)
         CartItem.objects.create(ticket=ticket, cart=cart, quantity=quantity)
-    return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "ok"}, status=201)
+
+
+@login_required()
+def change_quantity(request, line_id, command):
+    cart = Cart.objects.get(cart_id=_cart_id(request))
+    cart_items = CartItem.objects.filter(cart=cart, active=True)
+    total = cart.amount()
+    return render(request, 'cart.html', dict(total=total, cart_items=cart_items))
 
 
 @login_required
@@ -59,16 +67,17 @@ def cart_detail(request, cart_items=None):
     return render(request, 'cart.html', dict(total=total, cart_items=cart_items))
 
 
-def cart_remove(request, ticket_id):
-    cart = Cart.objects.get(cart_id=_cart_id(request))
-    event = get_object_or_404(Ticket, id=ticket_id)
-    cart_item = CartItem.objects.get(event=event, cart=cart)
-    if cart_item.quantity > 1:
-        cart_item.quantity -= 1
-        cart_item.save()
-    else:
-        cart_item.delete()
-    return redirect('cart:cart_detail')
+# def cart_remove(request, item_id):
+#     cart = Cart.objects.get(cart_id=_cart_id(request))
+#     event = get_object_or_404(Ticket, id=item_id)
+#     cart_item = CartItem.objects.get(event=event, cart=cart)
+#     if cart_item.quantity > 1:
+#         cart_item.quantity -= 1
+#         cart_item.save()
+#     else:
+#         cart_item.delete()
+#     return redirect('cart:cart_detail')
+
 
 def remove_item(request, item_id):
     """
@@ -81,17 +90,21 @@ def remove_item(request, item_id):
     item.delete()
     return redirect('cart:detail')
 
-def full_remove(request, event_id):
-    cart = Cart.objects.get(cart_id=_cart_id(request))
-    event = get_object_or_404(Event, id=event_id)
-    cart_item = CartItem.objects.get(event=event, cart=cart)
-    cart_item.delete()
-    return redirect('cart:cart_detail')
+
+# def full_remove(request, event_id):
+#     cart = Cart.objects.get(cart_id=_cart_id(request))
+#     event = get_object_or_404(Event, id=event_id)
+#     cart_item = CartItem.objects.get(event=event, cart=cart)
+#     cart_item.delete()
+#     return redirect('cart:cart_detail')
 
 
 @login_required
 @csrf_exempt
 def checkout(request):
+    """
+    Faz o redirecionamento do carrinho para processo de checkout no Stripe
+    """
     cart = Cart.objects.get(cart_id=_cart_id(request))
     cart_items = CartItem.objects.filter(cart=cart, active=True)
     stripe.api_key = settings.STRIPE_SECRET_KEY
