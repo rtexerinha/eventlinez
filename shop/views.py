@@ -24,7 +24,7 @@ def index(request, c_slug=None):
     # else:
     lis = lists_events(c_slug)
     page = pagination_home(request, lis)
-    detach = Event.objects.all().filter(available=True).order_by('-event_date').first()
+    detach = None
     return render(request, 'shop/home.html', {'detach': detach,
                                               'category': c_page,
                                               'events_futures': page[0],
