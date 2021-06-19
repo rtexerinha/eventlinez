@@ -60,16 +60,16 @@ def create(request):
     )
 
     items = cart.cartitem_set.filter(active=True)
-
-    stripe.PaymentIntent.modify(session.payment_intent,
-                                description="%s (Order #%s)" % (items.first().event.name, order.id),
-                                metadata={"order_id": order.id})
-
+    stripe.PaymentIntent.modify(
+        session.payment_intent,
+        metadata={"order_id": order.id},
+        description="%s (Order #%s)" % (str(items.first().ticket), order.id)
+    )
     for item in items:
         OrderItem.objects.create(
-            event=item.event,
+            event_ticket=item.ticket,
             quantity=item.quantity,
-            price=item.event.unit_price,
+            unit_price=item.ticket.price,
             amount=item.price_total(),
             fee=item.fee(),
             promo_code=item.promo_code,
@@ -77,5 +77,5 @@ def create(request):
         )
     cart.delete()
     send_mail.delay(order.id)
-
     return redirect('order:thanks', order.id)
+
