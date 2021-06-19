@@ -1,22 +1,25 @@
-from django.test import TestCase
+from decimal import Decimal
 
-from .models import CartItem, Cart
-from event.models import Event
-from event.models import Ticket
+from django.test import TestCase
 from model_bakery import baker
 from django.urls import reverse
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+
+from .models import CartItem
+from .models import Cart
+from event.models import Event
+from event.models import Ticket
 
 
 class TestCartItem(TestCase):
-
     def test_round_fee(self):
         cart = baker.make('cart.Cart')
         event = baker.make('event.Event', description="foo")
         ticket = baker.make('event.Ticket', event=event, quantity=10, price=50)
-
-        with self.settings(EVENTLINEZ_FEE=0.09):
-            item = CartItem.objects.create(ticket=ticket, quantity=2, cart=cart)
-            self.assertEqual(9, item.fee())
+        item = CartItem.objects.create(ticket=ticket, quantity=2, cart=cart)
+        # Teste passa apenas de o valor EVENTLINEZ_FEE for 0.09
+        self.assertEqual(9, item.fee())
 
     def test_amount(self):
         cart = baker.make('cart.Cart')
@@ -29,11 +32,10 @@ class TestCartItem(TestCase):
         with self.settings(EVENTLINEZ_FEE=0.09):
             CartItem.objects.create(ticket=ticket1, quantity=2, cart=cart)
             CartItem.objects.create(ticket=ticket2, quantity=1, cart=cart)
-
             self.assertEqual(272.5, cart.amount())
 
 
-class CardAddTest(TestCase):
+class CardAddViewTest(TestCase):
 
     def setUp(self):
         event = baker.make(Event, description="foo")
@@ -41,7 +43,7 @@ class CardAddTest(TestCase):
         self.frontstage = baker.make(Ticket, event=event, quantity=20)
         self.pista = baker.make(Ticket, event=event, quantity=40)
 
-    def test_deve_adicionar_carrinho_da_sessacao(self):
+    def test_deve_adicionar_carrinho_da_sessao(self):
         payload = {
             "promocode": None,
             "tickets": [
@@ -65,8 +67,8 @@ class CardAddTest(TestCase):
             ]
         }
         response = self.client.post(reverse('cart:add_cart'), payload, 'application/json')
-        self.assertRedirects(response, reverse('cart:detail'),
-                             target_status_code=302, fetch_redirect_response=True)
+        self.assertEqual(201, response.status_code)
+        self.assertIsInstance(response, JsonResponse)
 
     def test_nao_deve_add_ao_carrinho_se_quantidade_for_0(self):
         payload = {
@@ -90,3 +92,75 @@ class CardAddTest(TestCase):
         }
         response = self.client.post(reverse('cart:add_cart'), payload, 'application/json')
         self.assertEqual(response.status_code, 400)
+
+
+class CardDetailViewTest(TestCase):
+
+    def setUp(self):
+        event = baker.make(Event, description="foo")
+        self.pista = baker.make(Ticket, event=event, quantity=40, price=10)
+        self.frontstage = baker.make(Ticket, event=event, quantity=20, price=20)
+        self.camarote = baker.make(Ticket, event=event, quantity=10, price=40)
+        self.user = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
+
+    def test_exibir_login_caso_usuario_nao_cadastrado_acesso_carrinho(self):
+        payload = {
+            "promocode": None,
+            "tickets": [
+                {"id": self.camarote.id, "quantity": 1},
+                {"id": self.frontstage.id, "quantity": 1},
+                {"id": self.pista.id, "quantity": 0},
+            ]
+        }
+        self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+
+        response = self.client.get(reverse("cart:detail"))
+        self.assertEqual(302, response.status_code)
+        response.url.startswith('/accounts/login')
+
+    def test_itens_adicionados_ao_carrinho_devem_ser_exibidos_na_listagem_de_tickets(self):
+        payload = {
+            "promocode": None,
+            "tickets": [
+                {"id": self.camarote.id, "quantity": 1},
+                {"id": self.frontstage.id, "quantity": 1},
+                {"id": self.pista.id, "quantity": 0},
+            ]
+        }
+        self.client.login(username='john', password='johnpassword')
+
+        self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+        response = self.client.get(reverse("cart:detail"))
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(2, response.context['cart_items'].count())
+        # Teste passa apenas de o valor EVENTLINEZ_FEE for 0.09
+        self.assertEqual(Decimal('65.40'), response.context['total'])
+
+
+class CardRemoveItemViewTest(TestCase):
+
+    def setUp(self):
+        event = baker.make(Event, description="foo")
+        self.pista = baker.make(Ticket, event=event, quantity=40, price=10)
+        self.frontstage = baker.make(Ticket, event=event, quantity=20, price=20)
+        self.camarote = baker.make(Ticket, event=event, quantity=10, price=40)
+        self.user = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
+
+    def test_remove_item(self):
+        payload = {
+            "promocode": None,
+            "tickets": [
+                {"id": self.camarote.id, "quantity": 1},
+                {"id": self.frontstage.id, "quantity": 1},
+                {"id": self.pista.id, "quantity": 0},
+            ]
+        }
+        self.client.login(username='john', password='johnpassword')
+        self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+        self.assertEqual(2, CartItem.objects.filter(cart__cart_id=self.client.session.session_key).count())
+
+        # item  ser removido
+        item = CartItem.objects.filter(cart__cart_id=self.client.session.session_key).first()
+
+        self.client.post(reverse('cart:remove-item', args=[item.id]))
+        self.assertEqual(1, CartItem.objects.filter(cart__cart_id=self.client.session.session_key).count())

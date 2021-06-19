@@ -70,6 +70,16 @@ def cart_remove(request, ticket_id):
         cart_item.delete()
     return redirect('cart:cart_detail')
 
+def remove_item(request, item_id):
+    """
+    Remove um item do carrinho
+    :param request:
+    :param item_id:
+    :return:
+    """
+    item = get_object_or_404(CartItem, id=item_id)
+    item.delete()
+    return redirect('cart:detail')
 
 def full_remove(request, event_id):
     cart = Cart.objects.get(cart_id=_cart_id(request))
