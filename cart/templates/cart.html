@@ -6,22 +6,21 @@
 {% block title %}Cart - Eventlinez{% endblock %}
 
 {% block content %}
-{#	{% if not cart_items %}#}
-	{% if cart_items %}
-    <main style="min-height: 70vh">
-        <div class="text-center">
-            <br>
-            <h1 class="text-center title-cart">
-                Your shopping cart is empty
-            </h1>
-            <br>
-            <p class="text-center text-default" style="justify-content: center;">
-                Please click
-                <a class="link-cart" href="{% url 'shop:index' %}"> here </a>
-                to continue shopping.
-				</p>
-        </div>
-    </main>
+	{% if not cart_items %}
+        <main style="min-height: 70vh">
+            <div class="text-center">
+                <br>
+                <h1 class="text-center title-cart">
+                    Your shopping cart is empty
+                </h1>
+                <br>
+                <p class="text-center text-default" style="justify-content: center;">
+                    Please click
+                    <a class="link-cart" href="{% url 'shop:index' %}"> here </a>
+                    to continue shopping.
+                    </p>
+            </div>
+        </main>
 	{% else %}
 
     <main class="container mt-4 mb-5" style="min-height: 70vh">
@@ -54,7 +53,7 @@
                 {% for cart_item in cart_items %}
                     <tr>
                         <td class="float-left">
-                            <a href="{% url 'cart:full_remove' cart_item.ticket.event.id %}" class="icon_remove_a">
+                            <a href="{% url 'cart:remove-item' cart_item.ticket.event.id %}" class="icon_remove_a">
                                 <i style="padding-right: 10px" class="fas fa-trash-alt icon_remove"></i>
                             </a>
 
@@ -72,16 +71,12 @@
                             {{cart_item.quantity }}&nbsp;
 
                         {% if cart_item.ticket.event.qty_available  == 1 %}
-                            <a style="pointer-events: none; cursor: not-allowed;"
-                               href="{% url 'cart:add_cart' cart_item.ticket.event.id %}"
-                               class="custom_a">
-                                <i class="fas fa-plus-circle"
-                                   style=" color: gray!important; text-decoration: none"></i>
+                            <a style="pointer-events: none; cursor: not-allowed;" href="{% url 'cart:add_cart' cart_item.id 'increase' %}" class="custom_a">
+                                <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
                             </a>
                              <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">Only one ticket available</p>&nbsp;
-
                         {% else %}
-                            <a href="{% url 'cart:add_cart' cart_item.ticket.event.id %}" class="custom_a">
+                            <a href="{% url 'cart:add_cart' cart_item.id 'decrement' %}" class="custom_a">
                                 <i class="fas fa-plus-circle custom_icon"></i>
                             </a>
                         {% endif %}
@@ -96,10 +91,10 @@
                                 <i class="fas fa-minus-circle custom_icon"></i>
                             </a>&nbsp;
                             {{cart_item.quantity }}&nbsp;
-                            <a style="pointer-events: none; cursor: not-allowed;"
-                               href="{% url 'cart:add_cart' cart_item.ticket.event.id %}" class="custom_a">
-                                <i class="fas fa-plus-circle"  style=" color: gray!important; text-decoration: none"></i>
-                            </a>
+{#                            <a style="pointer-events: none; cursor: not-allowed;"#}
+{#                               href="{% url 'cart:add_cart' cart_item.ticket.event.id %}" class="custom_a">#}
+{#                                <i class="fas fa-plus-circle"  style=" color: gray!important; text-decoration: none"></i>#}
+{#                            </a>#}
                             <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
                                 There are only {{cart_item.quantity }} tickets available
                             </p>&nbsp;
@@ -196,16 +191,16 @@
                                     {{item.quantity }}&nbsp;
 
                                     {% if item.ticket.qty_available  == 1 %}
-                                        <a style="pointer-events: none; cursor: not-allowed;" class="custom_a"
-                                           href="{% url 'cart:add_cart' item.ticket.event.id %}">
-                                            <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
-                                        </a>
+{#                                        <a style="pointer-events: none; cursor: not-allowed;" class="custom_a"#}
+{#                                           href="{% url 'cart:add_cart' item.ticket.event.id %}">#}
+{#                                            <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>#}
+{#                                        </a>#}
                                          <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
 
                                     {% else %}
-                                        <a href="{% url 'cart:add_cart' item.ticket.event.id %}" class="custom_a">
-                                            <i class="fas fa-plus-circle custom_icon"></i>
-                                        </a>
+{#                                        <a href="{% url 'cart:add_cart' item.ticket.event.id %}" class="custom_a">#}
+{#                                            <i class="fas fa-plus-circle custom_icon"></i>#}
+{#                                        </a>#}
 
                                     {% endif %}
                                 </td>
@@ -218,10 +213,10 @@
 
                                     {{item.quantity }}&nbsp;
 
-                                    <a style="pointer-events: none; cursor: not-allowed;"
-                                       href="{% url 'cart:add_cart' item.ticket.event.id %}" class="custom_a">
-                                        <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
-                                    </a>
+{#                                    <a style="pointer-events: none; cursor: not-allowed;"#}
+{#                                       href="{% url 'cart:add_cart' item.ticket.event.id %}" class="custom_a">#}
+{#                                        <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>#}
+{#                                    </a>#}
 
                                     <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
                                         There are only {{item.quantity }} tickets available

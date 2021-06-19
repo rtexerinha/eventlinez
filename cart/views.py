@@ -23,7 +23,7 @@ def _cart_id(request):
 
 
 @csrf_exempt
-def cart_add(request, event_id=None):
+def cart_add(request):
     data = json.loads(request.body)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
