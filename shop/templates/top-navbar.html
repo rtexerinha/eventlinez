@@ -13,7 +13,7 @@
         {% if request.user.is_authenticated %}
             <div class="header-right-log">
                 {% if item_count > 0 %}
-                    <a class="link-nav nav__link cart" href="{% url 'cart:cart_detail' %}">
+                    <a class="link-nav nav__link cart" href="{% url 'cart:detail' %}">
                         <i class="fas fa-shopping-cart"></i>({{item_count}})
                     </a>
                 {% endif %}
@@ -64,7 +64,7 @@
         {% else %}
             <div class="header-right">
                 {% if item_count > 0 %}
-                    <a class="link-nav nav__link" href="{% url 'cart:cart_detail' %}">
+                    <a class="link-nav nav__link" href="{% url 'cart:detail' %}">
                         <i class="fas fa-shopping-cart"></i>({{item_count}})
                     </a>
                 {% endif %}
@@ -139,7 +139,7 @@
                  {% endif %}
 
                 {% if item_count > 0 %}
-                    <a class="link-nav nav__link nav-cart" href="{% url 'cart:cart_detail' %}">
+                    <a class="link-nav nav__link nav-cart" href="{% url 'cart:detail' %}">
                         <i class="fas fa-shopping-cart" style="padding-right: 5px"></i>
                         Cart ({{item_count}})
                     </a>
@@ -178,7 +178,7 @@
 
                                 {% if item_count > 0 %}
                     <a class="link-nav nav__link nav-cart"
-                       href="{% url 'cart:cart_detail' %}">
+                       href="{% url 'cart:detail' %}">
                         <i class="fas fa-shopping-cart" style="padding-right: 5px"></i>
                         Cart
                         ({{item_count}})

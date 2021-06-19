@@ -65,7 +65,7 @@ class CardAddTest(TestCase):
             ]
         }
         response = self.client.post(reverse('cart:add_cart'), payload, 'application/json')
-        self.assertRedirects(response, reverse('cart:cart_detail'),
+        self.assertRedirects(response, reverse('cart:detail'),
                              target_status_code=302, fetch_redirect_response=True)
 
     def test_nao_deve_add_ao_carrinho_se_quantidade_for_0(self):

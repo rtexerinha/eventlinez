@@ -38,7 +38,7 @@
             {% if request.user.is_authenticated %}
                 {% if item_count > 0 %}
                     <li class="nav-item mt-lg-2 mt-xl-2">
-                        <a class="nav-link" href="{% url 'cart:cart_detail' %}" style="display: flex">
+                        <a class="nav-link" href="{% url 'cart:detail' %}" style="display: flex">
                             <i class="fas fa-shopping-cart" style="color: #585858; margin-right: 5px"></i>
                              <h6 class="weight-height h6-home">({{item_count}})</h6>
                         </a>
@@ -97,7 +97,7 @@
             {% else %}
                 {% if item_count > 0 %}
                     <li class="nav-item mt-lg-2 mt-xl-2">
-                        <a class="nav-link" href="{% url 'cart:cart_detail' %}">
+                        <a class="nav-link" href="{% url 'cart:detail' %}">
                             <i class="fas fa-shopping-cart"></i>
                             <h6 class="weight-height h6-home">({{item_count}})</h6>
                         </a>
