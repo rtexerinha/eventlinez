@@ -1,6 +1,8 @@
 function controlQty(ticket_id, command){
     let quantity = document.getElementById("ticket-" + ticket_id + "-qty");
     let value = parseInt(quantity.innerText, 10);
+    if (command === "decrease" && value <= 0)
+        return
     if (command === "increase")
         value = ++value;
     if (command === "decrease")
