@@ -58,6 +58,7 @@ def cart_add(request):
 def change_quantity(request, item_id, operation):
     """
     Altera (incrementa ou decrementa) a quantidade de um item no carrinho.
+    :param request
     :param item_id: Id da linha
     :param operation: Operaçãoque será realizada. Os valores possíveis são "increment" ou "decrement"
     :return:
@@ -95,6 +96,7 @@ def cart_detail(request, cart_items=None):
 def remove_item(request, item_id):
     """
     Remove um item do carrinho
+    :param request
     :param item_id: Id do item que será removido
     :return:
     """
