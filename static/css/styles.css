@@ -1095,7 +1095,7 @@ div.content-right-signin {
     color: #000000;
     font-size: 0.8rem!important;
 }
-
+/* remove css*/
 #cart-table-th{
     padding: 0.75rem 0 0.75rem 0;
     width: 550px;

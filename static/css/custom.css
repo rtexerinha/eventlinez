@@ -19,6 +19,7 @@
 .my_custom_table {
 	min-width: 100%!important;
 }
+/*remove css*/
 .my_custom_thead {
 	font-weight: normal;
 	text-transform: uppercase;

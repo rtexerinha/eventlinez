@@ -114,6 +114,10 @@
     color: var(--gray-color-dark)!important;
 }
 
+.p-light{
+    color: var(--white-color)!important;
+}
+
 .height-17 {
     line-height: 17px!important;
 }
@@ -140,6 +144,11 @@
 .weight-height:hover{
     color: var(--first-color);
     text-decoration: none;
+}
+
+.v-center{
+    display: flex;
+    align-items: center;
 }
 
 .h2-text{
