@@ -94,6 +94,21 @@ class CardAddViewTest(TestCase):
         response = self.client.post(reverse('cart:add_cart'), payload, 'application/json')
         self.assertEqual(response.status_code, 400)
 
+    def test_adicionar_tickets_repetidos_deve_incrementar_a_quantidae_ticket(self):
+        payload = {
+            "promocode": None,
+            "tickets": [
+                {"id": self.camarote.id, "quantity": 1},
+                {"id": self.frontstage.id, "quantity": 1},
+                {"id": self.pista.id, "quantity": 1},
+            ]
+        }
+        self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+        self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+        self.assertEqual(3, cart.cartitem_set.count())
+
 
 class CardDetailViewTest(TestCase):
 

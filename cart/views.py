@@ -45,7 +45,12 @@ def cart_add(request):
             return JsonResponse({"message": 'Quantity cannot be greater than %s' % qtd_available}, status=400)
         if tkt['quantity'] < 0:
             return JsonResponse({"message": 'Quantity cannot be less than 0'}, status=400)
-        CartItem.objects.create(ticket=ticket, cart=cart, quantity=quantity)
+        item = cart.cartitem_set.filter(ticket=ticket).first()
+        if item is not None and item.quantity != 0:
+            item.quantity = item.quantity + quantity
+            item.save()
+        else:
+            CartItem.objects.create(ticket=ticket, cart=cart, quantity=quantity)
     return JsonResponse({"status": "ok"}, status=201)
 
 
