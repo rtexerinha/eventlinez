@@ -191,7 +191,7 @@ class CardChangeQuantityViewTest(TestCase):
         self.client.post(reverse('cart:add_cart'), payload, 'application/json')
         self.assertEqual(2, CartItem.objects.filter(cart__cart_id=self.client.session.session_key).count())
 
-        # item  a ser incrementado
+        # Item  a ser incrementado
         item = CartItem.objects.filter(cart__cart_id=self.client.session.session_key)[0]
 
         # Incrementa a quantidade de tickets
@@ -204,6 +204,19 @@ class CardChangeQuantityViewTest(TestCase):
             1, "Demais tickests não devem ter suas quantidades incrementadas")
 
         # Decrementa a quantidade de tickets
+        self.client.post(reverse('cart:change-quantity', args=[item.id, 'decrement']))
+        item.refresh_from_db()
+        self.assertEqual(item.quantity, 1)
+
+    def test_nao_decrementar_quantidade_quando_esta_for_1(self):
+        payload = {
+            "promocode": None,
+            "tickets": [{"id": self.camarote.id, "quantity": 1}]
+        }
+        self.client.login(username='john', password='johnpassword')
+        self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+
+        item = CartItem.objects.filter(cart__cart_id=self.client.session.session_key)[0]
         self.client.post(reverse('cart:change-quantity', args=[item.id, 'decrement']))
         item.refresh_from_db()
         self.assertEqual(item.quantity, 1)

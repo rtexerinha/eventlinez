@@ -60,16 +60,19 @@ def change_quantity(request, item_id, operation):
     """
     cart = Cart.objects.get(cart_id=_cart_id(request))
     item = CartItem.objects.get(pk=item_id, cart=cart, active=True)
+
     if operation == "increment":
         item.quantity = item.quantity + 1
+    elif operation == "decrement" and item.quantity == 1:
+        total = cart.amount()
+        items = cart.cartitem_set.all()
+        return render(request, 'cart.html', dict(total=total, cart_items=items))
     elif operation == "decrement":
         item.quantity = item.quantity - 1
     else:
         return HttpResponse("Invalid cart iperation", status=400)
     item.save()
-    total = cart.amount()
-    items = cart.cartitem_set.all()
-    return render(request, 'cart.html', dict(total=total, cart_items=items))
+    return redirect('cart:detail')
 
 
 @login_required

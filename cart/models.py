@@ -45,6 +45,3 @@ class CartItem(models.Model):
 
 	def price_total(self):
 		return self.sub_total() + Decimal(self.fee())
-
-	def __str__(self):
-		return self.event

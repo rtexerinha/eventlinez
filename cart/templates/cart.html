@@ -182,32 +182,32 @@
 
                             {% if item.quantity < item.ticket.qty_available %}
                                 <td>
-                                    <a href="{% url 'cart:change-quantity' item.ticket.id "decrement" %}" class="custom_a">
+                                    <a href="{% url 'cart:change-quantity' item.id "decrement" %}" class="custom_a">
                                         <i class="fas fa-minus-circle custom_icon"></i>
                                     </a>&nbsp;
                                     {{item.quantity }}&nbsp;
 
                                     {% if item.ticket.qty_available  == 1 %}
                                         <a style="pointer-events: none; cursor: not-allowed;" class="custom_a"
-                                           href="{% url 'cart:change-quantity' item.ticket.id "increment" %}">
+                                           href="{% url 'cart:change-quantity' item.id "increment" %}">
                                             <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
                                         </a>
                                          <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
                                     {% else %}
-                                        <a href="{% url 'cart:change-quantity' item.ticket.id "increment" %}" class="custom_a">
+                                        <a href="{% url 'cart:change-quantity' item.id "increment" %}" class="custom_a">
                                             <i class="fas fa-plus-circle custom_icon"></i>
                                         </a>
                                     {% endif %}
                                 </td>
                             {% else %}
                                 <td>
-                                    <a href="{% url 'cart:change-quantity' item.ticket.id "increment" %}" class="custom_a">
+                                    <a href="{% url 'cart:change-quantity' item.id "increment" %}" class="custom_a">
                                         <i class="fas fa-minus-circle custom_icon"></i>
                                     </a>&nbsp;
                                     {{item.quantity }}&nbsp;
 
                                     <a style="pointer-events: none; cursor: not-allowed;"
-                                       href="{% url 'cart:change-quantity' item.ticket.id "increment" class="custom_a">
+                                       href="{% url 'cart:change-quantity' item.id "increment" class="custom_a">
                                         <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
                                     </a>
 
