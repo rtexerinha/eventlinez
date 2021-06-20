@@ -91,7 +91,7 @@
                                     {{item.quantity }}&nbsp;
 
                                     {% if item.ticket.qty_available  == 1 %}
-                                        <a style="pointer-events: none; cursor: not-allowed;" class="plus button-increment mr-2 p-1"
+                                        <a style="pointer-events: none; cursor: not-allowed;" class="button-increment mr-2 p-1"
                                            href="{% url 'cart:change-quantity' item.id "increment" %}">
                                             <i class="fas fa-plus" style=" color: gray!important; text-decoration: none"></i>
                                         </a>
@@ -108,14 +108,16 @@
 
                             {% else %}
                                 <div class="h6-home">
-                                    <a href="{% url 'cart:change-quantity' item.id "increment" %}" class="plus button-increment mr-2 p-1">
-                                        <i class="fas fa-minus-circle custom_icon"></i>
+                                    <a href="{% url 'cart:change-quantity' item.id "increment" %}" class="button-increment mr-2 p-1">
+                                        <i class="fas fa-minus"></i>
                                     </a>&nbsp;
 
                                     {{item.quantity }}&nbsp;
 
-                                    <a style="pointer-events: none; cursor: not-allowed;" href="{% url 'cart:change-quantity' item.id "increment" %}" class="plus button-increment mr-2 p-1">
-                                        <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
+                                    <a style="pointer-events: none; cursor: not-allowed; background: #909090"
+                                       href="{% url 'cart:change-quantity' item.id "increment" %}"
+                                       class="button-increment mr-2 p-1">
+                                        <i class="fas fa-plus" style=" color: white; text-decoration: none"></i>
                                     </a>
 
                                     <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
