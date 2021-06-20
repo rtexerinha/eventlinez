@@ -31,8 +31,6 @@
     font-style: normal;
     font-weight: bold;
     font-size: 14px;
-    /*line-height: 22px;*/
-    /*text-align: center;*/
     text-transform: uppercase;
     color: #909090;
 }
@@ -75,4 +73,14 @@
     .border-r {
         border-right: 1px solid #E9E9E9 !important;
     }
+}
+
+.border-b {
+    border-bottom: 1px solid #E9E9E9 !important;
+}
+
+.custom_img{
+    width: 120px;
+    height: 90px;
+    border-radius: 6px;
 }

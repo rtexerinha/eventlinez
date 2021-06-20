@@ -7,277 +7,189 @@
 
 {% block content %}
 	{% if not cart_items %}
-        <main style="min-height: 70vh">
+        <section class="container mt-4 mb-5" style="min-height: 70vh">
             <div class="text-center">
                 <br>
-                <h1 class="text-center title-cart">
+                <h3 class="h3-home">
                     Your shopping cart is empty
-                </h1>
+                </h3>
                 <br>
-                <p class="text-center text-default" style="justify-content: center;">
+                <p class="h6-home" style="justify-content: center;">
                     Please click
                     <a class="link-cart" href="{% url 'shop:index' %}"> here </a>
                     to continue shopping.
-                    </p>
+                </p>
             </div>
-        </main>
+        </section>
+
 	{% else %}
-
-    <main class="container mt-4 mb-5" style="min-height: 70vh">
-        <nav class="col-12" style="padding: 0!important;">
-            <a  href="{% url 'index' %}" class="decoration-none d-flex decoration-none">
-                <i class="i-icons fas fa-chevron-left mt-1 mr-1"></i>
-                <h6 class="h6-home p-dark">Back</h6>
-            </a>
-
-            <div class="d-flex mb-0">
-                <a class="decoration-none p-home pr-1" href="{% url 'index' %}">
-                    Home
+        <section class="container mt-4 mb-5" style="min-height: 70vh">
+            <nav class="col-12" style="padding: 0!important;">
+                <a  href="{% url 'index' %}" class="decoration-none d-flex decoration-none">
+                    <i class="i-icons fas fa-chevron-left mt-1 mr-1"></i>
+                    <h6 class="h6-home p-dark">Back</h6>
                 </a>
-                <p class="p-home pr-1"> / </p>
-                <p class="p-home">Cart</p>
-            </div>
-        </nav>
 
+                <div class="d-flex mb-0">
+                    <a class="decoration-none p-home pr-1" href="{% url 'index' %}">
+                        Home
+                    </a>
+                    <p class="p-home pr-1"> / </p>
+                    <p class="p-home">Cart</p>
+                </div>
+            </nav>
 
-        <aside class="bg-gradient col-lg-12 v-center">
-            <img class="mr-2" src="{% static 'img/ticket.svg' %}" alt="ticket">
-            <h3 class="mt-2 h3-home p-light">Cart summary</h3>
-        </aside>
+            <header class="bg-gradient col-lg-12 v-center">
+                <img class="mr-2" src="{% static 'img/ticket.svg' %}" alt="ticket">
+                <h3 class="mt-2 h3-home p-light">Cart summary</h3>
+            </header>
 
-        <main class="row">
-{#            <!--Mobile--->#}
-{#            <article class="mobile-cart col-12 col-sm-11 col-md-12 col-lg-12 text-center">#}
-{#				<table class="table" style="margin: auto">#}
-{#                    <tbody>#}
-{#                {% for cart_item in cart_items %}#}
-{#                    <tr>#}
-{#                        <td class="float-left">#}
-{#                            <a href="{% url 'cart:remove-item' cart_item.ticket.id %}" class="icon_remove_a">#}
-{#                                <i style="padding-right: 10px" class="fas fa-trash-alt icon_remove"></i>#}
-{#                            </a>#}
-{##}
-{#                            <a href="{{cart_item.ticket.event.get_url}}">#}
-{#                                <img src="{{cart_item.ticket.event.image.url}}" alt="" class="rounded custom_image">#}
-{#                            </a>#}
-{#                        </td>#}
-{##}
-{#                    {% if cart_item.quantity < cart_item.ticket.qty_available %}#}
-{#                        <td>#}
-{#                            <a href="{% url 'cart:cart_remove' cart_item.ticket.id %}" class="custom_a">#}
-{#                                <i class="fas fa-minus-circle custom_icon"></i>#}
-{#                            </a>&nbsp;#}
-{##}
-{#                            {{cart_item.quantity }}&nbsp;#}
-{##}
-{#                        {% if cart_item.ticket.event.qty_available  == 1 %}#}
-{#                            <a style="pointer-events: none; cursor: not-allowed;" href="{% url 'cart:add_cart' cart_item.id 'increase' %}" class="custom_a">#}
-{#                                <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>#}
-{#                            </a>#}
-{#                             <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">Only one ticket available</p>&nbsp;#}
-{#                        {% else %}#}
-{#                            <a href="{% url 'cart:add_cart' %}" class="custom_a">#}
-{#                                <i class="fas fa-plus-circle custom_icon"></i>#}
-{#                            </a>#}
-{#                        {% endif %}#}
-{#                        </td>#}
-{##}
-{#                        <td class="cart-details-quantity">#}
-{#                            ${{cart_item.price_total| floatformat:2 }}#}
-{#                        </td>#}
-{#                    {% else %}#}
-{#                        <td>#}
-{#                            <a href="{% url 'cart:cart_remove' cart_item.ticket.id %}" class="custom_a">#}
-{#                                <i class="fas fa-minus-circle custom_icon"></i>#}
-{#                            </a>&nbsp;#}
-{#                            {{cart_item.quantity }}&nbsp;#}
-{#                            <a style="pointer-events: none; cursor: not-allowed;"#}
-{#                               href="{% url 'cart:add_cart' cart_item.ticket.id %}" class="custom_a">#}
-{#                                <i class="fas fa-plus-circle"  style=" color: gray!important; text-decoration: none"></i>#}
-{#                            </a>#}
-{#                            <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">#}
-{#                                There are only {{cart_item.quantity }} tickets available#}
-{#                            </p>&nbsp;#}
-{#                        </td>#}
-{#                    {% endif %}#}
-{#                    </tr>#}
-{##}
-{#                    <tr>#}
-{#                        <td>#}
-{#                            <div style="float: left;">#}
-{#                                <p class="text-default cart-title">#}
-{#                                   	{{cart_item.ticket.e.name}}#}
-{#                                </p>#}
-{#                                <p class="event-localization">#}
-{#                                    {{ cart_item.ticket.event.address }},#}
-{#                                    {{ cart_item.ticket.event.city }}#}
-{#                                </p>#}
-{#                            </div>#}
-{#                        </td>#}
-{##}
-{#                        <td>#}
-{#                            <p class="text-left"><b>Unit Price</b></p>#}
-{#                            <p class="cart-details-quantity">#}
-{#                                ${{cart_item.sub_total }}cart_remove#}
-{#                            </p>#}
-{#                        </td>#}
-{##}
-{#                        <td>#}
-{#                            {% if cart_item.promo_code %}#}
-{#                                <p>#}
-{#                                    <b>Promo Code</b>#}
-{#                                </p>#}
-{#                                <p>#}
-{#                                    {{ cart_item.promo_code }}#}
-{#                                </p>#}
-{#                            {% endif %}#}
-{#                        </td>#}
-{#                        </tr>#}
-{#                {% endfor %}#}
-{#                    </tbody>#}
-{#				</table>#}
-{#			</article>#}
-{#            <!--End of Mobile-->#}
+            <main class="col-12 p-0">
+                <article class="d-lg-flex d-none mt-4 border-b">
+                    <div class="col-5"> <p class="h6-home">Events</p></div>
+                    <div class="col-2"> <p class="h6-home text-center">Ticket</p></div>
+                    <div class="col-2"> <p class="h6-home text-center">Quantity</p></div>
+                    <div class="col-1"> <p class="h6-home text-center">Unit Price</p></div>
+                    <div class="col-1"> <p class="h6-home text-center">Fee</p></div>
+                    <div class="col-1"> <p class="h6-home text-center">Amount</p></div>
+                </article>
 
-            <!--Desktop-->
-            <aside class="desktop-cart col-12 mt-4">
-				<table class="table">
-				    <thead class="col-12">
-						<tr style="border-top-color: red!important;">
-							<th class="h6-home">Events</th>
-                            <th class="h6-home text-center">Ticket</th>
-                            <th class="h6-home text-center">Quantity</th>
-                            <th class="h6-home text-center">Unit Price</th>
-                            <th class="h6-home text-center">Amount</th>
-						</tr>
-					</thead>
+            {% for item in cart_items %}
+                <article class="col-12 border-b">
+                    <aside class="row">
 
-                    <tbody>
-                        {% for item in cart_items %}
-                            <tr>
-                                <td class="float-left">
-                                    <!-- Remove item button -->
-                                    <a href="{% url 'cart:remove-item' item.id %}" class="icon_remove_a">
-                                        <i style="padding-right: 10px" class="fas fa-trash-alt icon_remove"></i>
-                                    </a>
-                                    <a href="{{item.ticket.event.get_url}}">
-                                        <img src="{{item.ticket.event.image.url}}" alt="" class="rounded custom_image">
-                                    </a>
-                                    <div style="float: right; margin-left: 10px">
-                                        <h6 class="h6-home">
-                                            {{item.ticket.event.name}}
-                                        </h6>
-                                        <p class="p-home">
-                                            {{ item.ticket.event.address }},
-                                            {{ item.ticket.event.city }}
-                                        </p>
-                                    </div>
-                                </td>
+                        <div class="col-lg-5 col-12 pt-3 d-flex">
+                            <a href="{% url 'cart:remove-item' item.id %}" class="mr-2 mt-4">
+                                <i class="fas fa-trash-alt icon_remove"></i>
+                            </a>
 
-                                <td>
-                                    {% if cart_item.promo_code %}
-                                        {{ cart_item.promo_code }}
-                                    {% endif %}
-                                </td>
+                            <a href="{{item.ticket.event.get_url}}" class="mr-3">
+                                <img src="{{item.ticket.event.image.url}}" alt="img event" class="custom_img">
+                            </a>
+
+                            <div>
+                                <h6 class="h6-home">{{item.ticket.event.name}}</h6>
+                                <p class="p-home p-date">{{ item.ticket.event.event_date }}</p>
+                                <p class="p-home">{{ item.ticket.event.city }}</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-2 col-6 pt-lg-5">
+                            <p class="h6-home text-lg-center">
+                                {{item.ticket.name }}
+                            </p>
+                        </div>
+
+                        <aside class="col-lg-2 col-6 pt-lg-5">
 
                             {% if item.quantity < item.ticket.qty_available %}
-                                <td>
-                                    <a href="{% url 'cart:change-quantity' item.id "decrement" %}" class="custom_a">
-                                        <i class="fas fa-minus-circle custom_icon"></i>
+                                <div class="h6-home text-lg-center">
+                                    <a href="{% url 'cart:change-quantity' item.id "decrement" %}" class="button-increment ml-2 p-1">
+                                        <i class="fas fa-minus"></i>
                                     </a>&nbsp;
+
                                     {{item.quantity }}&nbsp;
 
                                     {% if item.ticket.qty_available  == 1 %}
-                                        <a style="pointer-events: none; cursor: not-allowed;" class="custom_a"
+                                        <a style="pointer-events: none; cursor: not-allowed;" class="plus button-increment mr-2 p-1"
                                            href="{% url 'cart:change-quantity' item.id "increment" %}">
-                                            <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
+                                            <i class="fas fa-plus" style=" color: gray!important; text-decoration: none"></i>
                                         </a>
-                                         <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
+
+                                        <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
+
                                     {% else %}
-                                        <a href="{% url 'cart:change-quantity' item.id "increment" %}" class="custom_a">
-                                            <i class="fas fa-plus-circle custom_icon"></i>
+                                        <a class="plus button-increment mr-2 p-1" href="{% url 'cart:change-quantity' item.id "increment" %}">
+                                            <i class="fas fa-plus"></i>
                                         </a>
                                     {% endif %}
-                                </td>
+
+                                </div>
+
                             {% else %}
-                                <td>
-                                    <a href="{% url 'cart:change-quantity' item.id "increment" %}" class="custom_a">
+                                <div class="h6-home">
+                                    <a href="{% url 'cart:change-quantity' item.id "increment" %}" class="plus button-increment mr-2 p-1">
                                         <i class="fas fa-minus-circle custom_icon"></i>
                                     </a>&nbsp;
+
                                     {{item.quantity }}&nbsp;
 
-                                    <a style="pointer-events: none; cursor: not-allowed;"
-                                       href="{% url 'cart:change-quantity' item.id "increment" %}" class="custom_a">
+                                    <a style="pointer-events: none; cursor: not-allowed;" href="{% url 'cart:change-quantity' item.id "increment" %}" class="plus button-increment mr-2 p-1">
                                         <i class="fas fa-plus-circle" style=" color: gray!important; text-decoration: none"></i>
                                     </a>
 
                                     <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
                                         There are only {{item.quantity }} tickets available
-                                    </p>&nbsp;
-                                </td>
-                            {% endif %}
-                                <td class="h4-home">
-                                    ${{item.sub_total }}
-                                </td>
-
-                                <td class="h3-home">
-                                    ${{item.fee|floatformat:2 }}
-                                </td>
-
-                                <td class="cart-details-quantity">
-                                    ${{item.price_total| floatformat:2 }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-				</table>
-			</aside>
-            <!--End of Desktop-->
-
-            <!-- Promocode -->
-            <article class="col-lg-6 col-12">
-                <div class="col-lg-7 col-12 pt-4 pb-4 pb-lg-0">
-                    <label for="promo_code" class="h6-home">Promo code</label>
-                    <input id="promo_code" type="text"
-                           name="promo_code" placeholder="Insert code"
-                           style="border: 1px solid #E9E9E9;border-radius: 6px;"
-                           class="col-12 input-subcribe">
-                </div>
-            </article>
-
-            <!-- Total -->
-            <div class="col-lg-6 col-12">
-				<table class="table" style="min-width: 320px!important;">
-					<thead class="my_custom_thead">
-					</thead>
-					<tbody>
-						<tr>
-                            <td class="col-12">
-                                <div class="row">
-                                    <strong class="col-8 h4-home">
-                                        Your total is:
-                                    </strong>
-								    <strong class="col-4 h3-home">${{ total|floatformat:2 }}</strong>
+                                    </p>
                                 </div>
-							</td>
-						</tr>
-					</tbody>
-				</table>
 
-                <!-- Checkout Button-->
-                <div class="col-lg-12">
-                    <main class="d-lg-flex d-block justify-content-lg-end">
-                    <button class="buttons-primary h5-home mb-3 w-10">
-                        <a href="{% url 'shop:index' %}" class="buttons-primary h5-home">Continue Shopping</a>
-                    </button>
-                    <button id="checkout-btn"  onclick="doCheckout()"
-                            class="ml-lg-5 ml-0 buttons-primary h5-home w-10" type="submit">Checkout</button>
-                    </main>
-                </div>
-            </div>
-        </main>
+                            {% endif %}
+                        </aside>
 
-    </main>
+                        <div class="col-lg-1 col-12 pt-lg-5 d-flex">
+                            <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Unit Price</p>
+                            <p class="h6-home text-lg-center">
+                                $ {{item.sub_total }}
+                            </p>
+                        </div>
+
+                        <div class="col-lg-1 col-12 pt-lg-5 d-lg-flex d-none">
+                            <p class="h6-home text-lg-center">
+                                ${{item.fee|floatformat:2 }}
+                            </p>
+                        </div>
+
+                        <div class="col-lg-1 col-12 pt-lg-5 d-flex">
+                            <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Amount</p>
+                            <p class="h6-home text-lg-center">
+                                ${{item.price_total| floatformat:2 }}
+                            </p>
+                        </div>
+                    </aside>
+                </article>
+            {% endfor %}
+
+
+                <article class="col-12 mt-lg-0 mt-4">
+                    <div class="row">
+                        <!-- Promocode -->
+                        <div class="col-lg-6 col-12">
+                            <div class="col-lg-7 col-12 pt-4 pb-4 pb-lg-0">
+                                <label for="promo_code" class="h6-home">Promo code</label>
+                                <input id="promo_code" type="text"
+                                       name="promo_code" placeholder="Insert code"
+                                       style="border: 1px solid #E9E9E9;border-radius: 6px;"
+                                       class="col-12 input-subcribe">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-12 pt-4 pb-5">
+                            <!-- Total -->
+                            <div class="col-lg-12 mb-3 p-0">
+                                <div class="d-flex justify-content-end">
+                                    <strong class="col-6 h4-home pt-1" >Your total is:</strong>
+
+                                    <strong class="col-6 h3-home d-flex justify-content-end p-0">${{ total|floatformat:2 }}</strong>
+                                </div>
+                            </div>
+
+                            <!-- Checkout Button-->
+                            <div class="col-lg-12" style="padding: 0!important;">
+                                <div class="d-lg-flex d-block justify-content-lg-end">
+                                    <button class="buttons-primary h5-home mb-3 w-10">
+                                        <a href="{% url 'shop:index' %}" class="buttons-primary h5-home">Continue Shopping</a>
+                                    </button>
+
+                                    <button id="checkout-btn" onclick="doCheckout()"
+                                        class="ml-lg-5 ml-0 buttons-primary h5-home w-10" type="submit">Checkout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </main>
+        </section>
     {% endif %}
 {% endblock %}
 
