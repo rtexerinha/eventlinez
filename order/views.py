@@ -78,4 +78,3 @@ def create(request):
     cart.delete()
     send_mail.delay(order.id)
     return redirect('order:thanks', order.id)
-
