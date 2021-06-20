@@ -109,6 +109,21 @@ class CardAddViewTest(TestCase):
         cart = Cart.objects.get(cart_id=self.client.session.session_key)
         self.assertEqual(3, cart.cartitem_set.count())
 
+    def test_procode_dever_ser_adicionado_a_todas_as_linhas_do_cart(self):
+        payload = {
+            "promo_code": "30OFF",
+            "tickets": [
+                {"id": self.camarote.id, "quantity": 1},
+                {"id": self.frontstage.id, "quantity": 1},
+                {"id": self.pista.id, "quantity": 1},
+            ]
+        }
+        self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+
+        for item in cart.cartitem_set.all():
+            self.assertEqual(item.promo_code, "30OFF")
+
 
 class CardDetailViewTest(TestCase):
 

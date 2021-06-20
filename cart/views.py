@@ -34,6 +34,7 @@ def cart_add(request):
         cart = Cart.objects.create(cart_id=_cart_id(request))
         cart.save()
 
+    promocode = data.get("promo_code")
     for tkt in data['tickets']:
         ticket = Ticket.objects.get(pk=tkt['id'])
         quantity = tkt['quantity']
@@ -50,7 +51,7 @@ def cart_add(request):
             item.quantity = item.quantity + quantity
             item.save()
         else:
-            CartItem.objects.create(ticket=ticket, cart=cart, quantity=quantity)
+            CartItem.objects.create(ticket=ticket, cart=cart, quantity=quantity, promo_code=promocode)
     return JsonResponse({"status": "ok"}, status=201)
 
 

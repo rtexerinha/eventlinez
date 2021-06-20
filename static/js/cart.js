@@ -45,7 +45,7 @@ function addToCard() {
     }
 
     let payload = {
-        "promoCode": null,
+        "promo_code": null,
         "tickets": tickets
     }
 
