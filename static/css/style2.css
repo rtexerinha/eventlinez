@@ -428,9 +428,19 @@
     }
 }
 
+.pl-5px{
+    padding: 5px!important;
+}
 
 
 @media (max-width: 800px) {
+    .d-justy{
+        display: flex;
+        justify-content: flex-end;
+    }
+    .pl-5px{
+        padding: 0;
+    }
     .card-details{
         margin-left: 0px!important;
     }
