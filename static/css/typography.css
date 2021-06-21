@@ -86,7 +86,7 @@
     font-weight: var(--font-reg-400);
     font-size: var(--normal-font-size);
     line-height: 24px;
-    color: var(--gray-color-mid);
+    color: var(--gray-color-light);
 }
 /*12*/
 .p-home{
