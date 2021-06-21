@@ -27,9 +27,11 @@
 
                 <div class="dropdown-menu" aria-labelledby="userDropdown" onload=""
                      style="position: absolute;transform: translate3d(5px, 20px, 0px); top: 10px;left: 0px;will-change: transform;">
-                    <a class="dropdown-item text-mobile" href="{% url 'shop:index' %}">All Events</a>
+                    <a class="dropdown-item-new weight-height h6-home" href="{% url 'shop:index' %}">
+                        All Events
+                    </a>
                     {% for cat in links %}
-                        <a class="dropdown-item text-mobile" href="{{cat.get_url}}">{{cat.name}}</a>
+                        <a class="dropdown-item-new weight-height h6-home" href="{{cat.get_url}}">{{cat.name}}</a>
                     {% endfor %}
                 </div>
             </li>

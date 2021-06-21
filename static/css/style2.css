@@ -448,3 +448,15 @@
         font-size: 1.5rem !important;
     }
 }
+
+
+
+/* NAVBAR*/
+.dropdown-item-new {
+	padding: 0 1rem !important;
+}
+
+.dropdown-menu-new{
+	min-width: 1rem !important;
+	text-align: center !important;
+}
