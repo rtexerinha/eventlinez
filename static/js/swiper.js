@@ -1,6 +1,6 @@
 var swiper = new Swiper('.slider-banner', {
     slidesPerView: 1,
-	  centeredSlides: true,
+	centeredSlides: true,
 	autoplay: {
     delay: 2000,
   },
