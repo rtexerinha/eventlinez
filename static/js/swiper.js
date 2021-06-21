@@ -1,4 +1,20 @@
-var mySwiper = new Swiper ('.swiper-container', {
+var swiper = new Swiper('.slider-banner', {
+    slidesPerView: 1,
+	  centeredSlides: true,
+	autoplay: {
+    delay: 2000,
+  },
+    spaceBetween: 0, //it is only effective when slidesPerView >=2
+    paginationClickable: true,
+	pagination: {
+        el: '.swiper-pagination-banner',
+		clickable: true,
+	},
+    lazyLoading: true,
+});
+
+
+var mySwiper = new Swiper ('.slider-card', {
 	loop: false,
 	slidesPerView: 1.5,
 	spaceBetween: 30,

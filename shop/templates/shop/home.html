@@ -6,37 +6,48 @@
 {% endblock %}
 
 {% block content %}
-    <section class="container container-center pl-0 pr-0">
     {% if detach %}
-        <div class="col-12 mt-0 mt-lg-5 div-article">
+        <section class="container container-center pl-0 pr-0">
 
-            <div class="row" style="margin: 0">
-                <article class="col-lg-5 desktop" style="padding: 0!important;">
-                    <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
-                        <h1 class="h1-home pt-2 pt-lg-5">{{detach.name}}</h1>
-                        <h6 class="h6-home p-date h6-banner mt-lg-4 m-0">{{detach.event_date|date:"D, d M H:i"}}</h6>
-                        <h6 class="h6-home h6-banner mt-1">
-                             <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                            {{detach.city}}
-                        </h6>
-                        <button class="buttons-primary h6-home height-17 float-right" style="width: 138px!important;">
-                            <i class="fas fa-plus-circle"></i>
-                          <a href="{{detach.get_url}}" style="text-decoration: #FFFFFF; color: #FFFFFF;">See details</a>
-                        </button>
-                    </div>
+            <main class="slider">
+                <div class="m-slider swiper-container slider-banner">
 
-                </article>
+                    <aside class="swiper-wrapper">
+                        {% for detach in detach %}
+                            <div class="swiper-slide col-12 mt-0 div-article">
+                                <div class="row" style="margin: 0">
+                                    <article class="col-lg-5 desktop" style="padding: 0!important;">
+                                        <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
+                                            <h1 class="h1-home pt-2 pt-lg-5">{{detach.name}}</h1>
+                                            <h6 class="h6-home p-date h6-banner mt-lg-4 m-0">{{detach.event_date|date:"D, d M H:i"}}</h6>
+                                            <h6 class="h6-home h6-banner mt-1">
+                                                 <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
+                                                {{detach.city}}
+                                            </h6>
+                                            <button class="buttons-primary h6-home height-17 float-right" style="width: 138px!important;">
+                                                <i class="fas fa-plus-circle"></i>
+                                              <a href="{{detach.get_url}}" style="text-decoration: #FFFFFF; color: #FFFFFF;">See details</a>
+                                            </button>
+                                        </div>
 
-                <a href="{{detach.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
-                    <img class="m-img-card-banner" src="{{detach.image.url }}" alt="{{detach.name}}"/>
-                </a>
+                                    </article>
 
-                <aside class="col-lg-7 col-12 desktop" style="padding: 0!important;">
-                    <img class="m-img-card-banner" src="{{detach.image.url}}" alt="{{detach.name}}"/>
-                </aside>
-            </div>
+                                    <a href="{{detach.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
+                                        <img class="m-img-card-banner" src="{{detach.image.url }}" alt="{{detach.name}}"/>
+                                    </a>
 
-        </div>
+                                    <aside class="col-lg-7 col-12 desktop" style="padding: 0!important;">
+                                        <img class="m-img-card-banner" src="{{detach.image.url}}" alt="{{detach.name}}"/>
+                                    </aside>
+
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </aside>
+
+                    <div class="swiper-pagination swiper-pagination-banner"></div>
+                </div>
+            </main>
 
     {% else %}
         <section class="col-lg-12 background-container">
@@ -63,7 +74,7 @@
         </div>
 
          <section class="slider">
-                <div class="m-slider swiper-container">
+                <div class="m-slider swiper-container slider-card">
 
                     <!-- If we need navigation buttons -->
                     <div class="swiper-button-prev"></div>
@@ -102,7 +113,7 @@
         </div>
 
         <section class="slider">
-            <div class="m-slider swiper-container">
+            <div class="m-slider swiper-container slider-card">
 
               <!-- If we need navigation buttons -->
               <div class="swiper-button-prev"></div>
@@ -143,7 +154,7 @@
             </div>
 
         <section class="slider">
-            <div class="m-slider swiper-container">
+            <div class="m-slider swiper-container slider-card">
 
             <!-- If we need navigation buttons -->
               <div class="swiper-button-prev"></div>
