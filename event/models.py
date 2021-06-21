@@ -66,7 +66,7 @@ class Event(models.Model):
     promoter = models.ForeignKey(Promoter, on_delete=models.PROTECT)
     image = models.ImageField(upload_to='event', blank=False, null=False)
     thumbnail = ImageSpecField(source='image',
-                               processors=[ResizeToFill(200, 159)],
+                               processors=[ResizeToFill(180, 159)],
                                format='JPEG',
                                options={'quality': 90})
     available = models.BooleanField(default=False)
