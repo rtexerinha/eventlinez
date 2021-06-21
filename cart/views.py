@@ -147,7 +147,8 @@ def checkout(request):
         cancel_url=server + '/cart/',
         line_items=line_items,
         customer_email=request.user.username,
-        client_reference_id=cart.id
+        client_reference_id=cart.id,
+        allow_promotion_codes=True
     )
 
     return JsonResponse({

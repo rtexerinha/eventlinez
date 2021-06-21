@@ -43,9 +43,9 @@ function addToCard() {
         let qty = parseInt(linhas[i].getElementsByClassName("ticket-qty")[0].innerText, 10)
         tickets.push({"id": ticket_id, "quantity": qty})
     }
-    let promoCode = document.getElementById("promo_code").value
+    // let promoCode = document.getElementById("promo_code").value
     let payload = {
-        "promo_code": promoCode,
+        "promo_code": null,
         "tickets": tickets
     }
 
