@@ -86,12 +86,16 @@ def cart_detail(request, cart_items=None):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart_items = CartItem.objects.filter(cart=cart, active=True)
+        item = cart_items.first()
+        promo_code = None
+        if item:
+            promo_code = item.promo_code
         total = cart.amount()
     except Cart.DoesNotExist:
         logger.error("The cart doest not exist.")
         total = 0
         pass
-    return render(request, 'cart.html', dict(total=total, cart_items=cart_items))
+    return render(request, 'cart.html', dict(total=total, cart_items=cart_items, promo_code=promo_code))
 
 
 def remove_item(request, item_id):
