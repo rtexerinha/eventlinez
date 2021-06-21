@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.template.loader import render_to_string
@@ -74,9 +72,6 @@ class OrderItem(models.Model):
 
     def sub_total(self):
         return self.quantity * self.unit_price
-
-    def price_with_fee(self):
-        return self.unit_price + Decimal(self.fee)
 
     def __str__(self):
         return self.ticket

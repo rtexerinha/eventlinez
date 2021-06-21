@@ -70,7 +70,7 @@
                     <tr>
                         <td class="text-table">{{ticket.id}}</td>
                         <td class="text-table">{{ticket.event_ticket}}</td>
-                        <td class="text-table">{{ticket.order_item.price_with_fee }}</td>
+                        <td class="text-table">{{ticket.order_item.unit_price }}</td>
                         <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>
                         <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
                         <td class="text-table">{{ticket.guest_name|default_if_none:''}}</td>
