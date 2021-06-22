@@ -8,10 +8,6 @@
 {% endblock %}
 {% block content %}
     <main class="container" style="min-height: 80vh;">
-{#        <div>#}
-{#            <p class="text-center search_text">You have searched for: <b>"{{ query }}"</b></p>#}
-{#        </div>#}
-
         <div class="col-lg-12 ml-0 mt-4 pl-0">
             <h2 class="h3-home">You have searched for:
                 <span class="h3-home p-date">{{ query }}</span>
@@ -19,36 +15,42 @@
         </div>
 
         {% if events %}
-        <section class="slider">
-            <div class="m-slider swiper-container">
+            <section class="slider">
+                <article class="m-slider swiper-container slider-card">
 
-            <!-- If we need navigation buttons -->
-              <div class="swiper-button-prev"></div>
-              <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
 
-		        <div class="swiper-wrapper">
-                    {% for event in events %}
-			            <aside class="m-slider__item swiper-slide" >
-                            <div class="m-card" ontouchstart>
-					            <a class="m-card__header" href="{{event.get_url}}">
+                    <div class="swiper-wrapper">
+
+                        {% for event in events %}
+
+                            <aside class="m-slider__item swiper-slide">
+                                <div class="m-card" ontouchstart>
+                                    <a class="m-card__header" href="{{event.get_url}}">
                                         <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
-                                </a>
+                                    </a>
 
-                                <a class="m-card__body" href="{{event.get_url}}">
-						            <h4 class="h4-home">{{event.name}}</h4>
-                                    <h6 class="h6-home p-date">{{event.event_date|date:"D, d M H:i"}}</h6>
-                                    <h6 class="h6-home">{{event.city}}</h6>
-                                </a>
-				            </div>
-                        </aside>
-                    {% endfor %}
-                {% else %}
-                    <div class="col-lg-12 ml-0 mt-5 pl-0">
-                        <h4 class="h4-home">No events found</h4>
+                                    <a class="m-card__body" href="{{event.get_url}}">
+                                        <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
+
+                                        <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
+                                        <h6 class="h6-home">
+                                             <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
+                                            {{event.city}}</h6>
+                                    </a>
+                                </div>
+                            </aside>
+                        {% endfor %}
                     </div>
-                {% endif %}
-                </div>
-	        </div><!-- .m-slider // -->
-        </section><!-- .slider // -->
+                </article><!-- .m-slider // -->
+            </section><!-- .slider // -->
+
+        {% else %}
+            <div class="col-12">
+                <h4 class="h4-home">No events found</h4>
+            </div>
+
+        {% endif %}
     </main>
 {% endblock %}
