@@ -449,7 +449,23 @@
     }
 }
 
+@media(max-width: 900px) {
+    .m-reset {
+        margin: 6rem auto;
+    }
+}
 
+@media(min-width: 900px) {
+    .m-reset {
+        margin: 4rem auto;
+    }
+}
+
+@media(min-width: 1600px) {
+    .m-reset {
+        margin: 10rem auto;
+    }
+}
 
 /* NAVBAR*/
 .dropdown-item-new {
