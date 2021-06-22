@@ -188,8 +188,8 @@
 
 .div-banner-home{
     height: 354px;
-     background: linear-gradient(to right,  #FAFAFB 0%,#FAFAFB 20%,#E5E5E5 80%,#E5E5E5 100%);
-    /*background: #E5E5E5;*/
+    background: linear-gradient(to right, #FAFAFB 17%, #E5E5E5 17% , #E5E5E5 60%, #E5E5E5 80%);
+     /*background: linear-gradient(to right,  #FAFAFB 0%,#FAFAFB 20%,#E5E5E5 80%,#E5E5E5 100%);*/
     border-radius: 6px 0 0 6px;
 }
 
