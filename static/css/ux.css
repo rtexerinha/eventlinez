@@ -1,3 +1,9 @@
+.buttons-reset{
+    display: flex;
+    margin: auto;
+    justify-content: center;
+}
+
 .buttons-primary{
     width:185px;
     Height: 45px;
