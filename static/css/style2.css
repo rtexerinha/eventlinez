@@ -461,6 +461,11 @@
     }
 }
 
+.link-order{
+    color: var(--first-color);
+    font-size: 0.8rem;
+}
+
 @media(min-width: 1600px) {
     .m-reset {
         margin: 10rem auto;

@@ -1,56 +1,64 @@
-{% extends "base.html" %}
+{% extends "base-new.html" %}
 {% load static %}
 {% block title %}
 	Order History - Eventlinez
 {% endblock %}
+
 {% block content %}
-	<div>
-		<div class="text-center" style="min-height: 50vh;">
-			<br>
-			<h1 class="text-center title-order">Order History</h1>
-			<br>
-			{% if orders %}
-			<table class="table table-striped col-xl-10 col-lg-10 col-sm-10" style="width: 100%; margin: auto">
+	<section class="container mb-5" style="min-height: 70vh;">
+        <h2 class="h2-home p-dark mt-5 mb-4">Order History</h2>
+
+        {% if orders %}
+			<table class="table table-striped col-12" style="width: 100%; margin: auto">
 				<thead>
 					<tr>
-						<th class="title-table-order">Order Number</th>
-						<th class="title-table-order">Order Date</th>
-						<th class="title-table-order">Total Amount</th>
-                        <th class="title-table-order">Tickets Qty</th>
-						<th class="title-table-order">Status</th>
+						<th class="h6-home p-dark text-center">Order Number</th>
+						<th class="h6-home p-dark text-center">Order Date</th>
+						<th class="h6-home p-dark text-center">Total Amount</th>
+                        <th class="h6-home p-dark text-center">Tickets Qty</th>
+						<th class="h6-home p-dark">Status</th>
 					</tr>
 				</thead>
+
 				<tbody>
-					{% for orders in orders %}
+                {% for orders in orders %}
 					<tr>
-						<td class="text-body-table">
+						<td class="p-home text-center">
                             <a class="link-order" href="{% url 'order:order_detail' orders.id %}">
                                 #{{ orders.id }}
                             </a>
                         </td>
-						<td class="text-body-table">
+						<td class="p-home text-center">
                             {{ orders.created|date:"d M Y" }}
                         </td>
-						<td class="text-body-table">
+						<td class="p-home text-center">
                             {{ orders.total }}
                         </td>
 
-                        <td class="text-body-table">
+                        <td class="p-home text-center">
                             {{ orders.ticket_qty }}
                         </td>
-						<td class="text-body-table">
+						<td class="p-home">
                             <i class="fas fa-check" style="color: #1e7e34"></i>&nbsp
                             Complete
                         </td>
 					</tr>
-					{% endfor %}
+                {% endfor %}
 				</tbody>
 			</table>
-			{% else %}
-			<p>You have not placed any orders yet.<br><br><a href="{% url 'shop:index' %}" class="btn btn-secondary">Continue shopping</a></p>
-			{% endif %}
-		</div>
-	</div>
-	<br>
-	<br>
+        {% else %}
+            <div class="col-lg-6 col-12 m-auto">
+                <p class="h4-home buttons-reset mb-4">
+                    You have not placed any orders yet.
+                </p>
+
+                <button class="buttons-primary buttons-reset">
+                    <a href="{% url 'shop:index' %}" class="h6-home height-17 p-light">
+                        Continue shopping
+                    </a>
+                </button>
+            </div>
+        {% endif %}
+
+    </section>
 {% endblock %}
