@@ -2,7 +2,7 @@ var swiper = new Swiper('.slider-banner', {
     slidesPerView: 1,
 	centeredSlides: true,
 	autoplay: {
-    delay: 2000,
+    delay: 4000,
   },
     spaceBetween: 0, //it is only effective when slidesPerView >=2
     paginationClickable: true,
