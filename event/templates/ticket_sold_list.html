@@ -29,7 +29,7 @@
                             <option value="" selected="selected">All</option>
                         {% endif %}
                         {% for event in events %}
-                            <option value="{{event.id}}">{{event.name}}</option>
+                            <option value="{{event.id}}">{{ticket.event_ticket}}</option>
                         {% endfor %}
                     </select>
                     <button action="submit"
