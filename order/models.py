@@ -74,7 +74,7 @@ class OrderItem(models.Model):
         return self.quantity * self.unit_price
 
     def __str__(self):
-        return self.ticket
+        return str(self.event_ticket)
 
 
 @receiver(post_save, sender=OrderItem)

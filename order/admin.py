@@ -5,7 +5,7 @@ from .models import Order, OrderItem
 class OrderItemAdmin(admin.TabularInline):
     model = OrderItem
     fieldsets = [
-        ('Ticket', {'fields': ['ticket'], }),
+        ('Ticket', {'fields': ['event_ticket'], }),
         ('Promo Code', {'fields': ['promo_code'], }),
         ('Quantity', {'fields': ['quantity'], }),
         ('Price', {'fields': ['unit_price'], }),
@@ -25,10 +25,6 @@ class OrderAdmin(admin.ModelAdmin):
                        'shippingCity', 'shippingPostcode', 'shippingCountry']
     fieldsets = [
         ('ORDER INFORMATION', {'fields': ['id', 'token', 'total', 'created', 'emailAddress']}),
-        ('BILLING INFORMATION', {'fields': ['billingName', 'billingAddress1', 'billingCity', 'billingPostcode',
-                                            'billingCountry']}),
-        ('SHIPPING INFORMATION', {'fields': ['shippingName', 'shippingAddress1', 'shippingCity',
-                                             'shippingPostcode', 'shippingCountry']}),
     ]
 
     inlines = [
