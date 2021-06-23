@@ -8,7 +8,7 @@ class OrderItemAdmin(admin.TabularInline):
         ('Ticket', {'fields': ['ticket'], }),
         ('Promo Code', {'fields': ['promo_code'], }),
         ('Quantity', {'fields': ['quantity'], }),
-        ('Price', {'fields': ['price'], }),
+        ('Price', {'fields': ['unit_price'], }),
     ]
     readonly_fields = ['ticket', 'quantity', 'unit_price', 'promo_code']
     can_delete = False
