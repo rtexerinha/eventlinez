@@ -88,6 +88,6 @@ def create_tickets(sender, instance, **kwargs):
             event_ticket=instance.event_ticket,
             customer=instance.order.customer,
             order_item=instance,
-            price=instance.amount,
+            price=instance.unit_price,
             guest_name=guest_name
         )
