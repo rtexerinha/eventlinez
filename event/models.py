@@ -4,13 +4,14 @@ from django.db import models
 
 from django.template.defaultfilters import slugify
 from django.urls import reverse
+from django.db.models import Sum
 from ckeditor.fields import RichTextField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
-from address.models import City
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+from address.models import City
 from customer.models import Customer
 
 
@@ -99,9 +100,11 @@ class Event(models.Model):
         return qty
 
     def get_amount(self):
-        _amount = Decimal(0.0)
-        for ticket in self.tickets.all():
-            _amount = _amount + ticket.qty_sold() * ticket.price
+        from ticket.models import Ticket as TicketSould
+        result = TicketSould.objects.filter(event_ticket__event=self).aggregate(Sum('price'))
+        _amount = result['price__sum']
+        if not _amount:
+            return 0
         return _amount
 
     @property
