@@ -17,10 +17,10 @@ def tickets_sold_list(request):
     tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter).order_by('-id')
     selected_event = None
     if request.method == "POST":
-        event_ticket_id = request.POST.get('events_choice')
-        if event_ticket_id:
-            selected_event = Event.objects.get(pk=event_ticket_id)
-            tickets = Ticket.objects.filter(event=selected_event)
+        event_id = request.POST.get('events_choice')
+        if event_id:
+            selected_event = Event.objects.get(pk=event_id)
+            tickets = tickets.filter(event_ticket__event=selected_event)
     paginator = Paginator(tickets, 20)
     page = int(request.GET.get('page', '1'))
     try:

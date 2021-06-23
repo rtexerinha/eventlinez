@@ -17,7 +17,7 @@
             <div class="col-lg-11 col-md-5">
                 <form method="POST" style="display: flex">
                     {% csrf_token %}
-                    <label for="events_choice"
+                    <label for="eventsChoice"
                            style="font-size: 16px; margin-top: 10px">Events</label>
                     <select id="eventsChoice" class="form-control form-control-sm col-sm-3 col-md-3 col-lg-4 mt-2"
                             name="events_choice"
@@ -25,11 +25,10 @@
                             style="margin: 0 10px">
                         {% if selected_event %}
                             <option value="{{selected_event.id}}" selected="selected">{{ selected_event.name }}</option>
-                        {% else %}
-                            <option value="" selected="selected">All</option>
                         {% endif %}
+                        <option value="" >All</option>
                         {% for event in events %}
-                            <option value="{{event.id}}">{{ticket.event_ticket}}</option>
+                            <option value="{{event.id}}">{{event.name}}</option>
                         {% endfor %}
                     </select>
                     <button action="submit"
@@ -58,6 +57,7 @@
                     <tr style="background-color:#F4F4F4;">
                         <th class="text-table text-bold">Num</th>
                         <th class="text-table text-bold">Event</th>
+                        <th class="text-table text-bold">Ticket Type</th>
                         <th class="text-table text-bold">Price</th>
                         <th class="text-table text-bold">Promo Code</th>
                         <th class="text-table text-bold">Created</th>
@@ -69,7 +69,8 @@
                 {% for ticket in tickets %}
                     <tr>
                         <td class="text-table">{{ticket.id}}</td>
-                        <td class="text-table">{{ticket.event_ticket}}</td>
+                        <td class="text-table">{{ticket.event_ticket.event.name}}</td>
+                        <td class="text-table">{{ticket.event_ticket.name}}</td>
                         <td class="text-table">{{ticket.order_item.unit_price }}</td>
                         <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>
                         <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
