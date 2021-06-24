@@ -139,3 +139,7 @@ class Ticket(models.Model):
 
     def __str__(self):
         return "%s/%s" % (self.event.name, self.name)
+
+#
+# class Favorite(models.Model):
+#     event = models.ManyToManyField(Event,  on_delete=models.CASCADE,)

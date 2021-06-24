@@ -32,7 +32,7 @@
 
 .m-slider{
     box-shadow: none!important;
-    padding-top: 60px;
+    padding-top: 20px;
 }
 .swiper-container-vertical > .swiper-wrapper {
   flex-direction: column;
@@ -151,7 +151,7 @@
 }
 
 .swiper-button-prev{
-  left: 93%!important;
+  left: 80%!important;
 }
 
 @media (max-width: 750px) {

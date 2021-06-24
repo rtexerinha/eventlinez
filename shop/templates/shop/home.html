@@ -10,7 +10,7 @@
         <section class="container container-center pl-0 pr-0">
 
             <main class="slider">
-                <div class="swiper-container slider-banner mt-0 mt-lg-5">
+                <div class="swiper-container slider-banner mt-0 mt-lg-4">
 
                     <aside class="swiper-wrapper">
                         {% for detach in detach %}
@@ -18,7 +18,7 @@
                                 <div class="row" style="margin: 0">
                                     <article class="col-lg-5 desktop" style="padding: 0!important;">
                                         <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
-                                            <div style="min-height: 270px;">
+                                            <div style="min-height: 4rem;">
                                                 <h1 class="h1-home pt-2 pt-lg-5">{{detach.name}}</h1>
                                                 <h6 class="h6-home p-date h6-banner mt-lg-4 m-0">{{detach.event_date|date:"D, d M H:i"}}</h6>
                                                 <h6 class="h6-home h6-banner mt-1">
@@ -73,18 +73,20 @@
 
     <section class="container container-center">
         {% if events_all %}
-        <div class="col-lg-12 ml-0 mt-4 pl-0">
-            <h2 class="h3-home">Events</h2>
-        </div>
+         <main class="slider">
+             <article class="m-slider swiper-container slider-card">
+                <div class="col-12 d-flex mt-0 mb-4 p-0">
+                    <div class="col-lg-8 ml-0 pl-0">
+                        <h2 class="h3-home">Events</h2>
+                    </div>
 
-         <section class="slider">
-                <div class="m-slider swiper-container slider-card">
+                    <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-button-next"></div>
+                    </div>
+                </div>
 
-                    <!-- If we need navigation buttons -->
-                    <div class="swiper-button-prev"></div>
-                    <div class="swiper-button-next"></div>
-
-                    <div class="swiper-wrapper">
+                 <div class="swiper-wrapper">
                     {% if events_all %}
                         {% for event in events_all %}
                             <aside class="m-slider__item swiper-slide">
@@ -108,61 +110,65 @@
                         <h2>No events at the moment</h2>
                     {% endif %}
                     </div>
-                </div><!-- .m-slider // -->
-            </section><!-- .slider // -->
+                </article><!-- .m-slider // -->
+            </main><!-- .slider // -->
 
         {% else %}
-         <div class="col-lg-12 ml-0 mt-4 mb-4 pl-0">
-            <h2 class="h3-home">Upcoming Events</h2>
-        </div>
-
         <section class="slider">
-            <div class="m-slider swiper-container slider-card">
+            <main class="m-slider swiper-container slider-card">
+                <div class="col-12 d-flex p-0 mt-0 mb-4">
+                    <div class="col-lg-8 ml-0 pl-0">
+                        <h2 class="h3-home">Upcoming Events</h2>
+                    </div>
 
-              <!-- If we need navigation buttons -->
-              <div class="swiper-button-prev"></div>
-              <div class="swiper-button-next"></div>
-
-		        <div class="swiper-wrapper">
-                {% if events_futures %}
-                    {% for event in events_futures %}
-			            <aside class="m-slider__item swiper-slide">
-                            <div class="m-card" ontouchstart>
-					            <a class="m-card__header" href="{{event.get_url}}">
-                                    <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
-                                </a>
-
-                                <a class="m-card__body" href="{{event.get_url}}">
-						            <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
-
-                                    <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
-                                    <h6 class="h6-home">
-                                        <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                        {{event.city}}
-                                    </h6>
-                                </a>
-				            </div>
-                        </aside>
-                    {% endfor %}
-                {% else %}
-                    <h2>No events at the moment</h2>
-                {% endif %}
+                    <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-button-next"></div>
+                    </div>
                 </div>
-	        </div><!-- .m-slider // -->
+
+                <div class="swiper-wrapper">
+                    {% if events_futures %}
+                        {% for event in events_futures %}
+                            <aside class="m-slider__item swiper-slide">
+                                <div class="m-card" ontouchstart>
+                                    <a class="m-card__header" href="{{event.get_url}}">
+                                        <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
+                                    </a>
+
+                                    <a class="m-card__body" href="{{event.get_url}}">
+                                        <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
+
+                                        <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
+                                        <h6 class="h6-home">
+                                            <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
+                                            {{event.city}}
+                                        </h6>
+                                    </a>
+                                </div>
+                            </aside>
+                        {% endfor %}
+                    {% else %}
+                        <h2>No events at the moment</h2>
+                    {% endif %}
+                </div>
+            </main><!-- .m-slider // -->
         </section><!-- .slider // -->
 
 
         {% if events_old %}
-            <div class="col-lg-12 ml-0 mt-4 pl-0">
-                <h2 class="h3-home">Past Events</h2>
-            </div>
+        <main class="slider">
+            <article class="m-slider swiper-container slider-card">
+                <div class="col-12 d-flex p-0 mt-0 mb-4">
+                    <div class="col-lg-8 ml-0  pl-0">
+                        <h2 class="h3-home">Past Events</h2>
+                    </div>
 
-        <section class="slider">
-            <div class="m-slider swiper-container slider-card">
-
-            <!-- If we need navigation buttons -->
-              <div class="swiper-button-prev"></div>
-              <div class="swiper-button-next"></div>
+                    <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-button-next"></div>
+                    </div>
+                </div>
 
 		        <div class="swiper-wrapper">
                     {% for event in events_old %}
@@ -186,8 +192,8 @@
 {#                    <h2>No events at the moment</h2>#}
                 {% endif %}
                 </div>
-	        </div><!-- .m-slider // -->
-        </section><!-- .slider // -->
+	        </article><!-- .m-slider // -->
+        </main><!-- .slider // -->
 {% endif %}
     </section>
 

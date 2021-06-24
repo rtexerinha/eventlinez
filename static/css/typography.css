@@ -39,7 +39,7 @@
     font-size: var(--big-font-size);
     font-style: normal;
     font-weight: var(--font-semi-bold);
-    line-height: 55px;
+    line-height: 35px;
     color: var(--gray-color-dark);
     text-align: left;
 }
