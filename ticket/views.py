@@ -72,18 +72,16 @@ def tickets_excel(request, event_id=None):
     sheet.set_default_row(30)
     sheet.merge_range('A1:F1', u"", title_format)
 
-    # if event_id:
-    #     tickets = Ticket.objects.filter(event_id=event_id).values_list(
-    #         'id', 'event__name', 'order_item__price', 'order_item__promo_code',
-    #         'created_at', 'guest_name').order_by('-id')
-    # else:
-    #     tickets = Ticket.objects.filter(event__promoter=request.user.promoter). \
-    #         values_list('id', 'event__name', 'order_item__price',
-    #                     'order_item__promo_code', 'created_at', 'guest_name').order_by('-id')
-
-    tickets = Ticket.objects.filter(
-        event_ticket__event__promoter=request.user.promoter).values_list(
-        'id', 'event_ticket__event__name', 'event_ticket__name', 'order_item__unit_price', 'order_item__promo_code', 'created_at', 'guest_name').order_by('-id')
+    if event_id:
+        selected_event = Event.objects.get(pk=event_id)
+        tickets = Ticket.objects.filter(event_ticket__event=selected_event).values_list(
+            'id', 'event_ticket__event__name', 'event_ticket__name', 'order_item__unit_price',
+            'order_item__promo_code', 'created_at', 'guest_name').order_by('-id')
+    else:
+        tickets = Ticket.objects.filter(
+            event_ticket__event__promoter=request.user.promoter).values_list(
+            'id', 'event_ticket__event__name', 'event_ticket__name', 'order_item__unit_price',
+            'order_item__promo_code', 'created_at', 'guest_name').order_by('-id')
     row_num = 1
     columns = ['Ticket', 'Event', 'Type ticket', 'Price', 'Promo Code',  'Date', 'Guest Name']
     for col_num in range(len(columns)):
