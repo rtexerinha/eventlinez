@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 
 from event.models import Category, Event
 from .forms import ContactForm
+from .models import SpecialEvents
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,8 @@ def index(request, c_slug=None):
     # else:
     lis = lists_events(c_slug)
     page = pagination_home(request, lis)
-    detach = Event.objects.all().filter(available=True, event_date__gte=now).order_by('event_date')
+    detach = SpecialEvents.objects.all()
+    # detach = Event.objects.all().filter(available=True, event_date__gte=now).order_by('event_date')
     return render(request, 'shop/home.html', {'detach': detach,
                                               'category': c_page,
                                               'events_futures': page[0],

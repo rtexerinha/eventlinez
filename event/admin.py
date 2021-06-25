@@ -26,8 +26,3 @@ class EventAdmin(admin.ModelAdmin):
 class TicketAdmin(admin.ModelAdmin):
     list_display = ['name', 'quantity', 'price', 'event']
     search_fields = ['name']
-
-
-# @admin.register(Ticket)
-# class FavoriteAdmin(admin.ModelAdmin):
-#     list_display = ['event']
