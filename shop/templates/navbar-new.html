@@ -11,15 +11,18 @@
         <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse mt-3" id="navbarSupportedContent">
+    <main class="collapse navbar-collapse mt-3" id="navbarSupportedContent">
+
+        <!------------------- SEARCH -------------------->
         <form class="form-inline mr-auto" action="{% url 'shop:search' %}" method="get">
-        {% csrf_token %}
-        <input class="input-subcribe form-control mr-sm-2"
-               type="search" placeholder="Search" aria-label="Search" name="q">
+            {% csrf_token %}
+            <input class="input-subcribe form-control mr-sm-2"
+                   type="search" placeholder="Search" aria-label="Search" name="q">
         </form>
 
+
         <ul class="navbar-nav my-2 my-lg-0">
-            <li class="nav-item mt-lg-2 mt-xl-2 dropdown">
+            <li class="nav-item mt-lg-2 mt-xl-2 dropdown mr-3">
                 <a class="nav-link dropdown-toggle weight-height h6-home"
                    href="{% url 'shop:index' %}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Category
@@ -64,46 +67,77 @@
                     </li>
 
                 {% else %}
-                    <li class="nav-item mt-lg-2 mt-xl-2">
+                    <li class="nav-item mt-lg-2 mt-xl-2 mr-lg-3">
                         <a class="nav-link" href="{% url 'guest_list' %}" style="display: flex">
                              <i class="fas fa-ticket-alt" style="margin-right: 5px; color: #E10087"></i>
                             <h6 class="weight-height h6-home">My Tickets</h6>
                         </a>
                     </li>
 
-                    <li class="d-block nav-item mt-lg-2 mt-xl-2 dropdown">
-
-                        <div class="d-flex">
-                            <i class="fas fa-user" style="margin-right: 5px;color: #585858"></i>
-                        <a class="nav-link dropdown-toggle weight-height h6-home"
-                           href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-
-                        {{ request.user.first_name }}
+                    <li class="nav-item mt-lg-2 mt-xl-2 mr-lg-3">
+                        <a class="nav-link" href="{% url 'order:order_history' %}" style="display: flex">
+                             <i class="fas fa-list" style="margin-right: 5px; color: #E10087"></i>
+                            <h6 class="weight-height h6-home">Orders</h6>
                         </a>
-
-                         <a class="nav-link" href="{% url 'signout' %}" style="display: flex">
-{#                            <i class="fas fa-sign-out-alt" style="margin-right: 5px;  color: #E10087"></i>#}
-                            <h6 class="weight-height h6-home">Sign Out</h6>
-                        </a>
-                        </div>
-
-                        <div class="dropdown-menu" aria-labelledby="userDropdown" onload=""
-                             style="position: absolute;transform: translate3d(5px, 20px, 0px);
-                             top: 0;left: 0;will-change: transform;padding: 0.5rem!important;">
-                            <a class="dwop-item weight-height p-home" href="{% url 'order:order_history' %}">Order History</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dwop-item weight-height p-home" href="{% url 'customer_update' %}">Profile</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dwop-item weight-height p-home" href="{% url 'reset_password_costomer' %}">Reset Password</a>
-                        </div>
                     </li>
 
-{#                    <li class="nav-item mt-lg-2 mt-xl-2">#}
-{#                        <a class="nav-link" href="{% url 'signout' %}" style="display: flex">#}
+                    <li class="nav-item mt-0">
+                    <div class="d-flex">
+                        <div class="pt-2" style="height: 80%;">
+                            <img src="{% static 'img/user.png' %}" style="margin-right: 5px; color: #E10087;" alt="user"/>
+                        </div>
+
+                        <div class="d-block p-0">
+                            <p class="h6-home mb-0">
+                                Hello, {{ request.user.first_name }}</p>
+
+                            <div class="d-flex">
+                                <a href="{% url 'customer_update' %}">
+                                    <h6 class="weight-height h6-home mr-1 text-lowercase" style="text-decoration-line: underline;">
+                                        Profile
+                                    </h6>
+                                </a>
+
+                                <p class="weight-height h6-home mb-0 mr-1 text-lowercase">|</p>
+
+                                <a href="{% url 'signout' %}">
+                                    <h6 class="weight-height h6-home mr-3 text-lowercase" style="text-decoration-line: underline; ">
+                                        Sign out
+                                    </h6>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </li>
+
+{#                    <li class="d-block nav-item mt-lg-2 mt-xl-2 dropdown">#}
+{##}
+{#                        <div class="d-flex">#}
+{#                            <i class="fas fa-user" style="margin-right: 5px;color: #585858"></i>#}
+{#                        <a class="nav-link dropdown-toggle weight-height h6-home"#}
+{#                           href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">#}
+{##}
+{#                        {{ request.user.first_name }}#}
+{#                        </a>#}
+{##}
+{#                            <div class="dropdown-menu" aria-labelledby="userDropdown" onload=""#}
+{#                             style="position: absolute;transform: translate3d(5px, 20px, 0px);#}
+{#                             top: 0;left: 0;will-change: transform;padding: 0.5rem!important;">#}
+{#                            <a class="dwop-item weight-height p-home" href="{% url 'order:order_history' %}">Order History</a>#}
+{#                            <div class="dropdown-divider"></div>#}
+{#                            <a class="dwop-item weight-height p-home" href="{% url 'customer_update' %}">Profile</a>#}
+{#                            <div class="dropdown-divider"></div>#}
+{#                            <a class="dwop-item weight-height p-home" href="{% url 'reset_password_costomer' %}">Reset Password</a>#}
+{#                        </div>#}
+{##}
+{#                         <a class="nav-link" href="{% url 'signout' %}" style="display: flex">#}
 {#                            <i class="fas fa-sign-out-alt" style="margin-right: 5px;  color: #E10087"></i>#}
 {#                            <h6 class="weight-height h6-home">Sign Out</h6>#}
 {#                        </a>#}
+{#                        </div>#}
 {#                    </li>#}
+
 
                 {% endif %}
 
@@ -128,7 +162,7 @@
 
                             <div class="d-flex">
                                 <a href="{% url 'signin' %}">
-                                    <h6 class="weight-height h6-home mr-1">
+                                    <h6 class="weight-height h6-home mr-1" style="text-decoration-line: underline;">
                                         Log in
                                     </h6>
                                 </a>
@@ -136,7 +170,9 @@
                                 <p class="weight-height h6-home mb-0 mr-1 text-lowercase">or</p>
 
                                 <a href="{% url 'signup' %}">
-                                    <h6 class="weight-height h6-home" style="padding-right: 1.5rem">Sign up</h6>
+                                    <h6 class="weight-height h6-home mr-3" style="text-decoration-line: underline; ">
+                                        Sign up
+                                    </h6>
                                 </a>
                             </div>
 
@@ -144,13 +180,9 @@
                     </div>
                 </li>
 
-{#            <li class="nav-item mt-lg-2 mt-xl-2">#}
-{#                <a class="nav-link"  href="{% url 'signup' %}">#}
-{#                    <h6 class="weight-height h6-home" style="padding-right: 1.5rem">Sign up</h6>#}
-{#                </a>#}
-{#            </li>#}
 
-            <a class="buttons-primary mr-lg-5 my-2 my-sm-0 buttons-primary" style="padding: 13px; text-decoration: none;" href="{% url 'events_promoter' %}">
+            <a class="buttons-primary mr-lg-5 my-2 my-sm-0 buttons-primary"
+               style="padding: 13px; text-decoration: none;" href="{% url 'events_promoter' %}">
                 Organize your event
             </a>
 
@@ -158,5 +190,5 @@
 
         </ul>
 
-    </div>
+    </main>
 </nav>
