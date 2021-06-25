@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-new.html" %}
 {% load static %}
 {% block metadescription %}{% endblock %}
 {% block title %}
@@ -6,39 +6,34 @@
 {% endblock %}
 
 {% block content %}
-    <section class="col-sm-12 col-xl-12 col-lg-12 col-md-12 mt-5 mb-5" style="min-height: 50vh; margin: auto;">
-        <div class="row">
-            <div class="col-lg-11 pl-sm-4 ml-lg-5 pl-lg-4 pl-xl-4 about-mobile">
-                <main class="row">
-                    <article class="col-lg-6">
-                        <h1 class="title-about pb-1">Terms & Conditions</h1>
-                            <p class="text-about">
-                                All sales are final. No refunds unless event is canceled.
-                            </p>
-                        <h2 class="title-about">Limitation of Liability</h2>
-                        <p class="text-about" style="text-align: justify;">
-                            You understand and acknowledge that Eventlinez is a plataform that provides ticketing listing only, is not an organizer or a promoter of any event listed on our website and App, and it has no responsibility for or control over the accuracy of the event description, operation, sales or refunds, event’s management or condition of the venue in which the event is held. You understand and agree that some events may carry inherent risk, and by participating in those events, you choose to assume those risks voluntarily. Eventlinez service fee are not refundable.
-                        </p>
-                    </article>
+    <section class="container mt-2 mt-lg-3 mb-5" style="min-height: 70vh; margin: auto;">
+        <main class="row">
+             <aside class="col-lg-6 col-12 pt-0">
+                <img style="width: 70%; display: block; margin: auto" src="{% static 'img/term2.png' %}" alt="Ilustration terms">
+             </aside>
 
-                     <aside class="col-lg-6 mt-5 icon_remove_a">
-                        <img style="width: 70%; display: block; margin: auto" src="{% static 'img/term2.png' %}" alt="Ilustration terms">
-                     </aside>
-                </main>
+            <article class="col-lg-6 col-12 pt-3 p-4">
+                <h2 class="h2-home p-dark pb-1">Terms & Conditions</h2>
+                <p class="h6-home">
+                    All sales are final. No refunds unless event is canceled.
+                </p>
 
-                <h2 class="title-about pb-1" style="margin-top: 1% !important;">Instructions</h2>
-                <p class="text-about mt-1" style="text-align: justify;">
+                <h2 class="h2-home p-dark">Limitation of Liability</h2>
+                <p class="h6-home" style="text-align: justify;">
+                    You understand and acknowledge that Eventlinez is a plataform that provides ticketing listing only, is not an organizer or a promoter of any event listed on our website and App, and it has no responsibility for or control over the accuracy of the event description, operation, sales or refunds, event’s management or condition of the venue in which the event is held. You understand and agree that some events may carry inherent risk, and by participating in those events, you choose to assume those risks voluntarily. Eventlinez service fee are not refundable.
+                </p>
+
+            </article>
+
+        </main>
+
+        <article class="col-12 pt-1 p-2">
+            <h2 class="h2-home p-dark pb-1" style="margin-top: 1% !important;">Instructions</h2>
+
+                <p class="h6-home mt-1" style="text-align: justify;">
                     The digital ticket security system generates a unique code for only one access, copies are prohibited. Once validated it can not be reused. Eventlinez and the event’s organization are not responsible for tickets purchased outside the authorized network. **NO RETURNS FROM TICKETS AND CAN NOT BE TRANSFERRED**
                     Resale of this digital ticket is prohibited, tickets purchased from third parties may be fraudulent. Eventlinez reserves the right to request the photocopy ID and credit card of the holder used in the purchase by the site to access the event. If an event is canceled, and you purchased your ticket though Eventlinez.com, we will automatically issue you a refund to the credit card or debit card that you used to purchase the ticket.
                 </p>
-            </div>
-
-            <aside class="col-lg-6 mt-5 mobile">
-                        <img style="width: 70%; display: block; margin: auto" src="{% static 'img/term2.png' %}" alt="Ilustration terms">
-            </aside>
-
-
-        </div>
-
+        </article>
     </section>
 {% endblock %}
