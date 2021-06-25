@@ -102,7 +102,7 @@ def update_customer(request):
         
         if form.is_valid():
             form.save()
-            return redirect('shop:index')
+            return redirect('customer_update')
         else:
             return render(request, 'accounts/update_customer.html', {'form': form, 'user': user_form})
     elif request.method == 'GET':
@@ -110,7 +110,7 @@ def update_customer(request):
 
 
 @login_required
-def reset_password_customer(request):
+def change_password_customer(request):
 
     if request.method == 'POST':
         form = ResetPasswordForm(request.user, request.POST)
@@ -125,7 +125,7 @@ def reset_password_customer(request):
             messages.error(request, 'Please correct the error below.')
     else:
         form = ResetPasswordForm(request.user)
-    return render(request, 'accounts/reset_password_customer.html', {
+    return render(request, 'accounts/change_password_customer.html', {
         'form': form
     })
 

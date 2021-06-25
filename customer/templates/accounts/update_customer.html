@@ -1,100 +1,93 @@
-{% extends "base.html" %}
+{% extends "base-new.html" %}
 {% load crispy_forms_filters %}
 {% load static %}
 {% load crispy_forms_tags %}
+
 {% block metadescription %}
 	Sign up to get a new account with us. The Eventlinez has a variety of stunning products and tickets.
 {% endblock %}
+
 {% block title %}
-	Create a New Account - Eventlinez
+	Update Account - Eventlinez
 {% endblock %}
+
+
 {% block content %}
+     <section class="container" style="min-height: 75vh">
+        <main class="col-12 mt-5 mb-5" style="min-height: 50vh; margin: auto;">
+            <div class="row">
+                <aside class="col-lg-6 pt-lg-5">
+                    <img style="width: 80%; display: block; margin: auto"
+                         src="{% static 'img/persoal_data.svg' %}"
+                         alt="update customer img">
+                </aside>
 
-    <div class="col-lg-12 col-12 " id="wrapper-profile" style="min-height: 70vh">
-        <section class="row justify-content-center align-items-center">
+                <article class="col-lg-6 mt-6 mt-lg-2 pt-lg-2">
+                     {% if not form.is_valid %}
+{#                        <div class="col-12">#}
+                            <h4 class="h4-home pt-4">Enter the following information to update your account.</h4>
+{#                        </div>#}
 
-            <aside class="col-lg-6 col-md-10 col-sm-10 pl-sm-5 pl-lg-0" style="border-radius: 0 10px 10px 0;">
-             {% if not form.is_valid %}
-                 <div style="display: flex; padding-top: 20px">
-                    <a href="{% url 'index' %}" id="back-to-home">
-                        <i class="fas fa-arrow-left" style="color: #D90075;"></i>
-                    </a>
-                    <h4 class="text-default text-bk">Enter the following information to update your account.</h4>
-                </div>
+                        <form role="form" method="POST">
+                            {% csrf_token %}
+{#                            <div class="form-group">#}
+{#                                {{ form.as_p }}#}
+{#                            </div>#}
 
-                <form method="post" class="col-lg-12 ml-sm-4" >
-                {% csrf_token %}
-                    <div class="form-row" >
-                        <div class="form-group col-md-6 mb-0 my-1" >
-                            <label>First Name*</label>
-                            <br>
-                            {{ form.first_name}}
+                            <div class="row">
+                                <div class="form-group col-md-6 p-1 h6-home">
+                                     <label>First Name*</label>
+                                    {{ form.first_name}}
+                                </div>
 
+                                <div class="form-group col-md-6 p-1 h6-home">
+                                     <label>Last Name*</label>
+                                    {{ form.last_name }}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-12 col-lg-6 p-1 h6-home">
+                                     <label>Address*</label>
+                                    {{ form.address }}
+                                </div>
+                                <div class="form-group col-12 col-lg-4 p-1 h6-home">
+                                    <label>City*</label>
+                                    {{ form.city }}
+                                </div>
+                                <div class="form-group col-12 col-lg-2 p-1 h6-home">
+                                     <label>Zip code*</label>
+                                    {{ form.zip }}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-12 col-lg-6 p-1 h6-home">
+                                    <label>Cellphone*</label>
+                                    {{ form.cellphone }}
+                                </div>
+                            </div>
+
+                            <div class="float-right">
+
+                                <button class="buttons-primary mb-2">
+                                    <a class="buttons-primary weight-height p-home"
+                                       href="{% url 'reset_password_costomer' %}">Reset Password</a>
+                                </button>
+
+                                <button type="submit" name="submit" class="buttons-primary">Update Account</button>
+                            </div>
+                        </form>
+
+                    {% else %}
+                        <div class="col-12">
+                            <h4 class="h4-home pt-4">Update account has been successfully created.</h4>
                         </div>
-                        <div class="form-group col-md-6 mb-0 my-1">
-                            <label>Last Name*</label>
-                            <br>
-                            {{ form.last_name }}
-                        </div>
-                    </div>
-                    <br>
-                    <div class="form-row">
-                        <div class="form-group col-md-6 mb-0 my-1 ">
-                            <label>Address*</label>
-                            <br>
-                            {{ form.address }}
-                        </div>
-                        <div class="form-group col-md-4 mb-0 my-1">
-                            <label>City*</label>
-                            <br>
-                             {{ form.city }}
-                        </div>
 
-                        <div class="form-group col-md-2 mb-0 my-1">
-                            <label>Zip Code*</label>
-                            <br>
-                             {{ form.zip }}
-                        </div>
-                    </div>
+                    {% endif %}
+                </article>
 
-                    <div class="form-row">
-                        <div class="form-group col-md-6 mb-0 my-1 ">
-                            <label>Cellphone*</label>
-                            <br>
-                            {{ form.cellphone }}
-                        </div>
-                    </div>
-
-
-                    <br>
-                    <div class="form-row">
-                        <div class="form-group col-md-6 mb-0">
-
-                        </div>
-                        <div class="form-group col-md-6 mb-0">
-                            {{ form.password2 }}
-                        </div>
-                    </div>
-                      <br>
-                     <button type="submit" class="text-default button-login mt-0">
-                         Update Account
-                     </button>
-
-                </form>
-            {% else %}
-                 <h4 class="text-default">Update account has been successfully created</h4>
-                 <br>
-
-                 <div>
-                    <p>
-                        Dear Customer,
-                        <br><br>
-                        <a href="{% url 'shop:index' %}">Continue shopping</a> and enjoy the variety of cushions that we have at the perfect cushion store.
-                    </p>
-                </div>
-
-            {% endif %}
-            </aside>
-        </section>
-    </div>
+            </div>
+        </main>
+    </section>
 {% endblock %}
