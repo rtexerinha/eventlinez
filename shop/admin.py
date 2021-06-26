@@ -3,9 +3,9 @@ from .models import SpecialEvents
 
 
 @admin.register(SpecialEvents)
-class FavoriteAdmin(admin.ModelAdmin):
+class SpecialAdmin(admin.ModelAdmin):
     model = SpecialEvents
     filter_horizontal = ('event',)
-    search_fields = ('event',)
+    search_fields = ('name_special_event_list',)
     autocomplete_fields = ['event']
-    # list_display = ['event', ]
+    list_display = ['name_special_event_list', 'special_events', 'active_list']

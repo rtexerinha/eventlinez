@@ -6,46 +6,48 @@
 {% endblock %}
 
 {% block content %}
-    {% if detach %}
-        <section class="container container-center pl-0 pr-0">
-
+    <section class="container container-center pl-0 pr-0">
+        {% if detachs %}
             <main class="slider">
                 <div class="swiper-container slider-banner mt-0 mt-lg-4">
 
                     <aside class="swiper-wrapper">
-                        {% for detach in detach %}
-                            <div class="swiper-slide col-12 mt-0 div-article">
-                                <div class="row" style="margin: 0">
-                                    <article class="col-lg-5 desktop" style="padding: 0!important;">
-                                        <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
-                                            <div style="min-height: 4rem;">
-                                                <h1 class="h1-home pt-2 pt-lg-5">{{detach.name}}</h1>
-                                                <h6 class="h6-home p-date h6-banner mt-lg-4 m-0">{{detach.event_date|date:"D, d M H:i"}}</h6>
-                                                <h6 class="h6-home h6-banner mt-1">
-                                                    <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                                    {{detach.city}}
-                                                </h6>
+                        {% for detach in detachs %}
+                            {% for special_events in detach.event.all %}
+
+                                <div class="swiper-slide col-12 mt-0 div-article">
+                                    <div class="row" style="margin: 0">
+                                        <article class="col-lg-5 desktop" style="padding: 0!important;">
+                                            <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
+                                                <div style="min-height: 4rem;">
+                                                    <h1 class="h1-home pt-2 pt-lg-5">{{special_events.name}}</h1>
+                                                    <h6 class="h6-home p-date h6-banner mt-lg-4 m-0">{{special_events.event_date|date:"D, d M H:i"}}</h6>
+                                                    <h6 class="h6-home h6-banner mt-1">
+                                                        <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
+                                                        {{special_events.city}}
+                                                    </h6>
+                                                </div>
+
+
+                                                <button class="buttons-primary h6-home height-17 float-right" style="width: 138px!important;">
+                                                    <i class="fas fa-plus-circle"></i>
+                                                  <a href="{{special_events.get_url}}" style="text-decoration: #FFFFFF; color: #FFFFFF;">See details</a>
+                                                </button>
                                             </div>
 
+                                        </article>
 
-                                            <button class="buttons-primary h6-home height-17 float-right" style="width: 138px!important;">
-                                                <i class="fas fa-plus-circle"></i>
-                                              <a href="{{detach.get_url}}" style="text-decoration: #FFFFFF; color: #FFFFFF;">See details</a>
-                                            </button>
-                                        </div>
+                                        <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
+                                            <img class="m-img-card-banner" src="{{special_events.image.url }}" alt="{{special_events.name}}"/>
+                                        </a>
 
-                                    </article>
+                                        <aside class="col-lg-7 col-12 desktop" style="padding: 0!important;">
+                                            <img class="m-img-card-banner" src="{{special_events.image.url}}" alt="{{special_events.name}}"/>
+                                        </aside>
 
-                                    <a href="{{detach.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
-                                        <img class="m-img-card-banner" src="{{detach.image.url }}" alt="{{detach.name}}"/>
-                                    </a>
-
-                                    <aside class="col-lg-7 col-12 desktop" style="padding: 0!important;">
-                                        <img class="m-img-card-banner" src="{{detach.image.url}}" alt="{{detach.name}}"/>
-                                    </aside>
-
+                                    </div>
                                 </div>
-                            </div>
+                            {% endfor %}
                         {% endfor %}
                     </aside>
 

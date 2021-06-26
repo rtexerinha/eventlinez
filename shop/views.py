@@ -26,9 +26,10 @@ def index(request, c_slug=None):
     # else:
     lis = lists_events(c_slug)
     page = pagination_home(request, lis)
-    detach = SpecialEvents.objects.all()
+    detachs = SpecialEvents.objects.filter(active_list=True)
+
     # detach = Event.objects.all().filter(available=True, event_date__gte=now).order_by('event_date')
-    return render(request, 'shop/home.html', {'detach': detach,
+    return render(request, 'shop/home.html', {'detachs': detachs,
                                               'category': c_page,
                                               'events_futures': page[0],
                                               'events_old': page[1],
