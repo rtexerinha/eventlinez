@@ -76,6 +76,7 @@ class Event(models.Model):
         ordering = ('name',)
         verbose_name = 'Event'
         verbose_name_plural = 'Event'
+        ordering = ['-event_date']
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
