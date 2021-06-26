@@ -18,17 +18,11 @@ logger = logging.getLogger(__name__)
 
 def index(request, c_slug=None):
     c_page = None
-    now = datetime.now()
     if c_slug is not None:
         c_page = get_object_or_404(Category, slug=c_slug)
-        # lis = lists_events(c_page)
-        # page = pagination_home(request, lis)
-    # else:
     lis = lists_events(c_slug)
     page = pagination_home(request, lis)
     detachs = SpecialEvents.objects.filter(active_list=True)
-
-    # detach = Event.objects.all().filter(available=True, event_date__gte=now).order_by('event_date')
     return render(request, 'shop/home.html', {'detachs': detachs,
                                               'category': c_page,
                                               'events_futures': page[0],
