@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'address',
     'customer',
+    'promoter',
     'event',
     'shop',
     'cart',
