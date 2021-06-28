@@ -28,7 +28,7 @@ def signup_view_promoter(request):
             return redirect('events_promoter')
     else:
         form = SignUpFormPromoter()
-    return render(request, 'accounts/../promoter/templates/promoter/signup_promoter_new.html', {'form': form})
+    return render(request, 'promoter/signup_promoter_new.html', {'form': form})
 
 
 def signup_view(request):
@@ -60,7 +60,7 @@ def signin_view_promoter(request):
                 return redirect('signup_promoter')
     else:
         form = SignInPromoterForm()
-    return render(request, 'accounts/../promoter/templates/promoter/signin_promoter_new.html', {'form': form})
+    return render(request, 'promoter/signin_promoter_new.html', {'form': form})
 
 
 def signin_view(request):
