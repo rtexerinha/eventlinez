@@ -8,19 +8,29 @@
 {% endblock %}
 {% block content %}
     <main class="container" style="min-height: 80vh;">
-        <div class="col-lg-12 ml-0 mt-4 pl-0">
-            <h2 class="h3-home">You have searched for:
-                <span class="h3-home p-date">{{ query }}</span>
-            </h2>
-        </div>
+{#        <div class="col-lg-12 ml-0 mt-4 pl-0">#}
+{#            <h2 class="h3-home">You have searched for:#}
+{#                <span class="h3-home p-date">{{ query }}</span>#}
+{#            </h2>#}
+{#        </div>#}
 
         {% if events %}
             <section class="slider">
+
+                <div class="col-12 d-flex p-0 mt-5 mb-4">
+                    <div class="col-lg-8 ml-0 pl-0">
+                        <h2 class="h3-home">You have searched for:
+                            <span class="h3-home p-date">{{ query }}</span>
+                        </h2>
+                    </div>
+
+                    <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-button-next"></div>
+                    </div>
+                </div>
+
                 <article class="m-slider swiper-container slider-card">
-
-                    <div class="swiper-button-prev"></div>
-                    <div class="swiper-button-next"></div>
-
                     <div class="swiper-wrapper">
 
                         {% for event in events %}
