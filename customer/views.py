@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from ticket.models import Ticket
-from .forms import SignUpForm, SignInForm, SignUpFormPromoter, SignInPromoterForm, CustomerForm, UserForm, \
+from .forms import SignUpForm, SignInForm, CustomerForm, UserForm, \
     ResetPasswordForm
 import logging
 from .models import Customer
@@ -14,21 +14,6 @@ from django.contrib.auth import login, authenticate, logout, update_session_auth
 from django.contrib import messages
 
 logger = logging.getLogger(__name__)
-
-
-def signup_view_promoter(request):
-    if request.method == 'POST':
-        form = SignUpFormPromoter(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('email')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return redirect('events_promoter')
-    else:
-        form = SignUpFormPromoter()
-    return render(request, 'promoter/signup_promoter_new.html', {'form': form})
 
 
 def signup_view(request):
@@ -46,23 +31,6 @@ def signup_view(request):
     return render(request, 'accounts/signup_customer_new.html', {'form': form})
 
 
-def signin_view_promoter(request):
-    if request.method == 'POST':
-        form = SignInPromoterForm(data=request.POST)
-        if form.is_valid():
-            username = request.POST['username']
-            password = request.POST['password']
-            promoter = authenticate(username=username, password=password)
-            if promoter is not None:
-                login(request, promoter)
-                return redirect('events_promoter')
-            else:
-                return redirect('signup_promoter')
-    else:
-        form = SignInPromoterForm()
-    return render(request, 'promoter/signin_promoter_new.html', {'form': form})
-
-
 def signin_view(request):
     if request.method == 'POST':
         form = SignInForm(data=request.POST)
@@ -78,11 +46,6 @@ def signin_view(request):
     else:
         form = SignInForm()
     return render(request, 'accounts/signin_customer_new.html', {'form': form})
-
-
-def signout_view_promoter(request):
-    logout(request)
-    return redirect('signin_promoter')
 
 
 def signout_view(request):
