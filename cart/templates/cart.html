@@ -176,9 +176,10 @@
                             <!-- Checkout Button-->
                             <div class="col-lg-12" style="padding: 0!important;">
                                 <div class="d-lg-flex d-block justify-content-lg-end">
-                                    <button class="buttons-primary h5-home mb-3 w-10">
-                                        <a href="{% url 'shop:index' %}" class="buttons-primary h5-home">Continue Shopping</a>
-                                    </button>
+                                    <a class="buttons-primary mb-3 w-10 h6-home center-text-button" href="{% url 'shop:index' %}">
+                                        Continue Shopping
+                                    </a>
+
                                     <button id="checkout-btn" onclick="doCheckout()"
                                         class="ml-lg-5 ml-0 buttons-primary h5-home w-10" type="submit">Checkout
                                     </button>

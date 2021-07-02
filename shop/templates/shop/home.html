@@ -28,11 +28,11 @@
                                                     </h6>
                                                 </div>
 
-
-                                                <button class="buttons-primary h6-home height-17 float-right" style="width: 138px!important;">
-                                                    <i class="fas fa-plus-circle"></i>
-                                                  <a href="{{special_events.get_url}}" style="text-decoration: #FFFFFF; color: #FFFFFF;">See details</a>
-                                                </button>
+                                                <a class="buttons-primary h6-home center-text-button height-17 float-right"
+                                                   href="{{special_events.get_url}}" style="width: 138px!important;">
+                                                    <i class="fas fa-plus-circle mr-2"></i>
+                                                    See details
+                                                </a>
                                             </div>
 
                                         </article>
@@ -62,9 +62,12 @@
                 <h1 class="h1-home h1-banner-home pt-lg-0 pb-lg-0 pt-2 pb-2 mt-xl-5">Enjoy the Experience</h1>
                 <h5 class="h5-home" style="color: #FFFFFF">
                     It is more than a ticket , it is an Experience!</h5>
-                <button class="buttons-primary h6-home height-17" style="width: 138px!important;">
-                    <a href="{% url 'about' %}" style="text-decoration: #FFFFFF; color: #FFFFFF;">About us</a>
-                </button>
+
+                <a class="buttons-primary h6-home center-text-button height-17"
+                   href="{% url 'about' %}" style="width: 138px!important;">
+                    About us
+                </a>
+
             </div>
         </section>
         {#        <div class="clearfix"></div>#}
