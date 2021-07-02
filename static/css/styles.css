@@ -1697,14 +1697,14 @@ div.content-right-signin {
 
 .d-pr{
     display: flex;
-    padding-right: 70px!important;
+    justify-content: flex-end;
 }
 
-@media (min-width: 1600px) {
-    .d-pr{
-        padding-right: 80px!important;
-    }
-}
+/*@media (min-width: 1600px) {*/
+/*    .d-pr{*/
+/*        padding-right: 80px!important;*/
+/*    }*/
+/*}*/
 
 .button-tickets:hover {
     background: rgba(217, 0, 117, 0.8);
@@ -1755,7 +1755,7 @@ div.content-right-signin {
 .form-control-ticket {
     display: block;
     width: 100%;
-    height: calc(1.5em + .75rem + 2px);
+    height: calc(1.5em + .75rem + 10px);
     padding: .375rem .75rem;
     font-size: 0.75rem;
     font-weight: 400;
@@ -1784,9 +1784,9 @@ div.content-right-signin {
     .td-ticket{
         padding: 0.5rem 0.2rem 0.2rem 0.2rem!important;
     }
-    .form-control-ticket {
-        font-size: 0.625rem;
-    }
+    /*.form-control-ticket {*/
+    /*    font-size: 0.625rem;*/
+    /*}*/
     .text-default-mobile{
         font-size: 10px!important;
     }

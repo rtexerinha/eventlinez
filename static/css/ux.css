@@ -75,9 +75,15 @@
     height: 85px;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 990px) {
     .border-r {
         border-right: 1px solid #E9E9E9 !important;
+    }
+}
+
+@media (max-width: 990px) {
+    .border-r {
+        border-bottom: 1px solid #E9E9E9 !important;
     }
 }
 
