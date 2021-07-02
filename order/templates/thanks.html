@@ -63,14 +63,9 @@
                                 </main>
                                 {% endfor %}
                             <div class="d-pr col-12 mt-5 mb-5 pr-0 pb-4">
-{#                                <div class="col-lg-9"></div>#}
-{#                                <div class="col-lg-3 col-12">#}
-                                    <button type="button"class="buttons-primary h6-home">
-                                        <a class="buttons-primary h6-home" href="{% url 'shop:index' %}">
-                                            Save
-                                        </a>
-                                    </button>
-{#                                </div>#}
+                                <a class="buttons-primary h6-home center-text-button" style="" href="{% url 'shop:index' %}">
+                                    Save
+                                </a>
                             </div>
                         </div>
                     </article>
@@ -102,10 +97,11 @@
                             </div>
 
                             <div class="col-lg-12 mb-2">
-                                <div class="d-flex justify-content-center mt-5 mb-2">
-                                    <button class="buttons-primary">
-                                        <a class="height-17 h6-home p-light" href="{% url 'shop:index' %}" type="button">Home</a>
-                                    </button>
+
+                                <div class="d-flex justify-content-center mt-4 mb-2">
+                                    <a class="buttons-primary h6-home center-text-button" style="" href="{% url 'shop:index' %}">
+                                        Home
+                                    </a>
                                 </div>
                             </div>
 

@@ -27,6 +27,11 @@
     color: var(--white-color);
 }
 
+.center-text-button{
+    display: flex;
+    justify-content: center;
+}
+
 .button-increment{
     width: 24px;
     height: 24px;
