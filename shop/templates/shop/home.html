@@ -6,8 +6,8 @@
 {% endblock %}
 
 {% block content %}
-    <section class="container container-center pl-0 pr-0">
-        {% if detachs %}
+    {% if detachs %}
+        <section class="container container-center pl-0 pr-0">
             <main class="slider">
                 <div class="swiper-container slider-banner mt-0 mt-lg-4">
 
@@ -57,7 +57,7 @@
     </section>
 
     {% else %}
-        <section class="col-lg-12 background-container">
+        <section class="container container-center background-container pl-0 pr-0">
             <div class="col-lg-12 ml-lg-5 dpt">
                 <h1 class="h1-home h1-banner-home pt-lg-0 pb-lg-0 pt-2 pb-2 mt-xl-5">Enjoy the Experience</h1>
                 <h5 class="h5-home" style="color: #FFFFFF">
@@ -70,10 +70,7 @@
 
             </div>
         </section>
-        {#        <div class="clearfix"></div>#}
-
     {% endif %}
-
 
 
     <section class="container container-center">
