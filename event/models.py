@@ -1,27 +1,28 @@
 from decimal import Decimal
-from django.core.validators import MinValueValidator
-from django.db import models
 
-from django.template.defaultfilters import slugify
-from django.urls import reverse
-from django.db.models import Sum
 from ckeditor.fields import RichTextField
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToFill
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
+from django.db import models
+from django.db.models import Sum
+from django.template.defaultfilters import slugify
+from django.urls import reverse
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 
 from address.models import City
 from customer.models import Customer
 
 
 def validate_image(image):
-    max_height = 838
-    max_width = 1600
-    height = image.height
-    width = image.width
-    if width > max_width or height > max_height:
-       raise ValidationError("Height or Width is larger than what is allowed")
+    # max_height = 800
+    # max_width = 1600
+    megabyte_limit = 3.0
+    if image.file.size > megabyte_limit * 1024 * 1024:
+        raise ValidationError("Max file size is %sMB" % str(megabyte_limit))
+    # if image.width > max_width or image.height > max_height:
+    #     raise ValidationError("Height or Width is larger than what is allowed")
 
 
 class Category(models.Model):
@@ -65,18 +66,25 @@ class Event(models.Model):
     address = models.CharField(max_length=300)
     city = models.ForeignKey(City, on_delete=models.PROTECT, null=True)
     promoter = models.ForeignKey(Promoter, on_delete=models.PROTECT)
-    image = models.ImageField(upload_to='event', blank=False, null=False)
+    available = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='event', blank=False, null=False,
+                              validators=[validate_image],
+                              help_text='Recommended dimensions are 1600 x 838. The image can not be greater than 3MB')
+    image_sized = ImageSpecField(source='image',
+                                 processors=[ResizeToFill(800, 500)],
+                                 format='JPEG',
+                                 options={'quality': 90})
     thumbnail = ImageSpecField(source='image',
-                               processors=[ResizeToFill(180, 159)],
+                               processors=[ResizeToFill(265, 150)],
                                format='JPEG',
                                options={'quality': 90})
-    available = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('name',)
         verbose_name = 'Event'
         verbose_name_plural = 'Event'
         ordering = ['-event_date']
+
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -140,4 +148,3 @@ class Ticket(models.Model):
 
     def __str__(self):
         return "%s/%s" % (self.event.name, self.name)
-

@@ -124,18 +124,19 @@
 }
 
 .m-img-card-banner{
-    height: 25rem;
+    object-fit: cover;
+    /*height: 25rem;*/
     width: 100%;
     border-radius: 6px;
 }
 
 @media (max-width: 790px){
     .m-img-card-banner{
-        height: 200px;
+        /*height: 200px;*/
         border-radius: 0;
     }
     .div-article{
-        height: 6.25rem;
+        /*height: 6.25rem;*/
         padding: 0!important;
     }
 }
