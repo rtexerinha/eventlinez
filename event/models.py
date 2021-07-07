@@ -69,7 +69,7 @@ class Event(models.Model):
     available = models.BooleanField(default=False)
     image = models.ImageField(upload_to='event', blank=False, null=False,
                               validators=[validate_image],
-                              help_text='Recommended dimensions are 1600 x 838. The image can not be greater than 3MB')
+                              help_text='The recommended dimensions is 1600 x 838. Images with different dimensions will be resized. The image can not be greater than 3MB')
     image_sized = ImageSpecField(source='image',
                                  processors=[ResizeToFill(800, 500)],
                                  format='JPEG',
