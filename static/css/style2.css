@@ -33,7 +33,7 @@
 }
 
 .background-container {
-    background-image: url("../../static/img/banner.jpg");
+    background-image: url("../../static/img/banner.png");
     /*linear-gradient(90deg, #E10087 -0.47%,rgba(96, 1, 98, 0.4));*/
     background-position: 50% 50%;;
     background-size: cover;
