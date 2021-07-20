@@ -29,8 +29,8 @@
 
                                 </article>
 
-                                <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important; height: 200px">
-                                    <img class="m-img-card-banner" src="{% static 'img/banner.jpg' %}" alt="Eventlinez"/>
+                                <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
+                                    <img class="m-img-card-banner" src="{% static 'img/banner.png' %}" alt="Eventlinez"/>
                                 </a>
 
                                 <aside class="col-lg-7 col-12 background-container desktop" style="padding: 0!important;">
@@ -83,19 +83,44 @@
     </section>
 
     {% else %}
-        <section class="container container-center background-container pl-0 pr-0">
-            <div class="col-lg-12 ml-lg-5 dpt">
-                <h1 class="h1-home h1-banner-home pt-lg-0 pb-lg-0 pt-2 pb-2 mt-xl-5">Enjoy the Experience</h1>
-                <h5 class="h5-home" style="color: #FFFFFF">
-                    It is more than a ticket , it is an Experience!</h5>
+        <section class="container container-center pl-0 pr-0">
+            <main class="slider">
+                <div class="swiper-container slider-banner mt-0 mt-lg-4">
+                    <aside class="swiper-wrapper">
+                        <div class="swiper-slide col-12 mt-0 div-article">
+                            <div class="row" style="margin: 0">
+                                <article class="col-lg-5 desktop" style="padding: 0!important;">
+                                    <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
+                                        <div style="min-height: 18rem;">
+                                            <h1 class="h1-home pt-2 pt-lg-4">It is more than a ticket , it is an Experience!</h1>
+{#                                            <h6 class="h6-home p-date h6-banner mt-lg-4 m-0"> It is more than a ticket , it is an Experience!</h6>#}
+                                        </div>
 
-                <a class="buttons-primary h6-home center-text-button height-17"
-                   href="{% url 'about' %}" style="width: 138px!important;">
-                    About us
-                </a>
+                                        <a class="buttons-primary h6-home center-text-button height-17 float-right"
+                                           href="{% url 'about' %}" style="width: 138px!important;">
+                                            <i class="fas fa-plus-circle mr-2"></i>
+                                              About us
+                                        </a>
+                                    </div>
 
-            </div>
-        </section>
+                                </article>
+
+                                <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
+                                    <img class="m-img-card-banner" src="{% static 'img/banner.png' %}" alt="Eventlinez"/>
+                                </a>
+
+                                <aside class="col-lg-7 col-12 background-container desktop" style="padding: 0!important;">
+    {#                                            <img class="m-img-card-banner" src="{% static 'img/banner.jpg' %}" alt="Eventlinez"/>#}
+                                </aside>
+                            </div>
+                        </div>
+
+                    </aside>
+
+                    <div class="swiper-pagination swiper-pagination-banner"></div>
+                </div>
+            </main>
+    </section>
     {% endif %}
 
 
