@@ -13,7 +13,8 @@ urlpatterns = [
     path('reset_password/', reset_password, name='reset_password'),
 
     # Type Ticket
-    path('ticket/new/', ticket_type_create, name='ticket_create'),
+    path('ticket/new/<int:event_id>/', ticket_type_create, name='ticket_create'),
+    # path('ticket/new/', ticket_type_create, name='ticket_create'),
     path('ticket/update/<int:ticket_id>/', ticket_type_update, name='ticket_update'),
     path('ticket/type/list/<int:ticket_id>/', ticket_type_list, name='ticket_type_list'),
     path('ticket/type/list/', ticket_type_list, name='ticket_type_list'),

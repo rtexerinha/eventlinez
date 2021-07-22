@@ -57,21 +57,26 @@ def ticket_type_list(request):
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_list_per_event(request, event_id):
     tickets = Ticket.objects.filter(event=event_id)
-    return render(request, 'ticket_type_list.html', {'tickets': tickets})
+    return render(request, 'ticket_type_list.html', {'tickets': tickets, 'event_id': event_id})
 
 
 @login_required(login_url='/promoter/account/login/')
-def ticket_type_create(request):
+def ticket_type_create(request, event_id):
     if request.method == 'POST':
-        form = TicketForm(request.POST)
+        form = TicketForm(data=request.POST)
         if form.is_valid():
+            # name = form.cleaned_data['name']
+            # event = form.cleaned_data['event']
+            # quantity = form.cleaned_data['quantity']
+            # price = form.cleaned_data['price']
             ticket = Ticket(**form.cleaned_data)
+            # ticket.event = Event.objects.filter(id=event_id)
             ticket.save()
-            tickets = Ticket.objects.filter(event=ticket.event_id)
-            return render(request, 'ticket_type_list.html', {'tickets': tickets})
+            tickets = Ticket.objects.filter(event__id=event_id)
+            return render(request, 'ticket_type_list.html', {'tickets': tickets, 'event_id': event_id})
             # return redirect('ticket_type_list')
     else:
-        form = TicketForm()
+        form = TicketForm(event_id)
     return render(request, 'ticket_type_create.html', {'form': form})
 
 
@@ -81,11 +86,9 @@ def ticket_type_update(request, ticket_id):
     if request.method == 'GET':
         form = TicketForm(instance=instance)
     if request.method == 'POST':
-        form = TicketForm(request.POST, instance=instance)
+        form = TicketForm(data=request.POST, instance=instance)
         if form.is_valid():
             form.save()
             tickets = Ticket.objects.filter(event=instance.event_id)
             return render(request, 'ticket_type_list.html', {'tickets': tickets})
     return render(request, 'ticket_type_create.html', {'form': form})
-
-
