@@ -2,7 +2,6 @@ from datetimepicker import widgets
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
 from django.forms import ModelForm, DateTimeField, TextInput, ValidationError
-from django.http import QueryDict
 
 from address.models import City
 from event.models import Category
@@ -11,7 +10,7 @@ from event.models import Promoter
 from event.models import Ticket
 
 
-# TODO: Move this to address app
+# TDO: Move this to address app
 class CityForm(ModelForm):
     class Meta:
         model = City
@@ -25,14 +24,17 @@ class TicketForm(ModelForm):
 
     def __init__(self, event_id=None, *args, **kwargs):
         super(TicketForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        if instance and instance.id:
+            self.fields['event'].required = False
+            self.fields['event'].widget.attrs['disabled'] = 'disabled'
+
         if event_id and type(event_id) == int:
             self.fields['event'].queryset = Event.objects.filter(id=event_id)
-        elif type(kwargs) == dict and len(kwargs) == 2:
-            self.fields['event'].queryset = kwargs['data']
-        # elif len(kwargs) == 1:
-        #     self.fields['event'].queryset = Event.objects.filter(id=kwargs['instance'].event_id)
-        else:
+        elif type(kwargs) == dict:
             self.fields['event'].queryset = Event.objects.filter(id=kwargs['data']['event'])
+        else:
+            self.fields['event'].queryset = Event.objects.filter(id=kwargs['instance'].event_id)
 
     def clean_quantity(self):
         quantity = self.cleaned_data['quantity']
