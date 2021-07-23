@@ -26,15 +26,10 @@ class TicketForm(ModelForm):
         super(TicketForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         if instance and instance.id:
-            self.fields['event'].required = False
-            self.fields['event'].widget.attrs['disabled'] = 'disabled'
-
+            self.fields['event'].queryset = Event.objects.filter(id=kwargs['instance'].event_id)
+            # self.fields['event'].widget.attrs['disabled'] = 'disabled'
         if event_id and type(event_id) == int:
             self.fields['event'].queryset = Event.objects.filter(id=event_id)
-        elif type(kwargs) == dict:
-            self.fields['event'].queryset = Event.objects.filter(id=kwargs['data']['event'])
-        else:
-            self.fields['event'].queryset = Event.objects.filter(id=kwargs['instance'].event_id)
 
     def clean_quantity(self):
         quantity = self.cleaned_data['quantity']

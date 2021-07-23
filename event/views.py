@@ -80,11 +80,12 @@ def ticket_type_create(request, event_id):
 def ticket_type_update(request, ticket_id):
     instance = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'GET':
-        form = TicketForm(instance=instance)
+        form = TicketForm(event_id=instance.event_id, instance=instance)
+        # form.fields['event'].widget.attrs['disabled'] = 'disabled'
     if request.method == 'POST':
-        form = TicketForm(data=request.POST, instance=instance)
+        form = TicketForm(event_id=instance.event_id, data=request.POST, instance=instance)
         if form.is_valid():
             form.save()
             tickets = Ticket.objects.filter(event=instance.event_id)
-            return render(request, 'ticket_type_list.html', {'tickets': tickets})
+            return render(request, 'ticket_type_list.html', {'tickets': tickets, 'event_id': instance.event_id})
     return render(request, 'ticket_type_create.html', {'form': form})
