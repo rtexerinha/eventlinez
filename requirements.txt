@@ -9,3 +9,4 @@ celery[redis]
 xlsxwriter
 django-datetimepicker
 psycopg2
+qrcode

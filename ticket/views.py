@@ -1,13 +1,37 @@
 import xlsxwriter
 from io import BytesIO
 from os import path
-
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import StreamingHttpResponse
 from ticket.models import Ticket
 from event.models import Event
+import qrcode
+import qrcode.image.svg
+
+
+@login_required(login_url='/promoter/account/login/')
+def ticket_checkin(request, checkin):
+    host = request.get_raw_uri().replace(request.get_full_path(), "")
+    if not hasattr(request.user, "promoter"):
+        return HttpResponse("You are authorized to checkin ticket!", status=401)
+
+    return HttpResponse('Success: ' + host + str(checkin))
+
+
+def ticket_qrcode(request):
+    context = {}
+    # host = request.get_raw_uri().replace(request.get_full_path(), "")
+    img = qrcode.make("host;dieudyeuiydhie", image_factory=qrcode.image.svg.SvgImage, box_size=20)
+    uiid = "8755dce1-f139-4068-95a4-0dd823ac5890"
+    ticket = Ticket.objects.get(uuid=uiid)
+    # img = ticket.qrcode_ticket()
+    stream = BytesIO()
+    img.save(stream)
+    context["svg"] = stream.getvalue().decode()
+    return render(request, "ticket/qr.html", context=context)
 
 
 @login_required(login_url='/promoter/account/login/')
