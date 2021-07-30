@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import xlsxwriter
 from io import BytesIO
 from os import path
@@ -6,10 +8,21 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import StreamingHttpResponse
+from django.utils.safestring import mark_safe
+from weasyprint import CSS
+
+from eventlinez import settings
 from ticket.models import Ticket
 from event.models import Event
 import qrcode
 import qrcode.image.svg
+
+from django.template.loader import render_to_string
+# from django.utils.text import slugify
+
+from weasyprint import HTML
+from weasyprint.fonts import FontConfiguration
+from qrcode.image.svg import SvgImage
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -21,17 +34,36 @@ def ticket_checkin(request, checkin):
     return HttpResponse('Success: ' + host + str(checkin))
 
 
-def ticket_qrcode(request):
+# Create your views here.
+def ticket_pdf(request):
     context = {}
-    # host = request.get_raw_uri().replace(request.get_full_path(), "")
-    img = qrcode.make("host;dieudyeuiydhie", image_factory=qrcode.image.svg.SvgImage, box_size=20)
-    uiid = "8755dce1-f139-4068-95a4-0dd823ac5890"
-    ticket = Ticket.objects.get(uuid=uiid)
-    # img = ticket.qrcode_ticket()
+    img = qrcode.make("host;dieudyeuiydhie", image_factory=SvgImage, box_size=20)
+    # image_factory=qrcode.image.svg.SvgImage, box_size=20)
     stream = BytesIO()
     img.save(stream)
-    context["svg"] = stream.getvalue().decode()
-    return render(request, "ticket/qr.html", context=context)
+    # context["svg"] = stream.getvalue().decode()
+    svg = mark_safe(stream.getvalue().decode())
+    response = HttpResponse(content_type="application/pdf")
+    html_str = render_to_string("ticket/ticket_pdf.html", {'svg': svg})
+    font_config = FontConfiguration()
+    html = HTML(string=html_str, base_url=request.build_absolute_uri('static/img'))
+    host = request.get_raw_uri().replace(request.get_full_path(), "")
+    html.write_pdf(response,
+                   font_config=font_config,
+                   stylesheets=[CSS(host + settings.STATIC_URL + 'css/ticket.css')],
+                   presentational_hints=True)
+    return response
+
+
+def ticket_qrcode(request):
+    img = qrcode.make("brunocds", image_factory=qrcode.image.svg.SvgImage, box_size=20)
+    uiid = "8755dce1-f139-4068-95a4-0dd823ac5890"
+    ticket = Ticket.objects.get(uuid=uiid)
+    stream = BytesIO()
+    img.save(stream)
+    svg = stream.getvalue().decode()
+    # svg = ticket.get_qrcode_svg()
+    return render(request, "ticket/qr.html", {'svg': svg})
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -107,7 +139,7 @@ def tickets_excel(request, event_id=None):
             'id', 'event_ticket__event__name', 'event_ticket__name', 'order_item__unit_price',
             'order_item__promo_code', 'created_at', 'guest_name').order_by('-id')
     row_num = 1
-    columns = ['Ticket', 'Event', 'Type ticket', 'Price', 'Promo Code',  'Date', 'Guest Name']
+    columns = ['Ticket', 'Event', 'Type ticket', 'Price', 'Promo Code', 'Date', 'Guest Name']
     for col_num in range(len(columns)):
         sheet.write(row_num, col_num, columns[col_num], tthead)
 

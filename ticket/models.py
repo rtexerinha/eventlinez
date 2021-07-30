@@ -1,6 +1,6 @@
 import uuid
-# from io import BytesIO
-#
+from io import BytesIO
+
 import qrcode
 import qrcode.image.svg
 # from PIL import Image
@@ -22,6 +22,13 @@ class Ticket(models.Model):
     guest_name = models.CharField(max_length=161, blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+
+    @property
+    def get_qrcode_svg(self):
+        stream = BytesIO()
+        img = qrcode.make('uri', image_factory=qrcode.image.svg.SvgImage)
+        img.save(stream)
+        return stream.getvalue().decode()
 
     def __str__(self):
         return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)

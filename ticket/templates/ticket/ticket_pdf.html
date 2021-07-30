@@ -1,18 +1,31 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <title>QR Code Generator</title>
-      <link rel="stylesheet" href="{% static 'css/ticket.css' %}">
+    <meta charset="utf-8" />
+    <link href="{% static 'css/ticket.css' %}" rel="stylesheet" />
+    <title>ticket</title>
+    <meta name="description" content="Board ticket" />
+
+    <style>
+        @page {
+            size: "A4";
+            margin: 2.5cm 1.5cm 3.5cm 1.5cm;
+            @bottom-center {
+                background-size: auto 1.5cm;
+            }
+        }
+    </style>
   </head>
+
   <body>
     <article class="ticket">
       <header class="ticket__wrapper">
         <div class="ticket__header">EVENTLINEZ 🎟</div>
         <div class="ticket__header__name">
-          <h6>João Victor Queiroz de Souza</h6>
-          <p>1213</p>
+            <h6>João Victor Queiroz de Souza</h6>
+            <p>1213</p>
         </div>
       </header>
 
@@ -22,8 +35,10 @@
       </div>
 
       <div class="ticket__body">
-         <section class="ticket__section">
-          <div style="margin: 0 auto">{{ svg|safe }}</div>
+        <section class="ticket__section">
+            <div style="margin: 0 auto">{{ svg }}</div>
+            <div style="margin: 0 auto">{{ svg|safe }}</div>
+{#            <img src="{% static 'img/logosmall.jpg' %}" alt="sss"/>#}
           <h2>15</h2>
           <p>December 2021</p>
         </section>
