@@ -18,11 +18,10 @@ import qrcode
 import qrcode.image.svg
 
 from django.template.loader import render_to_string
-# from django.utils.text import slugify
 
 from weasyprint import HTML
 from weasyprint.fonts import FontConfiguration
-from qrcode.image.svg import SvgImage
+from PIL import Image
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -34,17 +33,11 @@ def ticket_checkin(request, checkin):
     return HttpResponse('Success: ' + host + str(checkin))
 
 
-# Create your views here.
 def ticket_pdf(request):
-    context = {}
-    img = qrcode.make("host;dieudyeuiydhie", image_factory=SvgImage, box_size=20)
-    # image_factory=qrcode.image.svg.SvgImage, box_size=20)
-    stream = BytesIO()
-    img.save(stream)
-    # context["svg"] = stream.getvalue().decode()
-    svg = mark_safe(stream.getvalue().decode())
+    ticket = Ticket.objects.first()
+    svg = ticket.get_qrcode_svg('g1.com.br')
     response = HttpResponse(content_type="application/pdf")
-    html_str = render_to_string("ticket/ticket_pdf.html", {'svg': svg})
+    html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg})
     font_config = FontConfiguration()
     html = HTML(string=html_str, base_url=request.build_absolute_uri('static/img'))
     host = request.get_raw_uri().replace(request.get_full_path(), "")
@@ -55,15 +48,15 @@ def ticket_pdf(request):
     return response
 
 
+@login_required(login_url='/promoter/account/login/')
 def ticket_qrcode(request):
-    img = qrcode.make("brunocds", image_factory=qrcode.image.svg.SvgImage, box_size=20)
-    uiid = "8755dce1-f139-4068-95a4-0dd823ac5890"
-    ticket = Ticket.objects.get(uuid=uiid)
-    stream = BytesIO()
-    img.save(stream)
-    svg = stream.getvalue().decode()
-    # svg = ticket.get_qrcode_svg()
-    return render(request, "ticket/qr.html", {'svg': svg})
+    if not hasattr(request.user, "promoter"):
+        return HttpResponse("You are authorized to checkin ticket!", status=401)
+    ticket_uuid = request.GET['tkt']
+    ticket = Ticket.objects.get(uuid=ticket_uuid)
+    host = request.get_raw_uri().replace(request.get_full_path(), "")
+    svg = ticket.get_qrcode_svg(host)
+    return render(request, "ticket/ticket_qrcode.html", {'svg': svg})
 
 
 @login_required(login_url='/promoter/account/login/')

@@ -3,9 +3,7 @@ from io import BytesIO
 
 import qrcode
 import qrcode.image.svg
-# from PIL import Image
-# from django.core.files import File
-from io import BytesIO
+import qrcode.image.svg
 
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -23,12 +21,13 @@ class Ticket(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
 
-    @property
-    def get_qrcode_svg(self):
+    def get_qrcode_svg(self, host):
+        content = host + '/qrcode/?tkt=' + str(self.uuid)
+        img = qrcode.make(content, image_factory=qrcode.image.svg.SvgImage, box_size=20)
         stream = BytesIO()
-        img = qrcode.make('uri', image_factory=qrcode.image.svg.SvgImage)
         img.save(stream)
-        return stream.getvalue().decode()
+        svg = stream.getvalue().decode()
+        return svg
 
     def __str__(self):
         return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)
