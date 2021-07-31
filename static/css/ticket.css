@@ -125,6 +125,7 @@ body {
 .ticket__section h2 {
   padding: 0.25rem;
   color: #e900ef;
+  font-size: 2rem;
 }
 
 .ticket__footer {

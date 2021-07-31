@@ -8,20 +8,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import StreamingHttpResponse
-from django.utils.safestring import mark_safe
-from weasyprint import CSS
+from django.template.loader import render_to_string
+from weasyprint import HTML, CSS
+from weasyprint.fonts import FontConfiguration
 
 from eventlinez import settings
 from ticket.models import Ticket
 from event.models import Event
-import qrcode
-import qrcode.image.svg
-
-from django.template.loader import render_to_string
-
-from weasyprint import HTML
-from weasyprint.fonts import FontConfiguration
-from PIL import Image
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -37,7 +30,7 @@ def ticket_pdf(request):
     ticket = Ticket.objects.first()
     svg = ticket.get_qrcode_svg('g1.com.br')
     response = HttpResponse(content_type="application/pdf")
-    html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg})
+    html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
     font_config = FontConfiguration()
     html = HTML(string=html_str, base_url=request.build_absolute_uri('static/img'))
     host = request.get_raw_uri().replace(request.get_full_path(), "")
@@ -56,7 +49,7 @@ def ticket_qrcode(request):
     ticket = Ticket.objects.get(uuid=ticket_uuid)
     host = request.get_raw_uri().replace(request.get_full_path(), "")
     svg = ticket.get_qrcode_svg(host)
-    return render(request, "ticket/ticket_qrcode.html", {'svg': svg})
+    return render(request, "ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
 
 
 @login_required(login_url='/promoter/account/login/')

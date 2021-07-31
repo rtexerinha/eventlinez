@@ -11,8 +11,12 @@
       <header class="ticket__wrapper">
         <div class="ticket__header">EVENTLINEZ 🎟</div>
         <div class="ticket__header__name">
-          <h6>João Victor Queiroz de Souza</h6>
-          <p>1213</p>
+            {% if ticket.guest_name %}
+                <h6>{{ ticket.guest_name }}</h6>
+            {% else %}
+                <h6>{{ ticket.customer }}</h6>
+            {% endif %}
+            <p>{{ ticket.id }}</p>
         </div>
       </header>
 
@@ -23,20 +27,23 @@
 
       <div class="ticket__body">
          <section class="ticket__section">
-          <div style="margin: 0 auto">{{ svg|safe }}</div>
+{#          <div style="margin: 0 auto">{{ svg|safe }}</div>#}
+             <div style="margin: 0 auto">{{ svg }}</div>
 {#             <img src="{% static 'img/logo_eventlinez_new.png' %}" alt="sss"/>#}
-          <h2>15</h2>
-          <p>December 2021</p>
+          <h2>{{ ticket.event_ticket.event.event_date|date:"d" }}</h2>
+          <p>{{ ticket.event_ticket.event.event_date|date:"F Y" }}</p>
         </section>
 
         <section class="ticket__section">
-          <p>Thursday 21:00</p>
+          <p style="font-size: 0.8rem">{{ ticket.event_ticket.event.event_date|date:"l H:i" }}</p>
         </section>
       </div>
 
       <footer class="ticket__footer">
-        <h6>Jennifer Lopez - LA Tour</h6>
-        <p>Av Hollywood Boulevard, 1283, Los Angeles, Califórnia</p>
+        <h6>{{ ticket.event_ticket.event.name }}</h6>
+        <p>{{ ticket.event_ticket.event.address }},
+            {{ ticket.event_ticket.event.city }},
+            {{ ticket.event_ticket.event.city.state }}</p>
       </footer>
     </article>
   </body>

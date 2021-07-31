@@ -7,6 +7,7 @@ import qrcode.image.svg
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils.safestring import mark_safe
 
 from customer.models import Customer
 from event.models import Event
@@ -26,7 +27,7 @@ class Ticket(models.Model):
         img = qrcode.make(content, image_factory=qrcode.image.svg.SvgImage, box_size=20)
         stream = BytesIO()
         img.save(stream)
-        svg = stream.getvalue().decode()
+        svg = mark_safe(stream.getvalue().decode())
         return svg
 
     def __str__(self):
