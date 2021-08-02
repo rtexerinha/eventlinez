@@ -1,20 +1,20 @@
 from __future__ import unicode_literals
 
-import xlsxwriter
 from io import BytesIO
 from os import path
-from django.http import HttpResponse
+
+import xlsxwriter
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
+from django.http import HttpResponse
 from django.http import StreamingHttpResponse
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
-from weasyprint.fonts import FontConfiguration
 
+from event.models import Event
 from eventlinez import settings
 from ticket.models import Ticket
-from event.models import Event
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -27,16 +27,14 @@ def ticket_checkin(request, checkin):
 
 
 def ticket_pdf(request):
-    ticket = Ticket.objects.first()
-    svg = ticket.get_qrcode_svg('g1.com.br')
+    host = request.get_raw_uri().replace(request.get_full_path(), "")
+    ticket = Ticket.objects.last()
+    svg = ticket.get_qrcode_svg(host)
+
     response = HttpResponse(content_type="application/pdf")
     html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
-    font_config = FontConfiguration()
-    html = HTML(string=html_str, base_url=request.build_absolute_uri('static/img'))
-    host = request.get_raw_uri().replace(request.get_full_path(), "")
-    html.write_pdf(response,
-                   font_config=font_config,
-                   stylesheets=[CSS(host + settings.STATIC_URL + 'css/ticket.css')],
+    html = HTML(string=html_str)
+    html.write_pdf(response, stylesheets=[CSS(host + settings.STATIC_URL + 'css/ticket.css')],
                    presentational_hints=True)
     return response
 
@@ -49,7 +47,7 @@ def ticket_qrcode(request):
     ticket = Ticket.objects.get(uuid=ticket_uuid)
     host = request.get_raw_uri().replace(request.get_full_path(), "")
     svg = ticket.get_qrcode_svg(host)
-    return render(request, "ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
+    return render(request, "ticket/ticket_qrcode.html", {'host': host, 'svg': svg, 'ticket': ticket})
 
 
 @login_required(login_url='/promoter/account/login/')

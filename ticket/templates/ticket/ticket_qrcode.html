@@ -4,19 +4,19 @@
   <head>
     <meta charset="UTF-8" />
     <title>QR Code Generator</title>
-      <link rel="stylesheet" href="{% static 'css/ticket.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ticket.css' %}" />
   </head>
   <body>
     <article class="ticket">
       <header class="ticket__wrapper">
         <div class="ticket__header">EVENTLINEZ 🎟</div>
         <div class="ticket__header__name">
-            {% if ticket.guest_name %}
-                <h6>{{ ticket.guest_name }}</h6>
-            {% else %}
-                <h6>{{ ticket.customer }}</h6>
-            {% endif %}
-            <p>{{ ticket.id }}</p>
+          {% if ticket.guest_name %}
+          <h6>{{ ticket.guest_name }}</h6>
+          {% else %}
+          <h6>{{ ticket.customer }}</h6>
+          {% endif %}
+          <p>{{ ticket.id }}</p>
         </div>
       </header>
 
@@ -26,24 +26,26 @@
       </div>
 
       <div class="ticket__body">
-         <section class="ticket__section">
-{#          <div style="margin: 0 auto">{{ svg|safe }}</div>#}
-             <div style="margin: 0 auto">{{ svg }}</div>
-{#             <img src="{% static 'img/logo_eventlinez_new.png' %}" alt="sss"/>#}
+        <section class="ticket__section">
+          <div>{{ svg }}</div>
           <h2>{{ ticket.event_ticket.event.event_date|date:"d" }}</h2>
           <p>{{ ticket.event_ticket.event.event_date|date:"F Y" }}</p>
         </section>
 
         <section class="ticket__section">
-          <p style="font-size: 0.8rem">{{ ticket.event_ticket.event.event_date|date:"l H:i" }}</p>
+          <p style="font-size: 0.8rem">
+            {{ ticket.event_ticket.event.event_date|date:"l H:i" }}
+          </p>
         </section>
       </div>
 
       <footer class="ticket__footer">
         <h6>{{ ticket.event_ticket.event.name }}</h6>
-        <p>{{ ticket.event_ticket.event.address }},
-            {{ ticket.event_ticket.event.city }},
-            {{ ticket.event_ticket.event.city.state }}</p>
+        <p>
+          {{ ticket.event_ticket.event.address }}, {{
+          ticket.event_ticket.event.city }}, {{
+          ticket.event_ticket.event.city.state }}
+        </p>
       </footer>
     </article>
   </body>

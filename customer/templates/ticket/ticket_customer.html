@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-	<main style="min-height: 70vh;">
+	<main style="min-height: 80vh;">
 
     {% if tickets %}
         <section class="col-lg-11 col-sm-12 pt-4 pb-2 m-auto">
@@ -20,6 +20,7 @@
 
             <table class="table col-lg-12">
                 <tr>
+                     <th style="border-top: transparent !important;"></th>
                     <th style="border-top: transparent !important;">Tickets</th>
                     <th style="border-top: transparent !important;">Events</th>
                     <th style="border-top: transparent !important;">Guest Name</th>
@@ -28,12 +29,25 @@
             {% for tickets in tickets %}
 {#                        {% if tickets.created_at <= tickets.event.event_date %}#}
                 <tr>
+
+                    <td class="td-ticket">
+                        <a href="{% url 'ticket_qrcode' %}?tkt={{ tickets.uuid | urlencode }}">
+                            <i class="fas fa-ticket-alt" style="color: #d90075"></i>
+                        </a>
+
+{#                        <p class="text-default text-default-mobile">#}
+{#                            {{ tickets.uuid }}#}
+{#                        </p>#}
+                    </td>
+
                     <td class="td-ticket">
                         <p class="text-default text-default-mobile"> {{ tickets.id }}</p>
                     </td>
 
                     <td class="td-ticket">
-                        <p class="text-default text-default-mobile"> {{ tickets.event_ticket }}</p>
+                        <p class="text-default text-default-mobile">
+                            {{ tickets.event_ticket }}
+                        </p>
                     </td>
 
                     <td class="text-default editable td-ticket" data-id="{{ tickets.id }}" data-type="guest_name">

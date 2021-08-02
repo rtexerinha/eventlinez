@@ -4,7 +4,6 @@ from io import BytesIO
 import qrcode
 import qrcode.image.svg
 import qrcode.image.svg
-
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.safestring import mark_safe
