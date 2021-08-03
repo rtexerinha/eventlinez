@@ -24,7 +24,7 @@ urlpatterns = [
     path('contact/', shop.views.contact, name='contact'),
     path('terms-of-service/', shop.views.terms, name='terms'),
     path('qrcode/', ticket_qrcode, name='ticket_qrcode'),
-    path('ticket/checkin/<int:checkin>/', ticket_checkin, name='ticket_checkin'),
+    path('ticket/checkin/<uuid:checkin>/', ticket_checkin, name='ticket_checkin'),
     path('pdf/', ticket_pdf, name="ticket_pdf"),
 
 
