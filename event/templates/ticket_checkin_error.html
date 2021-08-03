@@ -1,0 +1,27 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% block title %}
+	Error - Eventlinez!
+{% endblock %}
+
+{% block content %}
+    <div class="container" style="min-height: 80vh; justify-content: center; text-align: center">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="error-template" style="margin-top: 15vh">
+                <h1>
+                    Oops!</h1>
+                <h2>
+                    404 Not Found</h2>
+                {% for error in errors %}
+                <div class="error-details">
+                    {{error }}
+                </div>
+                    <br>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
