@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
+from datetime import timedelta
 from io import BytesIO
 from os import path
-
+from datetime import datetime
 import xlsxwriter
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
@@ -23,7 +24,24 @@ def ticket_checkin(request, checkin):
     if not hasattr(request.user, "promoter"):
         return HttpResponse("You are authorized to checkin ticket!", status=401)
 
-    return HttpResponse('Success: ' + host + str(checkin))
+    errors = []
+    ticket = Ticket.objects.get(uuid=checkin)
+    if ticket:
+        error = 'Ticket does not belong to this promoter.'
+        errors.append(error)
+    deadline = (ticket.event_ticket.event.event_date + timedelta(hours=12)).strftime("%Y-%m-%d %H:%M:%S")
+    if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > deadline:
+        error = 'Deadline to check in is over'
+        errors.append(error)
+    if ticket.checkin_date is not None:
+        error = 'Ticket has already been validated!'
+        errors.append(error)
+    if errors is not None:
+        return render(request, 'ticket_checkin_error.html', {'errors': errors})
+    ticket.checkin_date = datetime.now()
+    ticket.save()
+
+    return render(request, 'ticket_checkin.html', {'tickets': ticket_date_event})
 
 
 def ticket_pdf(request):
@@ -41,8 +59,8 @@ def ticket_pdf(request):
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_qrcode(request):
-    if not hasattr(request.user, "promoter"):
-        return HttpResponse("You are authorized to checkin ticket!", status=401)
+    # if not hasattr(request.user, "promoter"):
+    #     return HttpResponse("You are authorized to checkin ticket!", status=401)
     ticket_uuid = request.GET['tkt']
     ticket = Ticket.objects.get(uuid=ticket_uuid)
     host = request.get_raw_uri().replace(request.get_full_path(), "")
