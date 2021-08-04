@@ -1,52 +1,54 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>QR Code Generator</title>
-    <link rel="stylesheet" href="{% static 'css/ticket.css' %}" />
-  </head>
-  <body>
-    <article class="ticket">
-      <header class="ticket__wrapper">
-        <div class="ticket__header">EVENTLINEZ 🎟</div>
-        <div class="ticket__header__name">
-          {% if ticket.guest_name %}
-          <h6>{{ ticket.guest_name }}</h6>
-          {% else %}
-          <h6>{{ ticket.customer }}</h6>
-          {% endif %}
-          <p>{{ ticket.id }}</p>
-        </div>
-      </header>
+    <head>
+        <meta charset="UTF-8" />
+        <title>QR Code Generator</title>
+        <link rel="stylesheet" href="{% static 'css/ticket.css' %}" />
+    </head>
 
-      <div class="ticket__divider">
-        <div class="ticket__notch"></div>
-        <div class="ticket__notch ticket__notch--right"></div>
-      </div>
+    <body>
+        <article class="ticket">
+            <header class="ticket__wrapper">
+                <div class="ticket__header">EVENTLINEZ 🎟</div>
+                <div class="ticket__header__name">
+                    {% if ticket.guest_name %}
+                        <h6>{{ ticket.guest_name }}</h6>
+                    {% else %}
+                        <h6>{{ ticket.customer }}</h6>
+                    {% endif %}
+                    <p>{{ ticket.id }}</p>
+                </div>
+            </header>
 
-      <div class="ticket__body">
-        <section class="ticket__section">
-          <div>{{ svg }}</div>
-          <h2>{{ ticket.event_ticket.event.event_date|date:"d" }}</h2>
-          <p>{{ ticket.event_ticket.event.event_date|date:"F Y" }}</p>
-        </section>
+            <div class="ticket__divider">
+                <div class="ticket__notch"></div>
+                <div class="ticket__notch ticket__notch--right"></div>
+            </div>
 
-        <section class="ticket__section">
-          <p style="font-size: 0.8rem">
-            {{ ticket.event_ticket.event.event_date|date:"l H:i" }}
-          </p>
-        </section>
-      </div>
+            <div class="ticket__body">
+                <section class="ticket__section">
+                    <div>{{ svg }}</div>
+                    <h2>{{ ticket.event_ticket.event.event_date|date:"d" }}</h2>
+                    <p>{{ ticket.event_ticket.event.event_date|date:"F Y" }}</p>
+                </section>
 
-      <footer class="ticket__footer">
-        <h6>{{ ticket.event_ticket.event.name }}</h6>
-        <p>
-          {{ ticket.event_ticket.event.address }}, {{
-          ticket.event_ticket.event.city }}, {{
-          ticket.event_ticket.event.city.state }}
-        </p>
-      </footer>
-    </article>
-  </body>
+                <section class="ticket__section">
+                    <p style="font-size: 0.8rem">
+                        {{ ticket.event_ticket.event.event_date|date:"l H:i" }}
+                    </p>
+                </section>
+            </div>
+
+            <footer class="ticket__footer">
+                <h6>{{ ticket.event_ticket.event.name }}</h6>
+                <p>
+                    {{ ticket.event_ticket.event.address }},
+                    {{ticket.event_ticket.event.city }},
+                    {{ticket.event_ticket.event.city.state }}
+                </p>
+            </footer>
+        </article>
+    </body>
 </html>
