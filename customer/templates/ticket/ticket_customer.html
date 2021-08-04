@@ -45,14 +45,14 @@
                         </p>
                       </div>
 
-                      <div class="h6-home text-center editable col-lg-5 col-12 p-0"
+                      <aside class="h6-home text-center editable col-lg-5 col-12 p-0"
                            data-id="{{ tickets.id }}"
                            data-type="guest_name">
 
                           <input type="guest_name" class="input-data form-control-ticket"
                                  placeholder="Enter Your Guest Name"
                                  value="{{ tickets.guest_name|default_if_none:'' }}"/>
-                      </div>
+                      </aside>
                     </main>
                 {% endfor %}
             </section>

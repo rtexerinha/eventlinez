@@ -15,20 +15,25 @@
                              src="{% static 'img/thanks.png' %}"
                              alt="Ilustração de uma pessoa no computador">
                         <div class="col-12 p-0" style="justify-content: center">
-                            <h3 class="col-12 h3-home mt-2" style="text-align: center;">Thanks for placing your order</h3>
+                            <h3 class="col-12 h3-home mt-2" style="text-align: center;">
+                                Thanks for placing your order
+                            </h3>
                             <p class="col-12 h6-home mt-0 mt-lg-4" style="text-align: center;margin: auto">
                                 We have received your order and your name was added to the Guest List.
 
                                 For your records an email confirmation has been sent to you.
 
-                                It contains details of the items you purchased. Your order number is: {{ customer_order.id }}
+                                It contains details of the items you purchased. Your order number is:
+                                {{ customer_order.id }}
                             </p>
                         </div>
                     </aside>
 
                     <article class="col-lg-7 mt-4 mt-lg-2">
                         <div class="col-12 p-0">
-                         <h4 class="h4-home pb-2 pb-lg-4">For control purposes, inform the name to whom belongs each ticket</h4>
+                         <h4 class="h4-home pb-2 pb-lg-4">
+                             For control purposes, inform the name to whom belongs each ticket
+                         </h4>
                             <main class="col-12 d-lg-flex p-0 d-none">
                                 <div class="col-7 p-0 d-flex">
                                     <p class="h6-home p-dark pl-3 pr-3">Ticket</p>
@@ -46,19 +51,24 @@
                                 <main class="d-block d-lg-flex mt-3">
                                     <div class="col-lg-7 d-flex p-0">
 {#                                        <div class="col-lg-2 col-2" style="padding: revert">#}
-                                            <p class="h6-home p-dark text-left text-lg-center pl-lg-4 pr-lg-4"> {{ tickets.id }}</p>
+                                            <p class="h6-home p-dark text-left text-lg-center pl-lg-4 pr-lg-4">
+                                                {{ tickets.id }}
+                                            </p>
 {#                                        </div>#}
 
 {#                                        <div class="col-lg-5 col-10">#}
-                                        <p class="h6-home text-left p-dark text-lg-center pl-2"> {{ tickets.event_ticket }}</p>
+                                        <p class="h6-home text-left p-dark text-lg-center pl-2">
+                                            {{ tickets.event_ticket }}
+                                        </p>
 {#                                        </div>#}
                                     </div>
 
-                                    <div class="h6-home text-center editable col-lg-5 col-12 p-0" data-id="{{ tickets.id }}" data-type="guest_name">
+                                    <aside class="h6-home text-center editable col-lg-5 col-12 p-0"
+                                           data-id="{{ tickets.id }}" data-type="guest_name">
                                         <input type="guest_name" class="input-data form-control-ticket"
                                                placeholder="Enter Your Guest Name"
                                                value="{{ tickets.guest_name|default_if_none:'' }}">
-                                    </div>
+                                    </aside>
 
                                 </main>
                                 {% endfor %}
@@ -86,13 +96,17 @@
 
                         <article class="col-lg-6 mt-5 mt-lg-2 pt-lg-5">
                             <div class="col-12">
-                                <h3 class="col-12 h3-home mt-2" style="text-align: center;">Thanks for placing your order</h3>
-                                <p class="col-lg-10 col-12 h6-home mt-0 mt-lg-4" style="text-align: center;margin: auto">
+                                <h3 class="col-12 h3-home mt-2" style="text-align: center;">
+                                    Thanks for placing your order
+                                </h3>
+                                <p class="col-lg-10 col-12 h6-home mt-0 mt-lg-4"
+                                   style="text-align: center;margin: auto">
                                     We have received your order and your name was added to the Guest List.
 
                                     For your records an email confirmation has been sent to you.
 
-                                    It contains details of the items you purchased. Your order number is: {{ customer_order.id }}
+                                    It contains details of the items you purchased. Your order number is:
+                                    {{ customer_order.id }}
                                 </p>
                             </div>
 
