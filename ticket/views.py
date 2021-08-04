@@ -20,10 +20,9 @@ from ticket.models import Ticket
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_checkin(request, checkin):
-    host = request.get_raw_uri().replace(request.get_full_path(), "")
+    # host = request.get_raw_uri().replace(request.get_full_path(), "")
     if not hasattr(request.user, "promoter"):
-        return HttpResponse("You are authorized to checkin ticket!", status=401)
-
+        return HttpResponse("You are not authorized to validate this ticket!", status=401)
     errors = []
     ticket = Ticket.objects.get(uuid=checkin)
     if ticket:
@@ -47,7 +46,7 @@ def ticket_checkin(request, checkin):
 def ticket_pdf(request):
     host = request.get_raw_uri().replace(request.get_full_path(), "")
     ticket = Ticket.objects.last()
-    svg = ticket.get_qrcode_svg(host)
+    svg = ticket.generate_qrcode_svg(host)
 
     response = HttpResponse(content_type="application/pdf")
     html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
@@ -64,7 +63,7 @@ def ticket_qrcode(request):
     ticket_uuid = request.GET['tkt']
     ticket = Ticket.objects.get(uuid=ticket_uuid)
     host = request.get_raw_uri().replace(request.get_full_path(), "")
-    svg = ticket.get_qrcode_svg(host)
+    svg = ticket.generate_qrcode_svg(host)
     return render(request, "ticket/ticket_qrcode.html", {'host': host, 'svg': svg, 'ticket': ticket})
 
 
