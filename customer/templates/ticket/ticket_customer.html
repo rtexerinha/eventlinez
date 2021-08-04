@@ -1,88 +1,85 @@
 {% extends "base-new.html" %}
 {% load static %}
 {% csrf_token %}
-{% block title %}
-	Ticket - Eventlinez!
-{% endblock %}
+
+{% block title%} Ticket - Eventlinez! {% endblock %}
+
 
 {% block content %}
-	<main style="min-height: 80vh;">
+    <main style="min-height: 80vh">
+        {% if tickets %}
+            <section class="col-lg-11 col-sm-12 pt-4 pb-2 m-auto">
+                <h2 class="h2-home p-dark">My Tickets</h2>
 
-    {% if tickets %}
-        <section class="col-lg-11 col-sm-12 pt-4 pb-2 m-auto">
-            <h2 class="text-default text-secondary-default pl-lg-4 pl-0">
-                My Tickets
-            </h2>
-        </section>
+                <h6 class="h6-home pb-2 pb-lg-4">
+                    For control purposes, inform the name to whom belongs each ticket
+                </h6>
+            </section>
 
+            <section class="col-lg-11 sect-tab-ticket">
+                <main class="col-12 d-lg-flex p-0 d-none">
+                    <div class="col-7 p-0 d-flex">
+                        <p class="h6-home p-dark pl-4 pr-4">Ticket</p>
+                        <p class="h6-home p-dark pl-4">Event/Ticket</p>
+                    </div>
 
-        <section class="col-lg-11 sect-tab-ticket">
+                    <div class="col-5 p-0">
+                        <p class="h6-home p-dark">Guest Name</p>
+                    </div>
+                </main>
 
-            <table class="table col-lg-12">
-                <tr>
-                     <th style="border-top: transparent !important;"></th>
-                    <th style="border-top: transparent !important;">Tickets</th>
-                    <th style="border-top: transparent !important;">Events</th>
-                    <th style="border-top: transparent !important;">Guest Name</th>
-                </tr>
+                {% for tickets in tickets %}
+                    <main class="d-block d-lg-flex mt-3">
+                      <div class="col-lg-7 d-flex p-0">
 
-            {% for tickets in tickets %}
-{#                        {% if tickets.created_at <= tickets.event.event_date %}#}
-                <tr>
-
-                    <td class="td-ticket">
-                        <a href="{% url 'ticket_qrcode' %}?tkt={{ tickets.uuid | urlencode }}">
+                        <a href="{% url 'ticket_qrcode' %}?tkt={{ tickets.uuid | urlencode }}"
+                           class="pr-2 pr-lg-0 pt-1">
                             <i class="fas fa-ticket-alt" style="color: #d90075"></i>
                         </a>
 
-{#                        <p class="text-default text-default-mobile">#}
-{#                            {{ tickets.uuid }}#}
-{#                        </p>#}
-                    </td>
-
-                    <td class="td-ticket">
-                        <p class="text-default text-default-mobile"> {{ tickets.id }}</p>
-                    </td>
-
-                    <td class="td-ticket">
-                        <p class="text-default text-default-mobile">
+                        <p class="h6-home p-dark text-left text-lg-center pl-lg-4 pr-lg-4">
+                            {{ tickets.id }}
+                        </p>
+                        <p class="h6-home text-left p-dark text-lg-center pl-2">
                             {{ tickets.event_ticket }}
                         </p>
-                    </td>
+                      </div>
 
-                    <td class="text-default editable td-ticket" data-id="{{ tickets.id }}" data-type="guest_name">
-                        <input type="guest_name" placeholder="Enter Your Guest Name"
-                               class="input-data form-control-ticket"
-                               value="{{ tickets.guest_name|default_if_none:'' }}">
-                    </td>
-                </tr>
-            {% endfor %}
+                      <div class="h6-home text-center editable col-lg-5 col-12 p-0"
+                           data-id="{{ tickets.id }}"
+                           data-type="guest_name">
 
-            </table>
-        </section>
-
-        <section class="d-pr col-lg-12 mb-5" style="display: flex;">
-            <div class="col-lg-10"></div>
-            <div class="col-lg-2 col-12">
-                    <a class="button-tickets text-default"
-                       href="{% url 'shop:index' %}"
-                       style="border: #D90075" type="button">Save</a>
-            </div>
-        </section>
+                          <input type="guest_name" class="input-data form-control-ticket"
+                                 placeholder="Enter Your Guest Name"
+                                 value="{{ tickets.guest_name|default_if_none:'' }}"/>
+                      </div>
+                    </main>
+                {% endfor %}
+            </section>
 
 
+            <section class="d-pr col-lg-12 mb-5 mt-4" style="display: flex">
+                <div class="col-lg-10"></div>
+                <div class="col-lg-2 col-12">
+                  <a
+                    class="button-tickets text-default"
+                    href="{% url 'shop:index' %}"
+                    style="border: #d90075"
+                    type="button"
+                    >Save</a
+                  >
+                </div>
+            </section>
 
-    {% else %}
-        <section class="col-lg-11 col-sm-12 pt-4 pb-2 m-auto">
-            <h2 class="text-default text-secondary-default pl-lg-4 pl-0">
-                No Tickets
-            </h2>
-        </section>
-    {% endif %}
-
+        {% else %}
+            <section class="col-lg-11 col-sm-12 pt-4 pb-2 m-auto">
+                <h2 class="text-default text-secondary-default pl-lg-4 pl-0">No Tickets</h2>
+            </section>
+        {% endif %}
     </main>
 
 {% endblock %}
+
 
 {% block custom_js %}
     <script src="{% static 'js/guest-name-ticket.js' %}"></script>
