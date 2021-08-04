@@ -22,8 +22,9 @@ class Ticket(models.Model):
     checkin_date = models.DateTimeField(blank=True, null=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
 
-    def get_qrcode_svg(self, host):
-        content = host + '/qrcode/?tkt=' + str(self.uuid)
+    def generate_qrcode_svg(self, host):
+        # content = host + '/qrcode/?tkt=' + str(self.uuid)
+        content = host + '/promoter/ticket/checkin/' + str(self.uuid)
         img = qrcode.make(content, image_factory=qrcode.image.svg.SvgImage, box_size=20)
         stream = BytesIO()
         img.save(stream)
