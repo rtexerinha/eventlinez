@@ -76,6 +76,5 @@ def create(request):
             order=order
         )
     cart.delete()
-    host = request.get_raw_uri().replace(request.get_full_path(), "")
-    send_mail(order.id, host)
+    send_mail(order.id)
     return redirect('order:thanks', order.id)

@@ -24,29 +24,27 @@ def ticket_checkin(request, checkin):
     if not hasattr(request.user, "promoter"):
         return HttpResponse("You are not authorized to validate this ticket!", status=401)
     errors = []
-    ticket = Ticket.objects.get(uuid=checkin)
+    ticket = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter)
     if ticket:
-        error = 'Ticket does not belong to this promoter.'
-        errors.append(error)
+        ticket = ticket.get(uuid=checkin)
+        errors.append('Ticket does not belong to this promoter.')
     deadline = (ticket.event_ticket.event.event_date + timedelta(hours=12)).strftime("%Y-%m-%d %H:%M:%S")
     if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > deadline:
-        error = 'Deadline to check in is over'
-        errors.append(error)
+        errors.append('Deadline to check in is over')
     if ticket.checkin_date is not None:
-        error = 'Ticket has already been validated!'
-        errors.append(error)
+        errors.append('Ticket has already been validated!')
     if errors is not None:
         return render(request, 'ticket_checkin_error.html', {'errors': errors})
     ticket.checkin_date = datetime.now()
     ticket.save()
 
-    return render(request, 'ticket_checkin.html', {'tickets': ticket_date_event})
+    return render(request, 'ticket_checkin.html', {'tickets': tickets})
 
 
 def ticket_pdf(request):
     host = request.get_raw_uri().replace(request.get_full_path(), "")
     ticket = Ticket.objects.last()
-    svg = ticket.generate_qrcode_svg(host)
+    svg = ticket.as_qrcode(host)
 
     response = HttpResponse(content_type="application/pdf")
     html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
@@ -63,7 +61,7 @@ def ticket_qrcode(request):
     ticket_uuid = request.GET['tkt']
     ticket = Ticket.objects.get(uuid=ticket_uuid)
     host = request.get_raw_uri().replace(request.get_full_path(), "")
-    svg = ticket.generate_qrcode_svg(host)
+    svg = ticket.as_qrcode(host)
     return render(request, "ticket/ticket_qrcode.html", {'host': host, 'svg': svg, 'ticket': ticket})
 
 
