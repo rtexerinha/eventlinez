@@ -1,14 +1,33 @@
+from io import BytesIO
+
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.template.loader import render_to_string
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core import mail
+
+from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.db.models import Sum
+from weasyprint import HTML, CSS
 
 from customer.models import Customer
 from event.models import Event
+from eventlinez import settings
 from ticket.models import Ticket
+
+
+# def pdf_ticket(host):
+#     ticket = Ticket.objects.last()
+#     svg = ticket.generate_qrcode_svg(host)
+#
+#     out = BytesIO()
+#     html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
+#     html = HTML(string=html_str)
+#     html.write_pdf(out, stylesheets=[CSS(host + settings.STATIC_URL + 'css/ticket.css')],
+#                    presentational_hints=True)
+#     pdf = out.getvalue()
+#     out.close()
+#     return pdf
 
 
 class Order(models.Model):
@@ -32,20 +51,35 @@ class Order(models.Model):
     class Meta:
         ordering = ['-created']
 
-    def send_notification(self):
+    def send_notification(self, host):
         subject = "Eventlinez - New Order #%s" % self.id
 
         message = render_to_string('order/email/email.html', {'order': self})
         message_txt = 'Message de teste'
 
-        mail.send_mail(
+        email = EmailMessage(
             subject=subject,
-            message=message_txt,
+            body=message,
             from_email="noreply@eventlinez.com",
-            recipient_list=[self.emailAddress],
-            fail_silently=False,
-            html_message=message
+            to=[self.emailAddress],
         )
+        email.content_subtype = "html"
+        ticket = Ticket.objects.last()
+        svg = ticket.generate_qrcode_svg(host)
+
+        out = BytesIO()
+        html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
+        html = HTML(string=html_str)
+        html.write_pdf(out, stylesheets=[CSS(host + settings.STATIC_URL + 'css/ticket.css')],
+                       presentational_hints=True)
+        pdf = out.getvalue()
+        out.close()
+
+        # output_pdf = pdf_ticket(host)
+        email.attach('ticket_{}.pdf'.format(ticket.id), pdf, 'application/pdf')
+        # for file_to_attach in out:
+        #     email.attach('ticket_aleatorio.pdf', file_to_attach, 'application/pdf')
+        email.send()
 
     def ticket_qty(self):
         """
