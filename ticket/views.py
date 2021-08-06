@@ -29,21 +29,19 @@ def ticket_checkin(request, checkin):
     ticket = Ticket.objects.get(event_ticket__event__promoter=request.user.promoter, uuid=checkin)
     if not ticket:
         errors.append('Ticket does not belong to this promoter.')
-
     ticket_date_event = ticket.event_ticket.event.event_date
     deadline = (ticket_date_event + timedelta(hours=6)).strftime("%Y-%m-%d %H:%M:%S")
     if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > deadline:
         errors.append('Deadline to check in is over')
-
     if ticket.checkin_date is not None:
         errors.append('Ticket has already been validated!')
-
-    if errors is not None:
+    if errors is not None and len(errors):
         return render(request, 'ticket_checkin_error.html', {'errors': errors})
-
     ticket.checkin_date = datetime.now()
     ticket.save()
-    tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter)
+    tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter,
+                                    event_ticket=ticket.event_ticket,
+                                    checkin_date__isnull=False).order_by('-checkin_date')
     return render(request, 'ticket_checkin.html', {'tickets': tickets})
 
 
@@ -51,7 +49,6 @@ def ticket_pdf(request):
     host = request.get_raw_uri().replace(request.get_full_path(), "")
     ticket = Ticket.objects.last()
     svg = ticket.as_qrcode(host)
-
     response = HttpResponse(content_type="application/pdf")
     html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
     html = HTML(string=html_str)

@@ -1,93 +1,73 @@
 {% extends "base_promoter.html" %}
 {% load static %}
-{% block title %} Panel Admin - Events{% endblock %}
-{% block stylesheets %}{% endblock stylesheets %}
- {% block js-ticket %}
-     <script src="{% static 'js/ticket-export-excel.js' %}"></script>
- {% endblock %}
+{% block title %}
+    Panel Admin - Events
+{% endblock %}
 
+{% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-<main>
-    <div class="container-fluid">
-        <h1 class="mt-4 pt-2 mb-4 title-dast">Validated tickets</h1>
-        {% if tickets %}
-        <div>
-{#            <section class="table-responsive">#}
-{#            <table class="table table-bordered" id="dataTable">#}
-{#                <thead>#}
-{#                    <tr style="background-color:#F4F4F4;">#}
-{#                        <th class="text-table text-bold">Num</th>#}
-{#                        <th class="text-table text-bold">Guest Name</th>#}
-{#                        <th class="text-table text-bold">Ticket Type</th>#}
-{#                        <th class="text-table text-bold">Checkin</th>#}
-{#                    </tr>#}
-{#                </thead>#}
+    <section>
+        <div class="container-fluid">
+            <h1 class="mt-4 pt-2 mb-4 title-dast">Validated tickets</h1>
+            {% if tickets %}
+                <main>
+                    {% for ticket in tickets %}
+                        <article class="card mb-3">
+                            <h5 class="card-header">{{ticket.id}} | {{ticket.event_ticket}}</h5>
 
-{#                <tbody>#}
-                {% for ticket in tickets %}
-                    <div class="card mb-3">
-                      <h5 class="card-header">{{ticket.id}} | {{ticket.event_ticket.name}}</h5>
-                      <div class="card-body">
-                          <h5 class="card-title">{{ticket.guest_name|default_if_none:''}}</h5>
-                          <p class="card-text"><b>Checkin date: </b>{{ticket.checkin_date| date:'Y-M-d H:i'}}</p>
-                      </div>
-                    </div>
+                            <div class="card-body">
+                                {% if ticket.guest_name is None%}
+                                    <h5 class="card-title">{{ticket.customer}}</h5>
+                                {% else %}
+                                    <h5 class="card-title">{{ticket.guest_name|default_if_none:''}}</h5>
+                                {% endif %}
 
-{#                    <tr>#}
-{#                        <td class="text-table">{{ticket.id}}</td>#}
-{#                        <td class="text-table">{{ticket.guest_name|default_if_none:''}}</td>#}
-{#                        <td class="text-table">{{ticket.event_ticket.name}}</td>#}
-{#                        <td class="text-table">{{ticket.checkin_date| date:'Y-M-d H:i'}}</td>#}
-{##}
-{#                    </tr>#}
-                {% endfor %}
-{#                </tbody>#}
-{#            </table>#}
-{#        </section>#}
+                                <p class="card-text"><b>Checkin date: </b>{{ticket.checkin_date| date:'Y-M-d H:i'}}</p>
+                            </div>
+                        </article>
+                    {% endfor %}
 
-            <section class="col-12 mb-5">
-            {% if tickets.paginator.num_pages > 1 %}
-            <div class="row row-paginator">
-                <div class="col-lg-3 col-5">
-                    <span class="text-table">
-                        Showing {{ tickets.number }} - {{ tickets.paginator.num_pages }}
-                    </span>
-                </div>
+                    <footer class="col-12 mb-5">
+                        {% if tickets.paginator.num_pages > 1 %}
+                            <div class="row row-paginator">
+                            <div class="col-lg-3 col-5">
+                                <span class="text-table">
+                                    Showing {{ tickets.number }} - {{ tickets.paginator.num_pages }}
+                                </span>
+                            </div>
 
-                <div class="col-lg-6"></div>
-                <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
-                    {% if tickets.has_previous %}
-                    <a class="text-table text pr-3"
-                       href="?page={{ tickets.previous_page_number }}">
-                        <i class="fas fa-chevron-left fa-sm" style="color: #d90075; height: 10px; width: 10px"></i>
-                        Prev
-                    </a>
-                    {% endif %}
+                            <div class="col-lg-6"></div>
+                            <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
+                                {% if tickets.has_previous %}
+                                    <a class="text-table text pr-3"
+                                       href="?page={{ tickets.previous_page_number }}">
+                                        <i class="fas fa-chevron-left fa-sm" style="color: #d90075; height: 10px; width: 10px"></i>
+                                        Prev
+                                    </a>
+                                {% endif %}
 
-                    {% if tickets.has_next %}
-                    <a class="text-table text"
-                       href="?page={{ tickets.next_page_number }}">
-                        Next
-                        <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
-                    </a>
-                    {% endif %}
-                </div>
-            {% endif %}
-            </div>
-        </section>
-        </div>
-        {% else %}
+                                {% if tickets.has_next %}
+                                    <a class="text-table text"
+                                       href="?page={{ tickets.next_page_number }}">
+                                        Next
+                                        <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
+                                    </a>
+                                    {% endif %}
+                            </div>
+                        {% endif %}
+                        </div>
+                    </footer>
+                </main>
+            {% else %}
                 <div style="width: 100%; margin: auto">
                     <article id="event-div">
                         <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
                         <br>
-                        <h4 class="text-default centralized">No tickets sold</h4>
+                        <h4 class="text-default centralized">No tickets</h4>
                     </article>
                 </div>
-        {% endif %}
-    </div>
-</main>
-
-
+            {% endif %}
+        </div>
+    </section>
 {% endblock content %}
