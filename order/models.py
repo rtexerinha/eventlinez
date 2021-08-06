@@ -48,10 +48,9 @@ class Order(models.Model):
         email.content_subtype = "html"
 
         tickets = Ticket.objects.filter(order_item=item_order)
-
-        for item in tickets:
-            output_pdf = item.as_pdf()
-            email.attach('ticket_aleatorio.pdf', output_pdf, 'application/pdf')
+        for ticket in tickets:
+            output_pdf = ticket.as_pdf()
+            email.attach('ticket_{}.pdf'.format(ticket.id), output_pdf, 'application/pdf')
         email.send()
 
     def ticket_qty(self):

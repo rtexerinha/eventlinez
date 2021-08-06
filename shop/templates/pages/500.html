@@ -5,28 +5,34 @@
 	Error - Eventlinez!
 {% endblock %}
 
-
 {% block content %}
-    <div class="container" style="min-height: 70vh; justify-content: center; text-align: center">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="error-template" style="margin-top: 15vh">
-                <h1>Oops!</h1>
-                <h2>Sorry, internal server 500 error!</h2>
+    <section class="container mh-65" style="justify-content: center; text-align: center">
+        <div class="row">
+            <main class="col-md-12">
+                <article class="error-template" style="margin-top: 15vh">
+                    <h1 class="h2-home p-dark">Oops!</h1>
 
-                <div class="error-actions mt-2">
-                    <a href="{% url 'index' %}" class="btn btn-lg" style="background-color: #d90075; color: #FFFFFF">
-                    <span class="glyphicon glyphicon-home">
-                    </span>
-                        Take Me Home </a>
-                    <a href="{% url 'contact' %}" class="btn btn-lg" style="background-color: #FFFFFF; color: #d90075">
-                        <span class="glyphicon glyphicon-envelope"></span>
-                        Contact Support
-                    </a>
-                </div>
-            </div>
+                    <h4 class="h4-home">500 internal server</h4>
+
+                    <div class="h6-home">
+                        Sorry, internal server 500 error!
+                    </div>
+
+                    <div class="error-actions mt-2">
+                        <a href="{% url 'index' %}" class="p-home btn btn-lg mt-2"
+                           style="background-color: #d90075; color: #FFFFFF">
+                            <span class="glyphicon glyphicon-home"></span>
+                            Take Me Home
+                        </a>
+
+                        <a href="{% url 'contact' %}" class="btn btn-lg p-home mt-2"
+                           style="background-color: #FFFFFF; color: #d90075">
+                            <span class="glyphicon glyphicon-envelope"></span>
+                            Contact Support
+                        </a>
+                    </div>
+                </article>
+            </main>
         </div>
-    </div>
-</div>
-
+    </section>
 {% endblock %}

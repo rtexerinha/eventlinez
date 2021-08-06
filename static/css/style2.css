@@ -494,3 +494,14 @@
 	min-width: 1rem !important;
 	text-align: center !important;
 }
+
+
+.mh-65{
+    min-height: 65vh;
+}
+
+@media(min-width: 1600px) {
+    .mh-65{
+        min-height: 80vh;
+    }
+}

@@ -22,22 +22,28 @@ from ticket.models import Ticket
 def ticket_checkin(request, checkin):
     # host = request.get_raw_uri().replace(request.get_full_path(), "")
     if not hasattr(request.user, "promoter"):
-        return HttpResponse("You are not authorized to validate this ticket!", status=401)
+        error_msg = "You are not authorized to validate this ticket!"
+        return render(request, 'pages/error401.html', {'error_msg': error_msg})
     errors = []
-    ticket = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter)
-    if ticket:
-        ticket = ticket.get(uuid=checkin)
+
+    ticket = Ticket.objects.get(event_ticket__event__promoter=request.user.promoter, uuid=checkin)
+    if not ticket:
         errors.append('Ticket does not belong to this promoter.')
-    deadline = (ticket.event_ticket.event.event_date + timedelta(hours=12)).strftime("%Y-%m-%d %H:%M:%S")
+
+    ticket_date_event = ticket.event_ticket.event.event_date
+    deadline = (ticket_date_event + timedelta(hours=6)).strftime("%Y-%m-%d %H:%M:%S")
     if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > deadline:
         errors.append('Deadline to check in is over')
+
     if ticket.checkin_date is not None:
         errors.append('Ticket has already been validated!')
+
     if errors is not None:
         return render(request, 'ticket_checkin_error.html', {'errors': errors})
+
     ticket.checkin_date = datetime.now()
     ticket.save()
-
+    tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter)
     return render(request, 'ticket_checkin.html', {'tickets': tickets})
 
 
