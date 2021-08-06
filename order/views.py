@@ -1,16 +1,16 @@
+import stripe
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 
 from cart.models import Cart
 from cart.views import _cart_id
-from ticket.models import Ticket
 from order.tasks import send_mail
+from ticket.models import Ticket
 from .models import Order
 from .models import OrderItem
-import stripe
-from django.conf import settings
-from django.http import HttpResponse
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
