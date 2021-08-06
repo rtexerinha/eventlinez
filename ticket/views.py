@@ -66,13 +66,10 @@ def tickets_validate(request):
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_qrcode(request):
-    # if not hasattr(request.user, "promoter"):
-    #     return HttpResponse("You are authorized to checkin ticket!", status=401)
     ticket_uuid = request.GET['tkt']
     ticket = Ticket.objects.get(uuid=ticket_uuid)
-    host = request.get_raw_uri().replace(request.get_full_path(), "")
-    svg = ticket.as_qrcode(host)
-    return render(request, "ticket/ticket_qrcode.html", {'host': host, 'svg': svg, 'ticket': ticket})
+    svg = ticket.as_qrcode()
+    return render(request, "ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
 
 
 @login_required(login_url='/promoter/account/login/')
