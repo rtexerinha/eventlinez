@@ -33,7 +33,7 @@ class Order(models.Model):
     class Meta:
         ordering = ['-created']
 
-    def send_notification(self, item_order):
+    def send_notification(self):
         subject = "Eventlinez - New Order #%s" % self.id
 
         message = render_to_string('order/email/email.html', {'order': self})
@@ -47,10 +47,10 @@ class Order(models.Model):
         )
         email.content_subtype = "html"
 
-        tickets = Ticket.objects.filter(order_item=item_order)
-        for ticket in tickets:
-            output_pdf = ticket.as_pdf()
-            email.attach('ticket_{}.pdf'.format(ticket.id), output_pdf, 'application/pdf')
+        for item in self.orderitem_set.all():
+            for ticket in item.ticket_set.all():
+                output_pdf = ticket.as_pdf()
+                email.attach('ticket_{}.pdf'.format(ticket.id), output_pdf, 'application/pdf')
         email.send()
 
     def ticket_qty(self):

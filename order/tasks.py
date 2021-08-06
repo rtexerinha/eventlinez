@@ -1,7 +1,7 @@
 import logging
 
 from eventlinez.celery import app
-from order.models import Order, OrderItem
+from order.models import Order
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +10,5 @@ logger = logging.getLogger(__name__)
 def send_mail(order_id):
     logger.info("Enviando email da order %s" % order_id)
     order = Order.objects.get(pk=order_id)
-    item_order = OrderItem.objects.get(order=order_id)
-    order.send_notification(item_order)
+    order.send_notification()
     logger.info("Email enviado com sucesso ")
