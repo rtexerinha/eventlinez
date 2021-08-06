@@ -11,55 +11,99 @@
         <div class="container-fluid">
             <h1 class="mt-4 pt-2 mb-4 title-dast">Validated tickets</h1>
             {% if tickets %}
-                <main>
+
+                <header class="col-lg-11 col-md-5 mb-4">
+                    <form method="POST" style="display: flex">
+                        {% csrf_token %}
+                        <label for="eventsChoice" style="font-size: 16px; margin-top: 10px">Events</label>
+
+                        <select id="eventsChoice" class="form-control form-control-sm col-sm-3 col-md-3 col-lg-4 mt-2"
+                                name="events_choice"
+                                id="events_choice"
+                                style="margin: 0 10px">
+
+                            {% if selected_event %}
+                                <option value="{{selected_event.id}}" selected="selected">{{ selected_event.name }}</option>
+                            {% endif %}
+                            <option value="" >All</option>
+
+                            {% for event in events %}
+                                <option value="{{event.id}}">{{event.name}}</option>
+                            {% endfor %}
+                        </select>
+
+                        <button action="submit"
+                                id="button-adm"
+                                class="btn btn-secondary"
+                                style="margin-top: 8px;
+                                   background-color: #d90075">
+                            Filter
+                        </button>
+                    </form>
+                </header>
+
+
+                <main style="display: flex; flex-direction: row; flex-wrap: wrap;" >
                     {% for ticket in tickets %}
-                        <article class="card mb-3">
-                            <h5 class="card-header">{{ticket.id}} | {{ticket.event_ticket}}</h5>
+                        <div class="card" style="margin: 10px 15px; min-width: 20rem; max-width: 20rem;">
+                            <div style="background: #D90075; display: flex; justify-content: space-between; color: white"
+                                 class="card-header">
 
-                            <div class="card-body">
-                                {% if ticket.guest_name is None%}
-                                    <h5 class="card-title">{{ticket.customer}}</h5>
-                                {% else %}
-                                    <h5 class="card-title">{{ticket.guest_name|default_if_none:''}}</h5>
-                                {% endif %}
-
-                                <p class="card-text"><b>Checkin date: </b>{{ticket.checkin_date| date:'Y-M-d H:i'}}</p>
-                            </div>
-                        </article>
-                    {% endfor %}
-
-                    <footer class="col-12 mb-5">
-                        {% if tickets.paginator.num_pages > 1 %}
-                            <div class="row row-paginator">
-                            <div class="col-lg-3 col-5">
-                                <span class="text-table">
-                                    Showing {{ tickets.number }} - {{ tickets.paginator.num_pages }}
-                                </span>
+                                <h5>{{ticket.event_ticket.event.name}}</h5>
+                                <h6>{{ticket.id}}</h6>
                             </div>
 
-                            <div class="col-lg-6"></div>
-                            <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
-                                {% if tickets.has_previous %}
-                                    <a class="text-table text pr-3"
-                                       href="?page={{ tickets.previous_page_number }}">
-                                        <i class="fas fa-chevron-left fa-sm"
-                                           style="color: #d90075; height: 10px; width: 10px"></i>
-                                        Prev
-                                    </a>
-                                {% endif %}
-
-                                {% if tickets.has_next %}
-                                    <a class="text-table text"
-                                       href="?page={{ tickets.next_page_number }}">
-                                        Next
-                                        <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
-                                    </a>
+                            <article class="card-body">
+                                <div style="display: block; padding-right: 0; padding-left: 0" >
+                                    {% if ticket.guest_name is None%}
+                                        <h5 class="card-title">{{ticket.customer}}</h5>
+                                    {% else %}
+                                        <h5 class="card-title">{{ticket.guest_name|default_if_none:''}}</h5>
                                     {% endif %}
-                            </div>
-                        {% endif %}
+
+                                    <p class="card-text"><b>Checkin date: </b>{{ticket.checkin_date| date:'Y-M-d H:i'}}</p>
+                                </div>
+
+                                <div class="card-footer" style="background: transparent">
+                                    <small class="text-muted">{{ticket.event_ticket.name}}</small>
+                                </div>
+                            </article>
                         </div>
-                    </footer>
+                    {% endfor %}
                 </main>
+
+                <footer class="col-12 mb-5">
+                    {% if tickets.paginator.num_pages > 1 %}
+                        <div class="row row-paginator">
+                        <div class="col-lg-3 col-5">
+                            <span class="text-table">
+                                Showing {{ tickets.number }} - {{ tickets.paginator.num_pages }}
+                            </span>
+                        </div>
+
+                        <div class="col-lg-6"></div>
+                        <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
+                            {% if tickets.has_previous %}
+                                <a class="text-table text pr-3"
+                                   href="?page={{ tickets.previous_page_number }}">
+                                    <i class="fas fa-chevron-left fa-sm"
+                                       style="color: #d90075; height: 10px; width: 10px"></i>
+                                    Prev
+                                </a>
+                            {% endif %}
+
+                            {% if tickets.has_next %}
+                                <a class="text-table text"
+                                   href="?page={{ tickets.next_page_number }}">
+                                    Next
+                                    <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
+                                </a>
+                                {% endif %}
+                        </div>
+                    {% endif %}
+                    </div>
+                </footer>
+
             {% else %}
                 <div style="width: 100%; margin: auto">
                     <article id="event-div">

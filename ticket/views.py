@@ -43,6 +43,28 @@ def ticket_checkin(request, checkin):
 
 
 @login_required(login_url='/promoter/account/login/')
+def tickets_validate(request):
+    from ticket.models import Ticket
+    selected_event = None
+    events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
+    tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter,
+                                    checkin_date__isnull=False).order_by('-id')
+    if request.method == "POST":
+        event_id = request.POST.get('events_choice')
+        if event_id:
+            selected_event = Event.objects.get(pk=event_id)
+            tickets = tickets.filter(event_ticket__event=selected_event)
+    paginator = Paginator(tickets, 9)
+    page = int(request.GET.get('page', '1'))
+    try:
+        tickets = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        tickets = paginator.page(paginator.num_pages)
+    data = {'tickets': tickets, 'events': events, 'selected_event': selected_event}
+    return render(request, 'ticket_checkin.html', data)
+
+
+@login_required(login_url='/promoter/account/login/')
 def ticket_qrcode(request):
     # if not hasattr(request.user, "promoter"):
     #     return HttpResponse("You are authorized to checkin ticket!", status=401)

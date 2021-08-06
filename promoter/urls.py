@@ -2,7 +2,7 @@ from django.urls import path
 from promoter.views import update_promoter, reset_password, signup_view_promoter, signin_view_promoter, \
     signout_view_promoter
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
-from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin
+from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
 
 urlpatterns = [
@@ -26,6 +26,8 @@ urlpatterns = [
     path('ticket/excel/<int:event_id>/', tickets_excel, name='tickets_excel'),
     path('ticket/excel/', tickets_excel, name='tickets_excel'),
     path('ticket/checkin/<uuid:checkin>/', ticket_checkin, name='ticket_checkin'),
+    path('ticket/checkin/validate/', tickets_validate, name='tickets_validate'),
+
 
     # events
     path('events/new/', event_create, name='new_events'),
