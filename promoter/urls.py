@@ -14,7 +14,6 @@ urlpatterns = [
 
     # Type Ticket
     path('ticket/new/<int:event_id>/', ticket_type_create, name='ticket_create'),
-    # path('ticket/new/', ticket_type_create, name='ticket_create'),
     path('ticket/update/<int:ticket_id>/', ticket_type_update, name='ticket_update'),
     path('ticket/type/list/<int:ticket_id>/', ticket_type_list, name='ticket_type_list'),
     path('ticket/type/list/', ticket_type_list, name='ticket_type_list'),
@@ -27,7 +26,6 @@ urlpatterns = [
     path('ticket/excel/', tickets_excel, name='tickets_excel'),
     path('ticket/checkin/<uuid:checkin>/', ticket_checkin, name='ticket_checkin'),
     path('ticket/checkin/validate/', tickets_validate, name='tickets_validate'),
-
 
     # events
     path('events/new/', event_create, name='new_events'),
