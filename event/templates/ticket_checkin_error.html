@@ -5,23 +5,45 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container" style="min-height: 80vh; justify-content: center; text-align: center">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="error-template" style="margin-top: 15vh">
-                <h1>
-                    Oops!</h1>
-                <h2>
-                    404 Not Found</h2>
-                {% for error in errors %}
-                <div class="error-details">
-                    {{error }}
-                </div>
-                    <br>
-                {% endfor %}
-            </div>
+
+
+
+{#    <div class="container" style="min-height: 80vh; justify-content: center; text-align: center">#}
+{#    <div class="row">#}
+{#        <div class="col-md-12">#}
+{#            <div class="error-template" style="margin-top: 15vh">#}
+{#                <h3 class="h3-promoter">Oh no!</h3>#}
+{##}
+{#                <div class="error-details">#}
+{#                    <h4 class="h4=promoter">#}
+{#                         {{error }}#}
+{#                    </h4>#}
+{#                </div>#}
+{#                #}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+
+    <section class="container mt-5 mb-5" style="min-height: 75vh; margin: auto;">
+        <div class="d-block">
+            <aside class="col-lg-3 mt-lg-5 mb-4 mt-0" style="margin: auto;">
+                <img style="width: 100%; display: block; margin: auto" src="{% static 'img/error_ticket.svg' %}"
+                     alt="Error Ticket">
+            </aside>
+
+            <article class="col-lg-8 m-auto">
+                <h3 class="h3-promoter pt-4 pb-1 text-center">Oh no!</h3>
+
+                {% if errors%}
+                    {% for errors in errors %}
+                        <h4 class="h4-promoter text-center pb-2">{{ errors }}</h4>
+                    {% endfor %}
+                {% endif %}
+
+            </article>
         </div>
-    </div>
-</div>
+
+    </section>
 
 {% endblock %}
