@@ -6,7 +6,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 
 import shop
-from ticket.views import ticket_qrcode, ticket_pdf
+from ticket.views import ticket_qrcode
 from shop.views import index
 from customer.views import signin_view
 from shop.views import index
@@ -24,8 +24,6 @@ urlpatterns = [
     path('contact/', shop.views.contact, name='contact'),
     path('terms-of-service/', shop.views.terms, name='terms'),
     path('qrcode/', ticket_qrcode, name='ticket_qrcode'),
-    path('pdf/', ticket_pdf, name="ticket_pdf"),
-
 
     # Reset password views customer
     path('account/reset_password/', auth_views.PasswordResetView.as_view(

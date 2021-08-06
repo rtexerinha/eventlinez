@@ -1,20 +1,17 @@
 from __future__ import unicode_literals
 
+from datetime import datetime
 from datetime import timedelta
 from io import BytesIO
 from os import path
-from datetime import datetime
+
 import xlsxwriter
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.http import HttpResponse
 from django.http import StreamingHttpResponse
 from django.shortcuts import render
-from django.template.loader import render_to_string
-from weasyprint import HTML, CSS
 
 from event.models import Event
-from eventlinez import settings
 from ticket.models import Ticket
 
 
@@ -43,18 +40,6 @@ def ticket_checkin(request, checkin):
                                     event_ticket=ticket.event_ticket,
                                     checkin_date__isnull=False).order_by('-checkin_date')
     return render(request, 'ticket_checkin.html', {'tickets': tickets})
-
-
-def ticket_pdf(request):
-    host = request.get_raw_uri().replace(request.get_full_path(), "")
-    ticket = Ticket.objects.last()
-    svg = ticket.as_qrcode(host)
-    response = HttpResponse(content_type="application/pdf")
-    html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
-    html = HTML(string=html_str)
-    html.write_pdf(response, stylesheets=[CSS(host + settings.STATIC_URL + 'css/ticket.css')],
-                   presentational_hints=True)
-    return response
 
 
 @login_required(login_url='/promoter/account/login/')
