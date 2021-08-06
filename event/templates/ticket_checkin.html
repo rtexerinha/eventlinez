@@ -1,7 +1,7 @@
 {% extends "base_promoter.html" %}
 {% load static %}
 {% block title %}
-    Panel Admin - Events
+    Checkin ticket listing
 {% endblock %}
 
 {% block stylesheets %}{% endblock stylesheets %}
@@ -9,7 +9,7 @@
 {% block content %}
     <section>
         <div class="container-fluid">
-            <h1 class="mt-4 pt-2 mb-4 title-dast">Validated tickets</h1>
+            <h1 class="h3-promoter mt-4 pt-2 mb-4">Validated tickets</h1>
             {% if tickets %}
 
                 <header class="col-lg-11 col-md-5 mb-4">
@@ -45,34 +45,55 @@
 
                 <main style="display: flex; flex-direction: row; flex-wrap: wrap;" >
                     {% for ticket in tickets %}
-                        <div class="card" style="margin: 10px 15px; min-width: 20rem; max-width: 20rem;">
-                            <div style="background: #D90075; display: flex; justify-content: space-between; color: white"
+                        <div class="card m-lg-2 m-0 mb-4"
+                             style="min-width: 20rem;
+                             max-width: 20rem; border-radius: 10px;">
+                            <div style="display: flex;
+                                        justify-content: space-between;
+                                        color: white;
+                                        background: rgba(217, 0, 117, 0.8);
+                                        border-radius: 10px 10px 0px 0px;"
                                  class="card-header">
 
-                                <h5>{{ticket.event_ticket.event.name}}</h5>
-                                <h6>{{ticket.id}}</h6>
+                                <h5 class="h5-promoter">{{ticket.event_ticket.event.name}}</h5>
+                                <p class="p-promoter">{{ticket.id}}</p>
                             </div>
 
-                            <article class="card-body">
-                                <div style="display: block; padding-right: 0; padding-left: 0" >
-                                    {% if ticket.guest_name is None%}
-                                        <h5 class="card-title">{{ticket.customer}}</h5>
-                                    {% else %}
-                                        <h5 class="card-title">{{ticket.guest_name|default_if_none:''}}</h5>
-                                    {% endif %}
+                            <article class="card-body" style="padding-left: 0px;">
+                                <div style="display: block; padding-right: 0; padding-left: 20px" >
+                                    <div class="d-flex">
+                                        <img class="mr-2" src="{% static 'img/user_ticket.svg' %}" alt="ticket user icon"/>
 
-                                    <p class="card-text"><b>Checkin date: </b>{{ticket.checkin_date| date:'Y-M-d H:i'}}</p>
+                                        {% if ticket.guest_name is None%}
+                                            <h6 class="h6-promoter mt-2" style="color: #171717">
+                                                {{ticket.customer}}
+                                            </h6>
+                                        {% else %}
+                                            <h6 class="h6-promoter mt-2" style="color: #171717">
+                                                {{ticket.guest_name|default_if_none:''}}
+                                            </h6>
+                                        {% endif %}
+                                    </div>
+
+
+                                    <p class="p-promoter" style="color: #7B7B7B;">
+                                        <b style="color: #383838;">Checkin date: </b>
+                                        {{ticket.checkin_date| date:'Y-M-d H:i'}}
+                                    </p>
                                 </div>
 
                                 <div class="card-footer" style="background: transparent">
-                                    <small class="text-muted">{{ticket.event_ticket.name}}</small>
+                                    <h6 class="h5-promoter" style="color: #171717">
+                                        <img src="{% static 'img/ticket_icon.svg' %}" alt="ticket icon"/>
+                                        {{ticket.event_ticket.name}}
+                                    </h6>
                                 </div>
                             </article>
                         </div>
                     {% endfor %}
                 </main>
 
-                <footer class="col-12 mb-5">
+                <footer class="col-12 mb-5 mt-4">
                     {% if tickets.paginator.num_pages > 1 %}
                         <div class="row row-paginator">
                         <div class="col-lg-3 col-5">

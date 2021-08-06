@@ -21,6 +21,11 @@
      --body-font-family: 'Poppins', sans-serif;
     --body-font-family-promoter: 'Nunito', sans-serif;
     --body-font-family-lato: 'Lato', sans-serif;
+
+    --white-color: #FFFFFF;
+    --black-color: #000000;
+    --black-med-color: #171717;
+
 }
 
 @media screen and (min-width: 968px) {
@@ -201,4 +206,31 @@
     font-size: var(--h4-font-size);
     line-height: 28px;
     color: var(--black-color);
+}
+
+.h5-promoter{
+    font-family: var(--body-font-family-promoter);
+    font-style: normal;
+    font-weight: var(--font-semi-bold);
+    font-size: var(--h5-font-size);
+    line-height: 24px;
+    color: var(--white-color);
+}
+
+.h6-promoter{
+    font-family: var(--body-font-family-promoter);
+    font-style: normal;
+    font-weight: var(--font-reg-400);
+    font-size: var(--normal-font-size);
+    line-height: 24px;
+    color: var(--first-color);
+}
+
+.p-promoter{
+    font-family: var(--body-font-family-promoter);
+    font-style: normal;
+    font-weight: var(--font-reg-400);
+    font-size: var(--small-font-size);
+    line-height: 24px;
+    color: var(--white-color);
 }
