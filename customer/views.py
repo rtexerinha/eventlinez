@@ -111,5 +111,5 @@ def edit_guest(request):
 def guest_list(request):
     today = datetime.today()
     tickets = Ticket.objects.filter(customer=request.user.customer,
-                                    event_ticket__event__event_date__gte=today)
+                                    event_ticket__event__event_date__gte=today).order_by('-created_at')
     return render(request, 'ticket/ticket_customer.html', {'tickets': tickets})
