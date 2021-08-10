@@ -49,7 +49,7 @@ class Order(models.Model):
 
         for item in self.orderitem_set.all():
             for ticket in item.ticket_set.all():
-                output_pdf = ticket.as_pdf()
+                output_pdf = ticket.as_pdf_report()
                 email.attach('ticket_{}.pdf'.format(ticket.id), output_pdf, 'application/pdf')
         email.send()
 

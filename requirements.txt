@@ -11,3 +11,4 @@ django-datetimepicker
 psycopg2
 qrcode==7.2
 WeasyPrint==53.0
+reportlab==3.5.68
