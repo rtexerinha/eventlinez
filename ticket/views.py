@@ -16,7 +16,7 @@ from ticket.models import Ticket
 
 
 def generate_pdf_reportlab(request):
-    ticket = Ticket.objects.first()
+    ticket = Ticket.objects.last()
     response = ticket.as_pdf_report()
     return response
 

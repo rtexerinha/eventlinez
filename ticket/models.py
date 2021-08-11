@@ -6,12 +6,12 @@ import qrcode.image.svg
 import qrcode.image.svg
 from django.core.validators import MinValueValidator
 from django.db import models
-
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode import qr
 from reportlab.graphics.shapes import Drawing
+from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
 from weasyprint import CSS, HTML
 
@@ -67,22 +67,36 @@ class Ticket(models.Model):
         out = BytesIO()
         # response = HttpResponse(content_type='application/pdf')
         # response['Content-Disposition'] = 'attachment; filename="file.pdf"'
+
+        font_name = 'Helvetica'
+        font_size = 10
+
         p = canvas.Canvas(out)
+        p.setFont(font_name, font_size)
+        p.setFillColor(HexColor('#565454'))
 
+        p.setStrokeGray(0.6)
         p.line(30, 820, 560, 820)
-        p.line(30, 560, 560, 560)
-        p.line(30, 560, 30, 820)
-        p.line(560, 560, 560, 820)
+        p.line(30, 580, 560, 580)
+        p.line(30, 580, 30, 820)
+        p.line(560, 580, 560, 820)
 
+        img_file = 'static/img/Eventlinez.png'
+        p.drawImage(img_file, 50, 750, width=120, preserveAspectRatio=True, mask='auto')
         if self.guest_name is None:
-            p.drawString(50, 760, str(self.customer))
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(50, 720, str(self.customer))
         else:
-            p.drawString(50, 760, str(self.guest_name))
-        p.drawString(250, 760, str(self.id))
-        p.drawString(50, 720, str(self.event_ticket.event.event_date.strftime("%d %B %Y %H:%M")))
-        p.drawString(50, 700, str(self.event_ticket.event.address) + ', ' + str(self.event_ticket.event.city)
-                     + ', ' + str(self.event_ticket.event.city.state))
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(50, 720, str(self.guest_name))
+        p.drawString(250, 720, str(self.id))
+
+        p.setFont("Helvetica", 10)
         p.drawString(50, 680, str(self.event_ticket.event.name))
+        p.drawString(50, 660, str(self.event_ticket.name))
+        p.drawString(50, 640, str(self.event_ticket.event.event_date.strftime("%d %B %Y %H:%M")))
+        p.drawString(50, 620, str(self.event_ticket.event.address) + ', ' + str(self.event_ticket.event.city)
+                     + ', ' + str(self.event_ticket.event.city.state))
 
         renderPDF.draw(qrcodec, p, 320, 600)
         p.showPage()
@@ -90,6 +104,7 @@ class Ticket(models.Model):
         pdf = out.getvalue()
         out.close()
         return pdf
+        # return response
 
     def __str__(self):
         return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)
