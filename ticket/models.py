@@ -6,11 +6,13 @@ import qrcode.image.svg
 import qrcode.image.svg
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode import qr
-from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.shapes import Drawing, Rect
+from reportlab.lib import colors
 from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
 from weasyprint import CSS, HTML
@@ -71,40 +73,63 @@ class Ticket(models.Model):
         font_name = 'Helvetica'
         font_size = 10
 
+        # p = canvas.Canvas(response)
         p = canvas.Canvas(out)
         p.setFont(font_name, font_size)
         p.setFillColor(HexColor('#565454'))
 
-        p.setStrokeGray(0.6)
-        p.line(30, 820, 560, 820)
-        p.line(30, 580, 560, 580)
-        p.line(30, 580, 30, 820)
-        p.line(560, 580, 560, 820)
+        p.setStrokeGray(0.8)
+        p.rect(130, 780, 0, 0, fill=1)
+        # p.roundRect(130, 780, 300, 40, , stroke=1, fill=0)
+        # p.setFillColorRGB(0, 0, 0.77)
+        # p.line(130, 820, 430, 820)
+        # p.line(130, 410, 430, 410)
+        # p.line(130, 410, 130, 820)
+        # p.line(430, 410, 430, 820)
+        p.roundRect(130, 410, 300, 410, 10, stroke=1, fill=0)
+        # p.rect(130, 410, 300, 410)
 
         img_file = 'static/img/Eventlinez.png'
-        p.drawImage(img_file, 50, 750, width=120, preserveAspectRatio=True, mask='auto')
+        p.drawImage(img_file, 230, 785, width=100, preserveAspectRatio=True, mask='auto')
+
+        p.setStrokeGray(0.8)
+        p.line(130, 780, 430, 780)
+        p.setStrokeGray(0.6)
         if self.guest_name is None:
             p.setFont("Helvetica-Bold", 12)
-            p.drawString(50, 720, str(self.customer))
+            p.drawString(150, 755, str(self.customer))
         else:
             p.setFont("Helvetica-Bold", 12)
-            p.drawString(50, 720, str(self.guest_name))
-        p.drawString(250, 720, str(self.id))
+            p.drawString(150, 755, str(self.guest_name))
+        p.drawString(380, 755, str(self.id))
+
+        p.setFont("Helvetica-Bold", 18)
+        p.setFillColor(HexColor('#FF0054'))
+        p.drawString(270, 540, str(self.event_ticket.event.event_date.strftime("%d")))
+
+        p.setFont("Helvetica", 12)
+        p.setFillColor(HexColor('#565454'))
+        p.drawString(230, 520, str(self.event_ticket.event.event_date.strftime("%B %Y")))
+        p.setFont("Helvetica", 10)
+        p.drawString(270, 500, str(self.event_ticket.event.event_date.strftime("%H:%M")))
+
+        p.setLineWidth(0.01)
+        p.line(130, 480, 430, 480)
+
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(150, 450, str(self.event_ticket))
 
         p.setFont("Helvetica", 10)
-        p.drawString(50, 680, str(self.event_ticket.event.name))
-        p.drawString(50, 660, str(self.event_ticket.name))
-        p.drawString(50, 640, str(self.event_ticket.event.event_date.strftime("%d %B %Y %H:%M")))
-        p.drawString(50, 620, str(self.event_ticket.event.address) + ', ' + str(self.event_ticket.event.city)
+        p.drawString(150, 430, str(self.event_ticket.event.address) + ', ' + str(self.event_ticket.event.city)
                      + ', ' + str(self.event_ticket.event.city.state))
 
-        renderPDF.draw(qrcodec, p, 320, 600)
+        renderPDF.draw(qrcodec, p, 180, 550)
         p.showPage()
         p.save()
         pdf = out.getvalue()
         out.close()
-        return pdf
         # return response
+        return pdf
 
     def __str__(self):
         return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)
