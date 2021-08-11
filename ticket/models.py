@@ -80,18 +80,10 @@ class Ticket(models.Model):
 
         p.setStrokeGray(0.8)
         p.rect(130, 780, 0, 0, fill=1)
-        # p.roundRect(130, 780, 300, 40, , stroke=1, fill=0)
-        # p.setFillColorRGB(0, 0, 0.77)
-        # p.line(130, 820, 430, 820)
-        # p.line(130, 410, 430, 410)
-        # p.line(130, 410, 130, 820)
-        # p.line(430, 410, 430, 820)
-        p.roundRect(130, 410, 300, 410, 10, stroke=1, fill=0)
-        # p.rect(130, 410, 300, 410)
+        p.roundRect(130, 390, 300, 430, 10, stroke=1, fill=0)
 
         img_file = 'static/img/Eventlinez.png'
         p.drawImage(img_file, 230, 785, width=100, preserveAspectRatio=True, mask='auto')
-
         p.setStrokeGray(0.8)
         p.line(130, 780, 430, 780)
         p.setStrokeGray(0.6)
@@ -117,10 +109,13 @@ class Ticket(models.Model):
         p.line(130, 480, 430, 480)
 
         p.setFont("Helvetica-Bold", 14)
-        p.drawString(150, 450, str(self.event_ticket))
+        p.drawString(150, 450, str(self.event_ticket.event.name))
 
         p.setFont("Helvetica", 10)
-        p.drawString(150, 430, str(self.event_ticket.event.address) + ', ' + str(self.event_ticket.event.city)
+        p.drawString(150, 430, str(self.event_ticket.name))
+
+        p.setFont("Helvetica", 10)
+        p.drawString(150, 410, str(self.event_ticket.event.address) + ', ' + str(self.event_ticket.event.city)
                      + ', ' + str(self.event_ticket.event.city.state))
 
         renderPDF.draw(qrcodec, p, 180, 550)
