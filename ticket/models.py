@@ -7,12 +7,13 @@ import qrcode.image.svg
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.http import HttpResponse
+
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode import qr
-from reportlab.graphics.shapes import Drawing, Rect
-from reportlab.lib import colors
+from reportlab.graphics.shapes import Drawing
+
 from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
 from weasyprint import CSS, HTML
@@ -66,15 +67,15 @@ class Ticket(models.Model):
 
     def as_pdf_report(self):
         qrcodec = self.as_qrcode_reportlab()
-        out = BytesIO()
-        # response = HttpResponse(content_type='application/pdf')
-        # response['Content-Disposition'] = 'attachment; filename="file.pdf"'
+        # out = BytesIO()
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="file.pdf"'
 
         font_name = 'Helvetica'
         font_size = 10
 
-        # p = canvas.Canvas(response)
-        p = canvas.Canvas(out)
+        p = canvas.Canvas(response)
+        # p = canvas.Canvas(out)
         p.setFont(font_name, font_size)
         p.setFillColor(HexColor('#565454'))
 
@@ -121,10 +122,10 @@ class Ticket(models.Model):
         renderPDF.draw(qrcodec, p, 180, 550)
         p.showPage()
         p.save()
-        pdf = out.getvalue()
-        out.close()
-        # return response
-        return pdf
+        # pdf = out.getvalue()
+        # out.close()
+        return response
+        # return pdf
 
     def __str__(self):
         return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)

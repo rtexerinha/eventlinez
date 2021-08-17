@@ -10015,3 +10015,26 @@ input[type='file'] {
   }
 }
 
+.card-checkin{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media(min-width: 993px){
+  .card-checkin{
+      justify-content: flex-start;
+  }
+}
+
+.card-promoter{
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  color: white;
+  background: gray;
+  border-radius: 10px 10px 0px 0px;
+}
+
+
