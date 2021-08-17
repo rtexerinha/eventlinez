@@ -62,6 +62,18 @@ def search_checkin(request):
 
 
 @login_required(login_url='/promoter/account/login/')
+def search_ticket_sold(request):
+    q = None
+    tickts = None
+    if 'query' in request.GET:
+        q = request.GET.get('query')
+        ticket = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter)
+        tickts = ticket.all().filter(
+            Q(guest_name__icontains=q) | Q(id__icontains=q))
+    return render(request, 'ticket_sold_list.html', {'query': q, 'tickets': tickts})
+
+
+@login_required(login_url='/promoter/account/login/')
 def tickets_validate(request):
     from ticket.models import Ticket
     selected_event = None

@@ -14,12 +14,12 @@
         {% if tickets %}
         <div>
         <header class="row">
-            <div class="col-lg-11 col-md-5">
+            <div class="col-lg-6">
                 <form method="POST" style="display: flex">
                     {% csrf_token %}
                     <label for="eventsChoice"
                            style="font-size: 16px; margin-top: 10px">Events</label>
-                    <select id="eventsChoice" class="form-control form-control-sm col-sm-3 col-md-3 col-lg-4 mt-2"
+                    <select id="eventsChoice" class="form-control form-control-sm col-sm-3 col-md-3 col-lg-8 mt-2"
                             name="events_choice"
                             id="events_choice"
                             style="margin: 0 10px">
@@ -41,6 +41,18 @@
                 </form>
             </div>
 
+
+             <div class="col-12 col-lg-5">
+                        <form class="form-inline mr-auto" action="{% url 'search_ticket_sold' %}" method="get">
+                        {% csrf_token %}
+                            <input class="form-control col-11 col-lg-8 form-control-sm"
+                                   style="margin-top: 10px;height: 20px; margin-left: 10px"
+                                   type="search"
+                                   placeholder="Search per guest name or ticket number"
+                                   aria-label="Search" name="query">
+                        </form>
+             </div>
+
             <div class="col-lg-1 col-md-7 div-adm-newevent">
                 <button onclick="exportTicket()"
                    id="button-adm"
@@ -57,11 +69,12 @@
                     <tr style="background-color:#F4F4F4;">
                         <th class="text-table text-bold">Num</th>
                         <th class="text-table text-bold">Event</th>
-                        <th class="text-table text-bold">Ticket Type</th>
+{#                        <th class="text-table text-bold">Ticket Type</th>#}
                         <th class="text-table text-bold">Price</th>
                         <th class="text-table text-bold">Promo Code</th>
                         <th class="text-table text-bold">Created</th>
                         <th class="text-table text-bold">Guest Name</th>
+                        <th class="text-table text-bold">Checkin date</th>
                     </tr>
                 </thead>
 
@@ -70,20 +83,20 @@
                     <tr>
                      {% if ticket.checkin_date %}
                         <td class="text-table text-success text-bold">{{ticket.id}}</td>
-                        <td class="text-table text-success text-bold">{{ticket.event_ticket.event.name}}</td>
-                        <td class="text-table text-success text-bold">{{ticket.event_ticket.name}}</td>
+                         <td class="text-table text-success text-bold">{{ticket.event_ticket}}</td>
                         <td class="text-table text-success text-bold">{{ticket.order_item.unit_price }}</td>
                         <td class="text-table text-success text-bold">{{ticket.order_item.promo_code|default_if_none:''}}</td>
                         <td class="text-table text-success text-bold">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
                         <td class="text-table text-success text-bold">{{ticket.guest_name|default_if_none:''}}</td>
+                         <td class="text-table text-success text-bold">{{ticket.checkin_date}}</td>
                      {% else %}
                         <td class="text-table">{{ticket.id}}</td>
-                        <td class="text-table">{{ticket.event_ticket.event.name}}</td>
-                        <td class="text-table">{{ticket.event_ticket.name}}</td>
+                         <td class="text-table">{{ticket.event_ticket}}</td>
                         <td class="text-table">{{ticket.order_item.unit_price }}</td>
                         <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>
                         <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
                         <td class="text-table">{{ticket.guest_name|default_if_none:''}}</td>
+                        <td class="text-table">{{ticket.checkin_date|default_if_none:''}}</td>
                     {% endif %}
                     </tr>
                 {% endfor %}
@@ -123,13 +136,16 @@
         </section>
         </div>
         {% else %}
-                <div style="width: 100%; margin: auto">
-                    <article id="event-div">
-                        <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
+
+                 <div style="width: 100%; margin: auto">
+                    <article id="event-div" style="display: flex; flex-direction: column">
+                        <h4 class="h4-promoter centralized">No tickets sold</h4>
                         <br>
-                        <h4 class="text-default centralized">No tickets sold</h4>
+                        <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
+
                     </article>
                 </div>
+
         {% endif %}
     </div>
 </main>
