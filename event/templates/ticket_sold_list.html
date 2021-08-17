@@ -68,6 +68,15 @@
                 <tbody>
                 {% for ticket in tickets %}
                     <tr>
+                     {% if ticket.checkin_date %}
+                        <td class="text-table text-success text-bold">{{ticket.id}}</td>
+                        <td class="text-table text-success text-bold">{{ticket.event_ticket.event.name}}</td>
+                        <td class="text-table text-success text-bold">{{ticket.event_ticket.name}}</td>
+                        <td class="text-table text-success text-bold">{{ticket.order_item.unit_price }}</td>
+                        <td class="text-table text-success text-bold">{{ticket.order_item.promo_code|default_if_none:''}}</td>
+                        <td class="text-table text-success text-bold">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
+                        <td class="text-table text-success text-bold">{{ticket.guest_name|default_if_none:''}}</td>
+                     {% else %}
                         <td class="text-table">{{ticket.id}}</td>
                         <td class="text-table">{{ticket.event_ticket.event.name}}</td>
                         <td class="text-table">{{ticket.event_ticket.name}}</td>
@@ -75,6 +84,7 @@
                         <td class="text-table">{{ticket.order_item.promo_code|default_if_none:''}}</td>
                         <td class="text-table">{{ticket.created_at| date:'Y-M-d H:i'}}</td>
                         <td class="text-table">{{ticket.guest_name|default_if_none:''}}</td>
+                    {% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>
