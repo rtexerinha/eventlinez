@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.http import StreamingHttpResponse
 from django.shortcuts import render
+from django.db.models import Q
 
 from event.models import Event
 from ticket.models import Ticket
@@ -46,6 +47,18 @@ def ticket_checkin(request, checkin):
                                     event_ticket=ticket.event_ticket,
                                     checkin_date__isnull=False).order_by('-checkin_date')
     return render(request, 'ticket_checkin.html', {'tickets': tickets})
+
+
+@login_required(login_url='/promoter/account/login/')
+def search_checkin(request):
+    tickets = None
+    query = None
+    if 'q' in request.GET:
+        query = request.GET.get('q')
+        ticket = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter)
+        tickets = ticket.all().filter(
+            Q(guest_name__icontains=query) | Q(id__icontains=query))
+    return render(request, 'ticket_checkin.html', {'query': query, 'tickets': tickets})
 
 
 @login_required(login_url='/promoter/account/login/')

@@ -9,70 +9,97 @@
 {% block content %}
     <section>
         <div class="container-fluid">
-            <h1 class="h3-promoter mt-4 pt-2 mb-4">Validated tickets</h1>
+            <h2 class="h3-promoter mt-4 pt-2 mb-4">Validated tickets</h2>
             {% if tickets %}
 
-                <header class="col-lg-11 col-md-5 mb-4">
-                    <form method="POST" style="display: flex">
-                        {% csrf_token %}
-                        <label for="eventsChoice" style="font-size: 16px; margin-top: 10px">Events</label>
+                <header class="col-12 mb-4 p-0 d-block d-lg-flex">
 
-                        <select id="eventsChoice" class="form-control form-control-sm col-sm-3 col-md-3 col-lg-4 mt-2"
-                                name="events_choice"
-                                id="events_choice"
-                                style="margin: 0 10px">
+                    <div class="col-12 col-lg-6">
+                        <form class="form-inline mr-auto" action="{% url 'search_guest' %}" method="get">
+                        {% csrf_token %}
+                            <input class="form-control col-11 col-lg-8 form-control-sm"
+                                   style="margin-top: 10px;height: 20px; margin-left: 10px"
+                                   type="search"
+                                   placeholder="Search per guest name or ticket number"
+                                   aria-label="Search" name="q">
+                        </form>
+                    </div>
+
+
+                    <div class="col-12 col-lg-6">
+
+                         <form method="POST" style="display: flex">
+                            {% csrf_token %}
+{#                            <label for="eventsChoice" style="font-size: 16px; margin-top: 10px">Events</label>#}
+
+                            <select id="eventsChoice"
+                                    class="form-control form-control-sm col-sm-3 col-md-3 col-lg-8 mt-2"
+                                    name="events_choice"
+                                    id="events_choice"
+                                    style="margin: 0 10px">
 
                             {% if selected_event %}
-                                <option value="{{selected_event.id}}" selected="selected">{{ selected_event.name }}</option>
+                                <option value="{{selected_event.id}}" selected="selected">
+                                    {{ selected_event.name }}
+                                </option>
                             {% endif %}
                             <option value="" >All</option>
 
                             {% for event in events %}
                                 <option value="{{event.id}}">{{event.name}}</option>
                             {% endfor %}
-                        </select>
+                            </select>
 
-                        <button action="submit"
-                                id="button-adm"
-                                class="btn btn-secondary"
-                                style="margin-top: 8px;
-                                   background-color: #d90075">
-                            Filter
-                        </button>
-                    </form>
+                            <button action="submit"
+                                    id="button-adm"
+                                    class="btn btn-secondary"
+                                    style="margin-top: 8px;
+                                       background-color: #d90075">
+                                Filter
+                            </button>
+                        </form>
+                    </div>
                 </header>
 
 
-                <main style="display: flex; flex-direction: row; flex-wrap: wrap;" >
+                <main class="card-checkin">
                     {% for ticket in tickets %}
-                        <div class="card m-lg-2 m-0 mb-4"
+                        <article class="card m-lg-2 m-0 mb-4"
                              style="min-width: 20rem;
                              max-width: 20rem; border-radius: 10px;">
-                            <div style="display: flex;
-                                        justify-content: space-between;
-                                        color: white;
-                                        background: rgba(217, 0, 117, 0.8);
-                                        border-radius: 10px 10px 0px 0px;"
-                                 class="card-header">
 
-                                <h5 class="h5-promoter">{{ticket.event_ticket.event.name}}</h5>
-                                <p class="p-promoter">{{ticket.id}}</p>
-                            </div>
+                            {% if ticket.checkin_date %}
+                                <section class="card-header card-promoter" style="background: forestgreen">
+                            {% else %}
+                                <section class="card-header card-promoter">
+                            {% endif %}
 
-                            <article class="card-body" style="padding-left: 0px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <p class="p-promoter">Ticket Number:</p>
+                                    <p class="p-promoter">{{ticket.id}}</p>
+                                </div>
+                            </section>
+
+
+                            <section class="card-body" style="padding-left: 0px; padding-bottom: 0">
                                 <div style="display: block; padding-right: 0; padding-left: 20px" >
-                                    <div class="d-flex">
-                                        <img class="mr-2" src="{% static 'img/user_ticket.svg' %}" alt="ticket user icon"/>
+                                    <div style="display: flex; justify-content: flex-start;; flex-direction: row">
+                                        <i class="fas fa-user-circle mt-1"></i>
 
                                         {% if ticket.guest_name is None%}
-                                            <h6 class="h6-promoter mt-2" style="color: #171717">
-                                                {{ticket.customer}}
-                                            </h6>
+                                            <h5 class="h6-promoter ml-2">{{ticket.customer}}</h5>
                                         {% else %}
-                                            <h6 class="h6-promoter mt-2" style="color: #171717">
+                                            <h5 class="h6-promoter ml-2">
                                                 {{ticket.guest_name|default_if_none:''}}
-                                            </h6>
+                                            </h5>
                                         {% endif %}
+                                    </div>
+
+                                    <div class="d-flex">
+                                        <img src="{% static 'img/ticket_icon.svg' %}" alt="ticket icon"/>
+                                        <h6 class="h6-promoter ml-2 mt-1" style="color: #171717">
+                                            {{ticket.event_ticket}}
+                                        </h6>
                                     </div>
 
 
@@ -82,14 +109,13 @@
                                     </p>
                                 </div>
 
-                                <div class="card-footer" style="background: transparent">
-                                    <h6 class="h5-promoter" style="color: #171717">
-                                        <img src="{% static 'img/ticket_icon.svg' %}" alt="ticket icon"/>
-                                        {{ticket.event_ticket.name}}
-                                    </h6>
-                                </div>
-                            </article>
-                        </div>
+{#                                <div class="card-footer" style="background: transparent">#}
+{#                                    <h6 class="h5-promoter" style="color: #171717">#}
+{#                                         {{ticket.event_ticket.event.name}}#}
+{#                                    </h6>#}
+{#                                </div>#}
+                            </section>
+                        </article>
                     {% endfor %}
                 </main>
 
@@ -127,12 +153,21 @@
 
             {% else %}
                 <div style="width: 100%; margin: auto">
-                    <article id="event-div">
-                        <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
+                    <article id="event-div" style="display: flex; flex-direction: column">
+                        <h4 class="h4-promoter centralized">No tickets</h4>
                         <br>
-                        <h4 class="text-default centralized">No tickets</h4>
+                        <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
+
+                        <a href="{% url 'tickets_validate' %}" class="p-home btn btn-lg mt-4"
+                           style="background-color: #d90075; color: #FFFFFF">
+
+                            <i class="fas fa-chevron-left pr-2" style="font-size: 0.8rem"></i>
+                            Back
+
+                    </a>
                     </article>
                 </div>
+
             {% endif %}
         </div>
     </section>
