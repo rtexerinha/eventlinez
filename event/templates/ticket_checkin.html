@@ -14,7 +14,7 @@
 
                 <header class="col-12 mb-4 p-0 d-block d-lg-flex">
 
-                    <div class="col-12 col-lg-6">
+                    <div class="col-12 col-lg-6 pl-0">
                         <form class="form-inline mr-auto" action="{% url 'search_guest' %}" method="get">
                         {% csrf_token %}
                             <input class="form-control col-11 col-lg-8 form-control-sm"
@@ -33,7 +33,7 @@
 {#                            <label for="eventsChoice" style="font-size: 16px; margin-top: 10px">Events</label>#}
 
                             <select id="eventsChoice"
-                                    class="form-control form-control-sm col-sm-3 col-md-3 col-lg-8 mt-2"
+                                    class="form-control form-control-sm col-sm-3 col-md-3 col-lg-9 mt-2"
                                     name="events_choice"
                                     id="events_choice"
                                     style="margin: 0 10px">
