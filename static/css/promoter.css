@@ -9960,7 +9960,7 @@ body {
   .div-adm-newevent{
     display: block;
     height: 100%;
-    padding: 15px 0;
+    /*padding: 15px 0;*/
   }
   #button-adm{
     margin: 10px auto;

@@ -45,11 +45,28 @@
              <div class="col-12 col-lg-5">
                         <form class="form-inline mr-auto" action="{% url 'search_ticket_sold' %}" method="get">
                         {% csrf_token %}
-                            <input class="form-control col-11 col-lg-8 form-control-sm"
-                                   style="margin-top: 10px;height: 20px; margin-left: 10px"
-                                   type="search"
-                                   placeholder="Search per guest name or ticket number"
-                                   aria-label="Search" name="query">
+{#                            <input class="form-control col-11 col-lg-8 form-control-sm"#}
+{#                                   style="margin-top: 10px;height: 20px; margin-left: 10px"#}
+{#                                   type="search"#}
+{#                                   placeholder="Search per guest name or ticket number"#}
+{#                                   aria-label="Search" name="query">#}
+
+                            <div class="input-group col-lg-10 col-12 p-0 p-lg-2">
+                                    <input class="form-control form-control-sm border-right-0 border col-12"
+                                           style="height: 24px;"
+                                           type="search"
+                                           placeholder="Search per guest name or ticket number"
+                                           aria-label="Search" name="query"
+                                           id="example-search-input">
+
+                                    <span class="input-group-append form-control-sm p-0">
+                                        <button class="btn btn-outline-secondary border-left-0 border form-control-sm"
+                                                type="submit">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+
                         </form>
              </div>
 
