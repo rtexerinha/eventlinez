@@ -16,7 +16,6 @@ from reportlab.graphics.shapes import Drawing
 
 from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
-from weasyprint import CSS, HTML
 
 from customer.models import Customer
 from event.models import Event
@@ -52,18 +51,6 @@ class Ticket(models.Model):
         c = Drawing(45, 45, transform=[200. / width, 0, 0, 200. / height, 0, 0])
         c.add(qr_code)
         return c
-
-    def as_pdf(self):
-        host = settings.APP_HOST
-        svg = self.as_qrcode()
-        out = BytesIO()
-        html_str = render_to_string("ticket/ticket_qrcode.html", {'svg': svg, 'ticket': self})
-        html = HTML(string=html_str)
-        html.write_pdf(out, stylesheets=[CSS(host + settings.STATIC_URL + 'css/ticket.css')],
-                       presentational_hints=True)
-        pdf = out.getvalue()
-        out.close()
-        return pdf
 
     def as_pdf_report(self):
         qrcodec = self.as_qrcode_reportlab()
