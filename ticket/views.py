@@ -16,12 +16,6 @@ from event.models import Event
 from ticket.models import Ticket
 
 
-def generate_pdf_reportlab(request):
-    ticket = Ticket.objects.last()
-    response = ticket.as_pdf_report()
-    return response
-
-
 @login_required(login_url='/promoter/account/login/')
 def ticket_checkin(request, checkin):
     # host = request.get_raw_uri().replace(request.get_full_path(), "")
