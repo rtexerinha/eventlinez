@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
-from event.forms import EventForm, TicketForm
+from event.forms import EventForm, TicketForm, VendorForm
 from event.models import Event, Ticket
+from promoter.models import Vendor
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -89,3 +90,22 @@ def ticket_type_update(request, ticket_id):
             tickets = Ticket.objects.filter(event=instance.event_id)
             return render(request, 'ticket_type_list.html', {'tickets': tickets, 'event_id': instance.event_id})
     return render(request, 'ticket_type_create.html', {'form': form})
+
+
+@login_required(login_url='/promoter/account/login/')
+def vendors_list(request):
+    vendors = Vendor.objects.all()
+    return render(request, 'vendors_list.html', {'vendors': vendors})
+
+
+@login_required(login_url='/promoter/account/login/')
+def vendor_create(request):
+    if request.method == 'POST':
+        form = VendorForm(data=request.POST)
+        if form.is_valid():
+            vendors = Vendor(**form.cleaned_data)
+            vendors.save()
+            return render(request, 'create_vendor.html', {'vendors': vendors})
+    else:
+        form = VendorForm()
+    return render(request, 'create_vendor.html', {'form': form})

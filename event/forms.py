@@ -11,6 +11,9 @@ from event.models import Ticket
 
 
 # TDO: Move this to address app
+from promoter.models import Vendor
+
+
 class CityForm(ModelForm):
     class Meta:
         model = City
@@ -38,6 +41,12 @@ class TicketForm(ModelForm):
         if quantity < self.instance.qty_sold():
             raise ValidationError("Ticket quantity cannot be less than quantity sold")
         return quantity
+
+
+class VendorForm(ModelForm):
+    class Meta:
+        model = Vendor
+        fields = ['first_name', 'last_name', 'email', 'phone', 'link']
 
 
 class CategoryForm(ModelForm):

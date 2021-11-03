@@ -1,7 +1,8 @@
 from django.urls import path
 from promoter.views import update_promoter, reset_password, signup_view_promoter, signin_view_promoter, \
     signout_view_promoter
-from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
+from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event, \
+    vendors_list, vendor_create
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
 
@@ -32,4 +33,8 @@ urlpatterns = [
     path('events/', event_list, name='events_promoter'),
     path('events/update/<int:event_id>/', event_update, name='update_event'),
     path('events/full_remove/<int:event_id>/', event_remove, name='remove_event'),
+
+    # Vendors
+    path('vendors/', vendors_list, name='vendors_list'),
+    path('vendors/new/', vendor_create, name='vendor_create'),
 ]
