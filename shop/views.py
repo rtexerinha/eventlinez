@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 
 from event.models import Category, Event
+from promoter.models import Vendor
 from .forms import ContactForm
 from .models import SpecialEvents
 
@@ -85,12 +86,17 @@ def pagination_home(request, lists):
 
 
 def product_event_detail(request, c_slug, event_slug):
+    vendors = request.GET['vendor']
+    vendor = Vendor.objects.get(name=vendors)
+    if vendor is None:
+        vendor = 'andre'
+
     try:
         event = Event.objects.get(category__slug=c_slug, slug=event_slug)
         products_list = Event.objects.all().filter(available=True)
     except Exception as e:
         raise e
-    return render(request, 'shop/event.html', {'event': event, 'products_list': products_list})
+    return render(request, 'shop/event.html', {'event': event, 'products_list': products_list, 'vendor': vendor})
 
 
 def search_result(request):

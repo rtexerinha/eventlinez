@@ -234,3 +234,9 @@
     line-height: 24px;
     color: var(--white-color);
 }
+
+.p-vendor{
+    font-size: 14px;
+    line-height: 17px;
+    color: #212529;
+}
