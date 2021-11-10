@@ -13,6 +13,7 @@ from imagekit.processors import ResizeToFill
 
 from address.models import City
 from customer.models import Customer
+from local_settings import APP_HOST
 
 
 def validate_image(image):
@@ -55,6 +56,29 @@ class Promoter(models.Model):
         return '{}'.format(self.name)
 
 
+class Vendor(models.Model):
+    first_name = models.CharField(max_length=250)
+    last_name = models.CharField(max_length=250, default='')
+    email = models.CharField(max_length=250, unique=True)
+    phone = models.CharField(max_length=12, null=True, blank=True)
+    code = models.CharField(max_length=100, unique=True)
+    promoter = models.ForeignKey(Promoter, blank=True, null=True, on_delete=models.SET_NULL)
+
+    def full_name(self):
+        return self.first_name + ' ' + self.last_name
+
+    def link(self):
+        # return APP_HOST + '/shop/' + str(self.event.category) + '/' + self.event.name + '/?vendor=' + self.code
+        return APP_HOST + '/shop/' + '/?vendor=' + self.code
+
+    def __str__(self):
+        return self.first_name + ' ' + self.last_name
+
+    def save(self, *args, **kwargs):
+        self.code = slugify(self.full_name())
+        super(Vendor, self).save(*args, **kwargs)
+
+
 class Event(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(max_length=250, unique=True)
@@ -78,13 +102,13 @@ class Event(models.Model):
                                processors=[ResizeToFill(265, 150)],
                                format='JPEG',
                                options={'quality': 90})
+    vendors = models.ManyToManyField(Vendor, blank=True)
 
     class Meta:
         ordering = ('name',)
         verbose_name = 'Event'
         verbose_name_plural = 'Event'
         ordering = ['-event_date']
-
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)

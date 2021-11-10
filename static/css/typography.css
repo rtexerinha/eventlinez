@@ -240,3 +240,9 @@
     line-height: 17px;
     color: #212529;
 }
+
+.p-vendor-12{
+    font-weight: normal;
+    line-height: 16px;
+    color: rgba(0, 0, 0, 0.7);
+}

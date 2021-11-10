@@ -37,7 +37,8 @@
                  {{ event.description|safe }}
              </div>
 
-             <div class="m-card col-12 p-3 mt-5 mb-5" style="font-family: Lato">
+             {% if vendor != None %}
+             <section class="m-card col-12 p-3 mt-5 mb-5" style="font-family: Lato;">
                  <div class=row>
                      <div class="col-lg-1 col-2">
                         <i class="far fa-user-circle fa-3x" style="color: #F14CA5"></i>
@@ -46,34 +47,32 @@
                      <div class="col-lg-10 col-10">
                          <h4 class="h4-home pb-2" style="margin-left: 10px; color: #212529">Vendor Information</h4>
                          <div class="d-block d-lg-flex">
-                             <div class="col-4">
+                             <div class="col-6">
                                  <h6 class="weight-height h6-home" style="font-weight: 500;font-size: 12px">
                                      Vendor:
                                  </h6>
-                                 <p class="p-home p-vendor">{{ vendor.name}}</p>
+                                 <p class="p-home p-vendor">{{ vendor.full_name}}</p>
                              </div>
 
-                             <div class="col-4">
+                             <div class="col-6">
                                  <h6 class="weight-height h6-home" style="font-weight: 500;font-size: 12px">
                                      Email:
                                  </h6>
                                  <p class="p-home p-vendor">{{ vendor.email}}</p>
                              </div>
 
-                             <div class="col-4">
-                                 <h6 class="weight-height h6-home" style="font-weight: 500;font-size: 12px">
-                                     Phone:
-                                 </h6>
-                                 <p class="p-home p-vendor">{{ vendor.phone}}</p>
-                             </div>
-
-{#                             <h6 class="weight-height h6-home"><b class="p-date">Email:</b> {{ vendor.email}}</h6>#}
-{#                             <h6 class="weight-height h6-home"><b class="p-date">Phone:</b> {{ vendor.phone}}</h6>#}
+{#                             <div class="col-4">#}
+{#                                 <h6 class="weight-height h6-home" style="font-weight: 500;font-size: 12px">#}
+{#                                     Phone:#}
+{#                                 </h6>#}
+{#                                 <p class="p-home p-vendor">{{ vendor.phone}}</p>#}
+{#                             </div>#}
                            </div>
                          </div>
                  </div>
+             </section>
+             {% endif %}
 
-             </div>
         </aside>
 
         <article class="col-lg-4" style="padding: 0!important;">

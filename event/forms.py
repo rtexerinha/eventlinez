@@ -11,7 +11,7 @@ from event.models import Ticket
 
 
 # TDO: Move this to address app
-from promoter.models import Vendor
+from event.models import Vendor
 
 
 class CityForm(ModelForm):
@@ -46,7 +46,7 @@ class TicketForm(ModelForm):
 class VendorForm(ModelForm):
     class Meta:
         model = Vendor
-        fields = ['first_name', 'last_name', 'email', 'phone', 'link']
+        fields = ['first_name', 'last_name', 'email', 'phone']
 
 
 class CategoryForm(ModelForm):

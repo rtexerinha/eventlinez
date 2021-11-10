@@ -6,9 +6,7 @@ import qrcode.image.svg
 import qrcode.image.svg
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.http import HttpResponse
 
-from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode import qr
@@ -20,6 +18,7 @@ from reportlab.pdfgen import canvas
 from customer.models import Customer
 from event.models import Event
 from eventlinez import settings
+from event.models import Vendor
 
 
 class Ticket(models.Model):
@@ -31,6 +30,7 @@ class Ticket(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     checkin_date = models.DateTimeField(blank=True, null=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+    vendor = models.ForeignKey(Vendor, blank=True, null=True, on_delete=models.SET_NULL)
 
     def as_qrcode(self):
         # content = host + '/qrcode/?tkt=' + str(self.uuid)

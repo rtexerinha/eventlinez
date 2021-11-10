@@ -24,7 +24,7 @@
                     <a class="nav-link {% if 'index' in segment %} active {% endif %}"
                        href="{% url 'tickets_validate' %}">
                         <div class="sb-nav-link-icon">
-                            <i class="fas fa-user" style="color: #383838;" aria-hidden="true"></i>
+                            <i class="fa fa-list-alt" style="color: #383838;"></i>
                         </div>
                         Validated Tickets
                     </a>
@@ -32,10 +32,30 @@
                       <a class="nav-link {% if 'index' in segment %} active {% endif %}"
                        href="{% url 'vendors_list' %}">
                         <div class="sb-nav-link-icon">
-                            <i class="fas fa-sticky-note" style="color: #383838;" aria-hidden="true"></i>
+                            <i class="fas fa-user" style="color: #383838;" aria-hidden="true"></i>
                         </div>
                         Vendors
                     </a>
+
+                    <a href="#pageSubmenu" data-toggle="collapse"
+                       aria-expanded="false" class="nav-link dropdown-toggle">
+
+                        <div class="sb-nav-link-icon">
+                            <i class="fas fa-file-alt" style="color: #383838;" aria-hidden="true"></i>
+                        </div>
+                            Reports
+                        </a>
+
+                        <ul class="pl-5 collapse list-unstyled" id="pageSubmenu">
+                            <li>
+                                <a href="{% url 'vendors_reports' %}"
+                                   style="color:#D90075;text-decoration: none">
+                                    Vendors reports
+                                </a>
+                            </li>
+
+                        </ul>
+{#                </div>#}
                 </div>
             </div>
 

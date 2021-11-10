@@ -1,9 +1,10 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 
 from event.forms import EventForm, TicketForm, VendorForm
 from event.models import Event, Ticket
-from promoter.models import Vendor
+from event.models import Vendor
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -30,16 +31,27 @@ def event_create(request):
 
 @login_required(login_url='/promoter/account/login/')
 def event_update(request, event_id):
+    form = None
+    form_vendor = None
+    vendors = Vendor.objects.filter(promoter=request.user.promoter.id, event=event_id)
+    vendors_without_event = Vendor.objects.filter(promoter=request.user.promoter.id).exclude(event=event_id)
     tickets = Ticket.objects.filter(event=event_id)
     instance = get_object_or_404(Event, id=event_id)
     if request.method == 'GET':
         form = EventForm(instance=instance)
+        form_vendor = VendorForm()
     if request.method == 'POST':
         form = EventForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
             form.save()
             return redirect('events_promoter')
-    return render(request, 'event_create.html', {'form': form, 'tickets': tickets})
+    return render(request, 'event_create.html',
+                  {'form': form, 'tickets': tickets,
+                   'vendors': vendors,
+                   'event_id_dinamic': instance.id,
+                   'form_vendor': form_vendor,
+                   'vendors_without_event':
+                       vendors_without_event})
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -94,18 +106,82 @@ def ticket_type_update(request, ticket_id):
 
 @login_required(login_url='/promoter/account/login/')
 def vendors_list(request):
-    vendors = Vendor.objects.all()
+    vendors = Vendor.objects.filter(promoter=request.user.promoter.id)
     return render(request, 'vendors_list.html', {'vendors': vendors})
 
 
 @login_required(login_url='/promoter/account/login/')
 def vendor_create(request):
     if request.method == 'POST':
-        form = VendorForm(data=request.POST)
-        if form.is_valid():
-            vendors = Vendor(**form.cleaned_data)
-            vendors.save()
-            return render(request, 'create_vendor.html', {'vendors': vendors})
+        form_vendor = VendorForm(data=request.POST)
+        if form_vendor.is_valid():
+            vendor = Vendor(**form_vendor.cleaned_data)
+            vendor.promoter = request.user.promoter
+            vendor.save()
+            return redirect('vendors_list')
     else:
-        form = VendorForm()
-    return render(request, 'create_vendor.html', {'form': form})
+        form_vendor = VendorForm()
+    return render(request, 'vendor_create.html', {'form_vendor': form_vendor})
+
+
+@login_required(login_url='/promoter/account/login/')
+def vendor_create_per_event(request, event_id):
+    # events = Event.objects.get(id=event_id)
+    events = Vendor.objects.get(id=event_id).event_set.all()
+    if request.method == 'POST':
+        form_vendor = VendorForm(data=request.POST)
+        if form_vendor.is_valid():
+            vendor = Vendor(**form_vendor.cleaned_data)
+            vendor.promoter = request.user.promoter
+            vendor.event = events
+            vendor.save()
+            return redirect('vendors_list')
+    else:
+        form_vendor = VendorForm()
+    return render(request, 'vendor_create.html', {'form_vendor': form_vendor})
+
+
+@login_required(login_url='/promoter/account/login/')
+def vendor_update_per_event(request, event_id):
+    events = Event.objects.get(id=event_id)
+    if request.method == 'POST':
+        vendor_id = request.POST.get('vendors_choice')
+        vendors = Vendor.objects.get(id=vendor_id)
+        form_vendor = VendorForm(data=request.POST, instance=vendors)
+        if form_vendor.is_valid():
+            vendor = Vendor(**form_vendor.cleaned_data)
+            vendor.event = events
+            vendor.save()
+            return redirect('vendors_list')
+    else:
+        form_vendor = VendorForm()
+    return render(request, 'vendor_create.html', {'form_vendor': form_vendor})
+
+
+@login_required(login_url='/promoter/account/login/')
+def vendors_reports(request):
+    # events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
+    # vendors = Vendor.objects.filter(event_ticket__event__promoter=request.user.promoter).order_by('-id')
+    vendors = Vendor.objects.all()
+    return render(request, 'vendors_reports.html', {'vendors': vendors})
+
+
+@login_required(login_url='/promoter/account/login/')
+def vendor_update(request, vendor_id):
+    form_vendor = None
+    vendors = Vendor.objects.get(id=vendor_id)
+    if request.method == 'GET':
+        form_vendor = VendorForm(instance=vendors)
+    if request.method == 'POST':
+        form_vendor = VendorForm(request.POST, instance=vendors)
+        if form_vendor.is_valid():
+            form_vendor.save()
+            return redirect('vendors_list')
+    return render(request, 'vendor_create.html', {'form_vendor': form_vendor, 'vendors': vendors})
+
+
+@login_required(login_url='/promoter/account/login/')
+def vendor_remove(request, vendor_id):
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    vendor.delete()
+    return redirect('vendors_list')

@@ -21,8 +21,6 @@
                         </div>
                     </header>
 
-
-
                     <main class="card-checkin d-lg-none d-flex">
                         {% for vendor in vendors %}
                             <article class="card m-lg-2 m-0 mb-4"
@@ -47,10 +45,21 @@
                                         {{vendor.phone}}
                                     </p>
 
-                                    <p class="p-promoter" style="color: #7B7B7B;">
-                                        <b style="color: #383838;">Link: </b>
-                                        {{vendor.link}}
-                                    </p>
+                                    <div class="div-button-table pb-2" style="justify-content: flex-end">
+                                         <button class="button-link">
+                                             <a href="{% url 'vendor_update' vendor.id %}">
+                                                <i style="color: #d90075" class="far fa-edit icon_remove"></i>
+                                            </a>
+                                         </button>
+
+
+                                        <button class="button-link">
+                                            <a href="{% url 'vendor_update' vendor.id%}">
+                                                <i style=" color: #d90075"
+                                                   class="fas fa-trash-alt icon_remove"></i>
+                                            </a>
+                                        </button>
+                                    </div>
                                 </div>
 
                             </section>
@@ -68,8 +77,9 @@
                                     <th class="text-table text-bold">Vendor</th>
                                     <th class="text-table text-bold">Email</th>
                                     <th class="text-table text-bold">Phone</th>
+{#                                    <th class="text-table text-bold">link</th>#}
+{#                                    <th class="text-table text-bold">Share link</th>#}
                                     <th class="text-table text-bold"></th>
-                                    <th class="text-table text-bold">Share link</th>
                                 </tr>
                             </thead>
 
@@ -77,41 +87,34 @@
                             {% for vendor in vendors %}
                                 <tr>
                                     <td class="text-table">
-                                        {# <a href="{% url 'ticket_update' ticket.id%}" #}
-{#                                           style="color: #d90075; font-size: 12px">#}
-                                        <a href="#" style="color: #d90075; font-size: 12px">
+                                        <a href="{% url  'vendor_update' vendor.id %}"
+                                           style="color: #d90075; font-size: 12px">
                                             {{ vendor.full_name }}
                                         </a>
                                     </td>
 
                                     <td class="text-table">{{ vendor.email }}</td>
                                     <td class="text-table">{{ vendor.phone }}</td>
-                                    <td class="text-table">{{ vendor.link }}</td>
+{#                                    <td class="text-table">{{ vendor.link }}</td>#}
 
-                                    <td colspan="3">
-                                        <div class="div-button-table" style="justify-content: center">
-                                            <button class="button-link">
-                                                <a href="#" onclick="share()"
-                                                   class="icon_remove_a">
-                                                    <i style="color: #d90075" class="fas fa-share-alt-square"></i>
+                                    <td>
+                                        <div class="div-button-table" style="justify-content: flex-end">
+
+                                        <button class="button-link">
+                                                 <a href="{% url 'vendor_update' vendor.id %}" class="icon_remove_a">
+                                                    <i style="color: #d90075" class="far fa-edit icon_remove"></i>
                                                 </a>
                                             </button>
 
-                                            <button class="button-link">
-                                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ vendor.link }}"
-                                                   class="icon_remove_a">
-                                                    <i style="color: #d90075" class="fab fa-facebook-square"></i>
-                                                </a>
-                                            </button>
-
-                                            <button class="button-link">
-                                                <a href="https://api.whatsapp.com/send?text={{ vendor.link }}"
-                                                   class="icon_remove_a">
-                                                    <i style="color: #d90075" class="fab fa-whatsapp"></i>
-                                                </a>
-                                            </button>
-                                        </div>
+                                        <button class="button-link">
+                                            <a href="{% url 'vendor_update' vendor.id%}" class="icon_remove_a">
+                                                <i style=" color: #d90075"
+                                                   class="fas fa-trash-alt icon_remove"></i>
+                                            </a>
+                                        </button>
+                                               </div>
                                     </td>
+
 
                                 </tr>
                             {% endfor %}
@@ -123,16 +126,16 @@
             </section>
 
             {% else %}
-                <div style="width: 100%; margin: auto">
-                    <article id="event-div">
-                       <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
-                        <br>
-                        <h4 class="text-default centralized" style="font-size: 1rem">Create Vendor</h4>
-{#                        <p class="text-default centralized">General admission, Table, or other types </p>#}
-                        <a href="{% url 'ticket_create' event_id %}" id="button-adm"
-                           class="btn btn-secondary" style="margin-top: 10px;">New vendor</a>
-                    </article>
-                </div>
+                    <div style="width: 100%; margin: auto">
+                        <article id="event-div">
+                            <i class="fas fa-user-circle fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
+                            <br>
+                            <h4 class="text-default centralized" style="font-size: 1rem">Create Vendor</h4>
+{#                          <p class="text-default centralized">General admission, Table, or other types </p>#}
+                            <a href="{% url 'vendor_create' %}" id="button-adm"
+                               class="btn btn-secondary" style="margin-top: 10px;">New vendor</a>
+                        </article>
+                    </div>
             {% endif %}
         </div>
     </main>

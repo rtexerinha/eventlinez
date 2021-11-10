@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from promoter.models import Vendor
+from event.models import Vendor
 
 
 @admin.register(Vendor)

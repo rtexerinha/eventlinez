@@ -20,6 +20,7 @@
             <link rel="stylesheet" href="{% static 'date-time/jquery-ui.css' %}">
             <link rel="stylesheet" href="{% static 'date-time/jquery-ui-timepicker-addon.css' %}">
             <script src="{% static 'js/jquery-3.4.1.slim.min.js' %}"></script>
+            {% block stylesheets %}{% endblock stylesheets %}
             <title>{% block title %}{% endblock %}</title>
         </head>
 
@@ -44,7 +45,7 @@
                     crossorigin="anonymous"></script>
             <script src="/static/js/script.js"></script>
             <script src="{% static 'date-time/jquery-ui.js' %}"></script>
-             <script src="{% static 'date-time/jquery-ui-timepicker-addon.js' %}"></script>
+            <script src="{% static 'date-time/jquery-ui-timepicker-addon.js' %}"></script>
             <script type="text/javascript">
                 $(document).ready(function() {
                     $('#datetimepicker').datetimepicker({ dateFormat: 'yy-mm-dd' }).attr("autocomplete", "off");
