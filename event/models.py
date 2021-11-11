@@ -72,7 +72,8 @@ class Vendor(models.Model):
         return self.first_name + ' ' + self.last_name
 
     def link(self):
-        return APP_HOST + '/shop/' + '/?vendor=' + self.code
+        event = Event.objects.filter(vendors=self.id)[0]
+        return APP_HOST + '/shop/' + str(event.category) + '/' + str(event) + '/?vendor=' + self.code
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
