@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.db import models
 from event.models import Event
 from event.models import Ticket
+from event.models import Vendor
 from django.core.validators import MinValueValidator
 
 from local_settings import EVENTLINEZ_FEE
@@ -32,6 +33,7 @@ class CartItem(models.Model):
 	promo_code = models.CharField(max_length=10, null=True)
 	quantity = models.IntegerField(validators=[MinValueValidator(0)])
 	active = models.BooleanField(default=True)
+	vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, null=True)
 
 	def sub_total(self):
 		return self.ticket.price * self.quantity

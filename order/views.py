@@ -73,7 +73,8 @@ def create(request):
             amount=item.price_total(),
             fee=item.fee(),
             promo_code=item.promo_code,
-            order=order
+            order=order,
+            vendor=item.vendor
         )
     cart.delete()
     send_mail(order.id)

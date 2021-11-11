@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
 from event.models import Ticket
+from event.models import Vendor
 from .models import Cart, CartItem
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,9 @@ def cart_add(request):
         cart.save()
 
     promocode = data.get("promo_code")
+    vendor_code = data.get("vendor_code")
+    if vendor_code:
+        vendor = Vendor.objects.get(code=vendor_code)
     for tkt in data['tickets']:
         ticket = Ticket.objects.get(pk=tkt['id'])
         quantity = tkt['quantity']
@@ -51,7 +55,11 @@ def cart_add(request):
             item.quantity = item.quantity + quantity
             item.save()
         else:
-            CartItem.objects.create(ticket=ticket, cart=cart, quantity=quantity, promo_code=promocode)
+            CartItem.objects.create(ticket=ticket,
+                                    cart=cart,
+                                    quantity=quantity,
+                                    promo_code=promocode,
+                                    vendor=vendor)
     return JsonResponse({"status": "ok"}, status=201)
 
 

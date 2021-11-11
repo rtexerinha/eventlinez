@@ -8,7 +8,7 @@ from django.core.mail import EmailMessage
 from django.db.models import Sum
 
 from customer.models import Customer
-from event.models import Event
+from event.models import Event, Vendor
 from ticket.models import Ticket
 
 
@@ -75,6 +75,7 @@ class OrderItem(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     fee = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, null=True)
 
     def sub_total(self):
         return self.quantity * self.unit_price
@@ -95,5 +96,6 @@ def create_tickets(sender, instance, **kwargs):
             customer=instance.order.customer,
             order_item=instance,
             price=instance.unit_price,
-            guest_name=guest_name
+            guest_name=guest_name,
+            vendor=instance.vendor
         )
