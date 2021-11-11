@@ -64,6 +64,10 @@ class Vendor(models.Model):
     code = models.CharField(max_length=100, unique=True)
     promoter = models.ForeignKey(Promoter, blank=True, null=True, on_delete=models.SET_NULL)
 
+    def save(self, *args, **kwargs):
+        self.code = slugify(self.full_name())
+        super(Vendor, self).save(*args, **kwargs)
+
     def full_name(self):
         return self.first_name + ' ' + self.last_name
 
@@ -72,10 +76,6 @@ class Vendor(models.Model):
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
-
-    def save(self, *args, **kwargs):
-        self.code = slugify(self.full_name())
-        super(Vendor, self).save(*args, **kwargs)
 
 
 class Event(models.Model):
