@@ -383,6 +383,143 @@
                     </div>
                 {% endif %}
             {% endif %}
+
+           <!-- Modal -->
+<section class="modal fade" id="exampleModalCenter"
+     tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header pt-4 pb-0" style="border-bottom: none">
+          <div class="d-block">
+              <h3 class="h3-promoter" id="exampleModalLongTitle">Associate vendors to event</h3>
+              <h5 class="p-promoter p-vendor-12">
+                  You can join an existing vendor or create a new one
+              </h5>
+          </div>
+{#        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>#}
+        <button type="button" class="close"
+                style="font-size: 2rem!important;"
+                data-dismiss="modal" aria-label="Close">
+          <span style="font-size: 2rem!important;" aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <aside class="modal-body pt-0">
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+              <li class="nav-item link-active" role="presentation">
+                  <a class="nav-link active link" id="home-tab"
+                     style="color: #383838!important;"
+                     data-toggle="tab" href="#home"
+                     role="tab"
+                     aria-controls="home"
+                     aria-selected="true">
+                      Select Vendor
+                      </a>
+              </li>
+
+              <li class="nav-item link-active" role="presentation">
+                  <a class="nav-link link"
+                     style="color: #383838!important;"
+                     id="profile-tab"
+                     data-toggle="tab"
+                     href="#profile"
+                     role="tab"
+                     aria-controls="profile"
+                     aria-selected="false">
+                      New Vendor
+                  </a>
+              </li>
+          </ul>
+
+          <div class="tab-content" id="myTabContent">
+              <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <form method="POST" action="/promoter/vendor/update/1/event/{{ event_id_dinamic }}/"
+                          style="display: flex">
+                        {% csrf_token %}
+                        <div class="d-block" style="width: 100%;padding-right: 5px">
+                                <label class="col-12 col-lg-12 p-promoter p-vendor-12" for="vendorsChoice"
+                                       style="margin-top: 20px;">
+                                    Vendor*
+                                </label>
+                                <select id="vendorsChoice"
+                                        class="form-control col-12"
+                                        name="vendors_choice"
+                                        style="margin: 0 10px">}
+                                        <option value="{{selected_vendor.id}}" selected="selected">
+                                            {{ selected_vendor.name }}
+                                        </option>
+
+                                    <option value="">All</option>
+
+                                    {% for vendor in vendors_without_event %}
+                                        <option value="{{vendor.id}}">{{vendor.full_name}}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <button type="submit"
+                                        id="button-adm"
+                                        class="btn btn-secondary"
+                                        style="margin-top: 50px; float: right; background-color: #d90075">
+                                    Save
+                                </button>
+                        </div>
+
+                            </form>
+
+              </div>
+              <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+
+                  <form enctype="multipart/form-data"
+                        method="post" action="/promoter/vendor/new/{{ event_id_dinamic }}/"
+                        class="col-lg-12 ml-sm-4 pt-3"
+                        style="margin-left: 0!important;
+                          padding-left: 5px!important;">
+                {% csrf_token %}
+{#                <div class="form-row">#}
+{#                    <div class="form-group col-md-6 mb-0">#}
+{#                        {{ form_vendor|crispy }}#}
+{#                    </div>#}
+{#                </div>#}
+
+                      <div class="form-row">
+                          <div class="form-group col-md-6 mb-0">
+                              {{ form_vendor.first_name | as_crispy_field }}
+                          </div>
+
+                          <div class="form-group col-md-6 mb-0">
+                              {{ form_vendor.last_name | as_crispy_field }}
+                          </div>
+
+                      </div>
+                      <div class="form-row">
+                          <div class="form-group col-md-7 mb-0">
+                              {{ form_vendor.email | as_crispy_field }}
+                          </div>
+
+                          <div class="form-group col-md-5 mb-0">
+                              {{ form_vendor.phone | as_crispy_field }}
+                          </div>
+
+
+
+                </div>
+
+                <button type="submit" id="button-adm"
+                        class="btn btn-secondary"
+                        style="float: right;margin-top: 10px;border: 1px solid #d90075;">
+                    Save
+                </button>
+            </form>
+              </div>
+          </div>
+
+      </aside>
+
+    </div>
+  </div>
+</section>
+
           </div>
 
         </div>

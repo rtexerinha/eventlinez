@@ -8,9 +8,6 @@ from event.models import Category
 from event.models import Event
 from event.models import Promoter
 from event.models import Ticket
-
-
-# TDO: Move this to address app
 from event.models import Vendor
 
 
@@ -63,7 +60,7 @@ class EventForm(ModelForm):
 
     class Meta:
         model = Event
-        exclude = ('slug', 'created', 'updated', 'promoter',)
+        exclude = ('slug', 'created', 'updated', 'promoter', 'vendors')
 
 
 class PromoterForm(ModelForm):

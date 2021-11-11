@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 
 from event.forms import EventForm, TicketForm, VendorForm
 from event.models import Event, Ticket
@@ -19,11 +20,11 @@ def event_create(request):
     if request.method == 'POST':
         form = EventForm(request.POST, request.FILES)
         if form.is_valid():
-            events = Event(**form.cleaned_data)
-            events.promoter = request.user.promoter
-            events.save()
-            tickets = Ticket.objects.filter(event=events.pk)
-            return render(request, 'ticket_type_list.html', {'tickets': tickets, 'event_id': events.pk})
+            event = Event(**form.cleaned_data)
+            event.promoter = request.user.promoter
+            event.save()
+            tickets = Ticket.objects.filter(event=event.pk)
+            return render(request, 'ticket_type_list.html', {'tickets': tickets, 'event_id': event.pk})
     else:
         form = EventForm()
     return render(request, 'event_create.html', {'form': form})
@@ -45,7 +46,7 @@ def event_update(request, event_id):
         if form.is_valid():
             form.save()
             return redirect('events_promoter')
-    return render(request, 'event_create.html',
+    return render(request, 'event_update.html',
                   {'form': form, 'tickets': tickets,
                    'vendors': vendors,
                    'event_id_dinamic': instance.id,
@@ -91,10 +92,10 @@ def ticket_type_create(request, event_id):
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_update(request, ticket_id):
+    form = None
     instance = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'GET':
         form = TicketForm(event_id=instance.event_id, instance=instance)
-        # form.fields['event'].widget.attrs['disabled'] = 'disabled'
     if request.method == 'POST':
         form = TicketForm(event_id=instance.event_id, data=request.POST, instance=instance)
         if form.is_valid():
@@ -126,15 +127,14 @@ def vendor_create(request):
 
 @login_required(login_url='/promoter/account/login/')
 def vendor_create_per_event(request, event_id):
-    # events = Event.objects.get(id=event_id)
-    events = Vendor.objects.get(id=event_id).event_set.all()
     if request.method == 'POST':
+        event = Event.objects.get(id=event_id)
         form_vendor = VendorForm(data=request.POST)
         if form_vendor.is_valid():
             vendor = Vendor(**form_vendor.cleaned_data)
             vendor.promoter = request.user.promoter
-            vendor.event = events
             vendor.save()
+            vendor.event_set.add(event)
             return redirect('vendors_list')
     else:
         form_vendor = VendorForm()
@@ -142,16 +142,16 @@ def vendor_create_per_event(request, event_id):
 
 
 @login_required(login_url='/promoter/account/login/')
-def vendor_update_per_event(request, event_id):
-    events = Event.objects.get(id=event_id)
+def vendor_update_per_event(request, vendor_id, event_id):
+    event = Event.objects.get(id=event_id)
     if request.method == 'POST':
-        vendor_id = request.POST.get('vendors_choice')
+        # vendor_id = request.POST.get('vendors_choice')
         vendors = Vendor.objects.get(id=vendor_id)
         form_vendor = VendorForm(data=request.POST, instance=vendors)
         if form_vendor.is_valid():
             vendor = Vendor(**form_vendor.cleaned_data)
-            vendor.event = events
             vendor.save()
+            vendor.event_set.add(event)
             return redirect('vendors_list')
     else:
         form_vendor = VendorForm()
