@@ -434,7 +434,7 @@
 
           <div class="tab-content" id="myTabContent">
               <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                    <form method="POST" action="/promoter/vendor/update/1/event/{{ event_id_dinamic }}/"
+                    <form method="POST" action="/promoter/vendor/update/event/{{ event_id_dinamic }}/"
                           style="display: flex">
                         {% csrf_token %}
                         <div class="d-block" style="width: 100%;padding-right: 5px">
@@ -446,11 +446,14 @@
                                         class="form-control col-12"
                                         name="vendors_choice"
                                         style="margin: 0 10px">}
-                                        <option value="{{selected_vendor.id}}" selected="selected">
-                                            {{ selected_vendor.name }}
-                                        </option>
+                                      <option value="">All</option>
+                                        {% if selected_vendor %}
+                                            <option value="{{selected_vendor.id}}" selected="selected">
+                                                {{ selected_vendor.name }}
+                                            </option>
+                                        {% endif %}
 
-                                    <option value="">All</option>
+
 
                                     {% for vendor in vendors_without_event %}
                                         <option value="{{vendor.id}}">{{vendor.full_name}}</option>
@@ -466,6 +469,20 @@
                         </div>
 
                             </form>
+
+{#                  <form enctype="multipart/form-data"#}
+{#                        method="post" action="#"#}
+{#                        class="col-lg-12 ml-sm-4 pt-3"#}
+{#                        style="margin-left: 0!important;#}
+{#                          padding-left: 5px!important;">#}
+{#                      {% csrf_token %}#}
+{##}
+{#                      <div class="form-row">#}
+{#                          <div class="form-group col-md-6 mb-0">#}
+{#                              {{ form_vendor |crispy }}#}
+{#                          </div>#}
+{#                      </div>#}
+{#                  </form>#}
 
               </div>
               <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">

@@ -40,7 +40,7 @@ urlpatterns = [
     path('vendors/', vendors_list, name='vendors_list'),
     path('vendor/new/', vendor_create, name='vendor_create'),
     path('vendor/new/<int:event_id>/', vendor_create_per_event, name='vendor_create_per_event'),
-    path('vendor/update/<int:vendor_id>/event/<int:event_id>/', vendor_update_per_event, name='vendor_update_per_event'),
+    path('vendor/update/event/<int:event_id>/', vendor_update_per_event, name='vendor_update_per_event'),
     path('vendor/update/<int:vendor_id>/', vendor_update, name='vendor_update'),
     path('vendor/remove/<int:vendor_id>/', vendor_remove, name='vendor_remove'),
 

@@ -1,7 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
 
 from event.forms import EventForm, TicketForm, VendorForm
 from event.models import Event, Ticket
@@ -142,20 +140,16 @@ def vendor_create_per_event(request, event_id):
 
 
 @login_required(login_url='/promoter/account/login/')
-def vendor_update_per_event(request, vendor_id, event_id):
+def vendor_update_per_event(request, event_id):
+    vendor = None
     event = Event.objects.get(id=event_id)
-    if request.method == 'POST':
-        # vendor_id = request.POST.get('vendors_choice')
-        vendors = Vendor.objects.get(id=vendor_id)
-        form_vendor = VendorForm(data=request.POST, instance=vendors)
-        if form_vendor.is_valid():
-            vendor = Vendor(**form_vendor.cleaned_data)
-            vendor.save()
-            vendor.event_set.add(event)
-            return redirect('vendors_list')
-    else:
-        form_vendor = VendorForm()
-    return render(request, 'vendor_create.html', {'form_vendor': form_vendor})
+    if request.method == "POST":
+        vendor_id = request.POST.get('vendors_choice')
+        vendor = Vendor.objects.get(id=vendor_id)
+        vendor.event_set.add(event)
+        return redirect('vendors_list')
+    form_vendor = VendorForm()
+    return render(request, 'vendor_create.html', {'form_vendor': form_vendor, 'vendor_select': vendor})
 
 
 @login_required(login_url='/promoter/account/login/')
