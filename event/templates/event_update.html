@@ -25,6 +25,7 @@
          font-weight: bolder;
         text-decoration: none;
         border-color: #fff #fff #D90075 #fff!important;
+        border-bottom-width: 4px;
 }
     </style>
 {% endblock stylesheets %}
@@ -33,7 +34,7 @@
   <main>
     <div class="container-fluid pb-5 mb-5">
       <h1 class="mt-4 mb-4 title-dast">Event</h1>
-        <div id="exTab2" class="container" style="padding-left: 0;padding-right: 0">
+        <div id="exTab2" class="container m-0" style="padding-left: 0;padding-right: 0">
           <ul class="nav nav-tabs">
             <li class="nav-link active link">
               <a href="#event" data-toggle="tab" class="link-active" style="color: #00000080;">Event</a>
@@ -433,7 +434,8 @@
           </ul>
 
           <div class="tab-content" id="myTabContent">
-              <div class="tab-pane fade show active" id="selectvendor" role="tabpanel" aria-labelledby="selectvendor-tab">
+              <div class="tab-pane fade show active"
+                   id="selectvendor" role="tabpanel" aria-labelledby="selectvendor-tab">
                     <form method="POST" action="/promoter/vendor/update/event/{{ event_id_dinamic }}/"
                           style="display: flex">
                         {% csrf_token %}
