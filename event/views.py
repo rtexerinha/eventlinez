@@ -166,6 +166,8 @@ def vendor_update(request, vendor_id):
     vendors = Vendor.objects.get(id=vendor_id)
     if request.method == 'GET':
         form_vendor = VendorForm(instance=vendors)
+        form_vendor.fields['first_name'].widget.attrs['disabled'] = 'disabled'
+        form_vendor.fields['last_name'].widget.attrs['disabled'] = 'disabled'
     if request.method == 'POST':
         form_vendor = VendorForm(request.POST, instance=vendors)
         if form_vendor.is_valid():
