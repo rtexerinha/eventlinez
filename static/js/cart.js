@@ -43,10 +43,11 @@ function addToCard() {
     );
     tickets.push({ id: ticket_id, quantity: qty });
   }
-  let vendor_code = document.getElementsByClassName("vendor_code")[0].innerHTML;
-  if (vendor_code === undefined) {
-    code_vendor = null;
+  var vendor_code = null;
+  if (document.getElementById("vendor_code")) {
+    vendor_code = document.getElementsByClassName("vendor_code")[0].innerHTML;
   }
+
   let payload = {
     promo_code: null,
     vendor_code: vendor_code,

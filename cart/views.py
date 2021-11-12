@@ -34,9 +34,9 @@ def cart_add(request):
     except Cart.DoesNotExist:
         cart = Cart.objects.create(cart_id=_cart_id(request))
         cart.save()
-
     promocode = data.get("promo_code")
     vendor_code = data.get("vendor_code")
+    vendor = None
     if vendor_code:
         vendor = Vendor.objects.get(code=vendor_code)
     for tkt in data['tickets']:
