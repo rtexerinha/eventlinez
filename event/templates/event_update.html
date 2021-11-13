@@ -240,14 +240,30 @@
                           </a>
                         </button>
 
-                        <button class="button-link">
-                          <a href="{% url 'vendor_update' vendor.id%}">
-                            <i
-                              style="color: #d90075"
-                              class="fas fa-trash-alt icon_remove"
-                            ></i>
-                          </a>
-                        </button>
+{#                        <button class="button-link">#}
+{#                          <a href="{% url 'vendor_update' vendor.id%}">#}
+{#                            <i#}
+{#                              style="color: #d90075"#}
+{#                              class="fas fa-trash-alt icon_remove"#}
+{#                            ></i>#}
+{#                          </a>#}
+{#                        </button>#}
+
+                          {% if vendor.ticket_set.filter.exists %}
+                                               <button class="button-link" data-toggle="modal"
+                                                       data-target="#vendorModal">
+                                                <i style="color: #d90075" class="fas fa-trash-alt icon_remove"></i>
+                                               </button>
+                                        {% else %}
+                                            <button class="button-link">
+                                                    <a href="{% url 'vendor_remove' vendor.id%}">
+                                                        <i style=" color: #d90075"
+                                                           class="fas fa-trash-alt icon_remove"></i>
+                                                    </a>
+                                                </button>
+                                        {% endif %}
+
+
                       </div>
                     </div>
                   </section>
@@ -283,61 +299,44 @@
                         </td>
                         <td class="text-table">{{ vendor.link }}</td>
 
-                                                            <td>
-                                        <div class="div-button-table">
-{#                                            <button class="button-link">#}
-{#                                                <a href="#" onclick="share()"#}
-{#                                                   class="icon_remove_a">#}
-{#                                                    <i style="color: #d90075" class="fas fa-share-alt-square"></i>#}
-{#                                                </a>#}
-{#                                            </button>#}
+                        <td>
+                          <div class="div-button-table">
+                            <button class="button-link">
+                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ vendor.link }}"
+                                   class="icon_remove_a">
+                                    <i style="color: #d90075" class="fab fa-facebook-square"></i>
+                                </a>
+                            </button>
 
-                                            <button class="button-link">
-                                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ vendor.link }}"
-                                                   class="icon_remove_a">
-                                                    <i style="color: #d90075" class="fab fa-facebook-square"></i>
-                                                </a>
-                                            </button>
-
-                                            <button class="button-link">
-                                                <a href="https://api.whatsapp.com/send?text={{ vendor.link }}"
-                                                   class="icon_remove_a">
-                                                    <i style="color: #d90075" class="fab fa-whatsapp"></i>
-                                                </a>
-                                            </button>
-                                        </div>
-                                    </td>
-
-
+                            <button class="button-link">
+                                <a href="https://api.whatsapp.com/send?text={{ vendor.link }}"
+                                   class="icon_remove_a">
+                                    <i style="color: #d90075" class="fab fa-whatsapp"></i>
+                                </a>
+                            </button>
+                          </div>
+                        </td>
 
                         <td>
-                          <div
-                            class="div-button-table"
-                            style="justify-content: flex-end"
-                          >
+                          <div class="div-button-table" style="justify-content: flex-end">
                             <button class="button-link">
-                              <a
-                                href="{% url 'vendor_update' vendor.id %}"
-                                class="icon_remove_a"
-                              >
-                                <i
-                                  style="color: #d90075"
-                                  class="far fa-edit icon_remove"
-                                ></i>
+                              <a href="{% url 'vendor_update' vendor.id %}" class="icon_remove_a">
+                                <i style="color: #d90075" class="far fa-edit icon_remove"></i>
                               </a>
                             </button>
 
+                          {% if vendor.ticket_set.filter.exists %}
+                            <button class="button-link" data-toggle="modal" data-target="#vendorModal">
+                              <i style="color: #d90075" class="fas fa-trash-alt icon_remove"></i>
+                            </button>
+
+                          {% else %}
                             <button class="button-link">
-                              <a
-                                href="{% url 'vendor_remove' vendor.id%}"
-                                class="icon_remove_a"
-                              >
-                                <i
-                                  style="color: #d90075"
-                                  class="fas fa-trash-alt icon_remove"
-                                ></i>
+                              <a href="{% url 'vendor_remove' vendor.id%}">
+                                <i style=" color: #d90075" class="fas fa-trash-alt icon_remove"></i>
                               </a>
                             </button>
+                          {% endif %}
                           </div>
                         </td>
                       </tr>
@@ -386,9 +385,8 @@
             {% endif %}
 
            <!-- Modal -->
-<section class="modal fade" id="exampleModalCenter"
-     tabindex="-1" role="dialog"
-     aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <section class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header pt-4 pb-0" style="border-bottom: none">
@@ -502,15 +500,33 @@
   </div>
 </section>
 
-          </div>
 
+              <aside class="modal fade" id="vendorModal" tabindex="-1"
+                     aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">Error</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+
+                    <div class="modal-body">
+                      <p>You cannot delete this vendor because it already have tickets sold</p>
+                    </div>
+
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
         </div>
       </div>
+      <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     </div>
-
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-{#  <script src="{% static 'js/bootstrap.min.js' %}"></script>#}
-  </div>
-</main>
-
+  </main>
 {% endblock content %}
