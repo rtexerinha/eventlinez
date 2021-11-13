@@ -12,7 +12,7 @@
                 <div>
 
                     <header class="row">
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 mb-2">
                             <form method="POST" style="display: flex">
                                 {% csrf_token %}
                                 <label for="eventsChoice"
@@ -37,22 +37,21 @@
                                 <button action="submit"
                                         id="button-adm"
                                         class="btn btn-secondary"
-                                        style="margin-top: 8px;
-                                   background-color: #d90075">
+                                        style="margin-top: 8px;background-color: #d90075">
                                     Filter
                                 </button>
                             </form>
                         </div>
 
-                        <div class="col-lg-6 col-md-7 div-adm-newevent"
-                             style="justify-content: flex-end;">
-                            <button onclick="exportTicket()"
-                                    id="button-adm"
-                                    class="btn btn-secondary"
-                                    style="margin-top: 10px;">
-                                Export
-                            </button>
-                        </div>
+{#                        <div class="col-lg-6 col-md-7 div-adm-newevent"#}
+{#                             style="justify-content: flex-end;">#}
+{#                            <button onclick="exportTicket()"#}
+{#                                    id="button-adm"#}
+{#                                    class="btn btn-secondary"#}
+{#                                    style="margin-top: 10px;">#}
+{#                                Export#}
+{#                            </button>#}
+{#                        </div>#}
                     </header>
 
                     <section class="table-responsive">
