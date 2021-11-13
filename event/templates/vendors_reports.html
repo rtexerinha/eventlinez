@@ -34,7 +34,7 @@
                                     {% endfor %}
                                 </select>
 
-                                <button action="submit"
+                                <button type="submit"
                                         id="button-adm"
                                         class="btn btn-secondary"
                                         style="margin-top: 8px;background-color: #d90075">
@@ -83,36 +83,37 @@
             </table>
         </section>
 
-{#            <section class="col-12 mb-5">#}
-{#            {% if tickets.paginator.num_pages > 1 %}#}
-{#            <div class="row row-paginator">#}
-{#                <div class="col-lg-3 col-5">#}
-{#                    <span class="text-table">#}
-{#                        Showing {{ tickets.number }} - {{ tickets.paginator.num_pages }}#}
-{#                    </span>#}
-{#                </div>#}
-{##}
-{#                <div class="col-lg-6"></div>#}
-{#                <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">#}
-{#                    {% if tickets.has_previous %}#}
-{#                    <a class="text-table text pr-3"#}
-{#                       href="?page={{ tickets.previous_page_number }}">#}
-{#                        <i class="fas fa-chevron-left fa-sm" style="color: #d90075; height: 10px; width: 10px"></i>#}
-{#                        Prev#}
-{#                    </a>#}
-{#                    {% endif %}#}
-{##}
-{#                    {% if tickets.has_next %}#}
-{#                    <a class="text-table text"#}
-{#                       href="?page={{ tickets.next_page_number }}">#}
-{#                        Next#}
-{#                        <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>#}
-{#                    </a>#}
-{#                    {% endif %}#}
-{#                </div>#}
-{#            {% endif %}#}
-{#            </div>#}
-{#        </section>#}
+            <section class="col-12 mb-5">
+            {% if vendors.paginator.num_pages > 1 %}
+            <div class="row row-paginator">
+                <div class="col-lg-3 col-5">
+                    <span class="text-table">
+                        Showing {{ vendors.number }} - {{ vendors.paginator.num_pages }}
+                    </span>
+                </div>
+
+                <div class="col-lg-6"></div>
+                <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
+                    {% if vendors.has_previous %}
+                    <a class="text-table text pr-3"
+                       href="?page={{ vendors.previous_page_number }}">
+                        <i class="fas fa-chevron-left fa-sm"
+                           style="color: #d90075; height: 10px; width: 10px"></i>
+                        Prev
+                    </a>
+                    {% endif %}
+
+                    {% if vendors.has_next %}
+                    <a class="text-table text"
+                       href="?page={{ vendors.next_page_number }}">
+                        Next
+                        <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+            </div>
+        </section>
         </div>
         {% else %}
 

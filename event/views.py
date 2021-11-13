@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.core.paginator import EmptyPage, Paginator, InvalidPage
 from django.shortcuts import render, redirect, get_object_or_404
 
 from event.forms import EventForm, TicketForm, VendorForm
@@ -155,11 +155,23 @@ def vendor_update_per_event(request, event_id):
 
 @login_required(login_url='/promoter/account/login/')
 def vendors_reports(request):
-    # Filtrar para mostrar apenas events que tem ingressos vendidos
+    selected_event = None
     events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
     vendors = Vendor.objects.filter(promoter=request.user.promoter).order_by('first_name')
+    if request.method == "POST":
+        events_id = request.POST.get('events_choice')
+        if events_id:
+            selected_event = Event.objects.get(pk=events_id)
+            vendors = vendors.filter(event=selected_event)
+    paginator = Paginator(vendors, 25)
+    page = int(request.GET.get('page', '1'))
+    try:
+        vendors = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        vendors = paginator.page(paginator.num_pages)
     return render(request, 'vendors_reports.html', {'vendors': vendors,
-                                                    'events': events
+                                                    'events': events,
+                                                    'selected_event': selected_event
                                                     })
 
 
