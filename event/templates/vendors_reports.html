@@ -7,7 +7,7 @@
 {% block content %}
     <main>
         <div class="container-fluid">
-            <h1 class="mt-4 title-dast">Vendors reports</h1>
+            <h1 class="mt-4 title-dast">Sales by Vendor </h1>
             {% if vendors %}
                 <div>
 
@@ -16,7 +16,7 @@
                             <form method="POST" style="display: flex">
                                 {% csrf_token %}
                                 <label for="eventsChoice"
-                                       style="font-size: 16px; margin-top: 10px">Reports</label>
+                                       style="font-size: 16px; margin-top: 10px">Event</label>
                                 <select id="eventsChoice"
                                         class="form-control form-control-sm col-sm-3 col-md-3 col-lg-8 mt-2"
                                         name="events_choice"
@@ -60,22 +60,25 @@
                             <thead>
                                 <tr style="background-color:#F4F4F4;">
                                     <th class="text-table text-bold">Event</th>
-                                    <th class="text-table text-bold">Vendors</th>
-                                    <th class="text-table text-bold">Email</th>
-                                    <th class="text-table text-bold">Number tickets</th>
+                                    <th class="text-table text-bold">Vendor</th>
+                                    <th class="text-table text-bold" style="text-align: center">Number tickets</th>
                                     <th class="text-table text-bold">Amount</th>
                                 </tr>
                             </thead>
 
+
                             <tbody>
                 {% for vendor in vendors %}
-                    <tr>
-                        <td class="text-table">xAND NOME ESTATICO</td>
-                        <td class="text-table">{{vendor.full_name}}</td>
-                        <td class="text-table">{{vendor.email }}</td>
-                        <td class="text-table" style="padding-left: 40px;">10</td>
-                        <td class="text-table">R$ 100,00</td>
-                    </tr>
+                    {% for e in vendor.event_set.all %}
+                        {%  if vendor.ticket_set.filter.exists %}
+                        <tr>
+                            <td class="text-table">{{ e }}</td>
+                            <td class="text-table">{{vendor.full_name}}</td>
+                            <td class="text-table" style="text-align: center">{{ vendor.qty_sould_by_vendor }}</td>
+                            <td class="text-table">{{ vendor.get_amount_vendor }}</td>
+                        </tr>
+                        {% endif %}
+                     {% endfor %}
                 {% endfor %}
                 </tbody>
             </table>

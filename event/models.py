@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 from imagekit.models import ImageSpecField
@@ -74,6 +74,21 @@ class Vendor(models.Model):
     def link(self):
         event = Event.objects.filter(vendors=self.id)[0]
         return APP_HOST + '/shop/' + str(event.category) + '/' + str(event) + '/?vendor=' + self.code
+        # return APP_HOST + '/shop/' + str(event) + '/?vendor=' + self.code
+
+    def qty_sould_by_vendor(self):
+        from ticket.models import Ticket as TicketSould
+        qty = 0
+        qty = TicketSould.objects.filter(vendor_id=self).annotate(count=Count('id')).count()
+        return qty
+
+    def get_amount_vendor(self):
+        from ticket.models import Ticket as TicketSould
+        result = TicketSould.objects.filter(vendor_id=self).aggregate(Sum('price'))
+        _amount = result['price__sum']
+        if not _amount:
+            return 0
+        return _amount
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
