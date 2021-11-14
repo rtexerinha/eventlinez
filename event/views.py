@@ -134,7 +134,7 @@ def vendor_create_per_event(request, event_id):
             vendor.promoter = request.user.promoter
             vendor.save()
             vendor.event_set.add(event)
-            return redirect('vendors_list')
+            return redirect('update_event', event_id=event_id)
     else:
         form_vendor = VendorForm()
     return render(request, 'vendor_create.html', {'form_vendor': form_vendor})
@@ -148,7 +148,7 @@ def vendor_update_per_event(request, event_id):
         vendor_id = request.POST.get('vendors_choice')
         vendor = Vendor.objects.get(id=vendor_id)
         vendor.event_set.add(event)
-        return redirect('vendors_list')
+        return redirect('update_event', event_id=event_id)
     form_vendor = VendorForm()
     return render(request, 'vendor_create.html', {'form_vendor': form_vendor, 'vendor_select': vendor})
 
