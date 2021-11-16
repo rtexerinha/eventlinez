@@ -71,20 +71,6 @@ class Vendor(models.Model):
     def full_name(self):
         return self.first_name + ' ' + self.last_name
 
-    def qty_sould_by_vendor(self):
-        from ticket.models import Ticket as TicketSould
-        qty = 0
-        qty = TicketSould.objects.filter(vendor_id=self).annotate(count=Count('id')).count()
-        return qty
-
-    def get_amount_vendor(self):
-        from ticket.models import Ticket as TicketSould
-        result = TicketSould.objects.filter(vendor_id=self).aggregate(Sum('price'))
-        _amount = result['price__sum']
-        if not _amount:
-            return 0
-        return _amount
-
     def __str__(self):
         return self.first_name + ' ' + self.last_name
 
@@ -182,3 +168,15 @@ class Ticket(models.Model):
 
     def __str__(self):
         return "%s/%s" % (self.event.name, self.name)
+
+
+class SalesByVendor(models.Model):
+    id = models.IntegerField(primary_key=True)
+    vendor = models.ForeignKey(Vendor, db_column="vendor_id", on_delete=models.DO_NOTHING)
+    event = models.ForeignKey(Event, db_column="event_id", on_delete=models.DO_NOTHING)
+    qty = models.IntegerField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        managed = False
+        db_table = 'sales_by_vendor'
