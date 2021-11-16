@@ -71,11 +71,6 @@ class Vendor(models.Model):
     def full_name(self):
         return self.first_name + ' ' + self.last_name
 
-    def link(self):
-        event = Event.objects.filter(vendors=self.id)[0]
-        return APP_HOST + '/shop/' + str(event.category) + '/' + str(event) + '/?vendor=' + self.code
-        # return APP_HOST + '/shop/' + str(event) + '/?vendor=' + self.code
-
     def qty_sould_by_vendor(self):
         from ticket.models import Ticket as TicketSould
         qty = 0
