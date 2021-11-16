@@ -50,8 +50,7 @@ def event_update(request, event_id):
                    'vendors': vendors,
                    'event': event,
                    'form_vendor': form_vendor,
-                   'vendors_without_event':
-                       vendors_without_event})
+                   'vendors_without_event': vendors_without_event})
 
 
 @login_required(login_url='/promoter/account/login/')
