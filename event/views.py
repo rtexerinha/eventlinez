@@ -36,19 +36,19 @@ def event_update(request, event_id):
     vendors = Vendor.objects.filter(promoter=request.user.promoter.id, event=event_id)
     vendors_without_event = Vendor.objects.filter(promoter=request.user.promoter.id).exclude(event=event_id)
     tickets = Ticket.objects.filter(event=event_id)
-    instance = get_object_or_404(Event, id=event_id)
+    event = get_object_or_404(Event, id=event_id)
     if request.method == 'GET':
-        form = EventForm(instance=instance)
+        form = EventForm(instance=event)
         form_vendor = VendorForm()
     if request.method == 'POST':
-        form = EventForm(request.POST, request.FILES, instance=instance)
+        form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
             form.save()
             return redirect('events_promoter')
     return render(request, 'event_update.html',
                   {'form': form, 'tickets': tickets,
                    'vendors': vendors,
-                   'event_id_dinamic': instance.id,
+                   'event': event,
                    'form_vendor': form_vendor,
                    'vendors_without_event':
                        vendors_without_event})
