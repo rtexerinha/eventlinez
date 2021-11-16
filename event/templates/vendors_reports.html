@@ -8,9 +8,7 @@
     <main>
         <div class="container-fluid">
             <h1 class="mt-4 title-dast">Sales by Vendor </h1>
-            {% if vendors %}
                 <div>
-
                     <header class="row">
                         <div class="col-lg-6 mb-2">
                             <form method="POST" style="display: flex">
@@ -27,7 +25,7 @@
                                             {{ selected_event.name }}
                                         </option>
                                     {% endif %}
-                                    <option value="" >All</option>
+                                    <option value="">Option Select</option>
 
                                     {% for event in events %}
                                         <option value="{{event.id}}">{{event.name}}</option>
@@ -54,6 +52,9 @@
 {#                        </div>#}
                     </header>
 
+
+                {% if tickets %}
+
                     <section class="table-responsive">
                         <table class="table table-bordered" id="dataTable">
                             <thead>
@@ -66,60 +67,26 @@
                             </thead>
 
 
-                            <tbody>
-                {% for vendor in vendors %}
-                    {% for e in vendor.event_set.all %}
-                        {%  if vendor.ticket_set.filter.exists %}
-                        <tr>
-                            <td class="text-table">{{ e }}</td>
-                            <td class="text-table">{{vendor.full_name}}</td>
-                            <td class="text-table" style="text-align: center">{{ vendor.qty_sould_by_vendor }}</td>
-                            <td class="text-table">{{ vendor.get_amount_vendor }}</td>
-                        </tr>
-                        {% endif %}
-                     {% endfor %}
-                {% endfor %}
-                </tbody>
-            </table>
+                            {% for ticket in tickets %}
+                                    <tbody>
+                                         <tr>
+                                            <td class="text-table">{{ ticket.event }}</td>
+                                            <td class="text-table">{{ ticket.vendor }}</td>
+                                             <td class="text-table" style="text-align: center">{{ ticket.qty }}</td>
+                                             <td class="text-table">{{ ticket.amount }}</td>
+                                         </tr>
+                                    </tbody>
+                            {% endfor %}
+                        </table>
         </section>
 
-            <section class="col-12 mb-5">
-            {% if vendors.paginator.num_pages > 1 %}
-            <div class="row row-paginator">
-                <div class="col-lg-3 col-5">
-                    <span class="text-table">
-                        Showing {{ vendors.number }} - {{ vendors.paginator.num_pages }}
-                    </span>
-                </div>
-
-                <div class="col-lg-6"></div>
-                <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
-                    {% if vendors.has_previous %}
-                    <a class="text-table text pr-3"
-                       href="?page={{ vendors.previous_page_number }}">
-                        <i class="fas fa-chevron-left fa-sm"
-                           style="color: #d90075; height: 10px; width: 10px"></i>
-                        Prev
-                    </a>
-                    {% endif %}
-
-                    {% if vendors.has_next %}
-                    <a class="text-table text"
-                       href="?page={{ vendors.next_page_number }}">
-                        Next
-                        <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
-                    </a>
-                    {% endif %}
-                </div>
-            {% endif %}
-            </div>
-        </section>
         </div>
         {% else %}
 
                  <div style="width: 100%; margin: auto">
                     <article id="event-div" style="display: flex; flex-direction: column">
-                        <h4 class="h4-promoter centralized">No reports</h4>
+                        <h4 class="h4-promoter centralized">Option Select</h4>
+                         <h6 class="h6-promoter centralized" style="color: #495057">Select an event to get the sellers' sales report</h6>
                         <br>
                         <i class="fas fa-file-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
 

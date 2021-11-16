@@ -154,24 +154,20 @@ def vendor_update_per_event(request, event_id):
 
 @login_required(login_url='/promoter/account/login/')
 def vendors_reports(request):
+    from .models import SalesByVendor
+    tickets = None
     selected_event = None
-    events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
-    vendors = Vendor.objects.filter(promoter=request.user.promoter).order_by('first_name')
+
     if request.method == "POST":
-        events_id = request.POST.get('events_choice')
-        if events_id:
-            selected_event = Event.objects.get(pk=events_id)
-            vendors = vendors.filter(event=selected_event)
-    paginator = Paginator(vendors, 25)
-    page = int(request.GET.get('page', '1'))
-    try:
-        vendors = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        vendors = paginator.page(paginator.num_pages)
-    return render(request, 'vendors_reports.html', {'vendors': vendors,
-                                                    'events': events,
-                                                    'selected_event': selected_event
-                                                    })
+        event_id = request.POST.get('events_choice')
+        if event_id:
+            tickets = SalesByVendor.objects.filter(event=event_id)
+    events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
+    return render(request, 'vendors_reports.html', {
+        'tickets': tickets,
+        'events': events,
+        'selected_event': selected_event
+        })
 
 
 @login_required(login_url='/promoter/account/login/')
