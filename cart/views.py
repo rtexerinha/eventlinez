@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
 from event.models import Ticket
-from event.models import Vendor
+from promoter.models import Vendor
 from .models import Cart, CartItem
 
 logger = logging.getLogger(__name__)

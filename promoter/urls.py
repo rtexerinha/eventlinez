@@ -1,9 +1,8 @@
 from django.urls import path
 from promoter.views import update_promoter, reset_password, signup_view_promoter, signin_view_promoter, \
-    signout_view_promoter
-from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event, \
-    vendors_list, vendor_create, vendors_reports, vendor_update, vendor_remove, vendor_create_per_event, \
-    vendor_update_per_event
+    signout_view_promoter, vendors_list, vendor_create, vendor_update, vendor_remove, vendor_create_per_event, \
+    vendor_update_per_event, vendors_reports
+from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
 

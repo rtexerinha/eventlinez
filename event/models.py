@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Sum, Count
+from django.db.models import Sum
 from django.template.defaultfilters import slugify
 from django.urls import reverse
 from imagekit.models import ImageSpecField
@@ -13,7 +13,6 @@ from imagekit.processors import ResizeToFill
 
 from address.models import City
 from customer.models import Customer
-from local_settings import APP_HOST
 
 
 def validate_image(image):
@@ -56,25 +55,6 @@ class Promoter(models.Model):
         return '{}'.format(self.name)
 
 
-class Vendor(models.Model):
-    first_name = models.CharField(max_length=250)
-    last_name = models.CharField(max_length=250, default='')
-    email = models.CharField(max_length=250, unique=True)
-    phone = models.CharField(max_length=12, null=True, blank=True)
-    code = models.CharField(max_length=100, unique=True)
-    promoter = models.ForeignKey(Promoter, blank=True, null=True, on_delete=models.SET_NULL)
-
-    def save(self, *args, **kwargs):
-        self.code = slugify(self.full_name())
-        super(Vendor, self).save(*args, **kwargs)
-
-    def full_name(self):
-        return self.first_name + ' ' + self.last_name
-
-    def __str__(self):
-        return self.first_name + ' ' + self.last_name
-
-
 class Event(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(max_length=250, unique=True)
@@ -89,7 +69,9 @@ class Event(models.Model):
     available = models.BooleanField(default=False)
     image = models.ImageField(upload_to='event', blank=False, null=False,
                               validators=[validate_image],
-                              help_text='The recommended dimensions is 1600 x 838. Images with different dimensions will be resized. The image can not be greater than 3MB')
+                              help_text='The recommended dimensions is 1600 x 838. '
+                                        'Images with different dimensions will be resized. '
+                                        'The image can not be greater than 3MB')
     image_sized = ImageSpecField(source='image',
                                  processors=[ResizeToFill(800, 500)],
                                  format='JPEG',
@@ -98,7 +80,7 @@ class Event(models.Model):
                                processors=[ResizeToFill(265, 150)],
                                format='JPEG',
                                options={'quality': 90})
-    vendors = models.ManyToManyField(Vendor, blank=True)
+    vendors = models.ManyToManyField("promoter.Vendor", blank=True)
 
     class Meta:
         ordering = ('name',)
@@ -168,15 +150,3 @@ class Ticket(models.Model):
 
     def __str__(self):
         return "%s/%s" % (self.event.name, self.name)
-
-
-class SalesByVendor(models.Model):
-    id = models.IntegerField(primary_key=True)
-    vendor = models.ForeignKey(Vendor, db_column="vendor_id", on_delete=models.DO_NOTHING)
-    event = models.ForeignKey(Event, db_column="event_id", on_delete=models.DO_NOTHING)
-    qty = models.IntegerField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-
-    class Meta:
-        managed = False
-        db_table = 'sales_by_vendor'

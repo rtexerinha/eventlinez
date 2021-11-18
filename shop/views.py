@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 
 from event.models import Category, Event
-from event.models import Vendor
+from promoter.models import Vendor
 from .forms import ContactForm
 from .models import SpecialEvents
 

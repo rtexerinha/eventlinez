@@ -8,7 +8,8 @@ from django.core.mail import EmailMessage
 from django.db.models import Sum
 
 from customer.models import Customer
-from event.models import Event, Vendor
+from event.models import Event
+from promoter.models import Vendor
 from ticket.models import Ticket
 
 

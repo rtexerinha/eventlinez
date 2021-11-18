@@ -8,7 +8,7 @@ from event.models import Category
 from event.models import Event
 from event.models import Promoter
 from event.models import Ticket
-from event.models import Vendor
+from promoter.models import Vendor
 
 
 class CityForm(ModelForm):

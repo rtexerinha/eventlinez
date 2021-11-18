@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('event', '0034_auto_20211110_1132'),
+        ('promoter', '0001_initial'),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                     from ticket_ticket tt,
                          event_ticket et,
                          event_event ee,
-                         event_vendor ev
+                         promoter_vendor ev
                     where tt.event_ticket_id = et.id
                     and et.event_id = ee.id
                     and tt.vendor_id = ev.id
