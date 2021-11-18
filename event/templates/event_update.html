@@ -203,13 +203,13 @@
 
                       <p class="p-promoter" style="color: #7b7b7b">
                         <b style="color: #383838">Link: </b>
-                        {{ request.get_host }}/shop/{{ event.category }}/{{ event.slug }}/?vendor={{ vendor.code }}
+                        {{ request.get_host }}/shop/{{ event.category.slug }}/{{ event.slug }}/?vendor={{ vendor.code }}
                       </p>
 
                       <div class="div-button-table">
                         <button class="button-link">
                           <a
-                            href="https://www.facebook.com/sharer/sharer.php?u={{ request.get_host }}/shop/{{ event.category }}/{{ event.slug }}/?vendor={{ vendor.code }}">
+                            href="https://www.facebook.com/sharer/sharer.php?u={{ request.get_host }}/shop/{{ event.category.slug }}/{{ event.slug }}/?vendor={{ vendor.code }}">
                             <i
                               style="color: #d90075"
                               class="fab fa-facebook-square"
@@ -219,7 +219,7 @@
 
                         <button class="button-link">
                           <a
-                            href="https://api.whatsapp.com/send?text={{ request.get_host }}/shop/{{ event.category }}/{{ event.slug }}/?vendor={{ vendor.code }}">
+                            href="https://api.whatsapp.com/send?text={{ request.get_host }}/shop/{{ event.category.slug }}/{{ event.slug }}/?vendor={{ vendor.code }}">
                             <i
                               style="color: #d90075"
                               class="fab fa-whatsapp"
@@ -289,19 +289,19 @@
                           </a>
                         </td>
                         <td class="text-table">
-                            {{ request.get_host }}/shop/{{ event.category }}/{{ event.slug }}/?vendor={{ vendor.code }}
+                            {{ request.get_host }}/shop/{{ event.category.slug }}/{{ event.slug }}/?vendor={{ vendor.code }}
                         </td>
                         <td>
                           <div class="div-button-table">
                             <button class="button-link">
-                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.get_host }}/shop/{{ event.category }}/{{ event.slug }}/?vendor={{ vendor.code }}"
+                                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.get_host }}/shop/{{ event.category.slug }}/{{ event.slug }}/?vendor={{ vendor.code }}"
                                    class="icon_remove_a">
                                     <i style="color: #d90075" class="fab fa-facebook-square"></i>
                                 </a>
                             </button>
 
                             <button class="button-link">
-                                <a href="https://api.whatsapp.com/send?text={{ request.get_host }}/shop/{{ event.category }}/{{ event.slug }}/?vendor={{ vendor.code }}"
+                                <a href="https://api.whatsapp.com/send?text={{ request.get_host }}/shop/{{ event.category.slug }}/{{ event.slug }}/?vendor={{ vendor.code }}"
                                    class="icon_remove_a">
                                     <i style="color: #d90075" class="fab fa-whatsapp"></i>
                                 </a>
