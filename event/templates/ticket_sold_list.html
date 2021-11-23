@@ -24,7 +24,8 @@
                             id="events_choice"
                             style="margin: 0 10px">
                         {% if selected_event %}
-                            <option value="{{selected_event.id}}" selected="selected">{{ selected_event.name }}</option>
+                            <option value="{{selected_event.id}}"
+                                    selected="selected">{{ selected_event.name }}</option>
                         {% endif %}
                         <option value="" >All</option>
                         {% for event in events %}

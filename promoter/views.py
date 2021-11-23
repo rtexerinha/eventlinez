@@ -1,7 +1,11 @@
 from django.contrib import messages
+from io import BytesIO
+from os import path
 from django.contrib.auth import update_session_auth_hash, authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+import xlsxwriter
+from django.http import StreamingHttpResponse
 
 # Create your views here.
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
@@ -166,9 +170,74 @@ def vendors_reports(request):
         event_id = request.POST.get('events_choice')
         if event_id:
             tickets = SalesByVendor.objects.filter(event=event_id)
+            selected_event = Event.objects.get(id=event_id)
     events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
     return render(request, 'vendor/vendors_reports.html', {
         'tickets': tickets,
         'events': events,
         'selected_event': selected_event
         })
+
+
+@login_required(login_url='/promoter/account/login/')
+def vendor_export_excel(request, event_id):
+    out = BytesIO()
+    response = StreamingHttpResponse(
+        out, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=sales_by_vendors.xlsx'
+
+    workbook = xlsxwriter.Workbook(out)
+    sheet = workbook.add_worksheet("Sales by Vendor")
+    sheet.set_tab_color('#3c215c')
+
+    props_float = {'num_format': '[$$-409]#,##0.00', 'font_size': 10, 'align': 'vcenter', 'color': '#171717',
+                   'bg_color': '#FFFFFF', 'font_name': 'Arial', 'bottom': 1,
+                   'bottom_color': '#dee2e6', 'valign': 'vcenter'}
+
+    title_props = {'bold': True, 'font_size': 14, 'align': 'center', 'valign': 'vcenter', 'font_name': 'Arial'}
+
+    props_header = {'bold': True, 'font_size': 10, 'align': 'center', 'valign': 'vcenter',
+                    'color': '#171717', 'bg_color': '#F4F4F4', 'font_name': 'Arial'}
+
+    props_table = {'font_size': 10, 'align': 'center', 'color': '#171717', 'bg_color': '#FFFFFF',
+                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'vcenter'}
+
+    props_event = {'font_size': 10, 'align': 'left', 'color': '#171717', 'bg_color': '#FFFFFF',
+                   'font_name': 'Arial', 'bottom': 1, 'bottom_color': '#dee2e6', 'valign': 'left'}
+
+    title_format = workbook.add_format(title_props)
+    tthead = workbook.add_format(props_header)
+    event_style = workbook.add_format(props_event)
+    tbody_style = workbook.add_format(props_table)
+    money_format = workbook.add_format(props_float)
+
+    sheet.set_column('A:A', 40)
+    sheet.set_column('B:B', 40)
+    sheet.set_column('C:C', 20)
+    sheet.set_column('D:D', 20)
+    sheet.set_row(1, 25)
+    sheet.set_default_row(30)
+    sheet.merge_range('A1:F1', u"", title_format)
+
+    tickets = SalesByVendor.objects.filter(event=event_id).values_list(
+        'event__name', 'vendor__first_name', 'vendor__last_name', 'qty', 'amount').order_by('-event')
+
+    row_num = 1
+    columns = ['event', 'vendor', 'qty', 'amount']
+    for col_num in range(len(columns)):
+        sheet.write(row_num, col_num, columns[col_num], tthead)
+
+    for idx, data in enumerate(tickets):
+        row = 2 + idx
+        sheet.write_string(row, 0, data[0], event_style)
+        sheet.write_string(row, 1, data[1] + ' ' + data[2], event_style)
+        sheet.write_number(row, 2, data[3], tbody_style)
+        sheet.write_number(row, 3, data[4], money_format,)
+
+    way = path.abspath("static")
+    logo = path.join(way, 'img', 'logo.png')
+    sheet.insert_image('A1', logo)
+
+    workbook.close()
+    out.seek(0)
+    return response
