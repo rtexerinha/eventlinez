@@ -34,13 +34,13 @@ def ticket_checkin(request, checkin):
     if ticket.checkin_date is not None:
         errors.append('Ticket has already been validated!')
     if errors is not None and len(errors):
-        return render(request, 'ticket_checkin_error.html', {'errors': errors})
+        return render(request, 'ticket/ticket_checkin_error.html', {'errors': errors})
     ticket.checkin_date = datetime.now()
     ticket.save()
     tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter,
                                     event_ticket=ticket.event_ticket,
                                     checkin_date__isnull=False).order_by('-checkin_date')
-    return render(request, 'ticket_checkin.html', {'tickets': tickets})
+    return render(request, 'ticket/ticket_checkin.html', {'tickets': tickets})
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -52,7 +52,7 @@ def search_checkin(request):
         ticket = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter)
         tickets = ticket.all().filter(
             Q(guest_name__icontains=query) | Q(id__icontains=query))
-    return render(request, 'ticket_checkin.html', {'query': query, 'tickets': tickets})
+    return render(request, 'ticket/ticket_checkin.html', {'query': query, 'tickets': tickets})
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -64,7 +64,7 @@ def search_ticket_sold(request):
         ticket = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter)
         tickts = ticket.all().filter(
             Q(guest_name__icontains=q) | Q(id__icontains=q))
-    return render(request, 'ticket_sold_list.html', {'query': q, 'tickets': tickts})
+    return render(request, 'ticket/ticket_sold_list.html', {'query': q, 'tickets': tickts})
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -86,7 +86,7 @@ def tickets_validate(request):
     except (EmptyPage, InvalidPage):
         tickets = paginator.page(paginator.num_pages)
     data = {'tickets': tickets, 'events': events, 'selected_event': selected_event}
-    return render(request, 'ticket_checkin.html', data)
+    return render(request, 'ticket/ticket_checkin.html', data)
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -115,7 +115,7 @@ def tickets_sold_list(request):
     except (EmptyPage, InvalidPage):
         tickets = paginator.page(paginator.num_pages)
     data = {'tickets': tickets, 'events': events, 'selected_event': selected_event}
-    return render(request, 'ticket_sold_list.html', data)
+    return render(request, 'ticket/ticket_sold_list.html', data)
 
 
 @login_required(login_url='/promoter/account/login/')
