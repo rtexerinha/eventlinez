@@ -7,6 +7,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('promoter', '0001_initial'),
+        ('event', '0033_event_vendors'),
+        ('ticket', '0004_ticket_vendor'),
     ]
 
     operations = [
