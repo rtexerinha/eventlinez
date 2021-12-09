@@ -98,7 +98,7 @@ def product_event_detail(request, c_slug, event_slug):
     if request.META['QUERY_STRING']:
         pathpage = pathpage + '?' + request.META['QUERY_STRING']
     response = render(request, 'shop/event.html', {'event': event, 'products_list': products_list, 'vendor': vendor})
-    response.set_cookie(key='backpage', value=pathpage, samesite='None', secure=True)
+    response.set_cookie(key='backpage', value=pathpage, max_age=60)
     return response
 
 
