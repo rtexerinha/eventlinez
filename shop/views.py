@@ -94,7 +94,12 @@ def product_event_detail(request, c_slug, event_slug):
         products_list = Event.objects.all().filter(available=True)
     except Exception as e:
         raise e
-    return render(request, 'shop/event.html', {'event': event, 'products_list': products_list, 'vendor': vendor})
+    pathpage = request.META['PATH_INFO']
+    if request.META['QUERY_STRING']:
+        pathpage = pathpage + '?' + request.META['QUERY_STRING']
+    response = render(request, 'shop/event.html', {'event': event, 'products_list': products_list, 'vendor': vendor})
+    response.set_cookie(key='backpage', value=pathpage, samesite='None', secure=True)
+    return response
 
 
 def search_result(request):

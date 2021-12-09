@@ -1,10 +1,12 @@
 from datetime import datetime
-
+import json
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
+from cart.models import Cart, CartItem
+from cart.views import _cart_id
 from ticket.models import Ticket
 from .forms import SignUpForm, SignInForm, CustomerForm, UserForm, \
     ResetPasswordForm
@@ -25,7 +27,8 @@ def signup_view(request):
             password = form.cleaned_data['password1']
             user_auth = authenticate(username=username, password=password)
             login(request, user_auth)
-            return redirect('shop:index')
+            pageback = request.COOKIES['backpage']
+            return HttpResponseRedirect(pageback)
     else:
         form = SignUpForm()
     return render(request, 'accounts/signup_customer_new.html', {'form': form})
@@ -40,7 +43,8 @@ def signin_view(request):
             customer = authenticate(username=username, password=password)
             if customer is not None:
                 login(request, customer)
-                return redirect('shop:index')
+                pageback = request.COOKIES['backpage']
+                return HttpResponseRedirect(pageback)
             else:
                 return redirect('signup')
     else:
