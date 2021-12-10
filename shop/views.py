@@ -81,8 +81,8 @@ def pagination_home(request, lists):
         except (EmptyPage, InvalidPage):
             events_future = pagin[0].page(pagin[0].num_pages)
             events_old = pagin[1].page(pagin[1].num_pages)
-    eventsListsOfLists = [events_future, events_old, events_all]
-    return eventsListsOfLists
+    eventslistsoflists = [events_future, events_old, events_all]
+    return eventslistsoflists
 
 
 def product_event_detail(request, c_slug, event_slug):
@@ -91,10 +91,14 @@ def product_event_detail(request, c_slug, event_slug):
         vendor = Vendor.objects.filter(code=request.GET.get('vendor')).first()
     try:
         event = Event.objects.get(category__slug=c_slug, slug=event_slug)
-        products_list = Event.objects.all().filter(available=True)
     except Exception as e:
         raise e
-    return render(request, 'shop/event.html', {'event': event, 'products_list': products_list, 'vendor': vendor})
+    pathpage = request.META['PATH_INFO']
+    if request.META['QUERY_STRING']:
+        pathpage = pathpage + '?' + request.META['QUERY_STRING']
+    response = render(request, 'shop/event.html', {'event': event, 'vendor': vendor})
+    response.set_cookie(key='backpage', value=pathpage, max_age=60)
+    return response
 
 
 def search_result(request):
@@ -140,7 +144,6 @@ def contact(request):
                 message=msg,
                 from_email="noreply@eventlinez.com",
                 recipient_list=["eventlinez.adm@gmail.com"],
-                fail_silently=False,
                 html_message=html_message
             )
         except BadHeaderError:
