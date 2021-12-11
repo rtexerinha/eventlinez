@@ -27,8 +27,10 @@ def signup_view(request):
             password = form.cleaned_data['password1']
             user_auth = authenticate(username=username, password=password)
             login(request, user_auth)
-            pageback = request.COOKIES['backpage']
-            return HttpResponseRedirect(pageback)
+            if request.COOKIES.get('backpage') is not None:
+                pageback = request.COOKIES['backpage']
+                return HttpResponseRedirect(pageback)
+            return redirect('shop:index')
     else:
         form = SignUpForm()
     return render(request, 'accounts/signup_customer_new.html', {'form': form})
@@ -43,8 +45,10 @@ def signin_view(request):
             customer = authenticate(username=username, password=password)
             if customer is not None:
                 login(request, customer)
-                pageback = request.COOKIES['backpage']
-                return HttpResponseRedirect(pageback)
+                if request.COOKIES.get('backpage') is not None:
+                    pageback = request.COOKIES['backpage']
+                    return HttpResponseRedirect(pageback)
+                return redirect('shop:index')
             else:
                 return redirect('signup')
     else:
