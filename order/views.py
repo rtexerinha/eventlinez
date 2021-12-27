@@ -79,3 +79,8 @@ def create(request):
     cart.delete()
     send_mail(order.id)
     return redirect('order:thanks', order.id)
+
+
+def refund_order():
+    order = Order.objects.filter(id=4).delete()
+    return redirect('order:thanks', order.id)
