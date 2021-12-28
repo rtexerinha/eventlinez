@@ -81,6 +81,10 @@ def create(request):
     return redirect('order:thanks', order.id)
 
 
-def refund_order():
-    order = Order.objects.filter(id=4).delete()
-    return redirect('order:thanks', order.id)
+def refund_order(request, id_order=2):
+    order_item = OrderItem.objects.get(order_id=id_order)
+    ticket = Ticket.objects.get(order_item_id=order_item).delete()
+    order_item.delete()
+    order = Order.objects.get(id=id_order).delete()
+
+    return redirect('shop:index')

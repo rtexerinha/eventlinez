@@ -9,5 +9,5 @@ urlpatterns = [
 	path('history/', views.order_list, name='order_history'),
 	path('<int:order_id>/', views.order_detail, name='order_detail'),
 	path('success/', views.create, name='create_order'),
-	path('refund/', views.create, name='refund_order'),
+	path('refund/', views.refund_order, name='refund_order'),
 ]
