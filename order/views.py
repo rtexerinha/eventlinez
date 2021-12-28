@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 
 from cart.models import Cart
 from cart.views import _cart_id
@@ -82,9 +83,10 @@ def create(request):
     return redirect('order:thanks', order.id)
 
 
-def refund_order(request, id_order=1623):
-    order_item = OrderItem.objects.get(order_id=id_order)
-    ticket = Ticket.objects.get(order_item_id=order_item).delete()
-    order_item.delete()
-    order = Order.objects.get(id=id_order).delete()
+@csrf_exempt
+def refund_order(request):
+    # order_item = OrderItem.objects.get(order_id=id_order)
+    # ticket = Ticket.objects.get(order_item_id=order_item).delete()
+    # order_item.delete()
+    # order = Order.objects.get(id=id_order).delete()
     return HttpResponse("Success", status=200)
