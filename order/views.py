@@ -1,4 +1,5 @@
 import stripe
+import json
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -85,8 +86,12 @@ def create(request):
 
 @csrf_exempt
 def refund_order(request):
-    # order_item = OrderItem.objects.get(order_id=id_order)
-    # ticket = Ticket.objects.get(order_item_id=order_item).delete()
-    # order_item.delete()
-    # order = Order.objects.get(id=id_order).delete()
+    data = json.loads(request.body)
+    payment = data['data']['object']['payment_intent']
+    order = Order.objects.get(payment_code=payment)
+    order_item = OrderItem.objects.filter(order_id=order.id)
+    ticket = Ticket.objects.all(order_item_id=order_item)
+    ticket.delete()
+    order_item.delete()
+    order.delete()
     return HttpResponse("Success", status=200)
