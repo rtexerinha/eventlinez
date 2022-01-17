@@ -1,5 +1,6 @@
 import logging
 import json
+from decimal import Decimal
 
 import stripe
 from django.conf import settings
@@ -143,13 +144,22 @@ def checkout(request):
             'quantity': 1,
         }
         line_items.append(line_item)
+    if len(line_items) >= 2:
+        raise Exception('You cannot buy tickets to multiple events')
 
+    price = line_items[0]['price_data']['unit_amount_decimal']
+    fee = price - price * cents / (Decimal(0.13 * cents) + cents)
     server = request.get_raw_uri().replace(request.get_full_path(), "")
     session = stripe.checkout.Session.create(
         payment_intent_data={
             'setup_future_usage': 'off_session',
+            'application_fee_amount': int(fee),
+            'transfer_data': {
+                'destination': 'acct_1KHCMn2eTpJdc8dx',
+            },
         },
         mode='payment',
+
         payment_method_types=['card'],
         success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
         cancel_url=server + '/cart/',
