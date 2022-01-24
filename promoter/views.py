@@ -1,3 +1,4 @@
+import stripe
 from django.contrib import messages
 from io import BytesIO
 from os import path
@@ -59,9 +60,40 @@ def signup_view_promoter(request):
             form.save()
             username = form.cleaned_data.get('email')
             raw_password = form.cleaned_data.get('password1')
+            address = form.cleaned_data.get('address')
+            city = form.cleaned_data.get('city')
+            zips = form.cleaned_data.get('zip')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            return redirect('events_promoter')
+            stripe.api_key = "sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU"
+            account_object = stripe.Account.create(
+                type="express",
+                country="US",
+                email=username,
+                capabilities={
+                    "card_payments": {"requested": True},
+                    "transfers": {"requested": True},
+                },
+                business_profile={
+                    "mcc": "7922",
+                    "name": username,
+                },
+                business_type="individual",
+                individual={
+                    "address": {
+                        "city": city,
+                        "country": "US",
+                        "line1": address,
+                        "postal_code": zips,
+                    },
+                },
+            )
+            promoter = request.user.promoter
+            promoter.account_id = account_object.id
+            promoter.save()
+            # return redirect('events_promoter')
+            return redirect('payout_stripe')
+
     else:
         form = SignUpFormPromoter()
     return render(request, 'promoter/signup_promoter_new.html', {'form': form})
@@ -176,7 +208,7 @@ def vendors_reports(request):
         'tickets': tickets,
         'events': events,
         'selected_event': selected_event
-        })
+    })
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -232,7 +264,7 @@ def vendor_export_excel(request, event_id):
         sheet.write_string(row, 0, data[0], event_style)
         sheet.write_string(row, 1, data[1] + ' ' + data[2], event_style)
         sheet.write_number(row, 2, data[3], tbody_style)
-        sheet.write_number(row, 3, data[4], money_format,)
+        sheet.write_number(row, 3, data[4], money_format, )
 
     way = path.abspath("static")
     logo = path.join(way, 'img', 'logo.png')
@@ -241,3 +273,23 @@ def vendor_export_excel(request, event_id):
     workbook.close()
     out.seek(0)
     return response
+
+
+@login_required(login_url='/promoter/account/login/')
+def payout_stripe(request):
+    promoter = request.user.promoter
+    if promoter.account_id:
+        link = stripe.AccountLink.create(
+            account=promoter.account_id,
+            refresh_url="http://127.0.0.1:8000/promoter/events/",
+            return_url="http://127.0.0.1:8000/promoter/events/",
+            type="account_onboarding",
+        )
+        link_connect = link.url
+
+        history_transfer = stripe.Transfer.list(destination=promoter.account_id)
+
+        return render(request, 'payout_list.html', {'promoter': promoter,
+                                                    'link_connect': link_connect,
+                                                    'history_transfer': history_transfer['data']})
+    return render(request, 'payout_list.html', {'promoter': promoter, 'link_connect': None})
