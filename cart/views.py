@@ -146,7 +146,6 @@ def checkout(request):
         line_items.append(line_item)
     if len(line_items) >= 2:
         raise Exception('You cannot buy tickets to multiple events')
-
     price = line_items[0]['price_data']['unit_amount_decimal']
     fee = price - price * cents / (Decimal(0.13 * cents) + cents)
     server = request.get_raw_uri().replace(request.get_full_path(), "")
