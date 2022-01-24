@@ -44,17 +44,25 @@
                             <i class="fas fa-file-alt" style="color: #383838;" aria-hidden="true"></i>
                         </div>
                             Reports
-                        </a>
+                    </a>
 
-                        <ul class="pl-5 collapse list-unstyled" id="pageSubmenu">
-                            <li>
-                                <a href="{% url 'vendors_reports' %}"
-                                   style="color:#D90075;text-decoration: none">
-                                    Sales by Vendor
-                                </a>
-                            </li>
+                    <ul class="pl-5 collapse list-unstyled" id="pageSubmenu">
+                        <li>
+                            <a href="{% url 'vendors_reports' %}"
+                               style="color:#D90075;text-decoration: none">
+                                Sales by Vendor
+                            </a>
+                        </li>
+                    </ul>
 
-                        </ul>
+                    <a class="nav-link {% if 'index' in segment %} active {% endif %}"
+                       href="{% url 'payout_stripe' %}">
+                        <div class="sb-nav-link-icon">
+                            <i class="fas fa-user" style="color: #383838;" aria-hidden="true"></i>
+                        </div>
+                        Payout
+                    </a>
+
 {#                </div>#}
                 </div>
             </div>
