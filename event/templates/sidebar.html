@@ -55,13 +55,37 @@
                         </li>
                     </ul>
 
-                    <a class="nav-link {% if 'index' in segment %} active {% endif %}"
-                       href="{% url 'payout_stripe' %}">
+                    <a href="#pageSubmenu1" data-toggle="collapse"
+                       aria-expanded="false" class="nav-link dropdown-toggle">
+
                         <div class="sb-nav-link-icon">
-                            <i class="fas fa-user" style="color: #383838;" aria-hidden="true"></i>
+                            <i class="fas fa-dollar-sign" style="color: #383838;" aria-hidden="true"></i>
                         </div>
-                        Payout
+                            Payout
                     </a>
+
+                    <ul class="pl-5 collapse list-unstyled" id="pageSubmenu1">
+                        <li>
+                            <a href="{% url 'payout_stripe' %}"
+                               style="color:#D90075;text-decoration: none">
+                                Account Information
+                            </a>
+                        </li>
+
+                          <li class="pt-1">
+                            <a href="{% url 'balance_stripe' %}"
+                               style="color:#D90075;text-decoration: none">
+                                Balance
+                            </a>
+                        </li>
+
+                        <li class="pt-1">
+                            <a href="{% url 'payout_history' %}"
+                               style="color:#D90075;text-decoration: none">
+                                Payout History
+                            </a>
+                        </li>
+                    </ul>
 
 {#                </div>#}
                 </div>

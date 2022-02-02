@@ -1,0 +1,108 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% block title %} Payout - Panel Admin{% endblock %}
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+    <main>
+        <div class="container-fluid">
+            {% if payouts_history %}
+
+                <h1 class="mt-4 pb-4 title-dast" style="color: #49454D">
+                    History
+                </h1>
+
+                <main class="card-checkin d-lg-none d-flex">
+                        {% for payouts_history in payouts_history %}
+                            <article class="card m-lg-2 m-0 mb-4"
+                                     style="min-width: 20rem;max-width: 20rem; border-radius: 10px;">
+
+                                <section class="card-body" style="padding-left: 0px; padding-bottom: 0">
+                                    <div style="display: block; padding-right: 0; padding-left: 20px" >
+                                        <div style="display: flex; justify-content: flex-start;; flex-direction: row">
+                                            <h5 class="h6-promoter ml-2">
+                                                 <b style="color: #383838;">Arrival Data </b>
+                                                {{ payouts_history.arrival_date }}
+                                            </h5>
+                                        </div>
+
+                                        <p class="p-promoter" style="color: #7B7B7B;">
+                                            <b style="color: #383838;">Amount: </b>{{payouts_history.amount }}
+                                        </p>
+
+                                        <p class="p-promoter" style="color: #7B7B7B;">
+                                            <b style="color: #383838;">Status: </b>{{payouts_history.status}}
+                                        </p>
+
+                                        <p class="p-promoter" style="color: #7B7B7B;">
+                                            <b style="color: #383838;">created: </b>{{payouts_history.created}}
+                                        </p>
+
+                                    </div>
+                                </section>
+                            </article>
+                        {% endfor %}
+                    </main>
+
+                    <!-- TABLE VENDOR - COMPUTER -->
+                    <main class="d-lg-flex d-none">
+                        <aside class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" style="width: 99%">
+                                <thead>
+                                <tr style="background-color:#F4F4F4;">
+                                    <th class="text-table text-bold">Arrival Data</th>
+                                    <th class="text-table text-bold">Amount</th>
+                                    <th class="text-table text-bold">Status</th>
+                                    <th class="text-table text-bold">created</th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                {% for payouts_history in payouts_history %}
+                                    <tr>
+                                        <td class="text-table">
+                                            {{ payouts_history.arrival_date }}
+                                        </td>
+
+                                        <td class="text-table">{{ payouts_history.amount }}</td>
+                                        <td class="text-table">{{ payouts_history.status }}</td>
+                                        <td class="text-table">{{ payouts_history.created }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </aside>
+                    </main>
+
+
+
+
+
+
+
+
+            {% else %}
+                <section class="container" style="min-height: 75vh">
+                    <main class="col-12 mt-5 mb-5" style="min-height: 50vh; margin: auto;">
+                        <div class="col-12 pt-5" style="justify-content: center">
+                            <h3 class="col-12 h3-home mt-5" style="text-align: center;">Payout History</h3>
+                            <h6 class="col-lg-6 col-12 h6-home mt-0 mt-lg-4"
+                                style="text-align: center;margin: auto">
+                                Access Connect Onboarding and have access to the transfer history,
+                                where you can see the dates and amounts that were transferred to your bank account
+                            </h6>
+
+
+                            <div class="d-flex mt-3" style="justify-content: center">
+                                <a href="{{ link_history }}" id="button-adm" class="btn btn-secondary"
+                                   style="margin-top: 10px auto auto auto;justify-content: center">
+                                    Access History
+                                </a>
+                            </div>
+                        </div>
+                    </main>
+                </section>
+            {% endif %}
+        </div>
+    </main>
+{% endblock content %}

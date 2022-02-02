@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import stripe
+import requests
 from django.contrib import messages
 from io import BytesIO
 from os import path
@@ -8,7 +11,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 import xlsxwriter
 from django.http import StreamingHttpResponse
 
-# Create your views here.
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
@@ -276,20 +278,55 @@ def vendor_export_excel(request, event_id):
 
 
 @login_required(login_url='/promoter/account/login/')
-def payout_stripe(request):
+def balance_stripe(request):
     promoter = request.user.promoter
+
+    balance = stripe.Balance.retrieve(
+        stripe_account=promoter.account_id
+    )
+
+    #TODO: Melhorar a forma de conversão dos valores
+    available100 = balance.available[0].amount / 100
+    instant_available100 = balance.instant_available[0].amount / 100
+    pending100 = balance.pending[0].amount / 100
+
+    return render(request, 'balance_payout.html', {'promoter': promoter,
+                                                   'balance': balance,
+                                                   'available100': available100,
+                                                   'instant_available100': instant_available100,
+                                                   'pending100': pending100,
+                                                   })
+
+
+@login_required(login_url='/promoter/account/login/')
+def payout_history(request):
+    promoter = request.user.promoter
+    history = stripe.Account.create_login_link(
+        promoter.account_id,
+    )
+    link_history = history.url
+    payouts_history = stripe.Payout.list(stripe_account=promoter.account_id)
+
+    return render(request, 'payout_history.html', {'promoter': promoter, 'link_history': link_history,
+                                                   'payouts_history': payouts_history})
+
+
+@login_required(login_url='/promoter/account/login/')
+def payout_account_link(request):
+    promoter = request.user.promoter
+    host = request.get_raw_uri().replace(request.get_full_path(), "")
     if promoter.account_id:
         link = stripe.AccountLink.create(
             account=promoter.account_id,
-            refresh_url="http://127.0.0.1:8000/promoter/events/",
-            return_url="http://127.0.0.1:8000/promoter/events/",
+            refresh_url=host + "/promoter/events/",
+            return_url=host + "/promoter/events/",
             type="account_onboarding",
         )
         link_connect = link.url
 
-        history_transfer = stripe.Transfer.list(destination=promoter.account_id)
+        bank_information = stripe.Account.retrieve(promoter.account_id)
 
-        return render(request, 'payout_list.html', {'promoter': promoter,
-                                                    'link_connect': link_connect,
-                                                    'history_transfer': history_transfer['data']})
-    return render(request, 'payout_list.html', {'promoter': promoter, 'link_connect': None})
+        return render(request, 'payout_create.html', {'promoter': promoter,
+                                                      'bank_information': bank_information,
+                                                      'link_connect': link_connect})
+    return render(request, 'payout_create.html', {'promoter': promoter, 'link_connect': None})
