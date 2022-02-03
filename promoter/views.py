@@ -78,6 +78,11 @@ def signup_view_promoter(request):
                     "name": username,
                 },
                 business_type="individual",
+                settings={
+                    "payouts": {
+                        "schedule": {"delay_days": 2, "interval": "weekly", "weekly_anchor": "tuesday"}
+                    },
+                },
                 individual={
                     "address": {
                         "city": city,
