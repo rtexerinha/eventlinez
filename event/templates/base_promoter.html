@@ -1,5 +1,7 @@
 {% load static %}
 
+{% load converts %}
+
 <!DOCTYPE html>
     <html lang="en">
         <head>
@@ -50,6 +52,14 @@
                 $(document).ready(function() {
                     $('#datetimepicker').datetimepicker({ dateFormat: 'yy-mm-dd' }).attr("autocomplete", "off");
                 });
+            </script>
+
+            <script>
+                console.log('aqui');
+                function convert(value){
+                    console.log('jeito jr de ser');
+                    return value/100
+                }
             </script>
 
         </body>

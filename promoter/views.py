@@ -287,16 +287,9 @@ def balance_stripe(request):
         stripe_account=promoter.account_id
     )
 
-    #TODO: Melhorar a forma de conversão dos valores
-    available100 = balance.available[0].amount / 100
-    instant_available100 = balance.instant_available[0].amount / 100
-    pending100 = balance.pending[0].amount / 100
-
     return render(request, 'balance_payout.html', {'promoter': promoter,
                                                    'balance': balance,
-                                                   'available100': available100,
-                                                   'instant_available100': instant_available100,
-                                                   'pending100': pending100,
+                                                   'cents': 100
                                                    })
 
 
@@ -310,7 +303,9 @@ def payout_history(request):
     payouts_history = stripe.Payout.list(stripe_account=promoter.account_id)
 
     return render(request, 'payout_history.html', {'promoter': promoter, 'link_history': link_history,
-                                                   'payouts_history': payouts_history})
+                                                   'payouts_history': payouts_history,
+                                                   'cents': 100
+                                                   })
 
 
 @login_required(login_url='/promoter/account/login/')

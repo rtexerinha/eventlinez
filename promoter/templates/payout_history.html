@@ -1,4 +1,5 @@
 {% extends "base_promoter.html" %}
+{% load converts %}
 {% load static %}
 {% block title %} Payout - Panel Admin{% endblock %}
 {% block stylesheets %}{% endblock stylesheets %}
@@ -22,7 +23,7 @@
                                         <div style="display: flex; justify-content: flex-start;; flex-direction: row">
                                             <h5 class="h6-promoter ml-2">
                                                  <b style="color: #383838;">Arrival Data </b>
-                                                {{ payouts_history.arrival_date }}
+                                                {{ payouts_history.arrival_date|current_time }}
                                             </h5>
                                         </div>
 
@@ -35,7 +36,8 @@
                                         </p>
 
                                         <p class="p-promoter" style="color: #7B7B7B;">
-                                            <b style="color: #383838;">created: </b>{{payouts_history.created}}
+                                            <b style="color: #383838;">created: </b>
+                                            {{payouts_history.created|current_time }}
                                         </p>
 
                                     </div>
@@ -61,22 +63,20 @@
                                 {% for payouts_history in payouts_history %}
                                     <tr>
                                         <td class="text-table">
-                                            {{ payouts_history.arrival_date }}
+                                            {{ payouts_history.arrival_date|current_time }}
                                         </td>
 
-                                        <td class="text-table">{{ payouts_history.amount }}</td>
+                                        <td class="text-table">
+                                        {{ payouts_history.amount|divise:cents }}
+                                        </td>
                                         <td class="text-table">{{ payouts_history.status }}</td>
-                                        <td class="text-table">{{ payouts_history.created }}</td>
+                                        <td class="text-table">{{ payouts_history.created|current_time }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
                             </table>
                         </aside>
                     </main>
-
-
-
-
 
 
 
