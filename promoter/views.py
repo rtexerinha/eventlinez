@@ -1,7 +1,4 @@
-from datetime import datetime
-
 import stripe
-import requests
 from django.contrib import messages
 from io import BytesIO
 from os import path
