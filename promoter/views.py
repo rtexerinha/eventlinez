@@ -280,32 +280,26 @@ def vendor_export_excel(request, event_id):
 
 
 @login_required(login_url='/promoter/account/login/')
-def balance_stripe(request):
+def balance_history_payout(request):
     promoter = request.user.promoter
+    payouts_history = None
+    balance = None
+    bank_information = None
+    if promoter.account_id:
+        payouts_history = stripe.Payout.list(stripe_account=promoter.account_id)
 
-    balance = stripe.Balance.retrieve(
-        stripe_account=promoter.account_id
-    )
+        balance = stripe.Balance.retrieve(
+            stripe_account=promoter.account_id
+        )
 
-    return render(request, 'balance_payout.html', {'promoter': promoter,
-                                                   'balance': balance,
-                                                   'cents': 100
-                                                   })
+        bank_information = stripe.Account.retrieve(promoter.account_id)
 
-
-@login_required(login_url='/promoter/account/login/')
-def payout_history(request):
-    promoter = request.user.promoter
-    history = stripe.Account.create_login_link(
-        promoter.account_id,
-    )
-    link_history = history.url
-    payouts_history = stripe.Payout.list(stripe_account=promoter.account_id)
-
-    return render(request, 'payout_history.html', {'promoter': promoter, 'link_history': link_history,
-                                                   'payouts_history': payouts_history,
-                                                   'cents': 100
-                                                   })
+    return render(request, 'payout_list.html', {'promoter': promoter,
+                                                'balance': balance,
+                                                'payouts_history': payouts_history,
+                                                'bank_information': bank_information,
+                                                'cents': 100
+                                                })
 
 
 @login_required(login_url='/promoter/account/login/')

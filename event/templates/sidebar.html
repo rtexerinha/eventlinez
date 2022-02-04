@@ -30,7 +30,7 @@
                     </a>
 
                       <a class="nav-link {% if 'index' in segment %} active {% endif %}"
-                       href="{% url 'vendors_list' %}">
+                         href="{% url 'vendors_list' %}">
                         <div class="sb-nav-link-icon">
                             <i class="fas fa-user" style="color: #383838;" aria-hidden="true"></i>
                         </div>
@@ -73,18 +73,12 @@
                         </li>
 
                           <li class="pt-1">
-                            <a href="{% url 'balance_stripe' %}"
+                            <a href="{% url 'balancehistorypayout' %}"
                                style="color:#D90075;text-decoration: none">
-                                Balance
+                                Balance and History
                             </a>
                         </li>
 
-                        <li class="pt-1">
-                            <a href="{% url 'payout_history' %}"
-                               style="color:#D90075;text-decoration: none">
-                                Payout History
-                            </a>
-                        </li>
                     </ul>
 
 {#                </div>#}

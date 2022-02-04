@@ -134,6 +134,7 @@ def checkout(request):
     cents = 100
 
     for item in items:
+        promoter = item.ticket.event.promoter
         product = stripe.Product.create(name=str(item.ticket))
         line_item = {
             'price_data': {
@@ -154,7 +155,7 @@ def checkout(request):
             'setup_future_usage': 'off_session',
             'application_fee_amount': int(fee),
             'transfer_data': {
-                'destination': 'acct_1KHCMn2eTpJdc8dx',
+                'destination': 'acct_1KHWcQ2fYxgVqFDg',
             },
         },
         mode='payment',
