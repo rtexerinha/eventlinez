@@ -59,42 +59,8 @@ def signup_view_promoter(request):
             form.save()
             username = form.cleaned_data.get('email')
             raw_password = form.cleaned_data.get('password1')
-            address = form.cleaned_data.get('address')
-            city = form.cleaned_data.get('city')
-            zips = form.cleaned_data.get('zip')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            stripe.api_key = "sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU"
-            account_object = stripe.Account.create(
-                type="express",
-                country="US",
-                email=username,
-                capabilities={
-                    "card_payments": {"requested": True},
-                    "transfers": {"requested": True},
-                },
-                business_profile={
-                    "mcc": "7922",
-                    "name": username,
-                },
-                business_type="individual",
-                settings={
-                    "payouts": {
-                        "schedule": {"delay_days": 2, "interval": "weekly", "weekly_anchor": "tuesday"}
-                    },
-                },
-                individual={
-                    "address": {
-                        "city": city,
-                        "country": "US",
-                        "line1": address,
-                        "postal_code": zips,
-                    },
-                },
-            )
-            promoter = request.user.promoter
-            promoter.account_id = account_object.id
-            promoter.save()
             # return redirect('events_promoter')
             return redirect('payout_stripe')
 
@@ -306,18 +272,37 @@ def balance_history_payout(request):
 def payout_account_link(request):
     promoter = request.user.promoter
     host = request.get_raw_uri().replace(request.get_full_path(), "")
-    if promoter.account_id:
-        link = stripe.AccountLink.create(
-            account=promoter.account_id,
-            refresh_url=host + "/promoter/events/",
-            return_url=host + "/promoter/events/",
-            type="account_onboarding",
+    if not promoter.account_id:
+        account_object = stripe.Account.create(
+            type="express",
+            country="US",
+            email=promoter.email,
+            capabilities={
+                "card_payments": {"requested": True},
+                "transfers": {"requested": True},
+            },
+            business_profile={
+                "mcc": "7922",
+                "name": promoter.email,
+            },
+            business_type="individual",
+            settings={
+                "payouts": {
+                    "schedule": {"delay_days": 2, "interval": "weekly", "weekly_anchor": "tuesday"}
+                },
+            },
         )
-        link_connect = link.url
+        promoter = request.user.promoter
+        promoter.account_id = account_object.id
+        promoter.save()
 
-        bank_information = stripe.Account.retrieve(promoter.account_id)
+    link = stripe.AccountLink.create(
+        account=promoter.account_id,
+        refresh_url=host + "/promoter/events/",
+        return_url=host + "/promoter/events/",
+        type="account_onboarding",
+    )
+    link_connect = link.url
 
-        return render(request, 'payout_create.html', {'promoter': promoter,
-                                                      'bank_information': bank_information,
-                                                      'link_connect': link_connect})
-    return render(request, 'payout_create.html', {'promoter': promoter, 'link_connect': None})
+    return render(request, 'payout_create.html', {'promoter': promoter,
+                                                  'link_connect': link_connect})

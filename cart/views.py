@@ -129,7 +129,7 @@ def checkout(request):
     items = CartItem.objects.filter(cart=cart, active=True)
     stripe.api_key = settings.STRIPE_SECRET_KEY
     line_items = []
-
+    promoters = []
     # https://stripe.com/docs/billing/subscriptions/decimal-amounts
     cents = 100
 
@@ -145,6 +145,7 @@ def checkout(request):
             'quantity': 1,
         }
         line_items.append(line_item)
+        promoters.append(promoter)
     if len(line_items) >= 2:
         raise Exception('You cannot buy tickets to multiple events')
     price = line_items[0]['price_data']['unit_amount_decimal']
@@ -155,7 +156,7 @@ def checkout(request):
             'setup_future_usage': 'off_session',
             'application_fee_amount': int(fee),
             'transfer_data': {
-                'destination': 'acct_1KHWcQ2fYxgVqFDg',
+                'destination': promoters[0].account_id,
             },
         },
         mode='payment',

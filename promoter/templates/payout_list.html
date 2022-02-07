@@ -21,7 +21,7 @@
                          </h5>
                      {% else %}
                          <h5 class="h5-promoter" style="color: #0a0a0a">
-                             The transfers to the bank account in the week will be every Monday.
+                             The transfers to the bank account in the week will be every Tuesday.
                              It may take up to two days for the account to be registered.
                          </h5>
                     {% endif %}
@@ -75,6 +75,14 @@
                                                 {{ information_bank.bank_name }}
                                             </p>
 
+                                            <p class="p-promoter" style="color: #7B7B7B;">
+                                                <b style="color: #49454D;">
+                                                    Account number:
+                                                </b>
+                                                ******** {{ information_bank.last4 }}
+                                            </p>
+
+{#                                            000123456789#}
                                             <p class="p-promoter"
                                                style="color: #7B7B7B;">
                                                 <b style="color: #49454D;">Routing Number: </b>
@@ -194,7 +202,7 @@
                                     </h3>
                                     <h6 class="col-lg-10 col-12 h6-home mt-0 mt-lg-4"
                                         style="text-align: center;margin: auto">
-                                        The transfers to the bank account in the week will be every Monday.
+                                        The transfers to the bank account in the week will be every Tuesday.
                                         It may take up to two days for the account to be registered.
                                     </h6>
                                 </div>

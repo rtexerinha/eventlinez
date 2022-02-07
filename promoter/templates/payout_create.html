@@ -10,82 +10,6 @@
                 Account Information
             </h1>
 
-            {% if bank_information%}
-                <section class="container" style="min-height: 75vh">
-                    <main class="col-12 mt-4 mb-5" style="min-height: 50vh; margin: auto;">
-                        <div class="row">
-
-                            <aside class="col-lg-6 pt-lg-4">
-                                <div class="col-12 pt-5" style="justify-content: center">
-
-{#                                    <h3 class="col-12 h3-home mt-5" #}
-{#                                        style="text-align: center;">#}
-{#                                        Register your information#}
-{#                                    </h3>#}
-
-                                    <h6 class="col-lg-10 col-12 h6-home mt-0 mt-lg-4"
-                                        style="text-align: center;margin: auto">
-                                        Fill in some data on the Connect platform and have the possibility
-                                        of receiving your sales directly into your bank account.
-                                    </h6>
-                                </div>
-
-
-                                <div class="d-flex mt-3" style="justify-content: center">
-                                    <a href="{{ link_connect }}" id="button-adm"
-                                       class="btn btn-secondary"
-                                       style="margin-top: 10px auto auto auto;justify-content: center">
-                                        Access Connect
-                                    </a>
-                                </div>
-                            </aside>
-
-
-                            <aside class="col-lg-6 mt-4 mt-lg-2 pt-lg-5">
-                                <div class="card-checkin mt-4 d-lg-flex">
-                                    <article class="card m-lg-2 m-0 mb-4"
-                                             style="min-width: 20rem;max-width: 20rem; border-radius: 10px;">
-
-                                        <section class="card-body" style="padding-left: 0px; padding-bottom: 0">
-                                            <div style="display: block; padding-right: 0; padding-left: 20px" >
-                                                <div style="display: flex; justify-content: flex-start;; flex-direction: row">
-                                                    <i class="fas fa-university mt-1"></i>
-                                                    <h5 class="h6-promoter ml-2">Bank Information</h5>
-                                                </div>
-
-                                                {% for information_bank in bank_information.external_accounts %}
-                                                <p class="p-promoter" style="color: #7B7B7B;">
-                                                    <b style="color: #383838;">
-                                                        Bank name:
-                                                    </b>
-                                                    {{ information_bank.bank_name }}
-                                                </p>
-
-                                                <p class="p-promoter" style="color: #7B7B7B;">
-                                                    <b style="color: #383838;">Routing Number: </b>
-                                                    {{ information_bank.routing_number }}
-                                                </p>
-
-                                                {% endfor %}
-
-                                                <div class="div-button-table pb-2" style="justify-content: flex-end">
-                                                    <button class="button-link">
-                                                        <a href="#">
-                                                            <i style="color: #d90075"
-                                                               class="far fa-edit icon_remove"></i>
-                                                        </a>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </section>
-                                    </article>
-                                </div>
-                            </aside>
-                        </div>
-                    </main>
-                </section>
-
-            {% else %}
                 <section class="container" style="min-height: 75vh">
                     <main class="col-12 mt-5 mb-5" style="min-height: 50vh; margin: auto;">
                         <div class="col-12 pt-5"
@@ -114,7 +38,6 @@
                         </div>
                     </main>
                 </section>
-            {% endif %}
         </div>
     </main>
 {% endblock content %}
