@@ -304,5 +304,5 @@ def payout_account_link(request):
     )
     link_connect = link.url
 
-    return render(request, 'payout_create.html', {'promoter': promoter,
+    return render(request, 'payout.html', {'promoter': promoter,
                                                   'link_connect': link_connect})
