@@ -8,11 +8,13 @@
     <main>
         <div class="container-fluid">
             {% if balance.available %}
-                <h1 class="mt-4 pb-2 title-dast" style="color: #49454D">
-                    <i style="border-radius: 70%;background-color: #49454D;color: #FFFFFF"
-                       class="fas fa-dollar-sign pt-1 pb-1 pl-2 pr-2 mr-2"></i>
-                    Payout
-                </h1>
+                <div class="d-flex pt-5 pb-2">
+                    <i style="font-size: 1.5rem;color: #49454D"
+                       class="fas fa-dollar-sign mt-1"></i>
+                    <h1 class="title-dast pl-2" style="color: #49454D">
+                        Payout
+                    </h1>
+                </div>
 
                  {% for sald_available in balance.available %}
                      {% if sald_available.amount == 0 %}
@@ -27,55 +29,67 @@
                     {% endif %}
                 {% endfor %}
 
-                <section class="container pl-0 pr-0">
+                <section class="col-12 pl-0 pr-0">
                     <header class="col-12 mt-4 mb-5 header-box">
                         <div class="row">
-                            <aside class="col-lg-6 pr-0 pl-0 d-block d-lg-flex">
+                            <aside class="col-8 pr-0 pl-0 d-block d-lg-flex">
 
                                 <div class="col-12 col-lg-6 pl-0 pl-lg-2 d-flex d-lg-block box-small">
 
                                     {% for sald_available in balance.available %}
-                                        <h4 class="h4-promoter" style="line-height: 25px;color: #49454D">
+                                        <h4 class="h4-promoter border-details"
+                                            style="line-height: 25px;color: #49454D">
                                             Balance Available:
                                         </h4>
 
-                                        <h2 class="h2-promoter pt-2">
-                                            <i class="fas fa-dollar-sign fa-1x pr-1"></i>
-                                            {{ sald_available.amount|divise:cents }}
-                                        </h2>
+
+                                        <div class="d-flex pl-4">
+                                            <i class="fas fa-dollar-sign pt-3" style="font-size: 1.5rem"></i>
+                                            <h2 class="h2-promoter pt-2 pl-2" style="color: #0a0a0a">
+                                                {{ sald_available.amount|divise:cents }}
+                                            </h2>
+                                        </div>
                                     {% endfor %}
                                 </div>
 
                                 <div class="col-12 col-lg-6 pl-4 d-flex d-lg-block box-small">
                                     {% for sald_pending in balance.pending%}
-                                        <h4 class="h4-promoter" style="line-height: 25px;color: #49454D">
-                                            Balance Pending:</h4>
-                                        <h2 class="h2-promoter pt-2" style="color: #0a0a0a">
-                                        <i class="fas fa-dollar-sign fa-1x pr-1"></i>
-                                            {{ sald_pending.amount|divise:cents }}
-                                        </h2>
+                                        <h4 class="h4-promoter border-details"
+                                            style="line-height: 25px;color: #49454D">
+                                            Balance Pending:
+                                        </h4>
+
+                                        <div class="d-flex pl-4">
+                                            <i class="fas fa-dollar-sign pt-3" style="font-size: 1.5rem"></i>
+                                            <h2 class="h2-promoter pt-2 pl-2" style="color: #0a0a0a">
+                                                {{ sald_pending.amount|divise:cents }}
+                                            </h2>
+                                          </div>
                                     {% endfor %}
                                 </div>
                             </aside>
 
-                            <aside class="col-lg-6 pt-lg-4" style="border: 1px solid #F4F3F4;">
-                                <div style="display: flex; justify-content: flex-start;; flex-direction: row">
-                                    <i style="color: #3C215C;width: 24px;height: 24px;"
-                                       class="fas fa-university mt-1 pr-3"></i>
-                                    <h4 class="h4-promoter" style="line-height: 25px;">Bank Information</h4>
+                            <aside class="col-4 pt-lg-3 border-card">
+                                <div class="div-flex">
+{#                                    <i style="color: #3C215C;width: 24px;height: 24px;"#}
+{#                                       class="fas fa-university mt-1 pr-3">#}
+{#                                    </i>#}
+                                    <h4 class="h4-promoter border-details" style="line-height: 25px;">
+                                        Bank Information
+                                    </h4>
                                 </div>
 
-                                <article class="card-body pl-0 pb-0">
-                                    <div style="display: block; padding-right: 0; padding-left: 20px" >
+                                <article class="card-body pt-2 pl-0 pb-0">
+                                    <div class="d-block pr-0 pl-4">
                                         {% for information_bank in bank_information.external_accounts %}
-                                            <p class="p-promoter" style="color: #7B7B7B;">
+                                            <p class="p-promoter mb-1" style="color: #7B7B7B;">
                                                 <b style="color: #49454D;">
                                                     Bank name:
                                                 </b>
                                                 {{ information_bank.bank_name }}
                                             </p>
 
-                                            <p class="p-promoter" style="color: #7B7B7B;">
+                                            <p class="p-promoter mb-1" style="color: #7B7B7B;">
                                                 <b style="color: #49454D;">
                                                     Account number:
                                                 </b>
@@ -101,6 +115,19 @@
 
                 <section>
                     {% if payouts_history %}
+                        <div class="col-lg-12" style="display:flex;">
+                            <div class="col-lg-10 col-md-5"></div>
+                            <div class="col-lg-2 col-md-7 div-adm-newevent" style="justify-content: flex-end;">
+
+                                <a href="{% url 'payout_pdf_view' %}"
+                                   id="button-adm" class="btn btn-secondary"
+                                   style="margin-top: 10px;">
+                                        Export
+                                </a>
+                            </div>
+                        </div>
+
+
                         <main class="card-checkin d-lg-none d-flex">
                         {% for payouts_history in payouts_history %}
                             <article class="card m-lg-2 m-0 mb-4"
@@ -110,22 +137,17 @@
                                     <div style="display: block; padding-right: 0; padding-left: 20px" >
                                         <div style="display: flex; justify-content: flex-start;; flex-direction: row">
                                             <h5 class="h6-promoter ml-2">
-                                                 <b style="color: #383838;">Arrival Data </b>
-                                                {{ payouts_history.arrival_date|current_time }}
+                                                 <b style="color: #383838;">Payment Date</b>
+                                                {{ payouts_history.created|current_time }}
                                             </h5>
                                         </div>
 
                                         <p class="p-promoter" style="color: #7B7B7B;">
-                                            <b style="color: #383838;">Amount: </b>{{payouts_history.amount }}
+                                            <b style="color: #383838;">Amount Paid: </b>{{payouts_history.amount }}
                                         </p>
 
                                         <p class="p-promoter" style="color: #7B7B7B;">
                                             <b style="color: #383838;">Status: </b>{{payouts_history.status}}
-                                        </p>
-
-                                        <p class="p-promoter" style="color: #7B7B7B;">
-                                            <b style="color: #383838;">created: </b>
-                                            {{payouts_history.created|current_time }}
                                         </p>
 
                                     </div>
@@ -140,10 +162,9 @@
                             <table class="table table-bordered" id="dataTable" style="width: 99%">
                                 <thead>
                                 <tr style="background-color:#F4F4F4;">
-                                    <th class="text-table text-bold">Arrival Data</th>
-                                    <th class="text-table text-bold">Amount</th>
+                                    <th class="text-table text-bold">Payment Date</th>
+                                    <th class="text-table text-bold">Amoun Paid</th>
                                     <th class="text-table text-bold">Status</th>
-                                    <th class="text-table text-bold">created</th>
                                 </tr>
                                 </thead>
 
@@ -151,20 +172,19 @@
                                 {% for payouts_history in payouts_history %}
                                     <tr>
                                         <td class="text-table">
-                                            {{ payouts_history.arrival_date|current_time }}
+                                            {{ payouts_history.created|current_time }}
                                         </td>
 
                                         <td class="text-table">
-                                        {{ payouts_history.amount|divise:cents }}
+                                            {{ payouts_history.amount|divise:cents }}
                                         </td>
+
                                         <td class="text-table">
                                             <span style="background: rgba(51, 186, 29, 0.1);border-radius: 12px;
                                                         color: #33BA1D; padding: 0 1rem">
                                                 {{ payouts_history.status }}
                                             </span>
-
                                         </td>
-                                        <td class="text-table">{{ payouts_history.created|current_time }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

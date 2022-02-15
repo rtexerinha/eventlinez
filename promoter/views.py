@@ -1,17 +1,28 @@
+from datetime import datetime
+
 import stripe
 from django.contrib import messages
-from io import BytesIO
 from os import path
 from django.contrib.auth import update_session_auth_hash, authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMessage
 from django.shortcuts import render, redirect, get_object_or_404
 import xlsxwriter
 from django.http import StreamingHttpResponse
+from django.template.loader import render_to_string
 
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
 from promoter.models import Vendor, SalesByVendor
+
+from django.http import HttpResponse
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib import colors
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -304,5 +315,74 @@ def payout_account_link(request):
     )
     link_connect = link.url
 
-    return render(request, 'payout.html', {'promoter': promoter,
-                                                  'link_connect': link_connect})
+    return render(request, 'payout.html', {'promoter': promoter, 'link_connect': link_connect})
+
+
+def payout_pdf_view(request):
+    promoter = request.user.promoter
+
+    width, height = letter
+    margin = inch
+    mwidth = width - 2 * margin
+    mheight = height - 2 * margin
+
+    response = HttpResponse(content_type='application/pdf')
+    filename = 'history.pdf'
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+    buffer = BytesIO()
+
+    img_file = 'static/img/Eventlinez.png'
+    p = canvas.Canvas(buffer)
+
+    p.drawImage(img_file, 230, 790, width=100, preserveAspectRatio=True, mask='auto')
+    p.setFont("Helvetica", 16)
+    p.setTitle("History payout")
+    p.drawString(230, 750, "History payout")
+    p.setPageCompression(0)
+    p.translate(margin-50, margin+20)
+    p.translate(0, mheight - inch)
+    p.setFont("Helvetica", 20)
+
+    header_collumns = ['Payment Data', 'Amount Paid', 'Status']
+
+    history = stripe.Payout.list(stripe_account=promoter.account_id)
+    data = []
+    data.append(header_collumns)
+
+    for i in history['data']:
+        rt = [datetime.fromtimestamp(i.created).strftime("%Y-%m-%d"),
+              i.amount/100, i.status]
+        data.append(rt)
+
+    table = Table(data, colWidths=(185, 185, 185))
+    table.setStyle(TableStyle([
+        ('FONT', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 12),
+        ('BOX', (0, 0), (-1, -1), 0.25, colors.gray),
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.gray), ]))
+
+    table_style = []
+
+    for i, row in enumerate(data):
+        if i % 2 == 0:
+            table_style.append(('BACKGROUND', (0, i), (-1, i),
+                                colors.Color(red=(243.0/255), green=(243.0/255), blue=(243.0/255))))
+        else:
+            table_style.append(('BACKGROUND', (0, i), (-1, i), colors.white))
+        if i == 0:
+            table_style.append(('BACKGROUND', (0, i), (-1, i),
+                                colors.Color(red=(60.0/255), green=(33.0/255), blue=(92.0/255))))
+            table_style.append(('TEXTCOLOR', (0, i), (-1, i),
+                                colors.white))
+
+    table.setStyle(TableStyle(table_style))
+
+    table.wrapOn(p, mwidth, mheight)
+    table.drawOn(p, 0, 0)
+    p.showPage()
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+
+    return response
