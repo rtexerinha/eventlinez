@@ -386,3 +386,58 @@ def payout_pdf_view(request):
     response.write(pdf)
 
     return response
+
+
+def webhook_payout(request):
+    promoter = request.user.promoter
+    endpoint_secret = 'whsec_0529f0be75ba9503ce96eb53cbeda9e13266ed86c5c6076e87f6293ddc0178e6'
+    event = None
+    payload = request.data
+    sig_header = request.headers['STRIPE_SIGNATURE']
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        raise e
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        raise e
+
+    if event['type'] == 'payout.canceled' or event['type'] == 'payout.failed':
+        payout = event['data']['object']
+
+        subject = "Eventlinez - Error Payout"
+        message = render_to_string('payout/email_payout.html', {'payout': payout})
+
+        email_payout = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email="noreply@eventlinez.com",
+            to=[promoter.email],
+        )
+        payout.content_subtype = "html"
+
+        email_payout.send()
+    elif event['type'] == 'payout.paid':
+        payout = event['data']['object']
+
+        subject = "Eventlinez - New Payout"
+        message = render_to_string('payout/email_payout.html', {'payout': payout})
+
+        email_payout = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email="noreply@eventlinez.com",
+            to=[promoter.email],
+        )
+        payout.content_subtype = "html"
+
+        email_payout.send()
+
+    else:
+        print('Unhandled event type {}'.format(event['type']))
+
+    return HttpResponse(status=200)
