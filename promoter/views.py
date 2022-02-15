@@ -10,10 +10,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 import xlsxwriter
 from django.http import StreamingHttpResponse
 from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
 
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
+from local_settings import ENDPOINT_WEBHOOK_PAYOUT
 from promoter.models import Vendor, SalesByVendor
 
 from django.http import HttpResponse
@@ -388,11 +390,11 @@ def payout_pdf_view(request):
     return response
 
 
+@csrf_exempt
 def webhook_payout(request):
-    promoter = request.user.promoter
-    endpoint_secret = 'whsec_0529f0be75ba9503ce96eb53cbeda9e13266ed86c5c6076e87f6293ddc0178e6'
+    endpoint_secret = ENDPOINT_WEBHOOK_PAYOUT
     event = None
-    payload = request.data
+    payload = request
     sig_header = request.headers['STRIPE_SIGNATURE']
 
     try:
@@ -416,7 +418,7 @@ def webhook_payout(request):
             subject=subject,
             body=message,
             from_email="noreply@eventlinez.com",
-            to=[promoter.email],
+            to=['brunojndias@gmail.com'],
         )
         payout.content_subtype = "html"
 
@@ -431,7 +433,7 @@ def webhook_payout(request):
             subject=subject,
             body=message,
             from_email="noreply@eventlinez.com",
-            to=[promoter.email],
+            to=['brunojndias@gmail.com'],
         )
         payout.content_subtype = "html"
 
