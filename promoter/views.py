@@ -394,7 +394,7 @@ def payout_pdf_view(request):
 def webhook_payout(request):
     endpoint_secret = ENDPOINT_WEBHOOK_PAYOUT
     event = None
-    payload = request
+    payload = request.body
     sig_header = request.headers['STRIPE_SIGNATURE']
 
     try:
@@ -408,38 +408,32 @@ def webhook_payout(request):
         # Invalid signature
         raise e
 
+    payout = None
+    subject = None
+    message = None
     if event['type'] == 'payout.canceled' or event['type'] == 'payout.failed':
         payout = event['data']['object']
 
         subject = "Eventlinez - Error Payout"
         message = render_to_string('payout/email_payout.html', {'payout': payout})
 
-        email_payout = EmailMessage(
-            subject=subject,
-            body=message,
-            from_email="noreply@eventlinez.com",
-            to=['brunojndias@gmail.com'],
-        )
-        payout.content_subtype = "html"
-
-        email_payout.send()
     elif event['type'] == 'payout.paid':
         payout = event['data']['object']
 
         subject = "Eventlinez - New Payout"
         message = render_to_string('payout/email_payout.html', {'payout': payout})
 
-        email_payout = EmailMessage(
-            subject=subject,
-            body=message,
-            from_email="noreply@eventlinez.com",
-            to=['brunojndias@gmail.com'],
-        )
-        payout.content_subtype = "html"
-
-        email_payout.send()
-
     else:
         print('Unhandled event type {}'.format(event['type']))
+
+    email_payout = EmailMessage(
+        subject=subject,
+        body=message,
+        from_email="noreply@eventlinez.com",
+        to=['brunojndias@gmail.com'],
+    )
+    payout.content_subtype = "html"
+
+    email_payout.send()
 
     return HttpResponse(status=200)
