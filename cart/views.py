@@ -148,27 +148,39 @@ def checkout(request):
         promoters.append(promoter)
     if len(line_items) >= 2:
         raise Exception('You cannot buy tickets to multiple events')
-    price = line_items[0]['price_data']['unit_amount_decimal']
-    fee = price - price * cents / (Decimal(0.13 * cents) + cents)
     server = request.get_raw_uri().replace(request.get_full_path(), "")
-    session = stripe.checkout.Session.create(
-        payment_intent_data={
-            'setup_future_usage': 'off_session',
-            'application_fee_amount': int(fee),
-            'transfer_data': {
-                'destination': promoters[0].account_id,
+    if promoters[0].account_id:
+        price = line_items[0]['price_data']['unit_amount_decimal']
+        fee = price - price * cents / (Decimal(0.13 * cents) + cents)
+        session = stripe.checkout.Session.create(
+            payment_intent_data={
+                'setup_future_usage': 'off_session',
+                'application_fee_amount': int(fee),
+                'transfer_data': {
+                    'destination': promoters[0].account_id,
+                },
             },
-        },
-        mode='payment',
+            mode='payment',
 
-        payment_method_types=['card'],
-        success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url=server + '/cart/',
-        line_items=line_items,
-        customer_email=request.user.username,
-        client_reference_id=cart.id,
-        allow_promotion_codes=True
-    )
+            payment_method_types=['card'],
+            success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=server + '/cart/',
+            line_items=line_items,
+            customer_email=request.user.username,
+            client_reference_id=cart.id,
+            allow_promotion_codes=True
+        )
+    else:
+        session = stripe.checkout.Session.create(
+            mode='payment',
+            payment_method_types=['card'],
+            success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=server + '/cart/',
+            line_items=line_items,
+            customer_email=request.user.username,
+            client_reference_id=cart.id,
+            allow_promotion_codes=True
+        )
 
     return JsonResponse({
         'session_id': session.id,
