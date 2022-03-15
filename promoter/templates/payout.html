@@ -10,6 +10,7 @@
                 Account Information
             </h1>
 
+            {% if not promoter.account_id %}
                 <section class="container" style="min-height: 75vh">
                     <main class="col-12 mt-5 mb-5" style="min-height: 50vh; margin: auto;">
                         <div class="col-12 pt-5"
@@ -20,6 +21,36 @@
                             <h3 class="col-12 h3-home mt-4"
                                 style="text-align: center;">
                                 Register your information
+                            </h3>
+
+                            <h6 class="col-lg-6 col-12 h6-home mt-0 mt-lg-4"
+                                style="text-align: center;margin: auto">
+                                Update your data on the Connect platform and
+                                have the possibility to receive your sales directly into your bank account.
+                            </h6>
+                        </div>
+
+                        <div class="d-flex mt-3" style="justify-content: center">
+
+                            <a href="{{ link_connect }}" id="button-adm"
+                               class="btn btn-secondary"
+                               style="margin-top: 10px auto auto auto;justify-content: center">
+                                Access Connect</a>
+                        </div>
+                    </main>
+                </section>
+            {% else %}
+
+                <section class="container" style="min-height: 75vh">
+                    <main class="col-12 mt-5 mb-5" style="min-height: 50vh; margin: auto;">
+                        <div class="col-12 pt-5"
+                             style="justify-content: center;">
+
+                            <i style="display: flex; justify-content: center;color: #49454D"
+                               class="fas fa-info-circle fa-3x"></i>
+                            <h3 class="col-12 h3-home mt-4"
+                                style="text-align: center;">
+                                Update your information
                             </h3>
 
                             <h6 class="col-lg-6 col-12 h6-home mt-0 mt-lg-4"
@@ -38,6 +69,10 @@
                         </div>
                     </main>
                 </section>
+
+            {% endif %}
+
+
         </div>
     </main>
 {% endblock content %}
