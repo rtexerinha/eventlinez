@@ -341,15 +341,15 @@ def payout_pdf_view(request):
     p.setTitle("History payout")
     p.drawString(230, 750, "History payout")
     p.setPageCompression(0)
-    p.translate(margin-50, margin+20)
-    p.translate(0, mheight - inch)
+    # p.translate(0, mheight - inch)
     p.setFont("Helvetica", 20)
 
     header_collumns = ['Payment Data', 'Amount Paid', 'Status']
-
     history = stripe.Payout.list(stripe_account=promoter.account_id)
     data = []
     data.append(header_collumns)
+
+    p.translate(margin-50, margin + 620 - (15 * len(history)))
 
     for i in history['data']:
         rt = [datetime.fromtimestamp(i.created).strftime("%Y-%m-%d"),
