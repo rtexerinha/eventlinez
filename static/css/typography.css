@@ -105,6 +105,12 @@
     color: var(--gray-color-mid);
 }
 
+.h4-adc{
+    font-weight: var(--font-reg-400);
+    color: #E0E0E0;
+    font-size: 1em;
+}
+
 .h3-detail-center{
     display: flex;
     justify-content: center;
