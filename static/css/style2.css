@@ -43,13 +43,16 @@
 }
 
 .bg-box {
-    background-image: url("../../static/img/box_promoter.png");
-    width: 43vw;
-    height: 219px;
-    margin: 30vh auto auto auto;
+    background-image: url("../../static/img/Eventlinez_promoter.png");
+    width: 42vw;
+    height: 119px;
+    margin: 5vh auto auto auto;
+    background-repeat: no-repeat;
+    background-size: 100%;
+
 }
 .box-content{
-    padding: 70px 60px 70px 70px;
+    padding: 100px 60px 70px 70px;
     text-align: left;
 }
 
@@ -274,6 +277,7 @@
 
 @media(max-width: 920px) {
     .box-content {
+        display: none;
         padding: 25px 15px 70px 25px;
     }
 }
