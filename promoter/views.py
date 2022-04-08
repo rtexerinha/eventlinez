@@ -16,7 +16,7 @@ from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
 from local_settings import ENDPOINT_WEBHOOK_PAYOUT
-from promoter.models import Vendor, SalesByVendor
+from promoter.models import Vendor, SalesByVendor, BankInfomationPromoter
 
 from django.http import HttpResponse
 from io import BytesIO
@@ -318,6 +318,37 @@ def payout_account_link(request):
     link_connect = link.url
 
     return render(request, 'payout.html', {'promoter': promoter, 'link_connect': link_connect})
+
+
+@login_required(login_url='/promoter/account/login/')
+def bank_information_connect(request):
+    bank_information = None
+    bank_information_intern = None
+    promoter = request.user.promoter
+    if promoter.account_id:
+        bank_information = stripe.Account.list_external_accounts(
+            promoter.account_id,
+            object="bank_account",
+            limit=1,
+        )
+    if len(bank_information) > 0 and bank_information['data'][0].id:
+        bank_information_intern = BankInfomationPromoter.objects.get(id_bank_account=bank_information['data'][0].id)
+        if bank_information_intern is None:
+            bank_information_intern = BankInfomationPromoter.objects.create(
+                promoter=request.user.promoter,
+                id_bank_account=bank_information['data'][0].id,
+                last4=bank_information['data'][0].last4,
+                bank_name=bank_information['data'][0].bank_name,
+                routing_number=bank_information['data'][0].routing_number
+            )
+    return render(request, 'payout_bank_information.html',
+                  {'promoter': promoter, 'bank_information_intern': bank_information_intern})
+
+
+
+
+
+
 
 
 def payout_pdf_view(request):

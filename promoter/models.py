@@ -4,6 +4,14 @@ from django.template.defaultfilters import slugify
 from event.models import Promoter, Event
 
 
+class BankInfomationPromoter(models.Model):
+    promoter = models.ForeignKey(Promoter, blank=True, null=True, on_delete=models.SET_NULL)
+    id_bank_account = models.CharField(max_length=250, null=True, blank=True)
+    last4 = models.CharField(max_length=4, null=True, blank=True)
+    bank_name = models.CharField(max_length=250, null=True, blank=True)
+    routing_number = models.CharField(max_length=64, null=True, blank=True)
+
+
 class Vendor(models.Model):
     first_name = models.CharField(max_length=250)
     last_name = models.CharField(max_length=250, default='')
