@@ -346,7 +346,7 @@ def bank_information_connect_webhook(request):
     # ... handle other event types
     else:
         print('Unhandled event type {}'.format(event['type']))
-    return jsonify(success=True)
+    return True
 
 
 @login_required(login_url='/promoter/account/login/')
