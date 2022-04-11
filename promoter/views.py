@@ -320,7 +320,6 @@ def payout_account_link(request):
     return render(request, 'payout.html', {'promoter': promoter, 'link_connect': link_connect})
 
 
-@login_required(login_url='/promoter/account/login/')
 def bank_information_connect_webhook(request):
     endpoint_secret = 'whsec_0529f0be75ba9503ce96eb53cbeda9e13266ed86c5c6076e87f6293ddc0178e6'
     event = None
