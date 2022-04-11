@@ -321,6 +321,35 @@ def payout_account_link(request):
 
 
 @login_required(login_url='/promoter/account/login/')
+def bank_information_connect_webhook(request):
+    endpoint_secret = 'whsec_0529f0be75ba9503ce96eb53cbeda9e13266ed86c5c6076e87f6293ddc0178e6'
+    event = None
+    payload = request.data
+    sig_header = request.headers['STRIPE_SIGNATURE']
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        raise e
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        raise e
+
+    # Handle the event
+    if event['type'] == 'account.external_account.deleted':
+        external_account = event['data']['object']
+    elif event['type'] == 'account.external_account.updated':
+        external_account = event['data']['object']
+    # ... handle other event types
+    else:
+        print('Unhandled event type {}'.format(event['type']))
+    return jsonify(success=True)
+
+
+@login_required(login_url='/promoter/account/login/')
 def bank_information_connect(request):
     bank_information = None
     bank_information_intern = None
