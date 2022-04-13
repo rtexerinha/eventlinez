@@ -4,7 +4,7 @@ from django.template.defaultfilters import slugify
 from event.models import Promoter, Event
 
 
-class BankInfomationPromoter(models.Model):
+class BankAccount(models.Model):
     promoter = models.ForeignKey(Promoter, blank=True, null=True, on_delete=models.SET_NULL)
     id_bank_account = models.CharField(max_length=250, null=True, blank=True)
     last4 = models.CharField(max_length=4, null=True, blank=True)

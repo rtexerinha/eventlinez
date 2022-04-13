@@ -16,7 +16,7 @@ from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
 from local_settings import ENDPOINT_WEBHOOK_PAYOUT
-from promoter.models import Vendor, SalesByVendor, BankInfomationPromoter
+from promoter.models import Vendor, SalesByVendor, BankAccount
 
 from django.http import HttpResponse
 from io import BytesIO
@@ -320,63 +320,56 @@ def payout_account_link(request):
     return render(request, 'payout.html', {'promoter': promoter, 'link_connect': link_connect})
 
 
-def bank_information_connect_webhook(request):
-    endpoint_secret = 'whsec_0529f0be75ba9503ce96eb53cbeda9e13266ed86c5c6076e87f6293ddc0178e6'
-    event = None
-    payload = request.data
-    sig_header = request.headers['STRIPE_SIGNATURE']
+@csrf_exempt
+def bank_account_webhook(request):
+    import pdb;
+    pdb.set_trace()
+    endpoint_secret = 'whsec_IrkxuvRttsVB8JmebkRTym5z407dqT9s'
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
 
     try:
         event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
+            payload, sig_header, endpoint_secret, 86400
         )
     except ValueError as e:
-        # Invalid payload
-        raise e
+        return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
-        raise e
+        return HttpResponse(status=400)
 
     # Handle the event
-    if event['type'] == 'account.external_account.deleted':
+    if event['type'] == 'account.external_account.updated':
         external_account = event['data']['object']
-    elif event['type'] == 'account.external_account.updated':
-        external_account = event['data']['object']
-    # ... handle other event types
     else:
-        print('Unhandled event type {}'.format(event['type']))
-    return True
+        print('Unhandled event type {}'.format(event.type))
+
+    return HttpResponse(status=200)
 
 
 @login_required(login_url='/promoter/account/login/')
-def bank_information_connect(request):
-    bank_information = None
+def bank_account_list(request):
+    bank_accounts = None
     bank_information_intern = None
     promoter = request.user.promoter
     if promoter.account_id:
-        bank_information = stripe.Account.list_external_accounts(
+        bank_accounts = stripe.Account.list_external_accounts(
             promoter.account_id,
             object="bank_account",
             limit=1,
         )
-    if len(bank_information) > 0 and bank_information['data'][0].id:
-        bank_information_intern = BankInfomationPromoter.objects.get(id_bank_account=bank_information['data'][0].id)
+    if len(bank_accounts) > 0 and bank_accounts['data'][0].id:
+        bank_information_intern = BankAccount.objects.get(id_bank_account=bank_accounts['data'][0].id)
         if bank_information_intern is None:
-            bank_information_intern = BankInfomationPromoter.objects.create(
+            bank_information_intern = BankAccount.objects.create(
                 promoter=request.user.promoter,
-                id_bank_account=bank_information['data'][0].id,
-                last4=bank_information['data'][0].last4,
-                bank_name=bank_information['data'][0].bank_name,
-                routing_number=bank_information['data'][0].routing_number
+                id_bank_account=bank_accounts['data'][0].id,
+                last4=bank_accounts['data'][0].last4,
+                bank_name=bank_accounts['data'][0].bank_name,
+                routing_number=bank_accounts['data'][0].routing_number
             )
-    return render(request, 'payout_bank_information.html',
+    return render(request, 'bank_account.html',
                   {'promoter': promoter, 'bank_information_intern': bank_information_intern})
-
-
-
-
-
-
 
 
 def payout_pdf_view(request):
