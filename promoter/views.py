@@ -322,8 +322,6 @@ def payout_account_link(request):
 
 @csrf_exempt
 def bank_account_webhook(request):
-    import pdb;
-    pdb.set_trace()
     endpoint_secret = 'whsec_IrkxuvRttsVB8JmebkRTym5z407dqT9s'
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
@@ -337,12 +335,28 @@ def bank_account_webhook(request):
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
         return HttpResponse(status=400)
-
-    # Handle the event
-    if event['type'] == 'account.external_account.updated':
+    if event['type'] == 'account.external_account.created':
+        external_account = event['data']['object'][0]
+        BankAccount.objects.create(
+            promoter=request.user.promoter,
+            id_bank_account=external_account.id,
+            last4=external_account.last4,
+            bank_name=external_account.bank_name,
+            routing_number=external_account.routing_number
+        )
+    elif event['type'] == 'account.external_account.deleted':
         external_account = event['data']['object']
+        bank_account = BankAccount.objects.get(id_bank_account=external_account.id).delete()
+        bank_account.save()
+    elif event['type'] == 'account.external_account.updated':
+        external_account = event['data']['object']
+        bank_account = BankAccount.objects.get(id_bank_account=external_account.id)
+        bank_account.last4 = external_account.last4
+        bank_account.bank_name = external_account.bank_name
+        bank_account.routing_number = external_account.routing_number
+        bank_account.save()
     else:
-        print('Unhandled event type {}'.format(event.type))
+        print('Unhandled event type {}'.format(event['type']))
 
     return HttpResponse(status=200)
 
@@ -359,22 +373,17 @@ def bank_account_list(request):
             limit=1,
         )
     if len(bank_accounts) > 0 and bank_accounts['data'][0].id:
-        bank_information_intern = BankAccount.objects.get(id_bank_account=bank_accounts['data'][0].id)
-        if bank_information_intern is None:
-            bank_information_intern = BankAccount.objects.create(
-                promoter=request.user.promoter,
-                id_bank_account=bank_accounts['data'][0].id,
-                last4=bank_accounts['data'][0].last4,
-                bank_name=bank_accounts['data'][0].bank_name,
-                routing_number=bank_accounts['data'][0].routing_number
-            )
+        try:
+            bank_information_intern = BankAccount.objects.get(id_bank_account=bank_accounts['data'][0].id)
+        except BankAccount.DoesNotExist:
+            bank_information_intern = None
+            pass
     return render(request, 'bank_account.html',
                   {'promoter': promoter, 'bank_information_intern': bank_information_intern})
 
 
 def payout_pdf_view(request):
     promoter = request.user.promoter
-
     width, height = letter
     margin = inch
     mwidth = width - 2 * margin
@@ -401,11 +410,11 @@ def payout_pdf_view(request):
     data = []
     data.append(header_collumns)
 
-    p.translate(margin-50, margin + 620 - (15 * len(history)))
+    p.translate(margin - 50, margin + 620 - (15 * len(history)))
 
     for i in history['data']:
         rt = [datetime.fromtimestamp(i.created).strftime("%Y-%m-%d"),
-              i.amount/100, i.status]
+              i.amount / 100, i.status]
         data.append(rt)
 
     table = Table(data, colWidths=(185, 185, 185))
@@ -420,12 +429,12 @@ def payout_pdf_view(request):
     for i, row in enumerate(data):
         if i % 2 == 0:
             table_style.append(('BACKGROUND', (0, i), (-1, i),
-                                colors.Color(red=(243.0/255), green=(243.0/255), blue=(243.0/255))))
+                                colors.Color(red=(243.0 / 255), green=(243.0 / 255), blue=(243.0 / 255))))
         else:
             table_style.append(('BACKGROUND', (0, i), (-1, i), colors.white))
         if i == 0:
             table_style.append(('BACKGROUND', (0, i), (-1, i),
-                                colors.Color(red=(60.0/255), green=(33.0/255), blue=(92.0/255))))
+                                colors.Color(red=(60.0 / 255), green=(33.0 / 255), blue=(92.0 / 255))))
             table_style.append(('TEXTCOLOR', (0, i), (-1, i),
                                 colors.white))
 
