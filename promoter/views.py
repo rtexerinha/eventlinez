@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import json
 import stripe
 from django.contrib import messages
 from os import path
@@ -336,32 +336,37 @@ def bank_account_webhook(request):
         # Invalid signature
         return HttpResponse(status=400)
     if event['type'] == 'account.external_account.created':
-        external_account = event['data']['object'][0]
+        external_account = event['data']['object']
+        print(external_account, "c1")
+        promoter_user = Promoter.objects.get(account_id=external_account['account'])
         bank_account = BankAccount.objects.create(
-            promoter=request.user.promoter,
-            id_bank_account=external_account.id,
-            last4=external_account.last4,
-            bank_name=external_account.bank_name,
-            routing_number=external_account.routing_number
+            promoter=promoter_user,
+            id_bank_account=external_account['id'],
+            last4=external_account['last4'],
+            bank_name=external_account['bank_name'],
+            routing_number=external_account['routing_number']
         )
         bank_account.save()
     elif event['type'] == 'account.external_account.deleted':
         external_account = event['data']['object']
-        # bank_account = BankAccount.objects.get(id_bank_account=external_account.id).delete()
-        # bank_account.save()
+        bank_account = BankAccount.objects.get(id_bank_account=external_account['id']).delete()
+        bank_account.save()
     elif event['type'] == 'account.external_account.updated':
         external_account = event['data']['object']
         try:
-            bank_account = BankAccount.objects.get(id_bank_account=external_account.id)
-            bank_account.last4 = external_account.last4
-            bank_account.bank_name = external_account.bank_name
-            bank_account.routing_number = external_account.routing_number
-            bank_account.save()
+            bank_account = BankAccount.objects.get(id_bank_account=external_account['id'])
         except BankAccount.DoesNotExist:
-            pass
+            promoter_user = Promoter.objects.get(account_id=external_account['account'])
+            bank_account = BankAccount.objects.create(
+                promoter=promoter_user,
+                id_bank_account=external_account['id'],
+                last4=external_account['last4'],
+                bank_name=external_account['bank_name'],
+                routing_number=external_account['routing_number']
+            )
+            bank_account.save()
     else:
         print('Unhandled event type {}'.format(event['type']))
-
     return HttpResponse(status=200)
 
 
