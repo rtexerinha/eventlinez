@@ -5,7 +5,7 @@ from event.models import Promoter, Event
 
 
 class BankAccount(models.Model):
-    promoter = models.ForeignKey(Promoter, blank=True, null=True, on_delete=models.SET_NULL)
+    promoter = models.OneToOneField(Promoter, blank=True, null=True, on_delete=models.CASCADE)
     id_bank_account = models.CharField(max_length=250, null=True, blank=True)
     last4 = models.CharField(max_length=4, null=True, blank=True)
     bank_name = models.CharField(max_length=250, null=True, blank=True)
