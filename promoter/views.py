@@ -1,5 +1,5 @@
 from datetime import datetime
-import json
+import logging
 import stripe
 from django.contrib import messages
 from os import path
@@ -18,6 +18,7 @@ from event.models import Promoter, Event
 from local_settings import ENDPOINT_WEBHOOK_PAYOUT
 from promoter.models import Vendor, SalesByVendor, BankAccount
 
+
 from django.http import HttpResponse
 from io import BytesIO
 from reportlab.pdfgen import canvas
@@ -25,6 +26,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
+
+
+logger = logging.getLogger(__name__)
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -335,30 +339,35 @@ def bank_account_webhook(request):
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
         return HttpResponse(status=400)
-    if event['type'] == 'account.external_account.created':
-        external_account = event['data']['object']
-        print(external_account, "c1")
-        promoter_user = Promoter.objects.get(account_id=external_account['account'])
-        bank_account = BankAccount.objects.create(
-            promoter=promoter_user,
+
+    event_type = event['type']
+    external_account = event['data']['object']
+    promoter = Promoter.objects.get(account_id=external_account['account'])
+
+    logging.info('Unhandled event %s for %s ' % (event_type, promoter.name))
+
+    if event_type == 'account.external_account.created':
+        BankAccount.objects.create(
+            promoter=promoter,
             id_bank_account=external_account['id'],
             last4=external_account['last4'],
             bank_name=external_account['bank_name'],
             routing_number=external_account['routing_number']
         )
-        bank_account.save()
-    elif event['type'] == 'account.external_account.deleted':
-        external_account = event['data']['object']
-        bank_account = BankAccount.objects.get(id_bank_account=external_account['id']).delete()
-        bank_account.save()
-    elif event['type'] == 'account.external_account.updated':
+    elif event_type == 'account.external_account.deleted':
         external_account = event['data']['object']
         try:
             bank_account = BankAccount.objects.get(id_bank_account=external_account['id'])
+            bank_account.delete()
         except BankAccount.DoesNotExist:
-            promoter_user = Promoter.objects.get(account_id=external_account['account'])
+            return HttpResponse('Bank account does not exist', status=400)
+    elif event_type == 'account.external_account.updated':
+        external_account = event['data']['object']
+        try:
+            BankAccount.objects.get(id_bank_account=external_account['id'])
+        except BankAccount.DoesNotExist:
             bank_account = BankAccount.objects.create(
-                promoter=promoter_user,
+                promoter=promoter,
                 id_bank_account=external_account['id'],
                 last4=external_account['last4'],
                 bank_name=external_account['bank_name'],
@@ -366,7 +375,8 @@ def bank_account_webhook(request):
             )
             bank_account.save()
     else:
-        print('Unhandled event type {}'.format(event['type']))
+        logging.warning('Unhandled event type {}'.format(event['type']))
+
     return HttpResponse(status=200)
 
 
