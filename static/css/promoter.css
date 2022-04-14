@@ -9911,6 +9911,14 @@ body {
   color: #171717;
 }
 
+.title-color {
+  color: #49454D!important;
+}
+
+.p-color{
+  color: #7B7B7B !important;
+}
+
 #button-adm{
   height: 30px;
   background: #D90075;
@@ -10066,7 +10074,14 @@ border-card{
 .border-details{
   border-left: 5px solid #3C215C;
   padding-left: 1rem;
+}
 
+.m-height{
+  min-height: 75vh!important;
+}
+.m-height-50{
+  min-height: 50vh!important;
+  margin: 5rem auto;
 }
 
 

@@ -337,24 +337,28 @@ def bank_account_webhook(request):
         return HttpResponse(status=400)
     if event['type'] == 'account.external_account.created':
         external_account = event['data']['object'][0]
-        BankAccount.objects.create(
+        bank_account = BankAccount.objects.create(
             promoter=request.user.promoter,
             id_bank_account=external_account.id,
             last4=external_account.last4,
             bank_name=external_account.bank_name,
             routing_number=external_account.routing_number
         )
+        bank_account.save()
     elif event['type'] == 'account.external_account.deleted':
         external_account = event['data']['object']
-        bank_account = BankAccount.objects.get(id_bank_account=external_account.id).delete()
-        bank_account.save()
+        # bank_account = BankAccount.objects.get(id_bank_account=external_account.id).delete()
+        # bank_account.save()
     elif event['type'] == 'account.external_account.updated':
         external_account = event['data']['object']
-        bank_account = BankAccount.objects.get(id_bank_account=external_account.id)
-        bank_account.last4 = external_account.last4
-        bank_account.bank_name = external_account.bank_name
-        bank_account.routing_number = external_account.routing_number
-        bank_account.save()
+        try:
+            bank_account = BankAccount.objects.get(id_bank_account=external_account.id)
+            bank_account.last4 = external_account.last4
+            bank_account.bank_name = external_account.bank_name
+            bank_account.routing_number = external_account.routing_number
+            bank_account.save()
+        except BankAccount.DoesNotExist:
+            pass
     else:
         print('Unhandled event type {}'.format(event['type']))
 
@@ -364,7 +368,8 @@ def bank_account_webhook(request):
 @login_required(login_url='/promoter/account/login/')
 def bank_account_list(request):
     bank_accounts = None
-    bank_information_intern = None
+    link_connect = None
+    host = request.get_raw_uri().replace(request.get_full_path(), "")
     promoter = request.user.promoter
     if promoter.account_id:
         bank_accounts = stripe.Account.list_external_accounts(
@@ -372,14 +377,17 @@ def bank_account_list(request):
             object="bank_account",
             limit=1,
         )
-    if len(bank_accounts) > 0 and bank_accounts['data'][0].id:
-        try:
-            bank_information_intern = BankAccount.objects.get(id_bank_account=bank_accounts['data'][0].id)
-        except BankAccount.DoesNotExist:
-            bank_information_intern = None
-            pass
+        link = stripe.AccountLink.create(
+            account=promoter.account_id,
+            refresh_url=host + "/promoter/events/",
+            return_url=host + "/promoter/events/",
+            type="account_onboarding",
+        )
+        link_connect = link.url
     return render(request, 'bank_account.html',
-                  {'promoter': promoter, 'bank_information_intern': bank_information_intern})
+                  {'promoter': promoter,
+                   'bank_accounts': bank_accounts['data'],
+                   'link_connect': link_connect})
 
 
 def payout_pdf_view(request):
