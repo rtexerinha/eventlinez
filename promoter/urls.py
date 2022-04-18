@@ -1,7 +1,7 @@
 from django.urls import path
 from promoter.views import update_promoter, reset_password, signup_view_promoter, signin_view_promoter, \
     signout_view_promoter, vendors_list, vendor_create, vendor_update, vendor_remove, vendor_create_per_event, \
-    vendor_update_per_event, vendors_reports, vendor_export_excel, payout_account_link, \
+    vendor_update_per_event, vendors_reports, vendor_export_excel, \
     balance_history_payout, payout_pdf_view, webhook_payout, bank_account_list, bank_account_webhook
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
@@ -48,7 +48,6 @@ urlpatterns = [
     # payout
     path('payout/bank/information/webhook/', bank_account_webhook, name='bank_information_connect_webhook'),
     path('payout/bank/information/', bank_account_list, name='bank_information_connect'),
-    path('payout/', payout_account_link, name='payout_stripe'),
     path('payout/list/', balance_history_payout, name='balancehistorypayout'),
     path('payout/pdf/', payout_pdf_view, name='payout_pdf_view'),
     path('payout/webhook/', webhook_payout, name='webhook_payout'),
