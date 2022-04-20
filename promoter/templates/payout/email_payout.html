@@ -1,70 +1,80 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>New Order #{{ order.id }} - EventLinez </title>
-        <style type="text/css">
-           #title-message{color: #d90075;}
-            .tg  {border-collapse:collapse;border-spacing:0;}
-            .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-              overflow:hidden;padding:10px 5px;word-break:normal;}
-            .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-              font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-            .tg .tg-ugcu{background-color:#d90075;border-color:inherit;color:#ffffff;font-size:14px;text-align:center;vertical-align:top}
-            .tg .tg-ob96{background-color:#d90075;border-color:inherit;color:#ffffff;text-align:center;vertical-align:top}
-            .tg .tg-l93j{border-color:inherit;font-size:16px;font-weight:bold;text-align:center;vertical-align:top}
-            .tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
-            .tg .tg-uaft{border-color:inherit;color:#e10087;font-size:32px;text-align:center;vertical-align:top}
-            .tg .tg-yhtz{background-color:#D90075;border-color:inherit;color:#FFF;font-weight:bold;text-align:center;vertical-align:top}
-            .tg .tg-73oq{border-color:#000000;text-align:left;vertical-align:top}
-            .tg .tg-uah7{border-color:#000000;color:#212529;text-align:center;vertical-align:top}
-			#mensage {padding-right: 50px;padding-left: 50px;
-			}
-            a{ color: #d90075; text-decoration: none;}
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+            .b-background{background: #E5E5E5;}
+            .main-size{width: 30%;margin: 0 auto;}
+            .h1-email{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 24px;line-height: 33px;
+                align-items: center;color: #FFFFFF; margin-top: 0;margin-bottom: 10px;}
+            .h2-email-section{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 18px;
+                              line-height: 25px;display: flex;align-items: center;color: #49454D; margin-top:30px;}
+            .h3-logo{
+                font-family: 'Nunito';font-style: normal;font-weight: 800;
+                font-size: 18px;line-height: 25px;justify-content: space-around;padding-top: 5px;
+                display: flex;align-items: center;text-align: center;color: #3C215C;
+            }
+            .h4-email{font-family: 'Nunito';font-style: normal;font-weight: 400;font-size: 14px;
+                justify-content: center; margin: 0;
+                line-height: 19px;display: flex;align-items: center;text-align: center;color: rgba(255, 255, 255, 0.8);}
+            .h6-email{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 14px;
+                      line-height: 19px;display: flex;align-items: center;color: #49454D; margin: 0}
+            .p-email{font-family: 'Nunito';font-style: normal;font-weight: 400;font-size: 14px;
+                     padding-bottom: 10px;
+                     line-height: 19px;display: flex;align-items: center;letter-spacing: -0.02em;color: #605D64;}
+            .section-logo{height: 40px; ; margin-top:20px;background: #FAFAFB; text-align: center}
+            .section-main{height: 136px;text-align: center;
+                background: linear-gradient(89.39deg, #E10087 -29.61%, #007AFF 135.34%);}
+            .section-background{background: #FAFAFB; padding: 10px 20px 40px 20px;}
+            .line-div{border: 1px solid rgba(33, 33, 33, 0.1); margin-bottom: 20px}
+            .igm{margin-top: 10px}
+
+
 		</style>
 	</head>
-	<body>
-         <div style="width: 80%;margin: auto">
-             <div style="text-align: center">
-			    <h1 id="title-message">Payout</h1>
-			    <p>This email is to notify you of the payout made from our platform to your bank account.
-                    <br>Please make sure the payout has been received.
-                </p>
-             </div>
-		    <br>
+	<body class="b-background">
+         <main class="main-size">
+             <section class="section-logo">
+                  <h3 class="h3-logo">
+                      Eventlinez
+                  </h3>
+             </section>
 
-            <table class="tg" style="margin: auto">
-                <thead>
-                  <tr>
-                    <th class="tg-uaft" colspan="4">
-                        <span style="font-weight:700;font-style:normal">Eventlinez</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="tg-l93j" colspan="2">--</td>
-                    <td class="tg-c3ow" colspan="2">--</td>
-                  </tr>
-                  <tr>
-                    <td class="tg-ob96" colspan="4">
-                        <span style="font-weight:bolder;font-style:normal">
-                            Payment details:
-                        </span>
-                        <br><br>
-                        <span style="font-weight:400;font-style:normal">
-                            Paid successfully via Stripe.
-                        </span>
-                    </td>
-                  </tr>
-                </tbody>
-            </table>
+             <section class="section-main">
+                 <img class="igm" alt="repasse" src="{% static 'img/repasse_email.png' %}"/>
+                 <h1 class="h1-email">
+                     Your payout has arrived!
+                 </h1>
+                 <h4 class="h4-email" style="margin: 0">View payment information below.</h4>
+             </section>
 
-			<br>
-			<p id="mensage" style="text-align: center">
-                Any question, please contact us at eventlinez.adm@gmail.com
-            </p>
-	        </div>
+             <section class="section-background">
+                 <h2 class="h2-email-section">Payout Information</h2>
+
+                 <h6 class="h6-email">Payment Date </h6>
+                 <p class="p-email">1642192673</p>
+
+                 <h6 class="h6-email">Amount</h6>
+                 <p class="p-email">0,01</p>
+
+                 <div class="line-div"></div>
+
+                 <h6 class="h6-email">Bank Name:</h6>
+                 <p class="p-email">1642192673</p>
+
+                 <h6 class="h6-email">Account number:</h6>
+                 <p class="p-email">*******673</p>
+
+                 <h6 class="h6-email">Routing Number:</h6>
+                 <p class="p-email">1642192673</p>
+             </section>
+
+         </main>
+
 
 	</body>
 </html>

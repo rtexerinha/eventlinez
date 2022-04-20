@@ -9,12 +9,28 @@
         <div class="container-fluid">
             {% if balance.available %}
                 <div class="d-flex pt-5 pb-2">
+
+                    <div class="col-10 d-flex pl-0">
                     <i style="font-size: 1.5rem;color: #49454D"
                        class="fas fa-dollar-sign mt-1"></i>
                     <h1 class="title-dast pl-2" style="color: #49454D">
                         Payout
                     </h1>
+                    </div>
+
+                    <div class="col-2 d-flex justify-content-end">
+
+                        <a href="{{ link_connect }}" id="button-adm"
+                               class="btn btn-secondary"
+                               style="margin-top: 10px auto auto auto;justify-content: center">
+                                Update
+                        </a>
+                        </div>
                 </div>
+
+
+
+
 
                  {% for sald_available in balance.available %}
                      {% if sald_available.amount == 0 %}
@@ -28,6 +44,7 @@
                          </h5>
                     {% endif %}
                 {% endfor %}
+
 
                 {% if not promoter.bankaccount %}
                 <section class="container" style="min-height: 75vh">
@@ -102,9 +119,6 @@
 
                             <aside class="col-4 pt-lg-3 border-card">
                                 <div class="div-flex">
-{#                                    <i style="color: #3C215C;width: 24px;height: 24px;"#}
-{#                                       class="fas fa-university mt-1 pr-3">#}
-{#                                    </i>#}
                                     <h4 class="h4-promoter border-details" style="line-height: 25px;">
                                         Bank Information
                                     </h4>

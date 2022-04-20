@@ -467,7 +467,7 @@ def payout_pdf_view(request):
 
 @csrf_exempt
 def webhook_payout(request):
-    endpoint_secret = ENDPOINT_WEBHOOK_PAYOUT
+    endpoint_secret = 'whsec_na6ahEEXwDdtSMqx5DMGR8F6UOK8JSOi'
     event = None
     payload = request.body
     sig_header = request.headers['STRIPE_SIGNATURE']
@@ -499,7 +499,7 @@ def webhook_payout(request):
         message = render_to_string('payout/email_payout.html', {'payout': payout})
 
     else:
-        print('Unhandled event type {}'.format(event['type']))
+        logging.warning('Unhandled event type {}'.format(event['type']))
 
     email_payout = EmailMessage(
         subject=subject,
