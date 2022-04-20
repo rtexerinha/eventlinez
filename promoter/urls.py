@@ -50,5 +50,5 @@ urlpatterns = [
     path('payout/bank/information/', bank_account_list, name='bank_information_connect'),
     path('payout/list/', balance_history_payout, name='balancehistorypayout'),
     path('payout/pdf/', payout_pdf_view, name='payout_pdf_view'),
-    path('payout/webhook/', webhook_payout, name='webhook_payout'),
+    path('payout/email/webhook/', webhook_payout, name='webhook_payout'),
 ]

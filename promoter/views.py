@@ -467,7 +467,7 @@ def payout_pdf_view(request):
 
 @csrf_exempt
 def webhook_payout(request):
-    endpoint_secret = 'whsec_na6ahEEXwDdtSMqx5DMGR8F6UOK8JSOi'
+    endpoint_secret = 'whsec_Xa364UYwqvug5J7buCAMeFoFLNKNrrsW'
     event = None
     payload = request.body
     sig_header = request.headers['STRIPE_SIGNATURE']
