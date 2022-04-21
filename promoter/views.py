@@ -486,7 +486,7 @@ def webhook_payout(request):
         message = render_to_string('payout/email/payout_success.html', {'payout': payout})
     elif event['type'] == 'payout.canceled':
         subject = "Eventlinez - Error Payout"
-        message = render_to_string('payout/email/payout_success.html', {'payout': payout})
+        message = render_to_string('payout/email/payout_cancellation.html', {'payout': payout})
     elif event['type'] == 'payout.failed':
         subject = "Eventlinez - Error Payout"
         message = render_to_string('payout/email/payout_failure.html', {'payout': payout})
