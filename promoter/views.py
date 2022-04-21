@@ -306,13 +306,13 @@ def balance_history_payout(request):
     )
     link_connect = link.url
 
-    return render(request, 'payout_list.html', {'promoter': promoter,
+    return render(request, 'payout/payout_list.html', {'promoter': promoter,
                                                 'balance': balance,
                                                 "link_connect": link_connect,
                                                 'payouts_history': payouts_history,
                                                 'bank_information': bank_information,
                                                 'cents': 100
-                                                })
+                                                       })
 
 
 @csrf_exempt
@@ -467,39 +467,31 @@ def payout_pdf_view(request):
 
 @csrf_exempt
 def webhook_payout(request):
-    endpoint_secret = 'whsec_Xa364UYwqvug5J7buCAMeFoFLNKNrrsW'
-    event = None
+    endpoint_secret = 'whsec_ot8hWvpyECanOFBMMyE31v3KsfhZtPRQ'
     payload = request.body
-    sig_header = request.headers['STRIPE_SIGNATURE']
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
 
     try:
         event = stripe.Webhook.construct_event(
             payload, sig_header, endpoint_secret
         )
     except ValueError as e:
-        # Invalid payload
-        raise e
+        return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        raise e
+        return HttpResponse(status=400)
 
-    payout = None
-    subject = None
-    message = None
-    if event['type'] == 'payout.canceled' or event['type'] == 'payout.failed':
-        payout = event['data']['object']
-
-        subject = "Eventlinez - Error Payout"
-        message = render_to_string('payout/email_payout.html', {'payout': payout})
-
-    elif event['type'] == 'payout.paid':
-        payout = event['data']['object']
-
+    payout = event['data']['object']
+    if event['type'] == 'payout.paid':
         subject = "Eventlinez - New Payout"
-        message = render_to_string('payout/email_payout.html', {'payout': payout})
-
+        message = render_to_string('payout/email/payout_success.html', {'payout': payout})
+    elif event['type'] == 'payout.canceled':
+        subject = "Eventlinez - Error Payout"
+        message = render_to_string('payout/email/payout_success.html', {'payout': payout})
+    elif event['type'] == 'payout.failed':
+        subject = "Eventlinez - Error Payout"
+        message = render_to_string('payout/email/payout_failure.html', {'payout': payout})
     else:
-        logging.warning('Unhandled event type {}'.format(event['type']))
+        return HttpResponse(status=400)
 
     email_payout = EmailMessage(
         subject=subject,
@@ -507,8 +499,6 @@ def webhook_payout(request):
         from_email="noreply@eventlinez.com",
         to=['brunojndias@gmail.com'],
     )
-    payout.content_subtype = "html"
-
+    email_payout.content_subtype = "html"
     email_payout.send()
-
     return HttpResponse(status=200)
