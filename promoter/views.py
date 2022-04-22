@@ -15,9 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
-from local_settings import ENDPOINT_WEBHOOK_PAYOUT
+from local_settings import STRIPE_ENDPOINT_WEBHOOK_PAYOUT, STRIPE_ENDPOINT_WEBHOOK_BANK_ACCOUNT
 from promoter.models import Vendor, SalesByVendor, BankAccount
-
 
 from django.http import HttpResponse
 from io import BytesIO
@@ -26,7 +25,6 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
-
 
 logger = logging.getLogger(__name__)
 
@@ -307,17 +305,17 @@ def balance_history_payout(request):
     link_connect = link.url
 
     return render(request, 'payout/payout_list.html', {'promoter': promoter,
-                                                'balance': balance,
-                                                "link_connect": link_connect,
-                                                'payouts_history': payouts_history,
-                                                'bank_information': bank_information,
-                                                'cents': 100
+                                                       'balance': balance,
+                                                       "link_connect": link_connect,
+                                                       'payouts_history': payouts_history,
+                                                       'bank_information': bank_information,
+                                                       'cents': 100
                                                        })
 
 
 @csrf_exempt
 def bank_account_webhook(request):
-    endpoint_secret = 'whsec_IrkxuvRttsVB8JmebkRTym5z407dqT9s'
+    endpoint_secret = STRIPE_ENDPOINT_WEBHOOK_BANK_ACCOUNT
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
 
@@ -467,7 +465,7 @@ def payout_pdf_view(request):
 
 @csrf_exempt
 def webhook_payout(request):
-    endpoint_secret = 'whsec_ot8hWvpyECanOFBMMyE31v3KsfhZtPRQ'
+    endpoint_secret = STRIPE_ENDPOINT_WEBHOOK_PAYOUT
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
 
@@ -481,15 +479,20 @@ def webhook_payout(request):
         return HttpResponse(status=400)
 
     payout = event['data']['object']
+    promoter = Promoter.objects.get(account_id=event['account'])
+
     if event['type'] == 'payout.paid':
-        subject = "Eventlinez - New Payout"
-        message = render_to_string('payout/email/payout_success.html', {'payout': payout})
+        subject = "Eventlinez - Payout Paid"
+        message = render_to_string('payout/email/payout_success.html',
+                                   {'payout': payout, 'promoter': promoter.bankaccount})
     elif event['type'] == 'payout.canceled':
-        subject = "Eventlinez - Error Payout"
-        message = render_to_string('payout/email/payout_cancellation.html', {'payout': payout})
+        subject = "Eventlinez - Payout Canceled"
+        message = render_to_string('payout/email/payout_cancellation.html',
+                                   {'payout': payout, 'promoter': promoter.bankaccount})
     elif event['type'] == 'payout.failed':
-        subject = "Eventlinez - Error Payout"
-        message = render_to_string('payout/email/payout_failure.html', {'payout': payout})
+        subject = "Eventlinez - Payout Failed"
+        message = render_to_string('payout/email/payout_failure.html',
+                                   {'payout': payout, 'promoter': promoter.bankaccount})
     else:
         return HttpResponse(status=400)
 
@@ -497,7 +500,7 @@ def webhook_payout(request):
         subject=subject,
         body=message,
         from_email="noreply@eventlinez.com",
-        to=['brunojndias@gmail.com'],
+        to=[promoter.email],
     )
     email_payout.content_subtype = "html"
     email_payout.send()
