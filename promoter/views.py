@@ -504,4 +504,49 @@ def webhook_payout(request):
     )
     email_payout.content_subtype = "html"
     email_payout.send()
-    return HttpResponse(status=200)
+
+
+def bank_create(request):
+    if request.method == 'POST':
+        form_bank_account = BankAccountForm(data=request.POST)
+        if form_bank_account.is_valid():
+            bank_account = BankAccount(**form_bank_account.cleaned_data)
+            bank_account.promoter = request.user.promoter
+            bank_account.save()
+            return redirect('payment_list')
+    else:
+        form_bank_account = BankAccountForm()
+    return render(request, 'bank/bank_account_create.html',
+                  {'form_vendor': form_bank_account})
+
+
+@login_required(login_url='/promoter/account/login/')
+def bank_account_list(request):
+    promoter = request.user.promoter
+    bank_information = BankAccount.objects.filter(promoter=promoter)
+
+    return render(request, 'bank/bank_account.html',
+                  {'promoter': promoter,
+                   'bank_accounts': bank_information})
+
+
+@login_required(login_url='/promoter/account/login/')
+def bank_account_update(request, bank_id):
+    form_bank_account = None
+    bank_accounts = BankAccount.objects.get(id=bank_id)
+    if request.method == 'GET':
+        form_bank_account = BankAccountForm(instance=bank_accounts)
+    if request.method == 'POST':
+        form_bank_account = BankAccountForm(request.POST, instance=bank_accounts)
+        if form_bank_account.is_valid():
+            form_bank_account.save()
+            return redirect('bank_information')
+    return render(request, 'bank/bank_account_create.html',
+                  {'form_bank_account': form_bank_account})
+
+
+@login_required(login_url='/promoter/account/login/')
+def bank_remove(request, bank_id):
+    bank = get_object_or_404(BankAccount, id=bank_id)
+    bank.delete()
+    return redirect('bank_information')
