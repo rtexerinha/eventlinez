@@ -11,6 +11,7 @@ from django.http import StreamingHttpResponse
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
+from promoter.forms import BankAccountForm
 from promoter.models import Payments, Vendor, SalesByVendor, BankAccount
 
 from django.http import HttpResponse
@@ -259,7 +260,7 @@ def vendor_export_excel(request, event_id):
 def payment_list(request):
     promoter = request.user.promoter
     payouts_history = Payments.objects.filter(promoter=promoter)
-    balance = 100
+    balance = 0
     bank_information = BankAccount.objects.filter(promoter=promoter)
     
     data = {'promoter': promoter, 'balance': balance, 'payouts_history': payouts_history,
@@ -370,7 +371,7 @@ def bank_account_update(request, bank_id):
             form_bank_account.save()
             return redirect('bank_information')
     return render(request, 'bank/bank_account_create.html',
-                  {'form_bank_account': form_bank_account})
+                  {'form': form_bank_account})
 
 
 @login_required(login_url='/promoter/account/login/')
