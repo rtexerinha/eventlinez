@@ -380,49 +380,6 @@ def payment_pdf_view(request):
     return response
 
 
-@csrf_exempt
-def webhook_payout(request):
-    endpoint_secret = STRIPE_ENDPOINT_WEBHOOK_PAYOUT
-    payload = request.body
-    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
-    except ValueError as e:
-        return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError as e:
-        return HttpResponse(status=400)
-
-    payout = event['data']['object']
-    promoter = Promoter.objects.get(account_id=event['account'])
-
-    if event['type'] == 'payout.paid':
-        subject = "Eventlinez - Payout Paid"
-        message = render_to_string('payout/email/payout_success.html',
-                                   {'payout': payout, 'promoter': promoter.bankaccount})
-    elif event['type'] == 'payout.canceled':
-        subject = "Eventlinez - Payout Canceled"
-        message = render_to_string('payout/email/payout_cancellation.html',
-                                   {'payout': payout, 'promoter': promoter.bankaccount})
-    elif event['type'] == 'payout.failed':
-        subject = "Eventlinez - Payout Failed"
-        message = render_to_string('payout/email/payout_failure.html',
-                                   {'payout': payout, 'promoter': promoter.bankaccount})
-    else:
-        return HttpResponse(status=400)
-
-    email_payout = EmailMessage(
-        subject=subject,
-        body=message,
-        from_email="noreply@eventlinez.com",
-        to=[promoter.email],
-    )
-    email_payout.content_subtype = "html"
-    email_payout.send()
-
-
 def bank_create(request):
     if request.method == 'POST':
         form_bank_account = BankAccountForm(data=request.POST)
