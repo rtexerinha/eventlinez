@@ -62,20 +62,16 @@ class Payments(models.Model):
         verbose_name = 'Payments'
         verbose_name_plural = 'Payments'
 
-    def get_amount_payments(self):
-        result = Payments.objects.filter(promoter=self.promoter).aggregate(Sum('amount'))
-        _amount = result['amount__sum']
-        if not _amount:
-            return 0
-        return _amount
-        
-        
+                
 @receiver(post_save, sender=Payments)
-def register(sender, instance, **kwargs):
+def email_pay(sender, instance, **kwargs):
     if kwargs.get('created', False):
         subject = "Eventlinez - Payments Paid"
+        bank_account = BankAccount.objects.filter(promoter=instance.promoter)
+        print(bank_account)
         message = render_to_string('payout/email/payout_success.html',
-                               {'payout': instance, 'promoter': instance.promoter.email})
+                               {'payout': instance, 'bank_account': bank_account[0],
+                                'promoter': instance.promoter.email})
         from_email = 'noreply@eventlinez.com'
         email_payout = EmailMessage(
           subject=subject,
