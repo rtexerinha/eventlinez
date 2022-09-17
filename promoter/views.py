@@ -343,16 +343,15 @@ def payment_pdf_view(request):
 
 def bank_create(request):
     if request.method == 'POST':
-        form_bank_account = BankAccountForm(data=request.POST)
-        if form_bank_account.is_valid():
-            bank_account = BankAccount(**form_bank_account.cleaned_data)
+        form = BankAccountForm(data=request.POST)
+        if form.is_valid():
+            bank_account = BankAccount(**form.cleaned_data)
             bank_account.promoter = request.user.promoter
             bank_account.save()
             return redirect('payment_list')
     else:
-        form_bank_account = BankAccountForm()
-    return render(request, 'bank/bank_account_create.html',
-                  {'form_vendor': form_bank_account})
+        form = BankAccountForm()
+    return render(request, 'bank/bank_account_create.html', {'form': form})
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -367,7 +366,7 @@ def bank_account_list(request):
 
 @login_required(login_url='/promoter/account/login/')
 def bank_account_update(request, bank_id):
-    form_bank_account = None
+    # form_bank_account = None
     bank_accounts = BankAccount.objects.get(id=bank_id)
     if request.method == 'GET':
         form_bank_account = BankAccountForm(instance=bank_accounts)

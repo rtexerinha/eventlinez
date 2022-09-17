@@ -19,9 +19,9 @@
                 {% csrf_token %}
 
                 <div class="form-row">
-                    <div class="form-group col-md-4 mb-0">{{ form_bank_account.bank_name| as_crispy_field }}</div>
-                    <div class="form-group col-md-4 mb-0">{{ form_bank_account.routing_number| as_crispy_field }}</div>
-                    <div class="form-group col-md-4 mb-0">{{ form_bank_account.last4 | as_crispy_field }}</div>
+                   <div class="form-group col-md-4 mb-0">{{ form.bank_name| as_crispy_field }}</div>
+    <div class="form-group col-md-4 mb-0">{{ form.routing_number| as_crispy_field }}</div>
+                    <div class="form-group col-md-4 mb-0">{{ form.last4 | as_crispy_field }}</div>
                 </div>
 
                 <button type="submit" id="button-adm" class="btn btn-secondary" style="height: 40px;
