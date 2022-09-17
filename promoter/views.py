@@ -336,16 +336,15 @@ def payment_pdf_view(request):
     p.setFont("Helvetica", 20)
 
     header_collumns = ['Payment Data', 'Amount Paid', 'Status']
-    history = stripe.Payout.list(stripe_account=promoter.account_id)
+    historys = Payments.objects.filter(promoter=promoter)
     data = []
     data.append(header_collumns)
 
-    p.translate(margin - 50, margin + 620 - (15 * len(history)))
+    p.translate(margin - 50, margin + 620 - (15 * len(historys)))
 
-    for i in history['data']:
-        rt = [datetime.fromtimestamp(i.created).strftime("%Y-%m-%d"),
-              i.amount / 100, i.status]
-        data.append(rt)
+    for i in historys:
+        history = [i.created.strftime("%Y-%m-%d"), i.amount, 'Paid']
+        data.append(history)
 
     table = Table(data, colWidths=(185, 185, 185))
     table.setStyle(TableStyle([
