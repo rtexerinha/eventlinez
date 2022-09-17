@@ -1,14 +1,11 @@
 from django.db import models
 from django.db.models import Sum
 from django.template.defaultfilters import slugify
-
 from event.models import Promoter, Event
 from django.template.loader import render_to_string
 
-
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-# from django.core.mail import send_mail
 from django.core.mail import EmailMessage
 
 
@@ -77,7 +74,6 @@ class Payments(models.Model):
 def register(sender, instance, **kwargs):
     if kwargs.get('created', False):
         subject = "Eventlinez - Payments Paid"
-        # message = 'here goes your message'
         message = render_to_string('payout/email/payout_success.html',
                                {'payout': instance, 'promoter': instance.promoter.email})
         from_email = 'noreply@eventlinez.com'
@@ -89,4 +85,3 @@ def register(sender, instance, **kwargs):
         )
         email_payout.content_subtype = "html"
         email_payout.send()
-        # send_mail(subject, message, from_email, 'brunojndias@gmail.com', fail_silently=False)

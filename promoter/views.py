@@ -1,22 +1,16 @@
 from datetime import datetime
 import logging
-import stripe
 from django.contrib import messages
 from os import path
 from django.contrib.auth import update_session_auth_hash, authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.mail import EmailMessage
 from django.shortcuts import render, redirect, get_object_or_404
 import xlsxwriter
 from django.http import StreamingHttpResponse
-from django.template.loader import render_to_string
-from django.views.decorators.csrf import csrf_exempt
 
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
-from local_settings import STRIPE_ENDPOINT_WEBHOOK_PAYOUT, STRIPE_ENDPOINT_WEBHOOK_BANK_ACCOUNT
-from promoter.forms import BankAccountForm
 from promoter.models import Payments, Vendor, SalesByVendor, BankAccount
 
 from django.http import HttpResponse
