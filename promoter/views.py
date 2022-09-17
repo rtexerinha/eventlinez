@@ -78,7 +78,7 @@ def signup_view_promoter(request):
             user = authenticate(username=username, password=raw_password)
             login(request, user)
             # return redirect('events_promoter')
-            return redirect('balancehistorypayout')
+            return redirect('payment_list')
 
     else:
         form = SignUpFormPromoter()
@@ -262,56 +262,16 @@ def vendor_export_excel(request, event_id):
 
 
 @login_required(login_url='/promoter/account/login/')
-def balance_history_payout(request):
+def payment_list(request):
     promoter = request.user.promoter
-    host = request.get_raw_uri().replace(request.get_full_path(), "")
-    # payouts_history = None
-    # balance = None
-    # bank_information = None
-    if not promoter.account_id:
-        account_object = stripe.Account.create(
-            type="express",
-            country="US",
-            email=promoter.email,
-            capabilities={
-                "card_payments": {"requested": True},
-                "transfers": {"requested": True},
-            },
-            business_profile={
-                "mcc": "7922",
-                "name": promoter.email,
-            },
-            business_type="individual",
-            settings={
-                "payouts": {
-                    "schedule": {"delay_days": 2, "interval": "weekly", "weekly_anchor": "tuesday"}
-                },
-            },
-        )
-        promoter.account_id = account_object.id
-        promoter.save()
+    payouts_history = Payments.objects.filter(promoter=promoter)
+    balance = 100
+    bank_information = BankAccount.objects.filter(promoter=promoter)
+    
+    data = {'promoter': promoter, 'balance': balance, 'payouts_history': payouts_history,
+                                                      'bank_information': bank_information}
+    return render(request, 'payments/payment_list.html', data)
 
-    payouts_history = stripe.Payout.list(stripe_account=promoter.account_id)
-
-    balance = stripe.Balance.retrieve(stripe_account=promoter.account_id)
-
-    bank_information = stripe.Account.retrieve(promoter.account_id)
-
-    link = stripe.AccountLink.create(
-        account=promoter.account_id,
-        refresh_url=host + "/promoter/events/",
-        return_url=host + "/promoter/events/",
-        type="account_onboarding",
-    )
-    link_connect = link.url
-
-    return render(request, 'payout/payout_list.html', {'promoter': promoter,
-                                                       'balance': balance,
-                                                       "link_connect": link_connect,
-                                                       'payouts_history': payouts_history,
-                                                       'bank_information': bank_information,
-                                                       'cents': 100
-                                                       })
 
 def payment_pdf_view(request):
     promoter = request.user.promoter
