@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum
 from django.template.defaultfilters import slugify
 
 from event.models import Promoter, Event
@@ -54,15 +55,22 @@ class SalesByVendor(models.Model):
         
 
 class Payments(models.Model):
-    promoter = models.ForeignKey(Promoter, blank=True, null=True, on_delete=models.SET_NULL)
+    promoter = models.ForeignKey(Promoter, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    image = models.ImageField(upload_to='payments', blank=False, null=False)
+    image = models.ImageField(upload_to='payments', blank=True, null=True)
     
     class Meta:
         verbose_name = 'Payments'
         verbose_name_plural = 'Payments'
+
+    def get_amount_payments(self):
+        result = Payments.objects.filter(promoter=self.promoter).aggregate(Sum('amount'))
+        _amount = result['amount__sum']
+        if not _amount:
+            return 0
+        return _amount
         
         
 @receiver(post_save, sender=Payments)
