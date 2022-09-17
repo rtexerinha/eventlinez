@@ -16,7 +16,8 @@ from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
 from local_settings import STRIPE_ENDPOINT_WEBHOOK_PAYOUT, STRIPE_ENDPOINT_WEBHOOK_BANK_ACCOUNT
-from promoter.models import Vendor, SalesByVendor, BankAccount
+from promoter.forms import BankAccountForm
+from promoter.models import Payments, Vendor, SalesByVendor, BankAccount
 
 from django.http import HttpResponse
 from io import BytesIO
