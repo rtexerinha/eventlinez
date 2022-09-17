@@ -2,6 +2,13 @@ from django.db import models
 from django.template.defaultfilters import slugify
 
 from event.models import Promoter, Event
+from django.template.loader import render_to_string
+
+
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+# from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 
 
 class BankAccount(models.Model):
@@ -10,6 +17,9 @@ class BankAccount(models.Model):
     last4 = models.CharField(max_length=4, null=True, blank=True)
     bank_name = models.CharField(max_length=250, null=True, blank=True)
     routing_number = models.CharField(max_length=64, null=True, blank=True)
+    
+    def __str__(self):
+        return self.bank_name
 
 
 class Vendor(models.Model):
@@ -41,3 +51,34 @@ class SalesByVendor(models.Model):
     class Meta:
         managed = False
         db_table = 'sales_by_vendor'
+        
+
+class Payments(models.Model):
+    promoter = models.ForeignKey(Promoter, blank=True, null=True, on_delete=models.SET_NULL)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    image = models.ImageField(upload_to='payments', blank=False, null=False)
+    
+    class Meta:
+        verbose_name = 'Payments'
+        verbose_name_plural = 'Payments'
+        
+        
+@receiver(post_save, sender=Payments)
+def register(sender, instance, **kwargs):
+    if kwargs.get('created', False):
+        subject = "Eventlinez - Payments Paid"
+        # message = 'here goes your message'
+        message = render_to_string('payout/email/payout_success.html',
+                               {'payout': instance, 'promoter': instance.promoter.email})
+        from_email = 'noreply@eventlinez.com'
+        email_payout = EmailMessage(
+          subject=subject,
+          body=message,
+          from_email=from_email,
+          to=[instance.promoter.email],
+        )
+        email_payout.content_subtype = "html"
+        email_payout.send()
+        # send_mail(subject, message, from_email, 'brunojndias@gmail.com', fail_silently=False)
