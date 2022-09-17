@@ -12,6 +12,7 @@
             .main-size{width: 90%;margin: 0 auto;}
             .h1-email{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 24px;line-height: 33px;
                 align-items: center;color: #FFFFFF; margin-top: 10px;margin-bottom: 10px;}
+            .p-top{padding-top:1.5rem;}
             .h2-email-section{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 18px;
                               line-height: 25px;display: flex;align-items: center;color: #49454D; margin-top:30px;}
             .h3-logo{
@@ -37,31 +38,78 @@
 
 		</style>
 	</head>
-	<body class="b-background">
-         <main class="main-size">
-             <section class="section-logo">
-                  <h3 class="h3-logo">Eventlinez</h3>
-             </section>
+	
+    <body class="b-background">
+        <main class="main-size">
+            <section class="section-logo">
+                <h3 class="h3-logo">Eventlinez</h3>
+            </section>
 
-             <section class="section-main">
-{#                 <img class="igm" alt="repasse" src="{% static 'img/repasse_email.png' %}"/>#}
-                 {% if payout.amount|divise:100 < 0%}
-                     <h1 class="h1-email">Payout Cancellation</h1>
-                     <h4 class="h4-email" style="margin: 0">View cancellation information below.</h4>
-                 {% else %}
-                     <h1 class="h1-email">Your payout has arrived!</h1>
-                    <h4 class="h4-email" style="margin: 0">View payment information below.</h4>
-                 {% endif %}
+            <section class="section-main">
+                <h1 class="h1-email p-top">Your payment has arrived!</h1>
+                <h4 class="h4-email" style="margin: 0">View payment information below.</h4>
+            </section>
 
-             </section>
+            <section class="section-background">
+                <h2 class="h2-email-section">Payment Information</h2>
+                <h6 class="h6-email">Payment Date </h6>
+                <p class="p-email"> {{payout.created}}</p>
+                <h6 class="h6-email">Amount</h6>
+                <p class="p-email">{{payout.amount}}</p>
+            </section>
 
-             <section class="section-background">
-                 <h2 class="h2-email-section">Payout Information</h2>
-                 <h6 class="h6-email">Payment Date </h6>
-                 <p class="p-email">{{  payout.arrival_date|current_time}}</p>
-                 <h6 class="h6-email">Amount</h6>
-                 <p class="p-email">{{ payout.amount|divise:100}}</p>
-             </section>
+            <footer style="margin:0;outline:none;padding:0;width:100%;background-color:red">
+                <div style="margin:0;outline:none;padding:0;display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;font-family:sans-serif"> </div>
+                <div style="margin:0;outline:none;padding:0;display:none;font-size:1px;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;font-family:sans-serif"> ‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌<wbr>&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌<wbr>&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌<wbr>&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌<wbr>&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌<wbr>&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌<wbr>&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌<wbr>&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp; </div>
+                <table align="center" cellspacing="0" cellpadding="0" border="0" width="600" style="border-collapse:collapse!important;font-size:14px;min-width:100%;border-spacing:0!important;margin:auto;table-layout:fixed!important;width:100%!important;background-color:#090909">
+                    <tbody>
+                        <tr>
+                            <td style="padding:25px 20px 25px 20px;background-color:#090909">
+                                <table cellspacing="0" cellpadding="0" border="0" width="100%">
+                                    <tbody>
+                                        <tr align="center">
+                                            
+                                            <td style="padding:0 50px 10px 50px"> <span> <b style="margin:0;outline:none;padding:0">
+                                                <h1 class="h1-email" style="font-size: 18px;
+                                                line-height: 14px;">Do you have any doubt?</h1>
+                                            </b>
+                                            <br>
+                                                <a href="https://www.eventlinez.com/contact/"> 
+                                                    <h4 class="h4-email">Access our Help section</h4>
+
+                                                    </a> </span> </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        
+                        <tr align="center">
+                            <td style="padding:3px 30px 3px 30px;color:#ffffff">Go to:  
+                                <a style="margin:0;outline:none;padding:0;color:#00788a;text-decoration:underline"></a>
+                                <a href="https://www.eventlinez.com/" 
+                                    style="margin:0;outline:none;padding:0;color:linear-gradient(89.39deg, #E10087 -29.61%, #007AFF 135.34%);text-decoration:none" 
+                                    target="_blank" 
+                                    data-saferedirecturl="https://www.eventlinez.com/"> eventlinez.com</a> 
+                                </td>
+                        </tr>
+                        <tr align="center">
+                            <td style="padding:3px 30px 6px 30px">
+                                <p style="font-family:'Arial',sans-serif;font-size:10px;color:#f4f4f4;font-weight:300"> Copyright © 2022 Eventlinez </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </footer>
+
          </main>
 	</body>
 </html>
+
+
+
+
+
+
+
+
