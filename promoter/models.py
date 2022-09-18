@@ -14,7 +14,7 @@ class BankAccount(models.Model):
     last4 = models.CharField(max_length=4)
     bank_name = models.CharField(max_length=250)
     routing_number = models.CharField(max_length=64)
-    
+
     def __str__(self):
         return self.bank_name
 
@@ -48,7 +48,7 @@ class SalesByVendor(models.Model):
     class Meta:
         managed = False
         db_table = 'sales_by_vendor'
-        
+
 
 class Payment(models.Model):
     promoter = models.ForeignKey(Promoter, on_delete=models.CASCADE)
@@ -56,7 +56,7 @@ class Payment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     image = models.ImageField(upload_to='payments', blank=True, null=True)
-    
+
     class Meta:
         verbose_name = 'Payments'
         verbose_name_plural = 'Payments'
@@ -65,17 +65,16 @@ class Payment(models.Model):
 def get_balance(promoter):
     from ticket.models import Ticket as TicketSould
     amout_balance = None
-    amount_paid = Payment.objects.filter(promoter=promoter).aggregate(Sum('amount'))
-    paid = amount_paid['amount__sum']
-    montante_ingressos_vendidos = TicketSould.objects.filter(event_ticket__event__promoter=promoter)\
-        .aggregate(Sum('price'))
-    montante = montante_ingressos_vendidos['price__sum']
-    amout_balance = montante - paid
+    amount_paid = Payment.objects.filter(promoter=promoter).aggregate(Sum('amount'))['amount__sum']
+    amout_ticket = TicketSould.objects.filter(event_ticket__event__promoter=promoter) \
+        .aggregate(Sum('price'))['price__sum']
+    if amount_paid:
+        amout_balance = amout_ticket - amount_paid
     if not amout_balance:
         return 0
     return amout_balance
 
-                
+
 @receiver(post_save, sender=Payment)
 def email_pay(sender, instance, **kwargs):
     if kwargs.get('created', False):
@@ -83,14 +82,14 @@ def email_pay(sender, instance, **kwargs):
         bank_account = BankAccount.objects.filter(promoter=instance.promoter)
         print(bank_account)
         message = render_to_string('payout/email/payout_success.html',
-                               {'payout': instance, 'bank_account': bank_account[0],
-                                'promoter': instance.promoter.email})
+                                   {'payout': instance, 'bank_account': bank_account[0],
+                                    'promoter': instance.promoter.email})
         from_email = 'noreply@eventlinez.com'
         email_payout = EmailMessage(
-          subject=subject,
-          body=message,
-          from_email=from_email,
-          to=[instance.promoter.email],
+            subject=subject,
+            body=message,
+            from_email=from_email,
+            to=[instance.promoter.email],
         )
         email_payout.content_subtype = "html"
         email_payout.send()
