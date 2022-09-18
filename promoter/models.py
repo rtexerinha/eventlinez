@@ -10,11 +10,10 @@ from django.core.mail import EmailMessage
 
 
 class BankAccount(models.Model):
-    promoter = models.OneToOneField(Promoter, blank=True, null=True, on_delete=models.CASCADE)
-    id_bank_account = models.CharField(max_length=250, null=True, blank=True)
-    last4 = models.CharField(max_length=4, null=True, blank=True)
-    bank_name = models.CharField(max_length=250, null=True, blank=True)
-    routing_number = models.CharField(max_length=64, null=True, blank=True)
+    promoter = models.OneToOneField(Promoter, on_delete=models.CASCADE)
+    last4 = models.CharField(max_length=4)
+    bank_name = models.CharField(max_length=250)
+    routing_number = models.CharField(max_length=64)
     
     def __str__(self):
         return self.bank_name
@@ -51,7 +50,7 @@ class SalesByVendor(models.Model):
         db_table = 'sales_by_vendor'
         
 
-class Payments(models.Model):
+class Payment(models.Model):
     promoter = models.ForeignKey(Promoter, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     created = models.DateTimeField(auto_now_add=True)
