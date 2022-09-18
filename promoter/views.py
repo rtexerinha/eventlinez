@@ -12,7 +12,7 @@ from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
 from promoter.forms import BankAccountForm
-from promoter.models import Payments, Vendor, SalesByVendor, BankAccount
+from promoter.models import Payment, Vendor, SalesByVendor, BankAccount, get_balance
 
 from django.http import HttpResponse
 from io import BytesIO
@@ -260,8 +260,10 @@ def vendor_export_excel(request, event_id):
 def payment_list(request):
     promoter = request.user.promoter
     bank_accounts = None
-    payouts_history = Payments.objects.filter(promoter=promoter)
-    balance = 0
+    form_bank_account = None
+    payouts_history = Payment.objects.filter(promoter=promoter)
+    # balance = 0
+    balance = get_balance(request.user.promoter)
     bank_information = BankAccount.objects.filter(promoter=promoter)
     if bank_information:
         bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
@@ -296,7 +298,7 @@ def payment_pdf_view(request):
     p.setFont("Helvetica", 20)
 
     header_collumns = ['Payment Data', 'Amount Paid', 'Status']
-    historys = Payments.objects.filter(promoter=promoter)
+    historys = Payment.objects.filter(promoter=promoter)
     data = []
     data.append(header_collumns)
 

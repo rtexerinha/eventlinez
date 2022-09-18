@@ -62,8 +62,22 @@ class Payments(models.Model):
         verbose_name = 'Payments'
         verbose_name_plural = 'Payments'
 
+
+def get_balance(promoter):
+    from ticket.models import Ticket as TicketSould
+    amout_balance = None
+    amount_paid = Payment.objects.filter(promoter=promoter).aggregate(Sum('amount'))
+    paid = amount_paid['amount__sum']
+    montante_ingressos_vendidos = TicketSould.objects.filter(event_ticket__event__promoter=promoter)\
+        .aggregate(Sum('price'))
+    montante = montante_ingressos_vendidos['price__sum']
+    amout_balance = montante - paid
+    if not amout_balance:
+        return 0
+    return amout_balance
+
                 
-@receiver(post_save, sender=Payments)
+@receiver(post_save, sender=Payment)
 def email_pay(sender, instance, **kwargs):
     if kwargs.get('created', False):
         subject = "Eventlinez - Payments Paid"
