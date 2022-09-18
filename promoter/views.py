@@ -355,12 +355,16 @@ def bank_create(request):
 
 @login_required(login_url='/promoter/account/login/')
 def bank_account_list(request):
-    promoter = request.user.promoter
-    bank_information = BankAccount.objects.filter(promoter=promoter)
-
-    return render(request, 'bank/bank_account.html',
-                  {'promoter': promoter,
-                   'bank_accounts': bank_information})
+    bank_accounts = None
+    bank_information = BankAccount.objects.filter(promoter=request.user.promoter)
+    if bank_information:
+        bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
+    if request.method == 'GET':
+        form_bank_account = BankAccountForm(instance=bank_accounts)
+    data = {'promoter': request.user.promoter,
+            'form': form_bank_account, 
+            'bank_information': bank_information}
+    return render(request, 'bank/bank_account.html', data)
 
 
 @login_required(login_url='/promoter/account/login/')
