@@ -259,12 +259,16 @@ def vendor_export_excel(request, event_id):
 @login_required(login_url='/promoter/account/login/')
 def payment_list(request):
     promoter = request.user.promoter
+    bank_accounts = None
     payouts_history = Payments.objects.filter(promoter=promoter)
     balance = 0
     bank_information = BankAccount.objects.filter(promoter=promoter)
-    
+    if bank_information:
+        bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
+    if request.method == 'GET':
+        form_bank_account = BankAccountForm(instance=bank_accounts)
     data = {'promoter': promoter, 'balance': balance, 'payouts_history': payouts_history,
-                                                      'bank_information': bank_information}
+            'form': form_bank_account, 'bank_information': bank_information}
     return render(request, 'payments/payment_list.html', data)
 
 

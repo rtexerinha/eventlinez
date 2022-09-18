@@ -5102,6 +5102,10 @@ a.close.disabled {
   outline: 0;
 }
 
+.modal-br-8{
+  border-radius: 8px 8px 0px 0px;
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
