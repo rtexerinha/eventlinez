@@ -83,7 +83,6 @@ def email_pay(sender, instance, **kwargs):
     if kwargs.get('created', False):
         subject = "Eventlinez - Payments Paid"
         bank_account = BankAccount.objects.filter(promoter=instance.promoter)
-        print(bank_account)
         message = render_to_string('payout/email/payout_success.html',
                                    {'payout': instance, 'bank_account': bank_account[0],
                                     'promoter': instance.promoter.email})

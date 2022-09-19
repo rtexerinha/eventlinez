@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from promoter.models import Vendor, BankAccount,Payment
+from promoter.models import Vendor, BankAccount, Payment
 
 
 @admin.register(Vendor)

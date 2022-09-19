@@ -1,4 +1,3 @@
-from datetime import datetime
 import logging
 from django.contrib import messages
 from os import path
@@ -358,6 +357,7 @@ def bank_create(request):
 @login_required(login_url='/promoter/account/login/')
 def bank_account_list(request):
     bank_accounts = None
+    form_bank_account = None
     bank_information = BankAccount.objects.filter(promoter=request.user.promoter)
     if bank_information:
         bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
@@ -371,7 +371,7 @@ def bank_account_list(request):
 
 @login_required(login_url='/promoter/account/login/')
 def bank_account_update(request, bank_id):
-    # form_bank_account = None
+    form_bank_account = None
     bank_accounts = BankAccount.objects.get(id=bank_id)
     if request.method == 'GET':
         form_bank_account = BankAccountForm(instance=bank_accounts)
