@@ -7,13 +7,16 @@ from django.template.loader import render_to_string
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.core.mail import EmailMessage
+from django.core.validators import RegexValidator
+
+numeric = RegexValidator(r'^[0-9+]', 'Only digit characters.')
 
 
 class BankAccount(models.Model):
     promoter = models.OneToOneField(Promoter, on_delete=models.CASCADE)
-    last4 = models.CharField(max_length=4)
+    last4 = models.CharField(max_length=4, validators=[numeric])
     bank_name = models.CharField(max_length=250)
-    routing_number = models.CharField(max_length=64)
+    routing_number = models.CharField(max_length=64, validators=[numeric])
 
     def __str__(self):
         return self.bank_name
