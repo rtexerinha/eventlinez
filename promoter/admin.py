@@ -10,7 +10,7 @@ class VendorAdmin(admin.ModelAdmin):
 
 @admin.register(BankAccount)
 class BankAccountAdmin(admin.ModelAdmin):
-    list_display = ['bank_name', 'routing_number', 'last4']
+    list_display = ['bank_name', 'routing_number', 'account_number']
     
     
 @admin.register(Payment)

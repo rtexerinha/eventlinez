@@ -14,9 +14,10 @@ numeric = RegexValidator(r'^[0-9+]', 'Only digit characters.')
 
 class BankAccount(models.Model):
     promoter = models.OneToOneField(Promoter, on_delete=models.CASCADE)
-    last4 = models.CharField(max_length=4, validators=[numeric])
+    account_number = models.CharField(max_length=12, validators=[numeric])
+    description = models.CharField(max_length=250)
     bank_name = models.CharField(max_length=250)
-    routing_number = models.CharField(max_length=64, validators=[numeric])
+    routing_number = models.CharField(max_length=12, validators=[numeric])
 
     def __str__(self):
         return self.bank_name
