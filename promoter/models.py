@@ -1,3 +1,4 @@
+from wsgiref.validate import validator
 from django.db import models
 from django.db.models import Sum
 from django.template.defaultfilters import slugify
@@ -9,15 +10,20 @@ from django.db.models.signals import post_save
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 
+from django.core.exceptions import ValidationError
+
 numeric = RegexValidator(r'^[0-9+]', 'Only digit characters.')
+
+def min_validation(value):
+    if len(value) < 9:
+        raise ValidationError("{} is invalid, must have more than 5 characters". format(value))
 
 
 class BankAccount(models.Model):
     promoter = models.OneToOneField(Promoter, on_delete=models.CASCADE)
-    account_number = models.CharField(max_length=12, validators=[numeric])
-    description = models.CharField(max_length=250)
+    account_number = models.CharField(max_length=12, validators=[numeric, min_validation])
     bank_name = models.CharField(max_length=250)
-    routing_number = models.CharField(max_length=12, validators=[numeric])
+    routing_number = models.CharField(max_length=12, validators=[numeric, min_validation])
 
     def __str__(self):
         return self.bank_name
@@ -60,6 +66,7 @@ class Payment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     image = models.ImageField(upload_to='payments', blank=True, null=True)
+    description = models.CharField(max_length=250)
 
     class Meta:
         verbose_name = 'Payments'
@@ -72,7 +79,7 @@ def get_balance(promoter):
     amount_paid = Payment.objects.filter(promoter=promoter).aggregate(Sum('amount'))['amount__sum']
     amout_ticket = TicketSould.objects.filter(event_ticket__event__promoter=promoter) \
         .aggregate(Sum('price'))['price__sum']
-    if amount_paid:
+    if amount_paid and amout_ticket:
         amout_balance = amout_ticket - amount_paid
     if not amout_balance:
         return 0
