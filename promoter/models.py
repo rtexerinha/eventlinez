@@ -66,7 +66,6 @@ class Payment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     image = models.ImageField(upload_to='payments', blank=True, null=True)
-    description = models.CharField(max_length=250)
 
     class Meta:
         verbose_name = 'Payments'
