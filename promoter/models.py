@@ -1,4 +1,3 @@
-from wsgiref.validate import validator
 from django.db import models
 from django.db.models import Sum
 from django.template.defaultfilters import slugify
@@ -14,6 +13,8 @@ from django.core.exceptions import ValidationError
 
 numeric = RegexValidator(r'^[0-9+]', 'Only digit characters.')
 
+alpha = RegexValidator(r'^[a-zA-Z]+')
+
 def min_validation(value):
     if len(value) < 9:
         raise ValidationError("{} is invalid, must have more than 5 characters". format(value))
@@ -22,7 +23,7 @@ def min_validation(value):
 class BankAccount(models.Model):
     promoter = models.OneToOneField(Promoter, on_delete=models.CASCADE)
     account_number = models.CharField(max_length=12, validators=[numeric, min_validation])
-    bank_name = models.CharField(max_length=250)
+    bank_name = models.CharField(max_length=250, validators=[alpha])
     routing_number = models.CharField(max_length=12, validators=[numeric, min_validation])
 
     def __str__(self):
