@@ -5,7 +5,7 @@ from event.models import Promoter, Event
 from django.template.loader import render_to_string
 
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.core.mail import EmailMessage
 from django.core.validators import RegexValidator
 
@@ -105,3 +105,16 @@ def email_pay(sender, instance, **kwargs):
         )
         email_payout.content_subtype = "html"
         email_payout.send()
+
+
+@receiver(pre_save, sender=Payment)
+def sald_to_payment(sender, instance, **kwargs):
+    from ticket.models import Ticket as TicketSould
+    if kwargs.get('created', True):
+        if not get_balance(instance.promoter):
+            raise ValidationError("No Tickets Sold")
+        if get_balance(instance.promoter) < instance.amount:
+            raise ValidationError("The customer does not have enough balance to make this payment amount")
+            
+            
+        
