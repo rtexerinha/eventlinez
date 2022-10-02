@@ -9934,6 +9934,13 @@ body {
   border: #d90075;
 }
 
+.button-adm{
+  height: 40px;
+  width: 110px;
+  margin-top: 10px;
+  border: 1px solid #d90075;
+}
+
 .input-search-adm{
   height: 39px;
   background: #F8F8F8;
