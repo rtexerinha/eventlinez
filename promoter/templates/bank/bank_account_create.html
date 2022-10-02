@@ -1,5 +1,7 @@
 {% extends "base_promoter.html" %}
-
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% crispy form form.helper %}
 
 {% block title %}Bank Account - Panel Admin{% endblock %}
 
@@ -8,7 +10,7 @@
 {% block content %}
 
     <main class="container-fluid mt-4 pb-5 mb-5" style="background: #FFFFFF;border-radius: 8px;">
-        <aside class="col-lg-6 mt-5 m-auto">
+        <aside class="col-lg-5 col-12 mt-5 m-auto">
             <div class="mt-4 pt-3 pb-0 background-modal" style="border-bottom: none">
                 <div class="d-flex" style="justify-content: space-between">
                     <h3 class="h3-promoter h3-white pl-4" id="exampleModalLongTitle">Bank Account</h3>
@@ -20,30 +22,19 @@
             </div>
 
             <div>
-                <h5 class="h5-promoter pl-2 pl-lg-4 pr-2 pr-lg-4 pt-4 mb-4 p-vendor-12">
+                <h5 class="h5-promoter pl-4 pr-4 pt-4 mb-4 p-vendor-12">
                     Fill in the details below to register a bank account.
                 </h5>
 
                 
-                <form enctype="multipart/form-data" method="post" class="col-lg-12 pl-2 pl-lg-4 pr-2 pr-lg-4 ml-sm-4"
+                <form enctype="multipart/form-data" method="post" class="col-lg-12 pl-4 pr-4 ml-sm-4"
                       style="margin-left: 0!important;">
                     {% csrf_token %}
           
                     <div class="form-row">
-                        <label class="h5-promoter-modal"> 
-                            {{ form.bank_name.label }}*
-                        </label>
-                        {{ form.bank_name }}
-
-                        <label class="h5-promoter-modal"> 
-                            {{ form.account_number.label }}*
-                        </label>
-                        {{ form.account_number }}
-
-                        <label class="h5-promoter-modal"> 
-                            {{ form.routing_number.label }}*
-                        </label>
-                        {{ form.routing_number }}
+                        <div class="form-group col-md-4 col-lg-12 mb-0">{{ form.bank_name| as_crispy_field }}</div>
+                        <div class="form-group col-md-4 col-lg-12 mb-0">{{ form.account_number | as_crispy_field }}</div>
+                        <div class="form-group col-md-4 col-lg-12 mb-0">{{ form.routing_number| as_crispy_field }}</div>
                     </div>
 
                     <div style="display:flex;justify-content: flex-end;">

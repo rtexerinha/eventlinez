@@ -11,20 +11,20 @@ from django.core.validators import RegexValidator
 
 from django.core.exceptions import ValidationError
 
-numeric = RegexValidator(r'^[0-9+]', 'Only digit characters.')
+numeric = RegexValidator(r'^[0-9+]', 'Only digit numeric.')
 
-alpha = RegexValidator(r'^[a-zA-Z]+')
+alpha = RegexValidator(r'^[a-zA-Z]+', 'Only letters')
 
-def min_validation(value):
+def min_validation_none(value):
     if len(value) < 9:
-        raise ValidationError("{} is invalid, must have more than 5 characters". format(value))
+        raise ValidationError("{} is invalid, must have more than 9 characters". format(value))
 
 
 class BankAccount(models.Model):
     promoter = models.OneToOneField(Promoter, on_delete=models.CASCADE)
-    account_number = models.CharField(max_length=12, validators=[numeric, min_validation])
+    account_number = models.CharField(max_length=12, validators=[numeric, min_validation_none])
     bank_name = models.CharField(max_length=250, validators=[alpha])
-    routing_number = models.CharField(max_length=12, validators=[numeric, min_validation])
+    routing_number = models.CharField(max_length=12, validators=[numeric, min_validation_none])
 
     def __str__(self):
         return self.bank_name
