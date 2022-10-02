@@ -25,6 +25,7 @@
     --white-color: #FFFFFF;
     --black-color: #000000;
     --black-med-color: #171717;
+    --gray-color: #605D64;
 
 }
 
@@ -252,6 +253,15 @@
     font-size: var(--h5-font-size);
     line-height: 24px;
     color: var(--white-color);
+}
+
+.h5-promoter-modal{
+    font-family: var(--body-font-family-promoter);
+    font-style: normal;
+    font-weight: var(--font-semi-bold);
+    font-size: var(--h5-font-size);
+    line-height: 1rem;
+    color: var(--gray-color);
 }
 
 .h6-promoter{
