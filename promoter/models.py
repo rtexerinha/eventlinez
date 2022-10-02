@@ -80,10 +80,11 @@ def get_balance(promoter):
     amount_paid = Payment.objects.filter(promoter=promoter).aggregate(Sum('amount'))['amount__sum']
     amout_ticket = TicketSould.objects.filter(event_ticket__event__promoter=promoter) \
         .aggregate(Sum('price'))['price__sum']
-    if amount_paid and amout_ticket:
-        amout_balance = amout_ticket - amount_paid
-    if not amout_balance:
+    if not amout_ticket:
         return 0
+    if not amount_paid:
+        return amout_ticket
+    amout_balance = amout_ticket - amount_paid
     return amout_balance
 
 
