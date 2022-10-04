@@ -44,7 +44,7 @@
                         <aside class="col-lg-6 col-12 pl-0 pt-lg-3 border-card">
                             <div class="div-flex">
                                 <h4 class="col-9 col-lg-5 h4-promoter border-details" style="line-height: 25px;">
-                                    Bank Information
+                                    Bank Account Information
                                 </h4>
                
                                 {% for information_bank in bank_information %}
@@ -79,7 +79,7 @@
                                             <b style="color: #49454D;">
                                                 Account number:
                                             </b>
-                                            ******** {{ information_bank.last4 }}
+                                            ****{{ information_bank.account_number }}
                                         </p>
 
                                         <p class="p-promoter"
