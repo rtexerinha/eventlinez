@@ -268,8 +268,11 @@ def payment_list(request):
         bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
     if request.method == 'GET':
         form_bank_account = BankAccountForm(instance=bank_accounts)
+    account_number_mask = bank_information[0].account_number[-4:].rjust(len(bank_information[0].account_number), "*")
     data = {'promoter': promoter, 'balance': balance, 'payouts_history': payouts_history,
-            'form': form_bank_account, 'bank_information': bank_information[0]}
+            'form': form_bank_account, 'bank_information': bank_information[0],
+            'account_number_mask': account_number_mask
+            }
     return render(request, 'payments/payment_list.html', data)
 
 
