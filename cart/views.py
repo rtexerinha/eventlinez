@@ -1,6 +1,5 @@
 import logging
 import json
-from decimal import Decimal
 
 import stripe
 from django.conf import settings
@@ -129,12 +128,11 @@ def checkout(request):
     items = CartItem.objects.filter(cart=cart, active=True)
     stripe.api_key = settings.STRIPE_SECRET_KEY
     line_items = []
-    promoters = []
+
     # https://stripe.com/docs/billing/subscriptions/decimal-amounts
     cents = 100
 
     for item in items:
-        promoter = item.ticket.event.promoter
         product = stripe.Product.create(name=str(item.ticket))
         line_item = {
             'price_data': {
@@ -145,42 +143,21 @@ def checkout(request):
             'quantity': 1,
         }
         line_items.append(line_item)
-        promoters.append(promoter)
-    if len(line_items) >= 2:
-        raise Exception('You cannot buy tickets to multiple events')
-    server = request.get_raw_uri().replace(request.get_full_path(), "")
-    if promoters[0].account_id:
-        price = line_items[0]['price_data']['unit_amount_decimal']
-        fee = price - price * cents / (Decimal(0.13 * cents) + cents)
-        session = stripe.checkout.Session.create(
-            payment_intent_data={
-                'setup_future_usage': 'off_session',
-                'application_fee_amount': int(fee),
-                'transfer_data': {
-                    'destination': promoters[0].account_id,
-                },
-            },
-            mode='payment',
 
-            payment_method_types=['card'],
-            success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=server + '/cart/',
-            line_items=line_items,
-            customer_email=request.user.username,
-            client_reference_id=cart.id,
-            allow_promotion_codes=True
-        )
-    else:
-        session = stripe.checkout.Session.create(
-            mode='payment',
-            payment_method_types=['card'],
-            success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=server + '/cart/',
-            line_items=line_items,
-            customer_email=request.user.username,
-            client_reference_id=cart.id,
-            allow_promotion_codes=True
-        )
+    server = request.get_raw_uri().replace(request.get_full_path(), "")
+    session = stripe.checkout.Session.create(
+        payment_intent_data={
+            'setup_future_usage': 'off_session',
+        },
+        mode='payment',
+        payment_method_types=['card'],
+        success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url=server + '/cart/',
+        line_items=line_items,
+        customer_email=request.user.username,
+        client_reference_id=cart.id,
+        allow_promotion_codes=True
+    )
 
     return JsonResponse({
         'session_id': session.id,
