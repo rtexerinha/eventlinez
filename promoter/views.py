@@ -259,18 +259,19 @@ def vendor_export_excel(request, event_id):
 def payment_list(request):
     promoter = request.user.promoter
     bank_accounts = None
+    account_bank_information = None
     form_bank_account = None
+    account_number_mask = None
     payouts_history = Payment.objects.filter(promoter=promoter)
-    # balance = 0
     balance = get_balance(request.user.promoter)
     bank_information = BankAccount.objects.filter(promoter=promoter)
     if bank_information:
         bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
+        account_number_mask = bank_accounts.account_number[-4:].rjust(len(bank_accounts.account_number), "*")
     if request.method == 'GET':
         form_bank_account = BankAccountForm(instance=bank_accounts)
-    account_number_mask = bank_information[0].account_number[-4:].rjust(len(bank_information[0].account_number), "*")
     data = {'promoter': promoter, 'balance': balance, 'payouts_history': payouts_history,
-            'form': form_bank_account, 'bank_information': bank_information[0],
+            'form': form_bank_account, 'bank_information': bank_accounts,
             'account_number_mask': account_number_mask
             }
     return render(request, 'payments/payment_list.html', data)
@@ -361,17 +362,19 @@ def bank_create(request):
 def bank_account_list(request):
     bank_accounts = None
     form_bank_account = None
+    account_bank_information = None
+    account_number_mask = None
     bank_information = BankAccount.objects.filter(promoter=request.user.promoter)
     if bank_information:
         bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
+        account_number_mask = bank_accounts.account_number[-4:].rjust(len(bank_accounts.account_number), "*")
     if request.method == 'GET':
         form_bank_account = BankAccountForm(instance=bank_accounts)
-    account_number_mask = bank_information[0].account_number[-4:].rjust(len(bank_information[0].account_number), "*")
 
     data = {'promoter': request.user.promoter,
             'form': form_bank_account, 
             'account_number_mask': account_number_mask,
-            'bank_information': bank_information[0]}
+            'bank_information': bank_accounts}
     return render(request, 'bank/bank_account.html', data)
 
 
