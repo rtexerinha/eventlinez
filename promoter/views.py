@@ -269,7 +269,7 @@ def payment_list(request):
     if request.method == 'GET':
         form_bank_account = BankAccountForm(instance=bank_accounts)
     data = {'promoter': promoter, 'balance': balance, 'payouts_history': payouts_history,
-            'form': form_bank_account, 'bank_information': bank_information}
+            'form': form_bank_account, 'bank_information': bank_information[0]}
     return render(request, 'payments/payment_list.html', data)
 
 
