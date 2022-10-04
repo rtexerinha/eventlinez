@@ -368,7 +368,7 @@ def bank_account_list(request):
     data = {'promoter': request.user.promoter,
             'form': form_bank_account, 
             'account_number_mask': account_number_mask,
-            'bank_information': bank_information}
+            'bank_information': bank_information[0]}
     return render(request, 'bank/bank_account.html', data)
 
 
