@@ -363,8 +363,11 @@ def bank_account_list(request):
         bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
     if request.method == 'GET':
         form_bank_account = BankAccountForm(instance=bank_accounts)
+    account_number_mask = bank_information[0].account_number[-4:].rjust(len(bank_information[0].account_number), "*")
+
     data = {'promoter': request.user.promoter,
             'form': form_bank_account, 
+            'account_number_mask': account_number_mask,
             'bank_information': bank_information}
     return render(request, 'bank/bank_account.html', data)
 
