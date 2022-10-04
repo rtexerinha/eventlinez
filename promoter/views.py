@@ -385,20 +385,6 @@ def bank_account_update(request, bank_id):
         form_bank_account = BankAccountForm(request.POST, instance=bank_accounts)
         if form_bank_account.is_valid():
             form_bank_account.save()
-            return redirect('bank_information')
-    return render(request, 'bank/bank_account_create.html',
-                  {'form': form_bank_account})
-    
-@login_required(login_url='/promoter/account/login/')
-def bank_account_update_perPayment(request, bank_id):
-    form_bank_account = None
-    bank_accounts = BankAccount.objects.get(id=bank_id)
-    if request.method == 'GET':
-        form_bank_account = BankAccountForm(instance=bank_accounts)
-    if request.method == 'POST':
-        form_bank_account = BankAccountForm(request.POST, instance=bank_accounts)
-        if form_bank_account.is_valid():
-            form_bank_account.save()
             return redirect('payment_list')
     return render(request, 'bank/bank_account_create.html',
                   {'form': form_bank_account})

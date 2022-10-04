@@ -1,9 +1,9 @@
 from django.urls import path
-from promoter.views import bank_account_update_perPayment, update_promoter, reset_password, signup_view_promoter, signin_view_promoter, \
+from promoter.views import update_promoter, reset_password, signup_view_promoter, signin_view_promoter, \
     signout_view_promoter, vendors_list, vendor_create, vendor_update, vendor_remove, vendor_create_per_event, \
     vendor_update_per_event, vendors_reports, vendor_export_excel, \
     payment_list, payment_pdf_view, bank_account_list, bank_create, \
-    bank_account_update, bank_account_update_perPayment, bank_remove
+    bank_account_update, bank_remove
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
@@ -49,7 +49,6 @@ urlpatterns = [
     # Payments
     path('payment/list/', payment_list, name='payment_list'),
     path('payment/pdf/', payment_pdf_view, name='payout_pdf_view'),
-    path('payment/bank/update/<int:bank_id>/', bank_account_update_perPayment, name='bank_account_update_perPayment'),
     
     # bank
     path('bank/create/', bank_create, name='bank_create'),
