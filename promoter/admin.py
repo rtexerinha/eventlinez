@@ -15,7 +15,7 @@ class BankAccountAdmin(admin.ModelAdmin):
     
     
 @admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
+class PaymentstAdmin(admin.ModelAdmin):
     list_display = ['promoter', 'amount', 'created', 'description']
     form = PaymentForm
 
