@@ -4,7 +4,7 @@
 {% block metadescription %}
 	Sign in and enjoy the variety of stunning products.
 {% endblock %}
-{% block title %}Login Promoter - Eventlinez{% endblock %}
+{% block title %}Login Organizer - Eventlinez{% endblock %}
 
 {% block content %}
         <section class="new-container" >
@@ -14,13 +14,13 @@
                         <img src="{% static 'img/Eventlinez.png' %}" alt="logo">
                     </div>
                     <div class="div-text">
-                        <h2 class="h2-text">Login Promoter</h2>
+                        <h2 class="h2-text">Login Organizer</h2>
                     </div>
 
                     <form method="post" >
                         {% csrf_token %}
                         <p>{{ form | crispy }}</p>
-                        <button type="submit" class="button-primary-new">Login Promoter</button>
+                        <button type="submit" class="button-primary-new">Login Organizer</button>
                     </form>
 
                     <div class="div-item">
