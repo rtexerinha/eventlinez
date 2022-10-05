@@ -32,4 +32,4 @@ class PaymentForm(ModelForm):
         balance = get_balance(promoter)
         if balance < amount:
             raise ValidationError('The available balance is: %(balance)s', params={'balance': balance},)
-        return 0
+        return amount
