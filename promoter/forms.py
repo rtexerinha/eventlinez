@@ -24,7 +24,7 @@ class BankAccountForm(ModelForm):
 class PaymentForm(ModelForm):
     class Meta:
         model = Payment
-        fields = '__all__'
+        fields = ['promoter', 'amount', 'image','description']
 
     def clean_amount(self):
         promoter = self.cleaned_data["promoter"]
