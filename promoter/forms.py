@@ -1,4 +1,3 @@
-from dataclasses import fields
 from django.forms import ModelForm
 from promoter.models import BankAccount, Payment, get_balance
 from django import forms
@@ -9,7 +8,7 @@ from django.core.exceptions import ValidationError
 class BankAccountForm(ModelForm):
     class Meta:
         model = BankAccount
-        fields = ['bank_name', 'account_number', 'routing_number']
+        fields = '__all__'
 
         widgets = {'account_number': forms.TextInput(attrs={'placeholder': "000987654321"}),
                    'routing_number': forms.TextInput(attrs={'placeholder': "123456789"}),
