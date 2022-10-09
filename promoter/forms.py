@@ -1,4 +1,3 @@
-from dataclasses import fields
 from django.forms import ModelForm
 from promoter.models import BankAccount, Payment, get_balance
 from django import forms
@@ -10,6 +9,7 @@ class BankAccountForm(ModelForm):
     class Meta:
         model = BankAccount
         fields = ['bank_name', 'account_number', 'routing_number']
+
         widgets = {'account_number': forms.TextInput(attrs={'placeholder': "000987654321"}),
                    'routing_number': forms.TextInput(attrs={'placeholder': "123456789"}),
                    }
@@ -17,7 +17,7 @@ class BankAccountForm(ModelForm):
 class PaymentForm(ModelForm):
     class Meta:
         model = Payment
-        fields = '__all__'
+        fields = ['promoter', 'amount', 'image','description']
 
     def clean_amount(self):
         promoter = self.cleaned_data["promoter"]
@@ -25,4 +25,4 @@ class PaymentForm(ModelForm):
         balance = get_balance(promoter)
         if balance < amount:
             raise ValidationError('The available balance is: %(balance)s', params={'balance': balance},)
-        return 0
+        return amount
