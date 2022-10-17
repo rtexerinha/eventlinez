@@ -126,7 +126,7 @@
 /*responsividade */
 @media (min-width:1500px) {
     .div-column{
-        min-height: 100vh;
+        min-height: 140vh;
     }
     .div-left-new{
         padding-left: 20vw;
@@ -190,4 +190,14 @@
     .div-left-new{
          padding-left: 5vw;
     }
+}
+
+
+.ico-promoter{
+    width: 60px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin-right: 43px;
+    color: #fff;
 }

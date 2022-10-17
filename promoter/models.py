@@ -1,7 +1,34 @@
 from django.db import models
+from django.db.models import Sum
 from django.template.defaultfilters import slugify
-
 from event.models import Promoter, Event
+from django.template.loader import render_to_string
+
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.core.mail import EmailMessage
+from django.core.validators import RegexValidator
+
+from django.core.exceptions import ValidationError
+
+numeric = RegexValidator(r'^[0-9+]', 'Only digit numeric.')
+
+alpha = RegexValidator(r'^[a-zA-Z]+', 'Only letters')
+
+
+def min_validation_none(value):
+    if len(value) < 9:
+        raise ValidationError("{} is invalid, must have more than 9 characters". format(value))
+
+
+class BankAccount(models.Model):
+    promoter = models.OneToOneField(Promoter, on_delete=models.CASCADE)
+    account_number = models.CharField(max_length=12, validators=[numeric, min_validation_none])
+    bank_name = models.CharField(max_length=250, validators=[alpha])
+    routing_number = models.CharField(max_length=12, validators=[numeric, min_validation_none])
+
+    def __str__(self):
+        return self.bank_name
 
 
 class Vendor(models.Model):
@@ -33,3 +60,49 @@ class SalesByVendor(models.Model):
     class Meta:
         managed = False
         db_table = 'sales_by_vendor'
+
+
+class Payment(models.Model):
+    promoter = models.ForeignKey(Promoter, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    image = models.ImageField(upload_to='payments', blank=True, null=True)
+    description = models.CharField(max_length=250)
+
+    class Meta:
+        verbose_name = 'Payments'
+        verbose_name_plural = 'Payments'
+
+
+def get_balance(promoter):
+    from ticket.models import Ticket as TicketSould
+    amout_balance = None
+    amount_paid = Payment.objects.filter(promoter=promoter).aggregate(Sum('amount'))['amount__sum']
+    amout_ticket = TicketSould.objects.filter(event_ticket__event__promoter=promoter) \
+        .aggregate(Sum('price'))['price__sum']
+    if not amout_ticket:
+        return 0
+    if not amount_paid:
+        return amout_ticket
+    amout_balance = amout_ticket - amount_paid
+    return amout_balance
+
+
+@receiver(post_save, sender=Payment)
+def email_pay(sender, instance, **kwargs):
+    if kwargs.get('created', False):
+        subject = "Eventlinez - Payments Paid"
+        bank_account = BankAccount.objects.filter(promoter=instance.promoter)
+        message = render_to_string('payout/email/payout_success.html',
+                                   {'payout': instance, 'bank_account': bank_account[0],
+                                    'promoter': instance.promoter.email})
+        from_email = 'noreply@eventlinez.com'
+        email_payout = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email=from_email,
+            to=[instance.promoter.email],
+        )
+        email_payout.content_subtype = "html"
+        email_payout.send()

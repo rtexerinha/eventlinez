@@ -50,6 +50,7 @@ class Promoter(models.Model):
     address = models.CharField(max_length=250)
     city = models.CharField(max_length=250)
     zip = models.CharField(max_length=11)
+    account_id = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
         return '{}'.format(self.name)
