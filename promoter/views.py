@@ -1,5 +1,5 @@
+import logging
 from django.contrib import messages
-from io import BytesIO
 from os import path
 from django.contrib.auth import update_session_auth_hash, authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -7,11 +7,21 @@ from django.shortcuts import render, redirect, get_object_or_404
 import xlsxwriter
 from django.http import StreamingHttpResponse
 
-# Create your views here.
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
-from promoter.models import Vendor, SalesByVendor
+from promoter.forms import BankAccountForm
+from promoter.models import Payment, Vendor, SalesByVendor, BankAccount, get_balance
+
+from django.http import HttpResponse
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.platypus import Table, TableStyle
+from reportlab.lib import colors
+
+logger = logging.getLogger(__name__)
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -61,7 +71,9 @@ def signup_view_promoter(request):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            return redirect('events_promoter')
+            # return redirect('events_promoter')
+            return redirect('payment_list')
+
     else:
         form = SignUpFormPromoter()
     return render(request, 'promoter/signup_promoter_new.html', {'form': form})
@@ -176,7 +188,7 @@ def vendors_reports(request):
         'tickets': tickets,
         'events': events,
         'selected_event': selected_event
-        })
+    })
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -232,7 +244,7 @@ def vendor_export_excel(request, event_id):
         sheet.write_string(row, 0, data[0], event_style)
         sheet.write_string(row, 1, data[1] + ' ' + data[2], event_style)
         sheet.write_number(row, 2, data[3], tbody_style)
-        sheet.write_number(row, 3, data[4], money_format,)
+        sheet.write_number(row, 3, data[4], money_format, )
 
     way = path.abspath("static")
     logo = path.join(way, 'img', 'logo.png')
@@ -241,3 +253,148 @@ def vendor_export_excel(request, event_id):
     workbook.close()
     out.seek(0)
     return response
+
+
+@login_required(login_url='/promoter/account/login/')
+def payment_list(request):
+    promoter = request.user.promoter
+    bank_accounts = None
+    account_bank_information = None
+    form_bank_account = None
+    account_number_mask = None
+    payouts_history = Payment.objects.filter(promoter=promoter)
+    balance = get_balance(request.user.promoter)
+    bank_information = BankAccount.objects.filter(promoter=promoter)
+    if bank_information:
+        bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
+        account_number_mask = bank_accounts.account_number[-4:].rjust(len(bank_accounts.account_number), "*")
+    if request.method == 'GET':
+        form_bank_account = BankAccountForm(instance=bank_accounts)
+    data = {'promoter': promoter, 'balance': balance, 'payouts_history': payouts_history,
+            'form': form_bank_account, 'bank_information': bank_accounts,
+            'account_number_mask': account_number_mask
+            }
+    return render(request, 'payments/payment_list.html', data)
+
+
+def payment_pdf_view(request):
+    promoter = request.user.promoter
+    width, height = letter
+    margin = inch
+    mwidth = width - 2 * margin
+    mheight = height - 2 * margin
+
+    response = HttpResponse(content_type='application/pdf')
+    filename = 'history.pdf'
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+    buffer = BytesIO()
+
+    img_file = 'static/img/Eventlinez.png'
+    p = canvas.Canvas(buffer)
+
+    p.drawImage(img_file, 230, 790, width=100, preserveAspectRatio=True, mask='auto')
+    p.setFont("Helvetica", 16)
+    p.setTitle("History payout")
+    p.drawString(230, 750, "History payout")
+    p.setPageCompression(0)
+    # p.translate(0, mheight - inch)
+    p.setFont("Helvetica", 20)
+
+    header_collumns = ['Payment Data', 'Amount Paid', 'Status']
+    historys = Payment.objects.filter(promoter=promoter)
+    data = []
+    data.append(header_collumns)
+
+    p.translate(margin - 50, margin + 620 - (15 * len(historys)))
+
+    for i in historys:
+        history = [i.created.strftime("%Y-%m-%d"), i.amount, 'Paid']
+        data.append(history)
+
+    table = Table(data, colWidths=(185, 185, 185))
+    table.setStyle(TableStyle([
+        ('FONT', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 12),
+        ('BOX', (0, 0), (-1, -1), 0.25, colors.gray),
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.gray), ]))
+
+    table_style = []
+
+    for i, row in enumerate(data):
+        if i % 2 == 0:
+            table_style.append(('BACKGROUND', (0, i), (-1, i),
+                                colors.Color(red=(243.0 / 255), green=(243.0 / 255), blue=(243.0 / 255))))
+        else:
+            table_style.append(('BACKGROUND', (0, i), (-1, i), colors.white))
+        if i == 0:
+            table_style.append(('BACKGROUND', (0, i), (-1, i),
+                                colors.Color(red=(60.0 / 255), green=(33.0 / 255), blue=(92.0 / 255))))
+            table_style.append(('TEXTCOLOR', (0, i), (-1, i),
+                                colors.white))
+
+    table.setStyle(TableStyle(table_style))
+
+    table.wrapOn(p, mwidth, mheight)
+    table.drawOn(p, 0, 0)
+    p.showPage()
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+
+    return response
+
+
+def bank_create(request):
+    if request.method == 'POST':
+        form = BankAccountForm(data=request.POST)
+        if form.is_valid():
+            bank_account = BankAccount(**form.cleaned_data)
+            bank_account.promoter = request.user.promoter
+            bank_account.save()
+            return redirect('payment_list')
+    else:
+        form = BankAccountForm()
+    return render(request, 'bank/bank_account_create.html', {'form': form})
+
+
+@login_required(login_url='/promoter/account/login/')
+def bank_account_list(request):
+    bank_accounts = None
+    form_bank_account = None
+    account_bank_information = None
+    account_number_mask = None
+    bank_information = BankAccount.objects.filter(promoter=request.user.promoter)
+    if bank_information:
+        bank_accounts = BankAccount.objects.get(id=bank_information[0].id)
+        account_number_mask = bank_accounts.account_number[-4:].rjust(len(bank_accounts.account_number), "*")
+    if request.method == 'GET':
+        form_bank_account = BankAccountForm(instance=bank_accounts)
+
+    data = {'promoter': request.user.promoter,
+            'form': form_bank_account, 
+            'account_number_mask': account_number_mask,
+            'bank_information': bank_accounts}
+    return render(request, 'bank/bank_account.html', data)
+
+
+@login_required(login_url='/promoter/account/login/')
+def bank_account_update(request, bank_id):
+    form_bank_account = None
+    bank_accounts = BankAccount.objects.get(id=bank_id)
+    if request.method == 'GET':
+        form_bank_account = BankAccountForm(instance=bank_accounts)
+    if request.method == 'POST':
+        form_bank_account = BankAccountForm(request.POST, instance=bank_accounts)
+        if form_bank_account.is_valid():
+            form_bank_account.save()
+            return redirect('payment_list')
+    return render(request, 'bank/bank_account_create.html',
+                  {'form': form_bank_account})
+
+
+@login_required(login_url='/promoter/account/login/')
+def bank_remove(request, bank_id):
+    bank = get_object_or_404(BankAccount, id=bank_id)
+    bank.delete()
+    return redirect('bank_information')

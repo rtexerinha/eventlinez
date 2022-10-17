@@ -1,0 +1,59 @@
+{% load converts %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>EventLinez </title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+            .b-background{background: #E5E5E5;}
+            .main-size{width: 90%;margin: 0 auto;}
+            .h1-email{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 24px;line-height: 33px;
+                align-items: center;color: #FFFFFF; margin-top: 10px;margin-bottom: 10px;}
+            .h2-email-section{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 18px;
+                              line-height: 25px;display: flex;align-items: center;color: #49454D; margin-top:30px;}
+            .h3-logo{
+                font-family: 'Nunito';font-style: normal;font-weight: 800;
+                font-size: 18px;line-height: 25px;justify-content: space-around;padding-top: 5px;
+                display: flex;align-items: center;text-align: center;color: #3C215C;
+            }
+            .h4-email{font-family: 'Nunito';font-style: normal;font-weight: 400;font-size: 14px;
+                justify-content: center; margin: 0;
+                line-height: 19px;display: flex;align-items: center;text-align: center;color: rgba(255, 255, 255, 0.8);}
+            .h6-email{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 14px;
+                      line-height: 19px;display: flex;align-items: center;color: #49454D; margin: 0}
+            .p-email{font-family: 'Nunito';font-style: normal;font-weight: 400;font-size: 14px;
+                     padding-bottom: 10px;
+                     line-height: 19px;display: flex;align-items: center;letter-spacing: -0.02em;color: #605D64;}
+            .section-logo{height: 40px; ; margin-top:20px;background: #FAFAFB; text-align: center}
+            .section-main{height: 136px;text-align: center;
+                background: linear-gradient(89.39deg, #E10087 -29.61%, #007AFF 135.34%);}
+            .section-background{background: #FAFAFB; padding: 10px 20px 40px 20px;}
+            .line-div{border: 1px solid rgba(33, 33, 33, 0.1); margin-bottom: 20px}
+            .igm{margin-top: 10px}
+		</style>
+	</head>
+	<body class="b-background">
+         <main class="main-size">
+             <section class="section-logo">
+                  <h3 class="h3-logo">Eventlinez</h3>
+             </section>
+
+             <section class="section-main">
+{#                 <img class="igm" alt="repasse" src="{% static 'img/repasse_email.png' %}"/>#}
+                 <h1 class="h1-email">Failure {{ payout.failure_code }}</h1>
+                 <h4 class="h4-email" style="margin: 0">View information below.</h4>
+             </section>
+
+             <section class="section-background">
+                 <h2 class="h2-email-section">{{ payout.failure_message }}</h2>
+                 <h6 class="h6-email">Payment Date </h6>
+                 <p class="p-email">{{  payout.arrival_date|current_time}}</p>
+                 <h6 class="h6-email">Amount</h6>
+                 <p class="p-email">{{ payout.amount|divise:100}}</p>
+             </section>
+         </main>
+	</body>
+</html>

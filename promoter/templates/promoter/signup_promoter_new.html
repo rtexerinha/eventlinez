@@ -6,7 +6,7 @@
 	Sign up to get a new account with us. The Eventlinez has a variety of stunning products and tickets.
 {% endblock %}
 {% block title %}
-	Create a New Account Promoter- Eventlinez
+	Create a New Account Organizer - Eventlinez
 {% endblock %}
 {% block content %}
 
@@ -18,7 +18,7 @@
                     <img src="{% static 'img/Eventlinez.png' %}" alt="logo">
                 </div>
                 <div class="div-text">
-                    <h2 class="h2-text">Create New Promoter Account</h2>
+                    <h2 class="h2-text">Create New Organizer Account</h2>
                 </div>
                 <form method="post">
                 {% csrf_token %}
@@ -30,7 +30,7 @@
 
                     </div>
 
-                    <button type="submit" class="button-primary-new" >Register Account Promoter</button>
+                    <button type="submit" class="button-primary-new" >Register Account Organizer</button>
                 </form>
                  <div class="div-inline">
                         <hr>
@@ -60,7 +60,109 @@
             </aside>
         </section>
         <section class="div-right-new div-column">
+            <div class="bg-box">
+                <div class="box-content" style="padding-bottom: 0">
+                    <h3 class="h3-home" style="color:#FFFFFF;">
+                        Benefits
+                    </h3>
 
+                    <article style="display: flex">
+                        <div class="ico-promoter">
+                            <img src="{% static 'img/incentivo.png'%}" alt="incentivo icone">
+
+                        </div>
+
+                        <div>
+                            <h4 class="h4-home h4-adc">
+                                QR Code ( App for check in).<br>
+                                Cashack 3% All sales.<br>
+                                WebLink for Vendors to sell.<br>
+                                Payout on weekly basis
+                            </h4>
+                        </div>
+                    </article>
+
+                </div>
+
+
+                <div class="box-content" style="padding-top: 30px" >
+                    <h3 class="h3-home" style="color:#FFFFFF;">
+                        How it works
+                    </h3>
+
+                    <article style="display: flex">
+                        <div class="ico-promoter">
+                            <i class="fa fa-user fa-4x" aria-hidden="true"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="h3-home h3-adc">
+                                <b>Organizer</b>
+                            </h3>
+                            <h4 class="h4-home h4-adc">
+                                Create a new event<br>
+                                Add event's information<br>
+                                Create ticket's type<br>
+                                Create your vendors
+                            </h4>
+                        </div>
+                    </article>
+
+
+                    <article style="display: flex">
+                        <div class="ico-promoter">
+                             <i class="fa fa-credit-card fa-4x" aria-hidden="true"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="h3-home h3-adc">
+                                <b>Payments</b>
+                            </h3>
+                            <h4 class="h4-home h4-adc">
+                                Standard Payout will deposit on weekly basis of the beginning of the sales.<br>
+                            </h4>
+                        </div>
+                    </article>
+
+                    <article style="display: flex">
+                        <div class="ico-promoter">
+                            <i class="fa fa-file fa-4x" aria-hidden="true"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="h3-home h3-adc">
+                                <b>Reports</b>
+                            </h3>
+                            <h4 class="h4-home h4-adc">
+                                Check out the final sales amount by Event.<br>
+                                Check out Sales by Vendors.<br>
+                                Check out the Customer list by Events.
+                            </h4>
+                        </div>
+                    </article>
+
+
+                    <article style="display: flex">
+                        <div class="ico-promoter">
+                             <i class="fa fa-users fa-4x" aria-hidden="true"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="h3-home h3-adc">
+                                <b>Client</b>
+                            </h3>
+                            <h4 class="h4-home h4-adc">
+                                Sign un on the website<br>
+                                Buy your tickets<br>
+                                Receive email's confirmation<br>
+                                Tickets available on tab (My tickets)
+                            </h4>
+                        </div>
+                    </article>
+
+
+                </div>
+            </div>
         </section>
     </div>
 {% endblock %}

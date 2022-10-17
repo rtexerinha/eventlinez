@@ -1,66 +1,73 @@
 
-    <div id="layoutSidenav_nav">
-        <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
+<div id="layoutSidenav_nav">
+    <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
+        <div class="sb-sidenav-menu">
+            <div class="nav">
+                <div class="sb-sidenav-menu-heading">Main</div>
+                
+                <a class="nav-link collapsed"
+                    href="{% url 'events_promoter' %}">
+                    <div class="sb-nav-link-icon">
+                        <i class="far fa-calendar" style="color: #383838;"></i>
+                    </div>
+                    Events
+                </a>
 
-           <div class="sb-sidenav-menu">
-                <div class="nav">
-                    <div class="sb-sidenav-menu-heading">Main</div>
-                    <a class="nav-link collapsed"
-                       href="{% url 'events_promoter' %}">
-                        <div class="sb-nav-link-icon">
-                            <i class="far fa-calendar" style="color: #383838;"></i>
-                        </div>
-                        Events
-                    </a>
+                <a class="nav-link {% if 'index' in segment %} active {% endif %}"
+                    href="{% url 'ticket_list' %}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-ticket-alt" style="color: #383838;"></i>
+                    </div>
+                    Sold Tickets
+                </a>
 
-                    <a class="nav-link {% if 'index' in segment %} active {% endif %}"
-                       href="{% url 'ticket_list' %}">
-                        <div class="sb-nav-link-icon">
-                            <i class="fas fa-ticket-alt" style="color: #383838;"></i>
-                        </div>
-                        Sold Tickets
-                    </a>
+                <a class="nav-link {% if 'index' in segment %} active {% endif %}"
+                    href="{% url 'tickets_validate' %}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fa fa-list-alt" style="color: #383838;"></i>
+                    </div>
+                    Validated Tickets
+                </a>
 
-                    <a class="nav-link {% if 'index' in segment %} active {% endif %}"
-                       href="{% url 'tickets_validate' %}">
-                        <div class="sb-nav-link-icon">
-                            <i class="fa fa-list-alt" style="color: #383838;"></i>
-                        </div>
-                        Validated Tickets
-                    </a>
-
-                      <a class="nav-link {% if 'index' in segment %} active {% endif %}"
-                       href="{% url 'vendors_list' %}">
-                        <div class="sb-nav-link-icon">
-                            <i class="fas fa-user" style="color: #383838;" aria-hidden="true"></i>
-                        </div>
+                <a class="nav-link {% if 'index' in segment %} active {% endif %}"
+                    href="{% url 'vendors_list' %}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-user" style="color: #383838;" aria-hidden="true"></i>
+                    </div>
                         Vendors
-                    </a>
+                </a>
 
-                    <a href="#pageSubmenu" data-toggle="collapse"
-                       aria-expanded="false" class="nav-link dropdown-toggle">
+                <a href="#pageSubmenu" data-toggle="collapse"
+                   aria-expanded="false" class="nav-link dropdown-toggle">
 
-                        <div class="sb-nav-link-icon">
-                            <i class="fas fa-file-alt" style="color: #383838;" aria-hidden="true"></i>
-                        </div>
-                            Reports
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-file-alt" style="color: #383838;" aria-hidden="true"></i>
+                    </div>
+                        Reports
+                </a>
+
+                <ul class="pl-5 collapse list-unstyled" id="pageSubmenu">
+                    <li>
+                        <a href="{% url 'vendors_reports' %}"
+                            style="color:#D90075;text-decoration: none">
+                            Sales by Vendor
                         </a>
+                    </li>
+                </ul>
 
-                        <ul class="pl-5 collapse list-unstyled" id="pageSubmenu">
-                            <li>
-                                <a href="{% url 'vendors_reports' %}"
-                                   style="color:#D90075;text-decoration: none">
-                                    Sales by Vendor
-                                </a>
-                            </li>
+                <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="{% url 'payment_list' %}">
+                    <div class="sb-nav-link-icon">
+                        <i style="color: #383838;" aria-hidden="true" class="fas fa-dollar-sign"></i>
+                    </div>
+                    Payments
+                </a>
 
-                        </ul>
 {#                </div>#}
-                </div>
             </div>
+        </div>
 
-            <div class="sb-sidenav-footer">
-                <div class="small">Logged in as: {{ request.user.username }}</div>
-            </div>
-        </nav>
-    </div>
+        <div class="sb-sidenav-footer">
+            <div class="small">Logged in as: {{ request.user.username }}</div>
+        </div>
+    </nav>
+</div>
