@@ -5102,6 +5102,10 @@ a.close.disabled {
   outline: 0;
 }
 
+.modal-br-8{
+  border-radius: 8px 8px 0px 0px;
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -9911,6 +9915,14 @@ body {
   color: #171717;
 }
 
+.title-color {
+  color: #49454D!important;
+}
+
+.p-color{
+  color: #7B7B7B !important;
+}
+
 #button-adm{
   height: 30px;
   background: #D90075;
@@ -9920,6 +9932,13 @@ body {
   font-size: 12px;
   text-decoration: none;
   border: #d90075;
+}
+
+.button-adm{
+  height: 40px;
+  width: 110px;
+  margin-top: 10px;
+  border: 1px solid #d90075;
 }
 
 .input-search-adm{
@@ -10036,5 +10055,45 @@ input[type='file'] {
   background: gray;
   border-radius: 10px 10px 0px 0px;
 }
+
+.header-box{
+  margin: auto;
+  background: #FFFFFF;
+  box-shadow: 0px 1px 3px rgba(60, 33, 92, 0.12);
+  border-radius: 4px;
+}
+
+
+.box-small{
+  border-radius: 8px;
+  padding: 15px;
+  margin: 0px 1.5rem 0px 2px;
+  flex-basis: 50%;
+}
+
+border-card{
+  /*border-left-color: #FFFFFF!important;*/
+  border: 1px solid #F4F3F4;
+}
+
+.div-flex{
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: row;
+}
+
+.border-details{
+  border-left: 5px solid #3C215C;
+  padding-left: 1rem;
+}
+
+.m-height{
+  min-height: 75vh!important;
+}
+.m-height-50{
+  min-height: 50vh!important;
+  margin: 5rem auto;
+}
+
 
 
