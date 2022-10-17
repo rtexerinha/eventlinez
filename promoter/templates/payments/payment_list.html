@@ -1,0 +1,353 @@
+{% extends "base_promoter.html" %}
+{% load converts %}
+{% load static %}
+
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% crispy form form.helper %}
+{% block title %}Payments - Panel Admin{% endblock %}
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+    <main class="container-fluid">
+        {% if bank_information %}
+            <header class="d-flex pt-5 pb-2">
+                <div class="col-10 d-flex pl-0">
+                    <i style="font-size: 1.5rem;color: #49454D"
+                        class="fas fa-dollar-sign mt-1"></i>
+                    <h1 class="title-dast pl-2" style="color: #49454D">
+                        Payments
+                    </h1>
+                </div>
+            </header>
+
+            <!--Section Balance and Account Bank-->
+            <section class="col-12 pl-0 pr-0">
+                <main class="col-12 mt-4 mb-5 header-box">
+                    <div class="row">
+                        <aside class="col-lg-6 col-12 pr-0 pl-0 d-block d-lg-flex">
+                            <div class="col-12 col-lg-6 pl-0 pl-lg-2 d-flex d-lg-block box-small">
+                                <h4 class="h4-promoter border-details"
+                                    style="line-height: 25px;color: #49454D">
+                                    Balance Available:
+                                </h4>
+
+                                <div class="d-flex pl-4">
+                                    <i class="fas fa-dollar-sign pt-0 pt-lg-3" style="font-size: 1.5rem"></i>
+                                    <h2 class="h2-promoter pt-0 pt-lg-2 pl-2 lh-2" style="color: #0a0a0a;">
+                                        {{ balance }}
+                                    </h2>
+                                </div>
+                            </div>
+                        </aside>
+
+                        <aside class="col-lg-6 col-12 pl-0 pt-lg-3 border-card">
+                            <div class="div-flex">
+                                <h4 class="col-9 col-lg-5 h4-promoter border-details" style="line-height: 25px;">
+                                    Bank Account Information
+                                </h4>
+               
+                                <div class="col-lg-7 col-4 d-flex justify-content-end"> 
+                                    <button type="button"
+                                            id="button-adm"
+                                            style="margin-top: 10px auto auto auto;justify-content: center"
+                                            class="btn btn-secondary"
+                                            data-toggle="modal"
+                                            data-target="#exampleModalBank">
+                                        Update
+                                    </button> 
+                                </div>
+                            </div>
+
+
+                      
+                        
+
+                            <article class="card-body pt-2 pl-0 pb-0">
+                                <div class="d-block pr-0 pl-4">
+                                    <p class="p-promoter mb-1" style="color: #7B7B7B;">
+                                        <b style="color: #49454D;">
+                                            Bank name:
+                                        </b>
+                                        {{ bank_information.bank_name }}
+                                    </p>
+
+                                    <p class="p-promoter mb-1" style="color: #7B7B7B;">
+                                        <b style="color: #49454D;">
+                                            Account number:
+                                        </b>
+                                        {{ account_number_mask }}
+                                    </p>
+
+                                    <p class="p-promoter"
+                                        style="color: #7B7B7B;">
+                                        <b style="color: #49454D;">Routing Number: </b>
+                                        {{ bank_information.routing_number }}
+                                    </p>
+                                </div>
+                            </article>
+                        </aside>
+
+                    </div>
+                </main>
+            </section>
+            <!--END Section Balance and Account Bank-->
+
+            <!--section history payments-->
+            {% if payouts_history %}
+                <section>
+                    <div class="col-lg-12" style="display:flex;">
+                        <div class="col-lg-10 col-md-5"></div>
+                        
+                        <div class="col-lg-2 col-md-7 div-adm-newevent" style="justify-content: flex-end;">
+                            <a href="{% url 'payout_pdf_view' %}"
+                                id="button-adm" class="btn btn-secondary"
+                                style="margin-top: 10px;">
+                                    Export
+                            </a>
+                        </div>
+                    </div>
+
+
+                    <main class="card-checkin d-lg-none d-flex">
+                        {% for payouts_history in payouts_history %}
+                        <article class="card m-lg-2 m-0 mb-4"
+                                    style="min-width: 20rem;max-width: 20rem; border-radius: 10px;">
+
+                            <section class="card-body" style="padding-left: 0px; padding-bottom: 0">
+                                <div style="display: block; padding-right: 0; padding-left: 20px" >
+                                    <div style="display: flex; justify-content: flex-start;; flex-direction: row">
+                                        <h5 class="h6-promoter ml-0 ml-lg-2">
+                                                <b style="color: #383838;">Payment Date</b>
+                                            {{ payouts_history.created|date:"M d, Y" }}
+                                        </h5>
+                                    </div>
+
+                                    
+
+                                    <p class="p-promoter" style="color: #7B7B7B;">
+                                        <b style="color: #383838;">Description </b>
+                                        {{ payouts_history.description }}
+                                    </p>
+
+                                    <p class="p-promoter" style="color: #7B7B7B;">
+                                        <b style="color: #383838;">Amount Paid: </b>
+                                        {{payouts_history.amount }}
+                                    </p>
+
+                                    <p class="p-promoter" style="color: #7B7B7B;">
+                                        <b style="color: #383838;">Status: </b> 
+                                        <span style="background: rgba(51, 186, 29, 0.1);border-radius: 12px;
+                                                     color: #33BA1D; padding: 0 1rem">
+                                            Paid
+                                        </span>
+                                    </p>
+
+                                    {%if payouts_history.image %}
+                                        <p class="p-promoter" style="color: #7B7B7B;">
+                                            <b style="color: #383838;">Confirmation: </b> 
+                                            <a href="{{payouts_history.image.url}}" target="_blank">
+                                                <i class="fas fa-file" style="color: #d90075" aria-hidden="true"></i>
+                                            </a>
+                                        </p>
+                                    {%endif%}
+
+                                </div>
+                            </section>
+                        </article>
+                        {% endfor %}
+                    </main>
+
+                    <!-- TABLE VENDOR - COMPUTER -->
+                    <main class="d-lg-flex d-none">
+                        <aside class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" style="width: 99%">
+                                <thead>
+                                <tr style="background-color:#F4F4F4;">
+                                    <th class="text-table text-bold">Payment Date</th>
+                                    <th class="text-table text-bold">Description</th>
+                                    <th class="text-table text-bold">Amoun Paid</th>
+                                    
+                                    <th class="text-table text-bold">Status</th>
+                                    {%if payouts_history.image %}
+                                        <th class="text-table text-bold">Confirmation</th>
+                                    {%else%}
+                                    <th class="text-table text-bold"></th>
+                                    {%endif%}
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                {% for payouts_history in payouts_history %}
+                                    <tr>
+                                        <td class="text-table">
+                                            {{ payouts_history.created|date:"M d, Y" }}
+                                        </td>
+
+                                        <td class="text-table">
+                                            {{ payouts_history.description }}
+                                        </td>
+
+                                        <td class="text-table">
+                                            {{ payouts_history.amount }}
+                                        </td>
+
+                                        <td class="text-table">
+                                            <span style="background: rgba(51, 186, 29, 0.1);border-radius: 12px;
+                                                        color: #33BA1D; padding: 0 1rem">
+                                                        Paid
+                                            </span>
+                                        </td>   
+                                        <td class="text-table">
+                                                {%if payouts_history.image %}
+                                                <a href="{{payouts_history.image.url}}" target="_blank">
+                                                    <i class="fas fa-file" style="color: #d90075" aria-hidden="true"></i>
+                                                </a>
+                                                {%endif%} 
+                                            </td>
+
+            
+
+                                        
+                        
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </aside>
+                    </main>
+                </section>
+
+            {% else %}
+                <section class="container" style="min-height: 75vh">
+                    <main class="col-12" style="min-height: 50vh; margin: 5rem auto;">
+                        <div class="col-12 pt-5 mt-5" style="justify-content: center">
+                            <i class="fas fa-exchange-alt fa-2x"
+                                style="display: flex; justify-content: center; color: #49454D;"></i>
+                            <h3 class="col-12 h3-home mt-3" style="text-align: center;">No payments</h3>
+                            <h6 class="col-lg-6 col-12 h6-home mt-0 mt-lg-4"
+                                style="text-align: center;margin: auto">
+                                There are no payments associated with this account.
+                            </h6>
+
+                        </div>
+                    </main>
+                </section>
+            {% endif %}
+            <!--END section history payments-->
+
+
+         <!--ELSE to bank_information is NONE-->   
+        {% else %}
+            <section class="container" style="min-height: 75vh">
+                <main class="col-12 mt-5 mb-5" style="min-height: 50vh; margin: auto;">
+                    <div class="row">
+                        <aside class="col-lg-6 pt-lg-4">
+                            <div class="col-12 pt-5" style="justify-content: center">
+                                <h3 class="col-12 h3-home mt-5" style="text-align: center;">
+                                    Bank Account Information
+                                </h3>
+                                <h6 class="col-lg-10 col-12 h6-home mt-0 mt-lg-4"
+                                    style="text-align: center;margin: auto">
+                                    To receive payments it is necessary to register a bank account.
+                                </h6>
+                            </div>
+
+                        </aside>
+
+                        <article class="col-lg-6 mt-5 mt-lg-2 pt-lg-5">
+                            <div style="width: 100%; margin: auto">
+                                <article id="event-div">
+                                    <h4 class="text-default centralized" style="font-size: 1rem">
+                                        Register Bank Information
+                                    </h4>
+                                    {% comment %} <a href="{% url 'bank_create' %}" id="button-adm"
+                                        class="btn btn-secondary" style="margin-top: 10px;">Create
+                                    </a> {% endcomment %}
+                                    <button type="button"
+                                            id="button-adm"
+                                            style="margin-top: 10px auto auto auto;justify-content: center"
+                                            class="btn btn-secondary"
+                                            data-toggle="modal"
+                                            data-target="#exampleModalBank">
+                                        Create
+                                    </button> 
+                                </article>
+                            </div>
+                        </article>
+                    </div>
+                </main>
+            </section>
+        {% endif %}
+        <!--END ELSE to bank_information is NONE-->   
+
+
+
+        <!--- Modal CREATE OR UPDATE account bank -->
+        <header class="modal fade" id="exampleModalBank" tabindex="-1" 
+                role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content modal-br-8">
+                    <div class="modal-header pt-3 pb-0 background-modal" style="border-bottom: none">
+                        <div class="d-block">
+                            <h3 class="h3-promoter h3-white" id="exampleModalLongTitle">Bank Account</h3>
+                        </div>
+                        <button type="button" class="close" style="font-size: 2rem!important;" data-dismiss="modal"
+                            aria-label="Close">
+                            <span style="font-size: 2rem!important; color:white" aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <aside class="modal-body pt-0">
+                        <h5 class="h5-promoter pl-1 pt-4 p-vendor-12">
+                            Fill in the details below to register a bank account.
+                            </h5>
+                            
+                            {%if bank_information%}
+                                <form enctype="multipart/form-data" method="post"
+                                action="/promoter/bank/update/{{bank_information.id}}/"
+                                        class="col-lg-12 ml-sm-4 pt-3" 
+                                        style="margin-left: 0!important;padding-left: 5px!important;">
+
+                                    {% csrf_token %}
+                                    <div class="form-row">
+                                        <div class="form-group col-md-12 mb-0">
+                                            {{ form|crispy }}
+                                        </div>
+                                        
+                                        <div class="col-12">
+                                            <button type="submit" id="button-adm" class="btn btn-secondary"
+                                            style="float: right;margin-top: 10px;border: 1px solid #d90075;">
+                                            Save
+                                        </button>
+                                    </div>
+                                </form>
+                            {%else%}
+                                <form enctype="multipart/form-data" method="post"
+                                        action="/promoter/bank/create/" 
+                                    class="col-lg-12 ml-sm-4 pt-3" 
+                                    style="margin-left: 0!important;padding-left: 5px!important;">
+
+                                {% csrf_token %}
+                                <div class="form-row">
+                                    <div class="form-group col-md-12 mb-0">
+                                        {{ form|crispy }}
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <button type="submit" id="button-adm" class="btn btn-secondary"
+                                        style="float: right;margin-top: 10px;border: 1px solid #d90075;">
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
+
+                            {%endif%}
+                    </div>
+                </aside>
+            </div>
+        </header>
+    <!--END modal-->
+
+    </main>
+{% endblock content %}

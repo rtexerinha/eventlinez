@@ -1858,3 +1858,9 @@ div.content-right-signin {
 .search_text {
 	padding-top: 20px;
 }
+
+
+.background-modal{
+    background: #3C215C;
+    border-radius: 8px 8px 0px 0px;
+}

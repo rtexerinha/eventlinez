@@ -5,9 +5,7 @@
 {% block metadescription %}
 	Sign in and enjoy the variety of stunning products.
 {% endblock %}
-{% block title %}
-	Login - Eventlinez
-{% endblock %}
+{% block title %}Signin Organizer - Eventlinez{% endblock %}
 
 {% block content %}
 	<div class="col-lg-12 col-sm-11" id="wrapper-login">
@@ -26,12 +24,12 @@
                 <div class="logoimg">
                     <img src="{% static 'img/logo.png' %}" alt="logo">
                 </div>
-                 <h2 class="text-default description-login-left">Registered Promoter Only</h2>
+                 <h2 class="text-default description-login-left">Registered Organizer Only</h2>
 
                 <form method="post" class="col-lg-9" style="margin: 0 auto">
                     {% csrf_token %}
                     <p>{{ form | crispy }}</p>
-                    <button type="submit" class="text-default button-login">Login Promoter</button>
+                    <button type="submit" class="text-default button-login">Login Organizer</button>
 
                 </form>
                 <div class="item-div">
