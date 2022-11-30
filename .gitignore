@@ -143,3 +143,5 @@ cython_debug/
 
 eventlinez/media/CACHE/
 media/
+
+.vscode
