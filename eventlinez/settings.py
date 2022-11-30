@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'cart',
     'order',
     'ticket',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
