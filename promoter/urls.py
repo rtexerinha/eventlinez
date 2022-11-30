@@ -7,7 +7,7 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
-from .api import CustomAuthToken
+from .api import CustomAuthToken, PromoterListAPIView
 
 urlpatterns = [
     path('account/create/', signup_view_promoter, name='signup_promoter'),
@@ -68,4 +68,5 @@ urlpatterns = [
 
     # auth
     path('api-token-auth/', CustomAuthToken.as_view()),
+    path('api/information/', PromoterListAPIView.as_view()),
 ]
