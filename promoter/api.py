@@ -28,4 +28,5 @@ class PromoterListAPIView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return self.model.objects.filter(user=user)
+        promoter = self.model.objects.filter(user=user)
+        return promoter
