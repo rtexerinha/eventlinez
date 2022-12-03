@@ -3,7 +3,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from .serializes import PromoterSerializer
+from .serializers import PromoterSerializer, EventSerializers
+from .models import Promoter
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -28,5 +29,14 @@ class PromoterListAPIView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        promoter = self.model.objects.filter(user=user)
-        return promoter
+        return self.model.objects.filter(user=user)
+
+
+class EventList(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = EventSerializers
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        user = self.request.user
+        return self.model.objects.all()
