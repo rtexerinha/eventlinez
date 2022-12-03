@@ -39,4 +39,4 @@ class EventList(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return self.model.objects.all()
+        return self.model.objects.filter(promoter__user=user)

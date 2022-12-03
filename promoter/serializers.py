@@ -58,6 +58,7 @@ class EventSerializers(serializers.Serializer):
     image = serializers.ImageField()
     image_sized = serializers.ImageField()
     thumbnail = serializers.ImageField()
+    promoter = PromoterSerializer()
 
     class Meta:
         model = Event
