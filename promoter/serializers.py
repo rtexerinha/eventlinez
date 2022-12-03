@@ -26,6 +26,19 @@ class PromoterSerializer(serializers.Serializer):
         fields = '__all__'
 
 
+class VendorSerializer(serializers.Serializer):
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    email = serializers.CharField()
+    phone = serializers.CharField()
+    code = serializers.CharField()
+    promoter = PromoterSerializer()
+
+    class Model:
+        model = Vendor
+        fields = '__all__'
+
+
 class CategoriaSerializers(serializers.Serializer):
     name = serializers.CharField(max_length=250)
     slug = serializers.SlugField(max_length=250)
@@ -47,18 +60,19 @@ class CitySerializers(serializers.Serializer):
 class EventSerializers(serializers.Serializer):
     name = serializers.CharField()
     slug = serializers.SlugField(max_length=250)
-    category = CategoriaSerializers()
     description = serializers.CharField()
-    created = serializers.DateTimeField()
-    updated = serializers.DateTimeField()
-    event_date = serializers.DateTimeField()
+    vendors = VendorSerializer(many=True, read_only=True)
     address = serializers.CharField()
     city = CitySerializers()
     available = serializers.BooleanField(default=False)
     image = serializers.ImageField()
     image_sized = serializers.ImageField()
     thumbnail = serializers.ImageField()
+    category = CategoriaSerializers()
     promoter = PromoterSerializer()
+    event_date = serializers.DateTimeField()
+    created = serializers.DateTimeField()
+    updated = serializers.DateTimeField()
 
     class Meta:
         model = Event
