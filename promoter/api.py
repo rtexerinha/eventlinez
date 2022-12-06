@@ -39,4 +39,17 @@ class EventList(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        query_params = self.request.query_params
+        available = query_params.get('available', None)
+        name = query_params.get('name', None)
+
+        if available and name:
+            return self.model.objects.filter(promoter__user=user, available=available, name=name)
+
+        if available:
+            return self.model.objects.filter(promoter__user=user, available=available)
+
+        if name:
+            return self.model.objects.filter(promoter__user=user, name=name)
+
         return self.model.objects.filter(promoter__user=user)
