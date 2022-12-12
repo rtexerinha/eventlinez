@@ -1,9 +1,9 @@
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListCreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from .serializers import PromoterSerializer, EventSerializers
+from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers
 from .models import Promoter
 
 
@@ -32,7 +32,7 @@ class PromoterListAPIView(ListAPIView):
         return self.model.objects.filter(user=user)
 
 
-class EventList(ListAPIView):
+class EventAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = EventSerializers
     model = serializer_class.Meta.model
@@ -53,3 +53,10 @@ class EventList(ListAPIView):
             return self.model.objects.filter(promoter__user=user, name=name)
 
         return self.model.objects.filter(promoter__user=user)
+
+
+class CategoryListAPIView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CategoriaSerializers
+    model = serializer_class.Meta.model
+    queryset = model.objects.all()
