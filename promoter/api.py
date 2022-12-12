@@ -1,10 +1,9 @@
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.generics import ListCreateAPIView, ListAPIView
+from rest_framework.generics import ListCreateAPIView, ListAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers
-from .models import Promoter
+from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketSerializers
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -60,3 +59,8 @@ class CategoryListAPIView(ListAPIView):
     serializer_class = CategoriaSerializers
     model = serializer_class.Meta.model
     queryset = model.objects.all()
+
+
+class TicketAPIView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TicketSerializers
