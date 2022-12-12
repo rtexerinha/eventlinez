@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from event.models import Promoter, Event, Category
-from .models import Vendor
-from address.models import City
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,52 +24,33 @@ class PromoterSerializer(serializers.Serializer):
         fields = '__all__'
 
 
-class VendorSerializer(serializers.Serializer):
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
-    email = serializers.CharField()
-    phone = serializers.CharField()
-    code = serializers.CharField()
-    promoter = PromoterSerializer()
-
-    class Model:
-        model = Vendor
-        fields = '__all__'
-
-
 class CategoriaSerializers(serializers.Serializer):
     name = serializers.CharField(max_length=250)
     slug = serializers.SlugField(max_length=250)
+    id = serializers.IntegerField()
 
     class Meta:
         model = Category
         fields = '__all__'
 
 
-class CitySerializers(serializers.Serializer):
-    name = serializers.CharField()
-    state = serializers.CharField()
-
-    class Meta:
-        model = City
-        fields = '__all__'
-
-
 class EventSerializers(serializers.Serializer):
     name = serializers.CharField()
-    slug = serializers.SlugField(max_length=250)
     description = serializers.CharField()
     address = serializers.CharField()
-    city = CitySerializers()
     available = serializers.BooleanField(default=False)
     image = serializers.ImageField()
-    image_sized = serializers.ImageField()
-    thumbnail = serializers.ImageField()
-    category = CategoriaSerializers()
+    category = serializers.CharField()
     event_date = serializers.DateTimeField()
-    created = serializers.DateTimeField()
-    updated = serializers.DateTimeField()
 
     class Meta:
         model = Event
         fields = '__all__'
+
+    def create(self, validated_data):
+
+        category_id = validated_data['category']
+        validated_data['category'] = Category.objects.get(id=category_id)
+        user = self.context['request'].user
+        validated_data['promoter'] = Promoter.objects.get(user=user)
+        return Event.objects.create(**validated_data)
