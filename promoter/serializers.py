@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from event.models import Promoter, Event, Category
+from event.models import Promoter, Event, Category, Ticket
 from address.models import City
 
 
@@ -44,6 +44,7 @@ class EventSerializers(serializers.Serializer):
     category = serializers.CharField()
     event_date = serializers.DateTimeField()
     city = serializers.CharField()
+    id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Event
@@ -67,3 +68,24 @@ class EventSerializers(serializers.Serializer):
             raise serializers.ValidationError(e)
 
         return Event.objects.create(**validated_data)
+
+
+class TicketSerializers(serializers.Serializer):
+    name = serializers.CharField(max_length=80)
+    event = serializers.CharField()
+    quantity = serializers.IntegerField()
+    price = serializers.DecimalField(decimal_places=2, max_digits=10)
+
+    class Meta:
+        model = Ticket
+        fields = '__all__'
+
+    def create(self, validated_data):
+
+        try:
+            event_id = validated_data['event']
+            validated_data['event'] = Event.objects.get(id=event_id)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+
+        return Ticket.objects.create(**validated_data)
