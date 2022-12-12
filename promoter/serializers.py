@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from event.models import Promoter, Event, Category
+from address.models import City
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -42,6 +43,7 @@ class EventSerializers(serializers.Serializer):
     image = serializers.ImageField()
     category = serializers.CharField()
     event_date = serializers.DateTimeField()
+    city = serializers.CharField()
 
     class Meta:
         model = Event
@@ -49,8 +51,19 @@ class EventSerializers(serializers.Serializer):
 
     def create(self, validated_data):
 
-        category_id = validated_data['category']
-        validated_data['category'] = Category.objects.get(id=category_id)
         user = self.context['request'].user
         validated_data['promoter'] = Promoter.objects.get(user=user)
+
+        try:
+            category_id = validated_data['category']
+            validated_data['category'] = Category.objects.get(id=category_id)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+
+        try:
+            city_id = validated_data['city']
+            validated_data['city'] = City.objects.get(id=city_id)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+
         return Event.objects.create(**validated_data)
