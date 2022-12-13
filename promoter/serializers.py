@@ -69,6 +69,29 @@ class EventSerializers(serializers.Serializer):
 
         return Event.objects.create(**validated_data)
 
+    def update(self, instance, validated_data):
+        try:
+            category_id = validated_data['category']
+            instance.category = Category.objects.get(id=category_id)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+
+        try:
+            city_id = validated_data['city']
+            instance.city = City.objects.get(id=city_id)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+
+        instance.name = validated_data['name']
+        instance.description = validated_data['description']
+        instance.address = validated_data['address']
+        instance.available = validated_data['available']
+        instance.image = validated_data['image']
+        instance.event_date = validated_data['event_date']
+        instance.save()
+
+        return instance
+
 
 class TicketSerializers(serializers.Serializer):
     name = serializers.CharField(max_length=80)
