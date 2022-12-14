@@ -7,8 +7,8 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
-from .api import CustomAuthToken, PromoterListAPIView, EventAPIView, CategoryListAPIView, TicketAPIView, EventUpdateAPIView
-
+from .api import CustomAuthToken, PromoterListAPIView, EventAPIView, CategoryListAPIView, TicketAPIView,\
+    EventUpdateAPIView, TicketUpdateAPIView
 urlpatterns = [
     path('account/create/', signup_view_promoter, name='signup_promoter'),
     path('account/login/', signin_view_promoter, name='signin_promoter'),
@@ -72,7 +72,8 @@ urlpatterns = [
 
     # event api
     path('api/event', EventAPIView.as_view()),
+    path('api/event/update/<int:pk>', EventUpdateAPIView.as_view()),
     path('api/categories', CategoryListAPIView.as_view()),
     path('api/ticket', TicketAPIView.as_view()),
-    path('api/event/update/<int:pk>', EventUpdateAPIView.as_view()),
+    path('api/ticket/update/<int:pk>', TicketUpdateAPIView.as_view()),
 ]

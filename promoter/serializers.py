@@ -70,24 +70,39 @@ class EventSerializers(serializers.Serializer):
         return Event.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
+
         try:
-            category_id = validated_data['category']
-            instance.category = Category.objects.get(id=category_id)
+            if 'category' in validated_data:
+                category_id = validated_data['category']
+                instance.category = Category.objects.get(id=category_id)
         except Exception as e:
             raise serializers.ValidationError(e)
 
         try:
-            city_id = validated_data['city']
-            instance.city = City.objects.get(id=city_id)
+            if 'city' in validated_data:
+                city_id = validated_data['city']
+                instance.city = City.objects.get(id=city_id)
         except Exception as e:
             raise serializers.ValidationError(e)
 
-        instance.name = validated_data['name']
-        instance.description = validated_data['description']
-        instance.address = validated_data['address']
-        instance.available = validated_data['available']
-        instance.image = validated_data['image']
-        instance.event_date = validated_data['event_date']
+        if 'name' in validated_data:
+            instance.name = validated_data['name']
+
+        if 'description' in validated_data:
+            instance.description = validated_data['description']
+
+        if 'address' in validated_data:
+            instance.address = validated_data['address']
+
+        if 'available' in validated_data:
+            instance.available = validated_data['available']
+
+        if 'image' in validated_data:
+            instance.image = validated_data['image']
+
+        if 'event_date' in validated_data:
+            instance.event_date = validated_data['event_date']
+
         instance.save()
 
         return instance
@@ -112,3 +127,25 @@ class TicketSerializers(serializers.Serializer):
             raise serializers.ValidationError(e)
 
         return Ticket.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+
+        try:
+            if 'event' in validated_data:
+                event_id = validated_data['event']
+                instance.event = Event.objects.get(id=event_id)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+        
+        if 'name' in validated_data:
+            instance.name = validated_data['name']
+
+        if 'quantity' in validated_data:
+            instance.quantity = validated_data['quantity']
+            
+        if 'price' in validated_data:
+            instance.price = validated_data['price']
+        
+        instance.save()
+
+        return instance

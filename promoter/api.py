@@ -62,6 +62,8 @@ class EventUpdateAPIView(UpdateAPIView):
     def get_queryset(self):
         user = self.request.user
         return self.model.objects.filter(promoter__user=user)
+
+
 class CategoryListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = CategoriaSerializers
@@ -72,3 +74,13 @@ class CategoryListAPIView(ListAPIView):
 class TicketAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = TicketSerializers
+
+
+class TicketUpdateAPIView(UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TicketSerializers
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        ticket_id = self.kwargs['pk']
+        return self.model.objects.filter(id=ticket_id)
