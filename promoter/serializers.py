@@ -45,10 +45,30 @@ class EventSerializers(serializers.Serializer):
     event_date = serializers.DateTimeField()
     city = serializers.CharField()
     id = serializers.IntegerField(read_only=True)
+    qty_available = serializers.SerializerMethodField(read_only=True)
+    qty_sould = serializers.SerializerMethodField(read_only=True)
+    quantity = serializers.SerializerMethodField(read_only=True)
+    amount = serializers.SerializerMethodField(read_only=True)
+    url = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Event
         fields = '__all__'
+
+    def get_qty_available(self, obj):
+        return obj.qty_available()
+
+    def get_qty_sould(self, obj):
+        return obj.qty_sould()
+
+    def get_quantity(self, obj):
+        return obj.quantity()
+
+    def get_amount(self, obj):
+        return obj.get_amount()
+
+    def get_url(self, obj):
+        return obj.get_url()
 
     def create(self, validated_data):
 
@@ -136,16 +156,16 @@ class TicketSerializers(serializers.Serializer):
                 instance.event = Event.objects.get(id=event_id)
         except Exception as e:
             raise serializers.ValidationError(e)
-        
+
         if 'name' in validated_data:
             instance.name = validated_data['name']
 
         if 'quantity' in validated_data:
             instance.quantity = validated_data['quantity']
-            
+
         if 'price' in validated_data:
             instance.price = validated_data['price']
-        
+
         instance.save()
 
         return instance
