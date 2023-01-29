@@ -35,9 +35,6 @@ class TicketSerializers(serializers.Serializer):
             raise serializers.ValidationError({'error':
                                                'Ticket has already been validated!'})
         if 'checkin_date' in validated_data:
-            if instance.checkin_date:
-                raise serializers.ValidationError(
-                    {'error': 'Ticket already checked in'})
             instance.checkin_date = validated_data['checkin_date']
             instance.save()
             return instance
