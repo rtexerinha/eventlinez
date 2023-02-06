@@ -36,6 +36,17 @@ class TicketCheckinAPIView(UpdateAPIView):
         return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
 
 
+class TicketDetailsAPIView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TicketSerializers
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        user = self.request.user
+        pk = self.kwargs['pk']
+        return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+
+
 class TicketCheckinQrcodeAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = TicketSerializers
