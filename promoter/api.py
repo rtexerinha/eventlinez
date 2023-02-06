@@ -31,6 +31,17 @@ class PromoterListAPIView(ListAPIView):
         return self.model.objects.filter(user=user)
 
 
+class EventDetailsAPIView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = EventSerializers
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        user = self.request.user
+        pk = self.kwargs['pk']
+        return self.model.objects.filter(promoter__user=user, id=pk)
+
+
 class EventAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = EventSerializers
