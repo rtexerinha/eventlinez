@@ -14,6 +14,10 @@ class TicketListAPIView(ListAPIView):
         guest_name = self.request.query_params.get('guest_name', None)
         event_name = self.request.query_params.get('event_name', None)
 
+        if event_name and guest_name:
+            return self.model.objects.filter(event_ticket__event__promoter__user=user,
+                                             event_ticket__event__name__contains=event_name,
+                                             guest_name__contains=guest_name)
         if guest_name:
             return self.model.objects.filter(event_ticket__event__promoter__user=user, guest_name__contains=guest_name)
         if event_name:
