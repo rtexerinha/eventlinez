@@ -54,13 +54,13 @@ class EventAPIView(ListCreateAPIView):
         name = query_params.get('name', None)
 
         if available and name:
-            return self.model.objects.filter(promoter__user=user, available=available, name__contains=name)
+            return self.model.objects.filter(promoter__user=user, available=available, name__icontains=name)
 
         if available:
             return self.model.objects.filter(promoter__user=user, available=available)
 
         if name:
-            return self.model.objects.filter(promoter__user=user, name__contains=name)
+            return self.model.objects.filter(promoter__user=user, name__icontains=name)
 
         return self.model.objects.filter(promoter__user=user)
 
