@@ -27,7 +27,8 @@ urlpatterns = [
     # Reset password views customer
     path('account/reset_password/', auth_views.PasswordResetView.as_view(
         html_email_template_name='registration/password_reset_email.html'), name="password_reset"),
-    path('account/reset_password_sent/', auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
+    path('account/reset_password_sent/',
+         auth_views.PasswordResetDoneView.as_view(), name="password_reset_done"),
     path('account/reset/<uidb64>/<token>',
          auth_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path('account/reset_password_complete/',
@@ -44,13 +45,15 @@ urlpatterns = [
          auth_views.PasswordResetDoneView.as_view(), name="password_reset_done_promoter"),
 
     path('account/reset/promoter/<uidb64>/<token>',
-         auth_views.PasswordResetConfirmView.as_view(success_url=reverse_lazy('password_reset_complete_promoter')),
+         auth_views.PasswordResetConfirmView.as_view(
+             success_url=reverse_lazy('password_reset_complete_promoter')),
          name="password_reset_confirm_promoter"),
 
     path('account/reset_password_complete/promoter',
          auth_views.PasswordResetCompleteView.as_view(
              template_name='registration/password_reset_complete_promoter.html'),
          name="password_reset_complete_promoter"),
+    path('address/', include('address.urls'))
 ]
 
 admin.site.site_header = 'Eventlinez'
@@ -60,5 +63,7 @@ handler404 = shop.views.handler404
 handler500 = shop.views.handler500
 
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
