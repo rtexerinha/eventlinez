@@ -3,65 +3,63 @@
 {% load converts %}
 
 <!DOCTYPE html>
-    <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-            <meta name="description" content="{% block metadescription %}{% endblock %}">
-            <link rel="shortcut icon" type="image/jpg" href="{% static 'img/logosmall.jpg' %}"/>
-            <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
-                  rel="stylesheet">
-            <link rel="stylesheet" href="{% static 'css/resert.css' %}">
-            <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-            <link rel="stylesheet" href="{% static 'css/promoter.css' %}">
-            <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-            <link rel="stylesheet" href="{% static 'css/typography.css' %}">
-            <link rel="stylesheet" type="text/css" href="{% static 'css/fontawesome-all.min.css' %}">
+<html lang="en">
 
-            <link rel="stylesheet" href="{% static 'date-time/jquery-ui.css' %}">
-            <link rel="stylesheet" href="{% static 'date-time/jquery-ui-timepicker-addon.css' %}">
-            <script src="{% static 'js/jquery-3.4.1.slim.min.js' %}"></script>
-            {% block stylesheets %}{% endblock stylesheets %}
-            <title>{% block title %}{% endblock %}</title>
-        </head>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{% block metadescription %}{% endblock %}">
+    <link rel="shortcut icon" type="image/jpg" href="{% static 'img/logosmall.jpg' %}" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/resert.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/promoter.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/typography.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/fontawesome-all.min.css' %}">
 
-        <body class="sb-nav-fixed">
+    <link rel="stylesheet" href="{% static 'date-time/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'date-time/jquery-ui-timepicker-addon.css' %}">
+    <script src="{% static 'js/jquery-3.4.1.slim.min.js' %}"></script>
+    {% block stylesheets %}{% endblock stylesheets %}
+    <title>{% block title %}{% endblock %}</title>
+</head>
 
-            {% include 'navigation.html' %}
+<body class="sb-nav-fixed">
 
-            <div id="layoutSidenav">
-                {% include 'sidebar.html' %}
+    {% include 'navigation.html' %}
 
-                <div id="layoutSidenav_content">
+    <div id="layoutSidenav">
+        {% include 'sidebar.html' %}
 
-                    {% block content %}{% endblock content %}
+        <div id="layoutSidenav_content">
 
-                </div>
-            </div>
+            {% block content %}{% endblock content %}
 
-            {% block js-ticket %}{% endblock %}
-             <script src="https://code.jquery.com/jquery-3.5.1.min.js"
-                     crossorigin="anonymous"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
-            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"
-                    crossorigin="anonymous"></script>
-            <script src="/static/js/script.js"></script>
-            <script src="{% static 'date-time/jquery-ui.js' %}"></script>
-            <script src="{% static 'date-time/jquery-ui-timepicker-addon.js' %}"></script>
-            <script type="text/javascript">
-                $(document).ready(function() {
-                    $('#datetimepicker').datetimepicker({ dateFormat: 'yy-mm-dd' }).attr("autocomplete", "off");
-                });
-            </script>
+        </div>
+    </div>
 
-            <script>
-                console.log('aqui');
-                function convert(value){
-                    console.log('jeito jr de ser');
-                    return value/100
-                }
-            </script>
+    {% block js-ticket %}{% endblock %}
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+    <script src="/static/js/script.js"></script>
+    <script src="{% static 'date-time/jquery-ui.js' %}"></script>
+    <script src="{% static 'date-time/jquery-ui-timepicker-addon.js' %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#datetimepicker').datetimepicker({ dateFormat: 'yy-mm-dd' }).attr("autocomplete", "off");
+        });
+    </script>
 
-        </body>
-    </html>
+    <script>
+        function convert(value) {
+            return value / 100
+        }
+    </script>
+
+</body>
+
+</html>
