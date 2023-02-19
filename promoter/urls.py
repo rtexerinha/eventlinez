@@ -9,6 +9,8 @@ from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, ticke
 from event.views import event_list, event_create, event_remove, event_update
 from .api import CustomAuthToken, PromoterListAPIView, EventAPIView, CategoryListAPIView, TicketAPIView,\
     EventUpdateAPIView, TicketUpdateAPIView, EventDetailsAPIView
+
+
 urlpatterns = [
     path('account/create/', signup_view_promoter, name='signup_promoter'),
     path('account/login/', signin_view_promoter, name='signin_promoter'),
