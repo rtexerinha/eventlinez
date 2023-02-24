@@ -1,8 +1,13 @@
-from rest_framework.authtoken.views import ObtainAuthToken
+from datetime import timedelta
+
+from django.utils import timezone
 from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-from rest_framework.generics import ListCreateAPIView, ListAPIView, CreateAPIView, UpdateAPIView
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from event.models import Event
 from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketSerializers
 
 
@@ -42,27 +47,25 @@ class EventDetailsAPIView(ListAPIView):
         return self.model.objects.filter(promoter__user=user, id=pk)
 
 
-class EventAPIView(ListCreateAPIView):
+class EventListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = EventSerializers
-    model = serializer_class.Meta.model
+    model = Event
 
     def get_queryset(self):
-        user = self.request.user
-        query_params = self.request.query_params
-        available = query_params.get('available', None)
-        name = query_params.get('name', None)
+        name = self.request.query_params.get('name')
+        state = self.request.query_params.get("state")
+        queryset = Event.objects.filter(promoter__user=self.request.user)
 
-        if available and name:
-            return self.model.objects.filter(promoter__user=user, available=available, name__icontains=name)
-
-        if available:
-            return self.model.objects.filter(promoter__user=user, available=available)
+        dt_reference = timezone.now() + timedelta(-1)
 
         if name:
-            return self.model.objects.filter(promoter__user=user, name__icontains=name)
-
-        return self.model.objects.filter(promoter__user=user)
+            queryset = queryset.filter(name__icontains=name)
+        if state == "previous":
+            queryset = queryset.filter(event_date__lte=dt_reference)
+        if state == "current":
+            queryset = queryset.filter(event_date__gte=dt_reference)
+        return queryset
 
 
 class EventUpdateAPIView(UpdateAPIView):
