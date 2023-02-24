@@ -73,7 +73,7 @@ urlpatterns = [
     path('api/information/', PromoterListAPIView.as_view()),
 
     # event api
-    path('api/event/event', EventListAPIView.as_view()),
+    path('api/event', EventListAPIView.as_view()),
     path('api/event/update/<int:pk>', EventUpdateAPIView.as_view()),
     path('api/event/<int:pk>', EventDetailsAPIView.as_view()),
     path('api/categories', CategoryListAPIView.as_view()),
