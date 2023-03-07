@@ -8,7 +8,7 @@ from event.views import ticket_type_create, ticket_type_list, ticket_type_update
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
 from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, CategoryListAPIView, TicketAPIView,\
-    EventUpdateAPIView, TicketUpdateAPIView, EventDetailsAPIView
+    EventUpdateAPIView, TicketUpdateAPIView, EventDetailsAPIView, sales_report
 
 
 urlpatterns = [
@@ -79,4 +79,6 @@ urlpatterns = [
     path('api/categories', CategoryListAPIView.as_view()),
     path('api/ticket', TicketAPIView.as_view()),
     path('api/ticket/update/<int:pk>', TicketUpdateAPIView.as_view()),
+
+    path("api/event/<int:pk>/salesReport", sales_report)
 ]
