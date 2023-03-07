@@ -1,4 +1,8 @@
 from datetime import timedelta
+from django.db.models.functions import (ExtractMonth, ExtractDay, TruncDate)
+from django.db.models import Sum
+from django.db.models import F
+from django.db.models import FloatField
 
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -6,6 +10,9 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
+
 
 from event.models import Event
 from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketSerializers
@@ -98,3 +105,25 @@ class TicketUpdateAPIView(UpdateAPIView):
     def get_queryset(self):
         ticket_id = self.kwargs['pk']
         return self.model.objects.filter(id=ticket_id)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def sales_report(request, event_id):
+    from order.models import OrderItem
+    by = request.GET["by"]
+
+    if by == "day":
+        group = TruncDate('order__created')
+    elif by == "month":
+        group = ExtractMonth('order__created')
+    else:
+        return Response(status=400)
+
+    queryset = OrderItem.objects\
+        .filter(event_ticket__event_id=event_id)\
+        .annotate(group=group)\
+        .values("group").annotate(value=Sum(F('quantity') * F('unit_price'), output_field=FloatField()))\
+        .order_by("group")
+
+    return Response({"data": list(queryset)})
