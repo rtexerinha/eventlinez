@@ -80,5 +80,5 @@ urlpatterns = [
     path('api/ticket', TicketAPIView.as_view()),
     path('api/ticket/update/<int:pk>', TicketUpdateAPIView.as_view()),
 
-    path("api/event/<int:pk>/salesReport", sales_report)
+    path("api/event/<int:event_id>/salesReport", sales_report)
 ]
