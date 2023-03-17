@@ -99,9 +99,9 @@ class TestSalesReportAPI(TestCase):
         self.assertEqual(len(response.data["data"]), 3)
         self.assertIsInstance(response.data["data"][0]["group"], date)
 
-        self.assertEqual(response.data["data"][0]["value"], 250.00)
-        self.assertEqual(response.data["data"][1]["value"], 400.00)
-        self.assertEqual(response.data["data"][2]["value"], 650)
+        self.assertEqual(response.data["data"][0]["value"], 5)
+        self.assertEqual(response.data["data"][1]["value"], 8)
+        self.assertEqual(response.data["data"][2]["value"], 13)
 
     def test_sales_by_month(self):
         request = self.factory.get(f"/promoter/api/event/{self.event.id}/salesReport", data={"by": "month"})
@@ -111,9 +111,9 @@ class TestSalesReportAPI(TestCase):
         self.assertEqual(len(response.data["data"]),  3)
         self.assertEqual(response.data["data"][0]["group"], "Dec 22")
 
-        self.assertEqual(response.data["data"][0]["value"], 250.00)
-        self.assertEqual(response.data["data"][1]["value"], 400.00)
-        self.assertEqual(response.data["data"][2]["value"], 650)
+        self.assertEqual(response.data["data"][0]["value"], 5)
+        self.assertEqual(response.data["data"][1]["value"], 8)
+        self.assertEqual(response.data["data"][2]["value"], 13)
 
 
 class TestUtil(TestCase):
