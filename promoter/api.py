@@ -115,7 +115,7 @@ def sales_report(request, event_id):
     by = request.GET["by"]
 
     queryset = OrderItem.objects.filter(event_ticket__event_id=event_id)
-    calc = Sum(F('quantity') * F('unit_price'), output_field=FloatField())
+    calc = Sum(F('quantity'))
 
     if by == "day":
         group = TruncDate('order__created')
