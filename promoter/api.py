@@ -1,5 +1,5 @@
 from datetime import timedelta
-from django.db.models.functions import (ExtractMonth, ExtractDay, TruncDate)
+from django.db.models.functions import (ExtractMonth, ExtractDay, TruncDate, ExtractYear)
 from django.db.models import Sum
 from django.db.models import F
 from django.db.models import FloatField
@@ -16,6 +16,7 @@ from rest_framework.decorators import permission_classes
 
 from event.models import Event
 from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketSerializers
+from promoter.util import transform_month
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -113,17 +114,21 @@ def sales_report(request, event_id):
     from order.models import OrderItem
     by = request.GET["by"]
 
+    queryset = OrderItem.objects.filter(event_ticket__event_id=event_id)
+    calc = Sum(F('quantity') * F('unit_price'), output_field=FloatField())
+
     if by == "day":
         group = TruncDate('order__created')
+        queryset = queryset .annotate(group=group) \
+            .values("group").annotate(value=calc).order_by("group")
+        data = list(queryset)
     elif by == "month":
-        group = ExtractMonth('order__created')
+        queryset = queryset.annotate(
+                    month=ExtractMonth('order__created'),
+                    year=ExtractYear('order__created')).\
+            values("month", "year").annotate(value=calc).order_by("year", "month")
+        data = list(map(transform_month, list(queryset)))
     else:
         return Response(status=400)
 
-    queryset = OrderItem.objects\
-        .filter(event_ticket__event_id=event_id)\
-        .annotate(group=group)\
-        .values("group").annotate(value=Sum(F('quantity') * F('unit_price'), output_field=FloatField()))\
-        .order_by("group")
-
-    return Response({"data": list(queryset)})
+    return Response({"data": data})
