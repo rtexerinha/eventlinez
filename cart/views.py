@@ -28,17 +28,20 @@ def cart_add(request):
     """
     Adiciona cria o carrinho e adiciona os tickets ao carrinho.
     """
-    data = json.loads(request.body)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
     except Cart.DoesNotExist:
         cart = Cart.objects.create(cart_id=_cart_id(request))
         cart.save()
+
+    data = json.loads(request.body)
     promocode = data.get("promo_code")
     vendor_code = data.get("vendor_code")
+
     vendor = None
     if vendor_code:
         vendor = Vendor.objects.get(code=vendor_code)
+
     for tkt in data['tickets']:
         ticket = Ticket.objects.get(pk=tkt['id'])
         quantity = tkt['quantity']

@@ -1,3 +1,4 @@
+import datetime
 from datetime import timedelta
 from datetime import date
 
@@ -63,7 +64,7 @@ class TestSalesReportAPI(TestCase):
         ticket_type = baker.make('event.Ticket', event=self.event)
 
         order1 = baker.make('order.Order')
-        order1.created = timezone.now() - timedelta(days=60)
+        order1.created = datetime.datetime(day=5, month=12, year=2022)
         order1.save()
 
         order2 = baker.make('order.Order')
@@ -108,7 +109,19 @@ class TestSalesReportAPI(TestCase):
         response = sales_report(request, self.event.id)
 
         self.assertEqual(len(response.data["data"]),  3)
+        self.assertEqual(response.data["data"][0]["group"], "Dec 22")
 
         self.assertEqual(response.data["data"][0]["value"], 250.00)
         self.assertEqual(response.data["data"][1]["value"], 400.00)
         self.assertEqual(response.data["data"][2]["value"], 650)
+
+
+class TestUtil(TestCase):
+
+    def test_transform_to_month(self):
+        data = [{'month': 1, 'year': 2023, 'value': 250.0}, {'month': 12, 'year': 2022, 'value': 400.0}]
+        from promoter.util import transform_month
+
+        data = list(map(transform_month, data))
+        self.assertEquals(data[0]["group"], "Jan 23")
+        self.assertEquals(data[1]["group"], "Dec 22")
