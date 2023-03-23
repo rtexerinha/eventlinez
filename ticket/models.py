@@ -18,6 +18,7 @@ from reportlab.pdfgen import canvas
 from customer.models import Customer
 from event.models import Event
 from eventlinez import settings
+from django.utils import timezone
 
 
 class Ticket(models.Model):
@@ -41,7 +42,7 @@ class Ticket(models.Model):
         svg = mark_safe(stream.getvalue().decode())
         return svg
 
-    def as_qrcode_reportlab(self):
+    def _qrcode_reportlab(self):
         content = settings.APP_HOST + '/promoter/ticket/checkin/' + str(self.uuid)
         qr_code = qr.QrCodeWidget(content)
         bounds = qr_code.getBounds()
@@ -51,8 +52,8 @@ class Ticket(models.Model):
         c.add(qr_code)
         return c
 
-    def as_pdf_report(self):
-        qrcodec = self.as_qrcode_reportlab()
+    def as_pdf(self):
+        qrcodec = self._qrcode_reportlab()
         out = BytesIO()
 
         font_name = 'Helvetica'
@@ -71,6 +72,7 @@ class Ticket(models.Model):
         p.setStrokeGray(0.8)
         p.line(130, 780, 430, 780)
         p.setStrokeGray(0.6)
+
         if self.guest_name is None:
             p.setFont("Helvetica-Bold", 12)
             p.drawString(150, 755, str(self.customer))
@@ -79,15 +81,24 @@ class Ticket(models.Model):
             p.drawString(150, 755, str(self.guest_name))
         p.drawString(380, 755, str(self.id))
 
+        month = timezone.localtime(self.event_ticket.event.event_date).strftime("%B %Y")
+        day = timezone.localtime(self.event_ticket.event.event_date).strftime("%d")
+        hour = timezone.localtime(self.event_ticket.event.event_date).strftime("%H:%M")
+
+        location = self.event_ticket.event.address + ', ' + \
+                   self.event_ticket.event.city.name + ', ' + \
+                   self.event_ticket.event.city.state.name
+
         p.setFont("Helvetica-Bold", 18)
         p.setFillColor(HexColor('#FF0054'))
-        p.drawString(270, 540, str(self.event_ticket.event.event_date.strftime("%d")))
+        p.drawString(270, 540, day)
 
         p.setFont("Helvetica", 12)
         p.setFillColor(HexColor('#565454'))
-        p.drawString(230, 520, str(self.event_ticket.event.event_date.strftime("%B %Y")))
+        p.drawString(230, 520, month)
+
         p.setFont("Helvetica", 10)
-        p.drawString(270, 500, str(self.event_ticket.event.event_date.strftime("%H:%M")))
+        p.drawString(270, 500, hour)
 
         p.setLineWidth(0.01)
         p.line(130, 480, 430, 480)
@@ -99,14 +110,14 @@ class Ticket(models.Model):
         p.drawString(150, 430, str(self.event_ticket.name))
 
         p.setFont("Helvetica", 10)
-        p.drawString(150, 410, str(self.event_ticket.event.address) + ', ' + str(self.event_ticket.event.city)
-                     + ', ' + str(self.event_ticket.event.city.state))
+        p.drawString(150, 410, location)
 
         renderPDF.draw(qrcodec, p, 180, 550)
         p.showPage()
         p.save()
         pdf = out.getvalue()
         out.close()
+
         return pdf
 
     def __str__(self):
