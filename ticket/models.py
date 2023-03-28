@@ -95,7 +95,7 @@ class Ticket(models.Model):
 
         p.setFont("Helvetica", 12)
         p.setFillColor(HexColor('#565454'))
-        p.drawString(230, 520, month)
+        p.drawString(270, 520, month)
 
         p.setFont("Helvetica", 10)
         p.drawString(270, 500, hour)
