@@ -7,7 +7,7 @@ from django.db.models import FloatField
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -55,7 +55,7 @@ class EventDetailsAPIView(ListAPIView):
         return self.model.objects.filter(promoter__user=user, id=pk)
 
 
-class EventListAPIView(ListAPIView):
+class EventListAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = EventSerializers
     model = Event
