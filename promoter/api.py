@@ -15,7 +15,7 @@ from rest_framework.decorators import permission_classes
 
 
 from event.models import Event
-from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketSerializers
+from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers
 from promoter.util import transform_month
 
 
@@ -93,14 +93,14 @@ class CategoryListAPIView(ListAPIView):
     queryset = model.objects.all()
 
 
-class TicketAPIView(CreateAPIView):
+class TicketTypeAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TicketSerializers
+    serializer_class = TicketTypeSerializers
 
 
-class TicketUpdateAPIView(UpdateAPIView):
+class TicketTypeUpdateAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TicketSerializers
+    serializer_class = TicketTypeSerializers
     model = serializer_class.Meta.model
 
     def get_queryset(self):
