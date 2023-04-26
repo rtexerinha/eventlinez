@@ -7,8 +7,8 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
-from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, CategoryListAPIView, TicketAPIView,\
-    EventUpdateAPIView, TicketUpdateAPIView, EventDetailsAPIView, sales_report
+from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, CategoryListAPIView, TicketTypeAPIView,\
+    EventUpdateAPIView, TicketTypeUpdateAPIView, EventDetailsAPIView, sales_report
 
 
 urlpatterns = [
@@ -72,13 +72,17 @@ urlpatterns = [
     path('api-token-auth/', CustomAuthToken.as_view()),
     path('api/information/', PromoterListAPIView.as_view()),
 
-    # event api
+    # API events
     path('api/event', EventListAPIView.as_view()),
     path('api/event/update/<int:pk>', EventUpdateAPIView.as_view()),
     path('api/event/<int:pk>', EventDetailsAPIView.as_view()),
-    path('api/categories', CategoryListAPIView.as_view()),
-    path('api/ticket', TicketAPIView.as_view()),
-    path('api/ticket/update/<int:pk>', TicketUpdateAPIView.as_view()),
+    path("api/event/<int:event_id>/salesReport", sales_report),
 
-    path("api/event/<int:event_id>/salesReport", sales_report)
+    path('api/categories', CategoryListAPIView.as_view()),
+
+    # APIs ticketType
+    path('api/ticket/type', TicketTypeAPIView.as_view()),
+    path('api/ticket/type/update/<int:pk>', TicketTypeUpdateAPIView.as_view()),
+
+
 ]
