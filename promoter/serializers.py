@@ -128,7 +128,7 @@ class EventSerializers(serializers.Serializer):
         return instance
 
 
-class TicketSerializers(serializers.Serializer):
+class TicketTypeSerializers(serializers.Serializer):
     name = serializers.CharField(max_length=80)
     event = serializers.CharField()
     quantity = serializers.IntegerField()
