@@ -108,6 +108,17 @@ class TicketTypeUpdateAPIView(UpdateAPIView):
         return self.model.objects.filter(id=ticket_id)
 
 
+class TicketTypeListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TicketTypeSerializers
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        event_id = self.kwargs['event_id']
+        queryset = self.model.objects.filter(event_id=event_id)
+        return queryset
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def sales_report(request, event_id):
