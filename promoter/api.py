@@ -55,6 +55,12 @@ class EventDetailsAPIView(ListAPIView):
         return self.model.objects.filter(promoter__user=user, id=pk)
 
 
+class EventCreateAPIView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = EventSerializers
+    model = Event
+
+
 class EventListAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = EventSerializers
