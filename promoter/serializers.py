@@ -140,6 +140,7 @@ class EventSerializers(serializers.Serializer):
 
 
 class TicketTypeSerializers(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=80)
     event = serializers.CharField()
     quantity = serializers.IntegerField()
