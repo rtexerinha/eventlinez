@@ -2,8 +2,6 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from event.models import Promoter, Event, Category, Ticket
 from address.models import City
-import base64
-from django.core.files.base import ContentFile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -42,7 +40,7 @@ class EventSerializers(serializers.Serializer):
     description = serializers.CharField()
     address = serializers.CharField()
     available = serializers.BooleanField(default=False)
-    image = serializers.CharField()
+    image = serializers.ImageField()
     category = serializers.CharField()
     event_date = serializers.DateTimeField()
     city = serializers.CharField()
@@ -89,16 +87,7 @@ class EventSerializers(serializers.Serializer):
         except Exception as e:
             raise serializers.ValidationError(e)
 
-        image = validated_data.pop('image')
-        event = Event.objects.create(**validated_data)
-
-        if image:
-            format, imgstr = image.split(';base64,')
-            ext = format.split('/')[-1]
-            image_data = ContentFile(base64.b64decode(imgstr), name=f'{event.name}.{ext}')
-            event.image.save(f'{event.name}.{ext}', image_data, save=True)
-
-        return event
+        return Event.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
 
