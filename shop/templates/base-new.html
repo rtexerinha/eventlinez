@@ -32,11 +32,16 @@
                 {% endblock %}
                 {% include 'footer-new.html' %}
 
-
             <script src="https://unpkg.com/swiper/swiper-bundle.js"></script>
             <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
             <script src="{% static  'js/swiper.js' %}"></script>
             <script src="{% static  'js/jquery-3.4.1.js' %}"></script>
+                {% if PROD %}
+                <script>
+                    {{ PROD }}
+                console.log('FOI')
+                </script>
+            {% endif %}
             {% block custom_js %}{% endblock %}
             {% block cart_js  %}{% endblock %}
                 <script src="{% static 'js/cart.js' %}"></script>
