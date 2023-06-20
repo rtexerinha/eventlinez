@@ -24,8 +24,8 @@ SECRET_KEY = 'wv3ra^smy9n*-^&oj%&h4ygkl7&#il(z$hc6$!*6ib+jhbx0rx'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# PROD = True
 PROD = os.environ.get('PROD', False)
-
 ALLOWED_HOSTS = ['*']
 
 CKEDITOR_CONFIGS = {
