@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from event.models import Ticket
 from promoter.models import Vendor
 from .models import Cart, CartItem
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,7 @@ def change_quantity(request, item_id, operation):
     elif operation == "decrement" and item.quantity == 1:
         total = cart.amount()
         items = cart.cartitem_set.all()
-        return render(request, 'cart.html', dict(total=total, cart_items=items))
+        return render(request, 'cart.html', dict(total=total, cart_items=items, PROD=settings.PROD))
     elif operation == "decrement":
         item.quantity = item.quantity - 1
     else:
@@ -106,7 +107,7 @@ def cart_detail(request, cart_items=None):
         logger.error("The cart doest not exist.")
         total = 0
         pass
-    return render(request, 'cart.html', dict(total=total, cart_items=cart_items, promo_code=promo_code))
+    return render(request, 'cart.html', dict(total=total, cart_items=cart_items, promo_code=promo_code, PROD=settings.PROD))
 
 
 def remove_item(request, item_id):
