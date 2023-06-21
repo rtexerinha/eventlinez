@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from event.models import Ticket
 from promoter.models import Vendor
 from .models import Cart, CartItem
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -28,17 +29,20 @@ def cart_add(request):
     """
     Adiciona cria o carrinho e adiciona os tickets ao carrinho.
     """
-    data = json.loads(request.body)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
     except Cart.DoesNotExist:
         cart = Cart.objects.create(cart_id=_cart_id(request))
         cart.save()
+
+    data = json.loads(request.body)
     promocode = data.get("promo_code")
     vendor_code = data.get("vendor_code")
+
     vendor = None
     if vendor_code:
         vendor = Vendor.objects.get(code=vendor_code)
+
     for tkt in data['tickets']:
         ticket = Ticket.objects.get(pk=tkt['id'])
         quantity = tkt['quantity']
@@ -80,7 +84,7 @@ def change_quantity(request, item_id, operation):
     elif operation == "decrement" and item.quantity == 1:
         total = cart.amount()
         items = cart.cartitem_set.all()
-        return render(request, 'cart.html', dict(total=total, cart_items=items))
+        return render(request, 'cart.html', dict(total=total, cart_items=items, PROD=settings.PROD))
     elif operation == "decrement":
         item.quantity = item.quantity - 1
     else:
@@ -103,7 +107,7 @@ def cart_detail(request, cart_items=None):
         logger.error("The cart doest not exist.")
         total = 0
         pass
-    return render(request, 'cart.html', dict(total=total, cart_items=cart_items, promo_code=promo_code))
+    return render(request, 'cart.html', dict(total=total, cart_items=cart_items, promo_code=promo_code, PROD=settings.PROD))
 
 
 def remove_item(request, item_id):

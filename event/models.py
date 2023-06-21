@@ -63,9 +63,9 @@ class Event(models.Model):
     description = RichTextField(blank=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    event_date = models.DateTimeField(null=True, blank=True)
+    event_date = models.DateTimeField()
     address = models.CharField(max_length=300)
-    city = models.ForeignKey(City, on_delete=models.PROTECT, null=True)
+    city = models.ForeignKey(City, on_delete=models.PROTECT)
     promoter = models.ForeignKey(Promoter, on_delete=models.PROTECT)
     available = models.BooleanField(default=False)
     image = models.ImageField(upload_to='event', blank=False, null=False,

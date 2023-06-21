@@ -1,14 +1,22 @@
 from datetime import timedelta
+from django.db.models.functions import (ExtractMonth, ExtractDay, TruncDate, ExtractYear)
+from django.db.models import Sum
+from django.db.models import F
+from django.db.models import FloatField
 
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
+
 
 from event.models import Event
-from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketSerializers
+from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers
+from promoter.util import transform_month
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -47,7 +55,13 @@ class EventDetailsAPIView(ListAPIView):
         return self.model.objects.filter(promoter__user=user, id=pk)
 
 
-class EventListAPIView(ListAPIView):
+class EventCreateAPIView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = EventSerializers
+    model = Event
+
+
+class EventListAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = EventSerializers
     model = Event
@@ -85,16 +99,53 @@ class CategoryListAPIView(ListAPIView):
     queryset = model.objects.all()
 
 
-class TicketAPIView(CreateAPIView):
+class TicketTypeAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TicketSerializers
+    serializer_class = TicketTypeSerializers
 
 
-class TicketUpdateAPIView(UpdateAPIView):
+class TicketTypeUpdateAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TicketSerializers
+    serializer_class = TicketTypeSerializers
     model = serializer_class.Meta.model
 
     def get_queryset(self):
         ticket_id = self.kwargs['pk']
         return self.model.objects.filter(id=ticket_id)
+
+
+class TicketTypeListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TicketTypeSerializers
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        event_id = self.kwargs['event_id']
+        queryset = self.model.objects.filter(event_id=event_id)
+        return queryset
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def sales_report(request, event_id):
+    from order.models import OrderItem
+    by = request.GET["by"]
+
+    queryset = OrderItem.objects.filter(event_ticket__event_id=event_id)
+    calc = Sum(F('quantity'))
+
+    if by == "day":
+        group = TruncDate('order__created')
+        queryset = queryset .annotate(group=group) \
+            .values("group").annotate(value=calc).order_by("group")
+        data = list(queryset)
+    elif by == "month":
+        queryset = queryset.annotate(
+                    month=ExtractMonth('order__created'),
+                    year=ExtractYear('order__created')).\
+            values("month", "year").annotate(value=calc).order_by("year", "month")
+        data = list(map(transform_month, list(queryset)))
+    else:
+        return Response(status=400)
+
+    return Response({"data": data})
