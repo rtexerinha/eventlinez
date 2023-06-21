@@ -1,33 +1,34 @@
 from django.db.models import Q
 from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
-from .serializers import TicketSerializers
+from .serializers import TicketSoldSerializers
+from .models import Ticket
 
 
-class TicketListAPIView(ListAPIView):
+class TicketSoldListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TicketSerializers
-    model = serializer_class.Meta.model
+    serializer_class = TicketSoldSerializers
+    model = Ticket
 
     def get_queryset(self):
         user = self.request.user
+        event_id = self.request.query_params.get('event_id')
         guest_name = self.request.query_params.get('guest_name', None)
-        event_name = self.request.query_params.get('event_name', None)
 
-        if event_name and guest_name:
-            return self.model.objects.filter(event_ticket__event__promoter__user=user,
-                                             event_ticket__event__name__contains=event_name,
-                                             guest_name__icontains=guest_name)
+        queryset = Ticket.objects.filter(
+            event_ticket__event__promoter__user=user,
+            event_ticket__event__id=event_id
+        )
+
         if guest_name:
-            return self.model.objects.filter(event_ticket__event__promoter__user=user, guest_name__icontains=guest_name)
-        if event_name:
-            return self.model.objects.filter(event_ticket__event__promoter__user=user, event_ticket__event__name__contains=event_name)
-        return self.model.objects.filter(event_ticket__event__promoter__user=user)
+            queryset = queryset.filter(guest_name__icontains=guest_name)
+
+        return queryset.order_by('guest_name')
 
 
-class TicketCheckinAPIView(UpdateAPIView):
+class TicketSoldCheckinAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TicketSerializers
+    serializer_class = TicketSoldSerializers
     model = serializer_class.Meta.model
 
     def get_queryset(self):
@@ -36,9 +37,9 @@ class TicketCheckinAPIView(UpdateAPIView):
         return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
 
 
-class TicketDetailsAPIView(ListAPIView):
+class TicketSoldDetailsAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TicketSerializers
+    serializer_class = TicketSoldSerializers
     model = serializer_class.Meta.model
 
     def get_queryset(self):
@@ -47,9 +48,9 @@ class TicketDetailsAPIView(ListAPIView):
         return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
 
 
-class TicketCheckinQrcodeAPIView(UpdateAPIView):
+class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = TicketSerializers
+    serializer_class = TicketSoldSerializers
     model = serializer_class.Meta.model
 
     lookup_field = 'uuid'

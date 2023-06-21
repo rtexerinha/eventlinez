@@ -14,6 +14,7 @@ import logging
 from .models import Customer
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib import messages
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def signup_view(request):
             return redirect('shop:index')
     else:
         form = SignUpForm()
-    return render(request, 'accounts/signup_customer_new.html', {'form': form})
+    return render(request, 'accounts/signup_customer_new.html', {'form': form, 'PROD': settings.PROD})
 
 
 def signin_view(request):
@@ -53,7 +54,7 @@ def signin_view(request):
                 return redirect('signup')
     else:
         form = SignInForm()
-    return render(request, 'accounts/signin_customer_new.html', {'form': form})
+    return render(request, 'accounts/signin_customer_new.html', {'form': form, 'PROD': settings.PROD})
 
 
 def signout_view(request):
@@ -75,9 +76,9 @@ def update_customer(request):
             form.save()
             return redirect('customer_update')
         else:
-            return render(request, 'accounts/update_customer.html', {'form': form, 'user': user_form})
+            return render(request, 'accounts/update_customer.html', {'form': form, 'user': user_form, 'PROD': settings.PROD})
     elif request.method == 'GET':
-        return render(request, 'accounts/update_customer.html', {'form': form, 'user': user_form})
+        return render(request, 'accounts/update_customer.html', {'form': form, 'user': user_form, 'PROD': settings.PROD})
 
 
 @login_required
@@ -97,7 +98,8 @@ def change_password_customer(request):
     else:
         form = ResetPasswordForm(request.user)
     return render(request, 'accounts/change_password_customer.html', {
-        'form': form
+        'form': form,
+        'PROD': settings.PROD
     })
 
 
@@ -122,4 +124,4 @@ def guest_list(request):
         customer=request.user.customer,
         event_ticket__event__event_date__gte=enddate).order_by('-created_at')
 
-    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets})
+    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets, 'PROD': settings.PROD})

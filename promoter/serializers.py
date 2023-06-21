@@ -1,7 +1,27 @@
+import base64
 from rest_framework import serializers
+from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 from event.models import Promoter, Event, Category, Ticket
 from address.models import City
+
+
+class Base64ImageField(serializers.ImageField):
+    """
+    Um campo personalizado para lidar com imagens codificadas em base64.
+    """
+
+    def to_internal_value(self, data):
+        """
+        Converte uma string base64 em um arquivo de imagem.
+        """
+        if isinstance(data, str) and data.startswith('data:image'):
+            # Decodifica a string base64
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name=f'file.{ext}')
+
+        return super().to_internal_value(data)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,7 +60,7 @@ class EventSerializers(serializers.Serializer):
     description = serializers.CharField()
     address = serializers.CharField()
     available = serializers.BooleanField(default=False)
-    image = serializers.ImageField()
+    image = Base64ImageField()
     category = serializers.CharField()
     event_date = serializers.DateTimeField()
     city = serializers.CharField()
@@ -128,7 +148,8 @@ class EventSerializers(serializers.Serializer):
         return instance
 
 
-class TicketSerializers(serializers.Serializer):
+class TicketTypeSerializers(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=80)
     event = serializers.CharField()
     quantity = serializers.IntegerField()

@@ -4,7 +4,7 @@ from rest_framework import serializers
 from .models import Ticket
 
 
-class TicketSerializers(serializers.Serializer):
+class TicketSoldSerializers(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     event_ticket = serializers.CharField(read_only=True)
     vendor = serializers.CharField(read_only=True)

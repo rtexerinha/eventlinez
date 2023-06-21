@@ -13,7 +13,7 @@ from event.models import Category, Event
 from promoter.models import Vendor
 from .forms import ContactForm
 from .models import SpecialEvents
-
+from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +28,9 @@ def index(request, c_slug=None):
                                               'category': c_page,
                                               'events_futures': page[0],
                                               'events_old': page[1],
-                                              'events_all': page[2]})
+                                              'events_all': page[2],
+                                              'PROD': settings.PROD
+                                              })
 
 
 def lists_events(slugs):
@@ -96,7 +98,7 @@ def product_event_detail(request, c_slug, event_slug):
     pathpage = request.META['PATH_INFO']
     if request.META['QUERY_STRING']:
         pathpage = pathpage + '?' + request.META['QUERY_STRING']
-    response = render(request, 'shop/event.html', {'event': event, 'vendor': vendor})
+    response = render(request, 'shop/event.html', {'PROD': settings.PROD, 'event': event, 'vendor': vendor})
     response.set_cookie(key='backpage', value=pathpage, max_age=60)
     return response
 
@@ -108,21 +110,21 @@ def search_result(request):
         query = request.GET.get('q')
         events = Event.objects.all().filter(
             Q(name__icontains=query) | Q(description__icontains=query))
-    return render(request, 'search.html', {'query': query, 'events': events})
+    return render(request, 'search.html', {'query': query, 'events': events, 'PROD': settings.PROD})
 
 
 def about(request):
-    return render(request, 'pages/about.html')
+    return render(request, 'pages/about.html', {'PROD': settings.PROD})
 
 
 def terms(request):
-    return render(request, 'pages/terms.html')
+    return render(request, 'pages/terms.html', {'PROD': settings.PROD})
 
 
 def contact(request):
     if request.method == 'GET':
         form = ContactForm()
-        return render(request, 'pages/contactus.html', {'form': form})
+        return render(request, 'pages/contactus.html', {'form': form, 'PROD': settings.PROD})
     form = ContactForm(request.POST)
     if form.is_valid():
         subject = form.cleaned_data['subject']
