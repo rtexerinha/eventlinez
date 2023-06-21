@@ -23,7 +23,7 @@ class TicketSoldListAPIView(ListAPIView):
         if guest_name:
             queryset = queryset.filter(guest_name__icontains=guest_name)
 
-        return queryset
+        return queryset.order_by('guest_name')
 
 
 class TicketSoldCheckinAPIView(UpdateAPIView):
