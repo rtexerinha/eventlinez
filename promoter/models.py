@@ -3,6 +3,7 @@ from django.db.models import Sum
 from django.template.defaultfilters import slugify
 from event.models import Promoter, Event
 from django.template.loader import render_to_string
+from django.contrib.auth.models import User
 
 from django.dispatch import receiver
 from django.db.models.signals import post_save
@@ -111,7 +112,7 @@ def email_pay(sender, instance, **kwargs):
 class Partner(models.Model):
     ROLES = [
         ("DOORMAN", "Doorman"),
-        ("BUSINESS_PARTNER", "Businness Partner")
+        ("PARTNER", "Businness Partner")
     ]
     email = models.EmailField(blank=False, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -120,3 +121,23 @@ class Partner(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     invited_at = models.DateTimeField(auto_created=True)
     joined_at = models.DateTimeField(null=True)
+
+
+@receiver(post_save, sender=Partner)
+def email_partner(sender, instance, **kwargs):
+    if kwargs.get('created', False):
+
+        subject = "Eventlinez - Notification of Role Assignment in Event - Partner"
+        message = render_to_string('partner/email/partner-email.html',
+                                   {'partner': instance, 'user': instance.user.first_name})
+        from_email = 'noreply@eventlinez.com'
+
+        email_new_partner = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email=from_email,
+            to=[instance.user.email],
+        )
+        email_new_partner.content_subtype = "html"
+        email_new_partner.send()
+
