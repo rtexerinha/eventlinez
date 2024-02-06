@@ -106,3 +106,17 @@ def email_pay(sender, instance, **kwargs):
         )
         email_payout.content_subtype = "html"
         email_payout.send()
+
+
+class Partner(models.Model):
+    ROLES = [
+        ("DOORMAN", "Doorman"),
+        ("BUSINESS_PARTNER", "Businness Partner")
+    ]
+    email = models.EmailField(blank=False, null=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    role = models.CharField(choices=ROLES, max_length=40)
+    disable = models.BooleanField(default=False)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    invited_at = models.DateTimeField(auto_created=True)
+    joined_at = models.DateTimeField(null=True)
