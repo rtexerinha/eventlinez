@@ -8,22 +8,22 @@
             @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
             .b-background{background: #E5E5E5;}
             .main-size{width: 90%;margin: 0 auto;}
-            .h1-email{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 24px;line-height: 33px;
+            .h1-email{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 1.25rem;line-height: 33px;
                 align-items: center;color: #FFFFFF; margin-top: 0;margin-bottom: 10px;}
             .p-top{padding-top:1.5rem;}
-            .h2-email-section{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 18px;
+            .h2-email-section{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 1rem;
                               line-height: 25px;color: #49454D; margin-top:30px;}
             .h3-logo{
                 font-family: 'Nunito';font-style: normal;font-weight: 800;
                 font-size: 18px;line-height: 25px;justify-content: space-around;padding-top: 5px;
                 display: flex;align-items: center;text-align: center;color: #3C215C;
             }
-            .h4-email{font-family: 'Nunito';font-style: normal;font-weight: 400;font-size: 14px;
+            .h4-email{font-family: 'Nunito';font-style: normal;font-weight: 400;font-size: 0.75rem;
                 justify-content: center; margin: 0;
                 line-height: 19px;display: flex;align-items: center;text-align: center;color: rgba(255, 255, 255, 0.8);}
-            .h6-email{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 14px;
+            .h6-email{font-family: 'Nunito';font-style: normal;font-weight: 700;font-size: 1rem;
                       line-height: 19px;display: flex;align-items: center;color: #49454D; margin: 0}
-            .p-email{font-family: 'Nunito';font-style: normal;font-weight: 400;font-size: 14px;
+            .p-email{font-family: 'Nunito';font-style: normal;font-weight: 400;font-size: 0.875rem;
                      padding-bottom: 10px;
                      line-height: 19px;display: flex;align-items: center;letter-spacing: -0.02em;color: #605D64;}
             .section-logo{height: 40px; ; margin-top:20px;background: #FAFAFB; text-align: center; padding-top:1rem;}
@@ -107,7 +107,7 @@
             </section>
 
             <section style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 class="h2-email-section">Dear {{ user }},</h2>
+                <h2 class="h2-email-section">Dear {{ user.first_name }},</h2>
 
                 <h2 class="h2-email-section">You have been assigned the role of <strong style="color:#E10087">{{ partner.role }}</strong> at the event <strong style="color:#E10087">{{ partner.event }}</strong>. We appreciate your participation and hope that your contribution will be valuable to the success of the event.</h2>
 

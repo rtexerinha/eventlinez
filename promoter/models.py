@@ -111,32 +111,33 @@ def email_pay(sender, instance, **kwargs):
 
 class Partner(models.Model):
     ROLES = [
-        ("DOORMAN", "Doorman"),
-        ("PARTNER", "Businness Partner")
+        ("DOORMAN", "Businnes Doorman"),
+        ("PARTNER", "Businnes Partner")
     ]
     email = models.EmailField(blank=False, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     role = models.CharField(choices=ROLES, max_length=40)
     disable = models.BooleanField(default=False)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    invited_at = models.DateTimeField(auto_created=True)
-    joined_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [["email", "event"]]
 
 
 @receiver(post_save, sender=Partner)
 def email_partner(sender, instance, **kwargs):
+    username = User.objects.get(username=instance.email)
     if kwargs.get('created', False):
-
-        subject = "Eventlinez - Notification of Role Assignment in Event - Partner"
+        subject = "Eventlinez - Notification of Role Assignment in Event"
         message = render_to_string('partner/email/partner-email.html',
-                                   {'partner': instance, 'user': instance.user.first_name})
-        from_email = 'noreply@eventlinez.com'
+                                   {'partner': instance, 'user': username})
 
         email_new_partner = EmailMessage(
             subject=subject,
             body=message,
-            from_email=from_email,
-            to=[instance.user.email],
+            from_email='noreply@eventlinez.com',
+            to=[instance.email],
         )
         email_new_partner.content_subtype = "html"
         email_new_partner.send()
