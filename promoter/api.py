@@ -1,4 +1,6 @@
 from datetime import timedelta
+
+from django.db import IntegrityError
 from django.db.models.functions import (ExtractMonth, ExtractDay, TruncDate, ExtractYear)
 from django.db.models import Sum
 from django.db.models import F
@@ -12,11 +14,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
-
+from rest_framework import status
 
 from event.models import Event
-from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers
+from .models import Partner
+from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers, \
+     PartnerSerializer, PartnerCreateSerializer
 from promoter.util import transform_month
+from django.contrib.auth.models import User
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -149,3 +154,31 @@ def sales_report(request, event_id):
         return Response(status=400)
 
     return Response({"data": data})
+
+
+class PartnerUpdateAPIView(UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PartnerSerializer
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        partner_id = self.kwargs['pk']
+        return self.model.objects.filter(id=partner_id)
+
+
+class PartnerCreateAPIView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PartnerCreateSerializer
+
+
+class PartnerListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PartnerSerializer
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        event_id = self.kwargs['event_id']
+        query = self.model.objects.filter(event_id=event_id)
+        return query
+
+

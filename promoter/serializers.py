@@ -1,9 +1,14 @@
 import base64
+
+from django.db import IntegrityError
 from rest_framework import serializers
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 from event.models import Promoter, Event, Category, Ticket
+from promoter.models import Partner
 from address.models import City
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class Base64ImageField(serializers.ImageField):
@@ -190,3 +195,53 @@ class TicketTypeSerializers(serializers.Serializer):
         instance.save()
 
         return instance
+
+
+class PartnerCreateSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    role = serializers.CharField()
+    disable = serializers.BooleanField(default=False)
+    event_id = serializers.IntegerField()
+
+    class Meta:
+        model = Partner
+        fields = ('email', 'role', 'event_id', 'disable')
+
+    def validate(self, data):
+        try:
+            Event.objects.get(pk=data["event_id"])
+        except Event.DoesNotExist:
+            raise serializers.ValidationError('Error: Event with provided ID does not exist')
+        try:
+            user = User.objects.get(username=data["email"])
+        except User.DoesNotExist:
+            raise serializers.ValidationError('Error:  User not Found')
+
+        query = Partner.objects.filter(event_id=data["event_id"], user__username=data["email"])
+        if query.count() > 0:
+            raise serializers.ValidationError("Error:  User already a partner or doorman")
+        return data
+
+    def create(self, validated_data):
+        user = User.objects.get(username=validated_data["email"])
+        return Partner.objects.create(user=user, **validated_data)
+
+
+class PartnerSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    user = UserSerializer()
+    role = serializers.CharField()
+    disable = serializers.BooleanField(default=False)
+    event = serializers.CharField()
+    created_at = serializers.DateTimeField()
+
+    class Meta:
+        model = Partner
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+        return instance
+
