@@ -228,6 +228,7 @@ class PartnerCreateSerializer(serializers.Serializer):
 
 
 class PartnerSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
     email = serializers.CharField()
     user = UserSerializer()
     role = serializers.CharField()
