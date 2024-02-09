@@ -111,7 +111,7 @@ def email_pay(sender, instance, **kwargs):
 
 class Partner(models.Model):
     ROLES = [
-        ("DOORMAN", "Businnes Doorman"),
+        ("DOORMAN", "Doorman"),
         ("PARTNER", "Businnes Partner")
     ]
     email = models.EmailField(blank=False, null=False)
