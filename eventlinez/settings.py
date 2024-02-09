@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'order',
     'ticket',
     'rest_framework',
+    'account',
     'rest_framework.authtoken',
 ]
 
