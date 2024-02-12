@@ -5,8 +5,10 @@ from rest_framework.views import APIView
 
 from .serializers import AccountSerializer
 from .serializers import UserSerializer
-from promoter.models import Event
+from promoter.models import Event, Partner
 from promoter.serializers import EventSerializers
+from django.db.models import Q
+
 
 class UserDetailAPI(APIView):
     permission_classes = (IsAuthenticated,)
@@ -16,18 +18,24 @@ class UserDetailAPI(APIView):
     def get(self,  request):
         data = UserSerializer(request.user).data
 
-        roles = []
+        events = Event.objects.filter(Q(partner__user=request.user) | Q(promoter__user=request.user))
+        serialized_events = []
+        for event in events:
+            event_data = EventSerializers(event).data
+            try:
+                partner = request.user.partner_set.get(event=event)
+                if partner is not None:
+                    event_data['role'] = partner.role
+            except Partner.DoesNotExist:
+                pass
+            if event.promoter.user == request.user:
+                event_data['role'] = 'PROMOTER'
 
-        if hasattr(request.user, "promoter"):
-            roles.append("PROMOTER")
-        if hasattr(request.user, "customer"):
-            roles.append("CUSTOMER")
-        if request.user.partner_set.count():
-            partner_roles = request.user.partner_set.values_list('role', flat=True).distinct()
-            roles = roles + list(partner_roles)
+            serialized_events.append(event_data)
 
-            events = Event.objects.filter(partner__user=request.user)
-            data["events"] = EventSerializers(events, many=True).data
+        if len(serialized_events) <= 0:
+            return Response(
+                {"Error": "User not Promoter or Partner or Doorman"}, status=403)
+        data["events"] = serialized_events
 
-        data['roles'] = roles
         return Response(data)
