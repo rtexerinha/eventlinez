@@ -18,7 +18,15 @@ class UserDetailAPI(APIView):
     def get(self,  request):
         data = UserSerializer(request.user).data
 
-        events = Event.objects.filter(Q(partner__user=request.user) | Q(promoter__user=request.user))
+        roles = []
+        if hasattr(request.user, "promoter"):
+            roles.append("PROMOTER")
+        if request.user.partner_set.count():
+            partner_roles = request.user.partner_set.values_list('role', flat=True).distinct()
+            roles = roles + list(partner_roles)
+        data['roles'] = roles
+
+        events = Event.objects.filter(Q(partner__user=request.user) | Q(promoter__user=request.user)).distinct()
         serialized_events = []
         for event in events:
             event_data = EventSerializers(event).data
@@ -37,5 +45,6 @@ class UserDetailAPI(APIView):
             return Response(
                 {"Error": "User not Promoter or Partner or Doorman"}, status=403)
         data["events"] = serialized_events
+
 
         return Response(data)
