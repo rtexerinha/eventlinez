@@ -95,7 +95,7 @@ class EventListSerializer(serializers.Serializer):
         return obj.get_url()
 
 
-class EventSerializers(serializers.Serializer):
+class EventSerializer(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()
     address = serializers.CharField()

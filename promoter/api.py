@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from account.api import get_user_role
 from event.models import Event
 from promoter.util import transform_month
-from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers, \
+from .serializers import PromoterSerializer, EventSerializer, CategoriaSerializers, TicketTypeSerializers, \
     PartnerSerializer, PartnerCreateSerializer, EventListSerializer
 
 
@@ -65,7 +65,7 @@ class EventDetailsAPIView(ListAPIView):
 
 class EventCreateAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventSerializers
+    serializer_class = EventSerializer
     model = Event
 
 
@@ -100,7 +100,7 @@ class EventListAPIView(ListCreateAPIView):
 
 class EventUpdateAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventSerializers
+    serializer_class = EventSerializer
     model = serializer_class.Meta.model
 
     def get_queryset(self):
