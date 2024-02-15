@@ -60,6 +60,43 @@ class CategoriaSerializers(serializers.Serializer):
         fields = '__all__'
 
 
+class EventListSerializers(serializers.Serializer):
+    name = serializers.CharField()
+    description = serializers.CharField()
+    address = serializers.CharField()
+    available = serializers.BooleanField(default=False)
+    image = Base64ImageField()
+    category = serializers.CharField()
+    event_date = serializers.DateTimeField()
+    city = serializers.CharField()
+    id = serializers.IntegerField(read_only=True)
+    qty_available = serializers.SerializerMethodField(read_only=True)
+    qty_sould = serializers.SerializerMethodField(read_only=True)
+    quantity = serializers.SerializerMethodField(read_only=True)
+    amount = serializers.SerializerMethodField(read_only=True)
+    url = serializers.SerializerMethodField(read_only=True)
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Event
+        fields = '__all__'
+
+    def get_qty_available(self, obj):
+        return obj.qty_available()
+
+    def get_qty_sould(self, obj):
+        return obj.qty_sould()
+
+    def get_quantity(self, obj):
+        return obj.quantity()
+
+    def get_amount(self, obj):
+        return obj.get_amount()
+
+    def get_url(self, obj):
+        return obj.get_url()
+
+
 class EventSerializers(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()

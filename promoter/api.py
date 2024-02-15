@@ -20,9 +20,8 @@ from account.api import get_user_role
 from event.models import Event
 from .models import Partner
 from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers, \
-     PartnerSerializer, PartnerCreateSerializer
+     PartnerSerializer, PartnerCreateSerializer, EventListSerializers
 from promoter.util import transform_month
-from django.contrib.auth.models import User
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -52,7 +51,7 @@ class PromoterListAPIView(ListAPIView):
 
 class EventDetailsAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventSerializers
+    serializer_class = EventListSerializers
     model = serializer_class.Meta.model
 
     def get_queryset(self):
@@ -77,7 +76,7 @@ class EventCreateAPIView(CreateAPIView):
 
 class EventListAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventSerializers
+    serializer_class = EventListSerializers
     model = Event
 
     def get_queryset(self):
