@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.db import IntegrityError
 from django.db.models.functions import (ExtractMonth, ExtractDay, TruncDate, ExtractYear)
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.db.models import F
 from django.db.models import FloatField
 
@@ -16,6 +16,7 @@ from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 from rest_framework import status
 
+from account.api import get_user_role
 from event.models import Event
 from .models import Partner
 from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers, \
@@ -57,7 +58,15 @@ class EventDetailsAPIView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        return self.model.objects.filter(promoter__user=user, id=pk)
+        queryset = self.model.objects.filter(promoter__user=user, id=pk)
+
+        queryset_with_roles = []
+
+        for event in queryset:
+            event.role = get_user_role(self.request.user, event)
+            queryset_with_roles.append(event)
+
+        return queryset_with_roles
 
 
 class EventCreateAPIView(CreateAPIView):
@@ -74,7 +83,8 @@ class EventListAPIView(ListCreateAPIView):
     def get_queryset(self):
         name = self.request.query_params.get('name')
         state = self.request.query_params.get("state")
-        queryset = Event.objects.filter(promoter__user=self.request.user)
+        queryset = Event.objects.filter(
+            Q(partner__user=self.request.user) | Q(promoter__user=self.request.user)).distinct()
 
         dt_reference = timezone.now() + timedelta(-1)
 
@@ -84,7 +94,14 @@ class EventListAPIView(ListCreateAPIView):
             queryset = queryset.filter(event_date__lte=dt_reference)
         if state == "current":
             queryset = queryset.filter(event_date__gte=dt_reference)
-        return queryset
+
+        queryset_with_roles = []
+
+        for event in queryset:
+            event.role = get_user_role(self.request.user, event)
+            queryset_with_roles.append(event)
+
+        return queryset_with_roles
 
 
 class EventUpdateAPIView(UpdateAPIView):
