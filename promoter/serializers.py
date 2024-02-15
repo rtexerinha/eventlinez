@@ -75,6 +75,7 @@ class EventSerializers(serializers.Serializer):
     quantity = serializers.SerializerMethodField(read_only=True)
     amount = serializers.SerializerMethodField(read_only=True)
     url = serializers.SerializerMethodField(read_only=True)
+    role = serializers.CharField(read_only=True)
 
     class Meta:
         model = Event
