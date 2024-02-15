@@ -1,14 +1,12 @@
 import base64
 
-from django.db import IntegrityError
-from rest_framework import serializers
-from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
+from rest_framework import serializers
+
+from address.models import City
 from event.models import Promoter, Event, Category, Ticket
 from promoter.models import Partner
-from address.models import City
-from rest_framework.response import Response
-from rest_framework import status
 
 
 class Base64ImageField(serializers.ImageField):
@@ -60,7 +58,7 @@ class CategoriaSerializers(serializers.Serializer):
         fields = '__all__'
 
 
-class EventListSerializers(serializers.Serializer):
+class EventListSerializer(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()
     address = serializers.CharField()

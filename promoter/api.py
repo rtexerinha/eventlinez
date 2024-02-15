@@ -1,27 +1,22 @@
 from datetime import timedelta
 
-from django.db import IntegrityError
-from django.db.models.functions import (ExtractMonth, ExtractDay, TruncDate, ExtractYear)
-from django.db.models import Sum, Q
 from django.db.models import F
-from django.db.models import FloatField
-
+from django.db.models import Sum, Q
+from django.db.models.functions import (ExtractMonth, TruncDate, ExtractYear)
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework.decorators import permission_classes
-from rest_framework import status
 
 from account.api import get_user_role
 from event.models import Event
-from .models import Partner
-from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers, \
-     PartnerSerializer, PartnerCreateSerializer, EventListSerializers
 from promoter.util import transform_month
+from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers, \
+    PartnerSerializer, PartnerCreateSerializer, EventListSerializer
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -51,7 +46,7 @@ class PromoterListAPIView(ListAPIView):
 
 class EventDetailsAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventListSerializers
+    serializer_class = EventListSerializer
     model = serializer_class.Meta.model
 
     def get_queryset(self):
@@ -76,7 +71,7 @@ class EventCreateAPIView(CreateAPIView):
 
 class EventListAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventListSerializers
+    serializer_class = EventListSerializer
     model = Event
 
     def get_queryset(self):
@@ -94,13 +89,13 @@ class EventListAPIView(ListCreateAPIView):
         if state == "current":
             queryset = queryset.filter(event_date__gte=dt_reference)
 
-        queryset_with_roles = []
+        events = []
 
         for event in queryset:
             event.role = get_user_role(self.request.user, event)
-            queryset_with_roles.append(event)
+            events.append(event)
 
-        return queryset_with_roles
+        return events
 
 
 class EventUpdateAPIView(UpdateAPIView):
