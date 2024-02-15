@@ -10,6 +10,17 @@ from promoter.serializers import EventSerializers
 from django.db.models import Q
 
 
+def get_user_role(user, event):
+    try:
+        partner = user.partner_set.get(event=event)
+        if partner is not None:
+            return partner.role
+    except Partner.DoesNotExist:
+        pass
+    if event.promoter.user == user:
+        return 'PROMOTER'
+
+
 class UserDetailAPI(APIView):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
@@ -30,21 +41,12 @@ class UserDetailAPI(APIView):
         serialized_events = []
         for event in events:
             event_data = EventSerializers(event).data
-            try:
-                partner = request.user.partner_set.get(event=event)
-                if partner is not None:
-                    event_data['role'] = partner.role
-            except Partner.DoesNotExist:
-                pass
-            if event.promoter.user == request.user:
-                event_data['role'] = 'PROMOTER'
-
+            event_data["role"] = get_user_role(request.user, event)
             serialized_events.append(event_data)
 
         if len(serialized_events) <= 0:
             return Response(
                 {"Error": "User not Promoter or Partner or Doorman"}, status=403)
         data["events"] = serialized_events
-
 
         return Response(data)
