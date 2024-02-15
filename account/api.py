@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from .serializers import AccountSerializer
 from .serializers import UserSerializer
 from promoter.models import Event, Partner
-from promoter.serializers import EventListSerializers
+from promoter.serializers import EventListSerializer
 from django.db.models import Q
 
 
@@ -40,7 +40,7 @@ class UserDetailAPI(APIView):
         events = Event.objects.filter(Q(partner__user=request.user) | Q(promoter__user=request.user)).distinct()
         serialized_events = []
         for event in events:
-            event_data = EventListSerializers(event).data
+            event_data = EventListSerializer(event).data
             event_data["role"] = get_user_role(request.user, event)
             serialized_events.append(event_data)
 
