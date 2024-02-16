@@ -32,6 +32,8 @@ class UserDetailAPI(APIView):
         roles = []
         if hasattr(request.user, "promoter"):
             roles.append("PROMOTER")
+        if hasattr(request.user, "customer"):
+            roles.append("CUSTOMER")
         if request.user.partner_set.count():
             partner_roles = request.user.partner_set.values_list('role', flat=True).distinct()
             roles = roles + list(partner_roles)
