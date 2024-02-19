@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ticket.models import Ticket
+from ticket.models import Ticket, FreeTicket
 
 
 @admin.register(Ticket)
@@ -12,3 +12,8 @@ class TicketAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+@admin.register(FreeTicket)
+class FreeTicketAdmin(admin.ModelAdmin):
+    list_display = ['guest_name', 'id', 'event', 'created_at', 'required', 'checkin_date']

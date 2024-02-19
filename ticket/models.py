@@ -11,14 +11,22 @@ from django.utils.safestring import mark_safe
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode import qr
 from reportlab.graphics.shapes import Drawing
-
 from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
-
 from customer.models import Customer
 from event.models import Event
 from eventlinez import settings
 from django.utils import timezone
+
+
+class FreeTicket(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.RESTRICT)
+    email = models.EmailField(blank=False, null=False)
+    guest_name = models.CharField(max_length=161, blank=False, null=False)
+    required = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now=True)
+    checkin_date = models.DateTimeField(blank=True, null=True)
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
 
 
 class Ticket(models.Model):
