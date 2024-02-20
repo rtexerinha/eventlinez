@@ -23,7 +23,7 @@ class FreeTicket(models.Model):
     event = models.ForeignKey(Event, on_delete=models.RESTRICT)
     email = models.EmailField(blank=False, null=False)
     guest_name = models.CharField(max_length=161, blank=False, null=False)
-    required = models.BooleanField(default=False)
+    account_required = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now=True)
     checkin_date = models.DateTimeField(blank=True, null=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
