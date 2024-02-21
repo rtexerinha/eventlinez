@@ -52,9 +52,11 @@ class TicketSoldDetailsAPIView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        tickets_sold = self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
-        tickets_free = FreeTicket.objects.filter(event_ticket__event__promoter__user=user, id=pk)
-        return list(chain(tickets_sold, tickets_free))
+        is_free = self.request.query_params.get('isFree')
+        ticket = self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+        if is_free:
+            ticket = FreeTicket.objects.filter(event_ticket__event__promoter__user=user, id=pk, isFree=is_free)
+        return ticket
 
 
 class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
