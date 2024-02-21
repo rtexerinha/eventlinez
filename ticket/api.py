@@ -3,6 +3,7 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from .serializers import TicketSoldSerializers, FreeTicketSerializer, FreeTicketListSerializer
 from .models import Ticket, FreeTicket
+from itertools import chain
 
 
 class TicketSoldListAPIView(ListAPIView):
@@ -18,12 +19,18 @@ class TicketSoldListAPIView(ListAPIView):
         queryset = Ticket.objects.filter(
             event_ticket__event__promoter__user=user,
             event_ticket__event__id=event_id
-        )
+        ).order_by('guest_name')
+
+        free_tickets = FreeTicket.objects.filter(
+            event_ticket__event__promoter__user=user,
+            event_ticket__event__id=event_id
+        ).order_by('guest_name')
 
         if guest_name:
-            queryset = queryset.filter(guest_name__icontains=guest_name)
+            queryset = queryset.filter(guest_name__icontains=guest_name).order_by('guest_name')
+            free_tickets = free_tickets.filter(guest_name__icontains=guest_name).order_by('guest_name')
 
-        return queryset.order_by('guest_name')
+        return list(chain(queryset, free_tickets))
 
 
 class TicketSoldCheckinAPIView(UpdateAPIView):
@@ -75,21 +82,21 @@ class FreeTicketListAPIView(ListAPIView):
     def get_queryset(self):
         event_id = self.request.query_params.get('event_id')
         queryset = FreeTicket.objects.filter(
-            event__id=event_id
+            event_ticket__event__id=event_id
         )
 
         return queryset.order_by('guest_name')
 
 
 class FreeTicketDetailsAPIView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
     serializer_class = FreeTicketListSerializer
     model = serializer_class.Meta.model
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        return self.model.objects.filter(event__promoter__user=user, id=pk)
+        return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
 
 
 # FREE TICKET CHECKIN
