@@ -35,14 +35,14 @@ class FreeTicketSerializer(serializers.Serializer):
         model = FreeTicket
         fields = '__all__'
 
-    # def validate(self, data):
-    #     event_ticket = data['event_ticket']
-    #     email = data['email']
-    #
-    #     if FreeTicket.objects.filter(event_ticket=event_ticket, email=email).exists():
-    #         raise serializers.ValidationError("There is already a free ticket for this event with the same email.")
-    #
-    #     return data
+    def validate(self, data):
+        event_ticket = data['event_ticket']
+        email = data['email']
+
+        if FreeTicket.objects.filter(event_ticket=event_ticket, email=email).exists():
+            raise serializers.ValidationError("There is already a free ticket for this event with the same email.")
+
+        return data
 
     def create(self, validated_data):
         try:
@@ -93,11 +93,13 @@ class TicketSoldSerializers(serializers.Serializer):
         fields = '__all__'
 
     def get_isFree(self, obj):
-        try:
-            is_free_instance = FreeTicket.objects.get(id=obj.id)
-            return is_free_instance.isFree
-        except FreeTicket.DoesNotExist:
-            return None
+        return None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if isinstance(instance, FreeTicket):
+            data['isFree'] = instance.isFree
+        return data
 
     def update(self, instance, validated_data):
 

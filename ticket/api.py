@@ -52,7 +52,9 @@ class TicketSoldDetailsAPIView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+        tickets_sold = self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+        tickets_free = FreeTicket.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+        return list(chain(tickets_sold, tickets_free))
 
 
 class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
@@ -69,6 +71,7 @@ class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
             event_ticket__event__promoter__user=user, uuid=uuid)
 
 
+# --------------------------------FreeTicket
 class FreeTicketAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = FreeTicketSerializer
@@ -98,14 +101,3 @@ class FreeTicketDetailsAPIView(ListAPIView):
         pk = self.kwargs['pk']
         return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
 
-
-# FREE TICKET CHECKIN
-class FreeTicketCheckinAPIView(UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = FreeTicketSerializer
-    model = serializer_class.Meta.model
-
-    def get_queryset(self):
-        user = self.request.user
-        pk = self.kwargs['pk']
-        return self.model.objects.filter(event__promoter__user=user, id=pk)
