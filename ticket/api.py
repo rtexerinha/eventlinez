@@ -6,6 +6,19 @@ from .models import Ticket, FreeTicket
 from itertools import chain
 
 
+def filter_tickets_by_user_and_id(user, pk, is_free=None, model=None):
+    if model is None:
+        raise ValueError("Model cannot be None")
+
+    queryset = model.objects.filter(
+        event_ticket__event__promoter__user=user,
+        id=pk
+    )
+    if is_free is not None:
+        queryset = queryset.filter(isFree=is_free)
+    return queryset
+
+
 class TicketSoldListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = TicketSoldSerializers
@@ -34,14 +47,19 @@ class TicketSoldListAPIView(ListAPIView):
 
 
 class TicketSoldCheckinAPIView(UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
     serializer_class = TicketSoldSerializers
     model = serializer_class.Meta.model
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+        is_free = self.request.query_params.get('isFree')
+
+        ticket = self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+        if is_free:
+            ticket = FreeTicket.objects.filter(event_ticket__event__promoter__user=user, id=pk, isFree=is_free)
+        return ticket
 
 
 class TicketSoldDetailsAPIView(ListAPIView):
@@ -50,12 +68,11 @@ class TicketSoldDetailsAPIView(ListAPIView):
     model = serializer_class.Meta.model
 
     def get_queryset(self):
-        user = self.request.user
         pk = self.kwargs['pk']
         is_free = self.request.query_params.get('isFree')
-        ticket = self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+        ticket = self.model.objects.filter(event_ticket__event__promoter__user=self.request.user, id=pk)
         if is_free:
-            ticket = FreeTicket.objects.filter(event_ticket__event__promoter__user=user, id=pk, isFree=is_free)
+            ticket = FreeTicket.objects.filter(event_ticket__event__promoter__user=self.request.user, id=pk, isFree=is_free)
         return ticket
 
 
