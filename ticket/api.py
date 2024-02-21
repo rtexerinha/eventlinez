@@ -67,8 +67,12 @@ class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
     def get_queryset(self):
         user = self.request.user
         uuid = self.kwargs['uuid']
-        return self.model.objects.filter(
+        tickets = self.model.objects.filter(
             event_ticket__event__promoter__user=user, uuid=uuid)
+        if len(tickets) == 0:
+            tickets = FreeTicket.objects.filter(
+                event_ticket__event__promoter__user=user, uuid=uuid)
+        return tickets
 
 
 # --------------------------------FreeTicket
