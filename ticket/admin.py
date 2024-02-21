@@ -16,4 +16,4 @@ class TicketAdmin(admin.ModelAdmin):
 
 @admin.register(FreeTicket)
 class FreeTicketAdmin(admin.ModelAdmin):
-    list_display = ['guest_name', 'id', 'event', 'created_at', 'checkin_date']
+    list_display = ['guest_name', 'id', 'event_ticket', 'created_at', 'checkin_date']

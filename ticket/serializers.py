@@ -2,17 +2,19 @@ from datetime import datetime
 from datetime import timedelta
 from rest_framework import serializers
 from .models import Ticket, FreeTicket
+from event.models import Ticket as TypeTicket
 from event.models import Event
 
 
 class FreeTicketListSerializer(serializers.Serializer):
-    event = serializers.CharField(read_only=True)
+    event_ticket = serializers.CharField(read_only=True)
     email = serializers.CharField(read_only=True)
     guest_name = serializers.CharField(read_only=True)
     required = serializers.BooleanField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     uuid = serializers.UUIDField(read_only=True)
     id = serializers.IntegerField(read_only=True)
+    isFree = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = FreeTicket
@@ -23,8 +25,8 @@ class FreeTicketSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     guest_name = serializers.CharField(max_length=161)
     email = serializers.EmailField(max_length=80)
-    event = serializers.CharField()
-    required = serializers.BooleanField()
+    event_ticket = serializers.CharField(max_length=80)
+    account_required = serializers.BooleanField()
     created_at = serializers.DateTimeField(read_only=True)
     checkin_date = serializers.DateTimeField(read_only=True)
     uuid = serializers.UUIDField(read_only=True)
@@ -33,19 +35,19 @@ class FreeTicketSerializer(serializers.Serializer):
         model = FreeTicket
         fields = '__all__'
 
-    def validate(self, data):
-        event = data['event']
-        email = data['email']
-
-        if FreeTicket.objects.filter(event=event, email=email).exists():
-            raise serializers.ValidationError("There is already a free ticket for this event with the same email.")
-
-        return data
+    # def validate(self, data):
+    #     event_ticket = data['event_ticket']
+    #     email = data['email']
+    #
+    #     if FreeTicket.objects.filter(event_ticket=event_ticket, email=email).exists():
+    #         raise serializers.ValidationError("There is already a free ticket for this event with the same email.")
+    #
+    #     return data
 
     def create(self, validated_data):
         try:
-            event_id = validated_data['event']
-            validated_data['event'] = Event.objects.get(id=event_id)
+            event_ticket = validated_data['event_ticket']
+            validated_data['event_ticket'] = TypeTicket.objects.get(id=event_ticket)
         except Exception as e:
             raise serializers.ValidationError(e)
 
@@ -84,10 +86,18 @@ class TicketSoldSerializers(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     checkin_date = serializers.DateTimeField(required=True)
     uuid = serializers.UUIDField(read_only=True)
+    isFree = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Ticket
         fields = '__all__'
+
+    def get_isFree(self, obj):
+        try:
+            is_free_instance = FreeTicket.objects.get(id=obj.id)
+            return is_free_instance.isFree
+        except FreeTicket.DoesNotExist:
+            return None
 
     def update(self, instance, validated_data):
 
