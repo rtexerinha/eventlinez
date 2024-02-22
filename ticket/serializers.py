@@ -10,7 +10,7 @@ class FreeTicketListSerializer(serializers.Serializer):
     event_ticket = serializers.CharField(read_only=True)
     email = serializers.CharField(read_only=True)
     guest_name = serializers.CharField(read_only=True)
-    required = serializers.BooleanField(read_only=True)
+    account_required = serializers.BooleanField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     uuid = serializers.UUIDField(read_only=True)
     id = serializers.IntegerField(read_only=True)
