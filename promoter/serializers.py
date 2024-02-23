@@ -222,15 +222,19 @@ class PartnerCreateSerializer(serializers.Serializer):
         model = Partner
         fields = ('email', 'role', 'event_id', 'disable')
 
-    def validate(self, data):
+    def validate(self, data, **kwargs):
         try:
             Event.objects.get(pk=data["event_id"])
         except Event.DoesNotExist:
             raise serializers.ValidationError('Error: Event with provided ID does not exist')
+
         try:
             user = User.objects.get(username=data["email"])
         except User.DoesNotExist:
             raise serializers.ValidationError('Error:  User not Found')
+
+        if self.context["request"].user.email == data["email"]:
+            raise serializers.ValidationError('The informed user is already event stuff in this event')
 
         query = Partner.objects.filter(event_id=data["event_id"], user__username=data["email"])
         if query.count() > 0:
