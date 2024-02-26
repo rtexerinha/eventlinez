@@ -17,6 +17,11 @@ from customer.models import Customer
 from event.models import Event
 from eventlinez import settings
 from django.utils import timezone
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.template.loader import render_to_string
+from django.contrib.auth.models import User
+from django.core.mail import EmailMessage
 
 
 class FreeTicket(models.Model):
@@ -28,6 +33,129 @@ class FreeTicket(models.Model):
     checkin_date = models.DateTimeField(blank=True, null=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     isFree = models.BooleanField(default=True)
+    is_email_sent = models.BooleanField(default=False)
+
+    def _qrcode_reportlab(self):
+        content = settings.APP_HOST + '/promoter/ticket/checkin/' + str(self.uuid)
+        qr_code = qr.QrCodeWidget(content)
+        bounds = qr_code.getBounds()
+        width = bounds[2] - bounds[0]
+        height = bounds[3] - bounds[1]
+        c = Drawing(45, 45, transform=[200. / width, 0, 0, 200. / height, 0, 0])
+        c.add(qr_code)
+        return c
+
+    def as_pdf(self):
+        qrcodec = self._qrcode_reportlab()
+        out = BytesIO()
+
+        font_name = 'Helvetica'
+        font_size = 10
+
+        p = canvas.Canvas(out)
+        p.setFont(font_name, font_size)
+        p.setFillColor(HexColor('#565454'))
+
+        p.setStrokeGray(0.8)
+        p.rect(130, 780, 0, 0, fill=1)
+        p.roundRect(130, 390, 300, 430, 10, stroke=1, fill=0)
+
+        img_file = 'static/img/Eventlinez.png'
+        p.drawImage(img_file, 230, 785, width=100, preserveAspectRatio=True, mask='auto')
+        p.setStrokeGray(0.8)
+        p.line(130, 780, 430, 780)
+        p.setStrokeGray(0.6)
+
+        if self.guest_name is None:
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(150, 755, str(self.customer))
+        else:
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(150, 755, str(self.guest_name))
+        p.drawString(380, 755, str(self.id))
+
+        month = timezone.localtime(self.event_ticket.event.event_date).strftime("%B %Y")
+        day = timezone.localtime(self.event_ticket.event.event_date).strftime("%d")
+        hour = timezone.localtime(self.event_ticket.event.event_date).strftime("%H:%M")
+
+        location = self.event_ticket.event.address + ', ' + \
+                   self.event_ticket.event.city.name + ', ' + \
+                   self.event_ticket.event.city.state.name
+
+        p.setFont("Helvetica-Bold", 18)
+        p.setFillColor(HexColor('#FF0054'))
+        p.drawString(270, 540, day)
+
+        p.setFont("Helvetica", 12)
+        p.setFillColor(HexColor('#565454'))
+        p.drawString(250, 520, month)
+
+        p.setFont("Helvetica", 10)
+        p.drawString(270, 500, hour)
+
+        p.setLineWidth(0.01)
+        p.line(130, 480, 430, 480)
+
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(150, 450, str(self.event_ticket.event.name))
+
+        p.setFont("Helvetica", 10)
+        p.drawString(150, 430, str(self.event_ticket.name))
+
+        p.setFont("Helvetica", 10)
+        p.drawString(150, 410, location)
+
+        renderPDF.draw(qrcodec, p, 180, 550)
+        p.showPage()
+        p.save()
+        pdf = out.getvalue()
+        out.close()
+
+        return pdf
+
+
+@receiver(post_save, sender=FreeTicket)
+def freeticket_email(sender, instance, **kwargs):
+    try:
+        user = User.objects.get(username=instance.email).first_name
+    except User.DoesNotExist:
+        if instance.account_required:
+            user = instance.guest_name
+            subject = "Eventlinez - Create Account Required"
+            message = render_to_string('freeticket/email/create-account-email.html',
+                                       {'email': instance.email, 'user': user})
+
+            email_create_account = EmailMessage(
+                subject=subject,
+                body=message,
+                from_email='noreply@eventlinez.com',
+                to=[instance.email],
+            )
+            email_create_account.content_subtype = "html"
+            email_create_account.send()
+            return
+        else:
+            user = instance.guest_name
+
+    if kwargs.get('created', False):
+        subject = "Eventlinez - New Free Ticket"
+        message = render_to_string('freeticket/email/freeticket-email.html',
+                                   {'freeticket': instance, 'user': user})
+
+        email_new = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email='noreply@eventlinez.com',
+            to=[instance.email],
+        )
+        email_new.content_subtype = "html"
+
+        output_pdf = instance.as_pdf()
+        email_new.attach('ticket_{}.pdf'.format(instance.id), output_pdf, 'application/pdf')
+
+        email_new.send()
+        instance.is_email_sent = True
+        instance.save()
 
 
 class Ticket(models.Model):
@@ -40,6 +168,9 @@ class Ticket(models.Model):
     checkin_date = models.DateTimeField(blank=True, null=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     vendor = models.ForeignKey("promoter.Vendor", blank=True, null=True, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)
 
     def as_qrcode(self):
         # content = host + '/qrcode/?tkt=' + str(self.uuid)
@@ -104,7 +235,7 @@ class Ticket(models.Model):
 
         p.setFont("Helvetica", 12)
         p.setFillColor(HexColor('#565454'))
-        p.drawString(270, 520, month)
+        p.drawString(250, 520, month)
 
         p.setFont("Helvetica", 10)
         p.drawString(270, 500, hour)
@@ -129,5 +260,3 @@ class Ticket(models.Model):
 
         return pdf
 
-    def __str__(self):
-        return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)
