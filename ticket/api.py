@@ -1,4 +1,3 @@
-from django.db.models import Q
 from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from .serializers import TicketSoldSerializers, FreeTicketSerializer, FreeTicketListSerializer
@@ -124,3 +123,15 @@ class FreeTicketDetailsAPIView(ListAPIView):
         pk = self.kwargs['pk']
         return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
 
+
+class FreeTicketResendEmailAPIView(ListAPIView):
+    serializer_class = FreeTicketListSerializer
+    model = serializer_class.Meta.model
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        pk = self.kwargs['pk']
+        ticket = self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+        ticket.model.resend_email(self)
+        return ticket

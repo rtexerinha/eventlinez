@@ -123,6 +123,29 @@ class FreeTicket(models.Model):
 
         return pdf
 
+    def resend_email(self):
+        subject = "Eventlinez - Free Ticket"
+        # output_pdf = self.as_pdf()
+        message = render_to_string('freeticket/email/freeticket-email.html', {'freeticket': self,
+                                                                              'user': self.guest_name})
+        email = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email='noreply@eventlinez.com',
+            to=[self.email],
+        )
+        email.content_subtype = "html"
+
+        # if output_pdf:
+        #     email.attach('ticket_{}.pdf'.format(self.id), output_pdf, 'application/pdf')
+
+        try:
+            email.send()
+            self.is_email_sent = True
+        except Exception:
+            self.is_email_sent = False
+        self.is_email_sent.save()
+
 
 @receiver(post_save, sender=FreeTicket)
 def freeticket_email(sender, instance, **kwargs):

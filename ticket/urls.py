@@ -2,8 +2,8 @@ from django.urls import path
 
 from ticket.views import ticket_qrcode, search_checkin, search_ticket_sold
 from .api import TicketSoldListAPIView, TicketSoldCheckinAPIView, TicketSoldCheckinQrcodeAPIView, \
-    TicketSoldDetailsAPIView, FreeTicketAPIView, FreeTicketListAPIView, FreeTicketDetailsAPIView
-
+    TicketSoldDetailsAPIView, FreeTicketAPIView, FreeTicketListAPIView, FreeTicketDetailsAPIView, \
+    FreeTicketResendEmailAPIView
 
 urlpatterns = [
     path('qrcode/', ticket_qrcode, name='ticket_qrcode'),
@@ -23,5 +23,7 @@ urlpatterns = [
     path('api/free/new', FreeTicketAPIView.as_view()),
     path('api/free/list', FreeTicketListAPIView.as_view(), name='api_list_freeticket'),
     path('api/free/list/<int:pk>', FreeTicketDetailsAPIView.as_view(),
+         name='api_free_ticket_per_id'),
+    path('api/free/<int:pk>/resend/email', FreeTicketResendEmailAPIView.as_view(),
          name='api_free_ticket_per_id'),
 ]
