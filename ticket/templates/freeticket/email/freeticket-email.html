@@ -4,16 +4,22 @@
         <section class="section-main">
             <h1 class="h1-email p-top">Congratulations! You got a free ticket!</h1>
             <h4 class="h4-email" style="margin-bottom: 5px">
-                This is an automatic notification to inform you about your free ticket to an event
+                This is an automatic notification to inform you about your free ticket
             </h4>
         </section>
 
         <section style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 class="h2-email-section">Dear {{ user }},</h2>
 
-            <h2 class="h2-email-section">We are happy to inform you that you received a free ticket for the event <strong style="color:#E10087">{{ freeticket.event_ticket }}</strong>. Thank you for your participation and we hope to see you at the event!</h2>
+            <h2 class="h2-email-section">We are happy to inform you that you received a free ticket
+                <strong style="color:#E10087">{{ freeticket.event_ticket }}</strong>.
+                Thank you for your participation and we hope to see you at the event!
+            </h2>
 
-            <p class="h4-email" style="color:#605D64">If you have any questions or need further information about your responsibilities or the event itself, please don't hesitate to contact us.</p>
+            <p class="h4-email" style="color:#605D64">
+                If you have any questions or need further information about your responsibilities or the event itself,
+                please don't hesitate to contact us.
+            </p>
         </section>
 
              <p class="h4-email" style="color:#605D64; margin-bottom: 15px">This is an automatic email. Please don't respond.</p>
