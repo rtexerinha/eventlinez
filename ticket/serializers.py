@@ -15,6 +15,7 @@ class FreeTicketListSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(read_only=True)
     id = serializers.IntegerField(read_only=True)
     isFree = serializers.BooleanField(read_only=True)
+    is_email_sent = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = FreeTicket
