@@ -13,7 +13,7 @@ from django.shortcuts import render
 from django.db.models import Q
 
 from event.models import Event
-from ticket.models import Ticket
+from ticket.models import Ticket, FreeTicket
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -92,7 +92,10 @@ def tickets_validate(request):
 @login_required(login_url='/promoter/account/login/')
 def ticket_qrcode(request):
     ticket_uuid = request.GET['tkt']
-    ticket = Ticket.objects.get(uuid=ticket_uuid)
+    try:
+        ticket = Ticket.objects.get(uuid=ticket_uuid)
+    except:
+        ticket = FreeTicket.objects.get(uuid=ticket_uuid)
     svg = ticket.as_qrcode()
     return render(request, "ticket/ticket_qrcode.html", {'svg': svg, 'ticket': ticket})
 
