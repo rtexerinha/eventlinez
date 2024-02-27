@@ -126,45 +126,39 @@ class FreeTicket(models.Model):
 
 @receiver(post_save, sender=FreeTicket)
 def freeticket_email(sender, instance, **kwargs):
-    try:
-        user = User.objects.get(username=instance.email).first_name
-    except User.DoesNotExist:
-        if instance.account_required:
-            user = instance.guest_name
-            subject = "Eventlinez - Create Account Required"
-            message = render_to_string('freeticket/email/create-account-email.html',
-                                       {'email': instance.email, 'user': user})
-
-            email_create_account = EmailMessage(
-                subject=subject,
-                body=message,
-                from_email='noreply@eventlinez.com',
-                to=[instance.email],
-            )
-            email_create_account.content_subtype = "html"
-            email_create_account.send()
-            return
-        else:
-            user = instance.guest_name
-
     if kwargs.get('created', False):
-        subject = "Eventlinez - New Free Ticket"
-        message = render_to_string('freeticket/email/freeticket-email.html',
-                                   {'freeticket': instance, 'user': user})
+        try:
+            user = User.objects.get(username=instance.email).first_name
+        except User.DoesNotExist:
+            user = instance.guest_name
 
-        email_new = EmailMessage(
+        if instance.account_required and user == instance.guest_name:
+            subject = "Eventlinez - Create Account Required"
+            message_template = 'freeticket/email/create-account-email.html'
+            output_pdf = None
+        else:
+            subject = "Eventlinez - New Free Ticket"
+            message_template = 'freeticket/email/freeticket-email.html'
+            output_pdf = instance.as_pdf()
+
+        message = render_to_string(message_template, {'freeticket': instance, 'user': user})
+
+        email = EmailMessage(
             subject=subject,
             body=message,
             from_email='noreply@eventlinez.com',
             to=[instance.email],
         )
-        email_new.content_subtype = "html"
+        email.content_subtype = "html"
 
-        output_pdf = instance.as_pdf()
-        email_new.attach('ticket_{}.pdf'.format(instance.id), output_pdf, 'application/pdf')
+        if output_pdf:
+            email.attach('ticket_{}.pdf'.format(instance.id), output_pdf, 'application/pdf')
 
-        email_new.send()
-        instance.is_email_sent = True
+        try:
+            email.send()
+            instance.is_email_sent = True
+        except Exception:
+            instance.is_email_sent = False
         instance.save()
 
 
