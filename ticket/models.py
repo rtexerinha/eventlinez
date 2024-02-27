@@ -35,6 +35,16 @@ class FreeTicket(models.Model):
     isFree = models.BooleanField(default=True)
     is_email_sent = models.BooleanField(default=False)
 
+    def as_qrcode(self):
+        # content = host + '/qrcode/?tkt=' + str(self.uuid)
+        host = settings.APP_HOST
+        content = host + '/promoter/ticket/checkin/' + str(self.uuid)
+        img = qrcode.make(content, image_factory=qrcode.image.svg.SvgImage, box_size=20)
+        stream = BytesIO()
+        img.save(stream)
+        svg = mark_safe(stream.getvalue().decode())
+        return svg
+
     def _qrcode_reportlab(self):
         content = settings.APP_HOST + '/promoter/ticket/checkin/' + str(self.uuid)
         qr_code = qr.QrCodeWidget(content)
