@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from account.api import get_user_role
 from event.models import Event
 from promoter.util import transform_month
+from .models import Partner
 from .serializers import PromoterSerializer, EventSerializer, CategoriaSerializers, TicketTypeSerializers, \
     PartnerSerializer, PartnerCreateSerializer, EventListSerializer
 
@@ -53,6 +54,10 @@ class EventDetailsAPIView(ListAPIView):
         user = self.request.user
         pk = self.kwargs['pk']
         queryset = self.model.objects.filter(promoter__user=user, id=pk)
+
+        partner = Partner.objects.filter(event_id=pk, user=user).first()
+        if partner:
+            queryset = self.model.objects.filter(promoter__event__partner=partner, id=pk)
 
         queryset_with_roles = []
 
