@@ -132,6 +132,6 @@ class FreeTicketResendEmailAPIView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        ticket = self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
-        ticket.model.resend_email(self)
+        ticket = self.model.objects.get(event_ticket__event__promoter__user=user, id=pk)
+        ticket.send_email()
         return ticket
