@@ -83,8 +83,9 @@
                     </h3>
                 </aside>
 
-            <div class="col-12" style="padding: 0!important; min-height: 250px">
-                {% for ticket in event.tickets.all %}
+            <div class="col-12" style="padding: 0!important; min-height: 250px;">
+                {% for ticket in tickets  %}
+
                     <aside class="col-12 mt-4">
                         <div id="ticket-row-{{ ticket.id }}" class="ticket-row row">
                             <div class="col-8" style="display: block">
@@ -104,10 +105,11 @@
                             </div>
                         </div>
                     </aside>
+
                 {% endfor %}
             </div>
 
-            {% if event.qty_available <= 0%}
+            {% if event.qty_available <= 0 or tickets.first is None%}
                 <p class="h2-home text-center p-date mt-5">
                     Sold Out
                 </p>
@@ -134,15 +136,16 @@
 
                     <div class="col-lg-12 mt-4">
                         {% now "YmdHis" as todays_date %}
-                        {% if todays_date >= event.event_date|date:"YmdHis" %}
+                        {% if todays_date >= event.event_date|date:"YmdHis"%}
                             <h6  class="h6-home d-flex justify-content-center"
                                  style="margin-top: 5%; font-size: 1rem; color: #E10087">
                                 The event date has passed
                             </h6>
-                        <input disabled class="buttons-primary button-details-width h5-home" type="submit" value="Add to Cart">
+
                         {% else %}
                             <input onclick="addToCard()" id="addToCartBtn" class="buttons-primary button-details-width h5-home"
                                    type="submit" value="Add to Cart">
+
                         {% endif %}
                     </div>
             {% endif %}

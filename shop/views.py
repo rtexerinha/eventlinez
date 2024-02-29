@@ -9,7 +9,7 @@ from django.http import BadHeaderError, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 
-from event.models import Category, Event
+from event.models import Category, Event, Ticket
 from promoter.models import Vendor
 from .forms import ContactForm
 from .models import SpecialEvents
@@ -93,12 +93,14 @@ def product_event_detail(request, c_slug, event_slug):
         vendor = Vendor.objects.filter(code=request.GET.get('vendor')).first()
     try:
         event = Event.objects.get(category__slug=c_slug, slug=event_slug)
+        tickets = Ticket.objects.filter(event_id=event, sold_out=False)
     except Exception as e:
         raise e
     pathpage = request.META['PATH_INFO']
     if request.META['QUERY_STRING']:
         pathpage = pathpage + '?' + request.META['QUERY_STRING']
-    response = render(request, 'shop/event.html', {'PROD': settings.PROD, 'event': event, 'vendor': vendor})
+    response = render(request, 'shop/event.html',
+                      {'PROD': settings.PROD, 'event': event, 'tickets': tickets, 'vendor': vendor})
     response.set_cookie(key='backpage', value=pathpage, max_age=60)
     return response
 
