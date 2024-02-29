@@ -75,8 +75,8 @@
 
         </aside>
 
-        <article class="col-lg-4" style="padding: 0!important;">
-            <div class="col-lg-12 card-details">
+        <article class="col-lg-4" style="padding: 0!important; display: flex;flex-direction: column;">
+            <div class="col-lg-12 card-details" style="height: 100%">
                 <aside class="bg-gradient col-lg-12">
                     <h3 class="h3-home h3-detail-center">
                         Select the ticket type
@@ -134,7 +134,7 @@
                     </div>
                 </article>
 
-                    <div class="col-lg-12 mt-4">
+                    <div class="col-lg-12 mt-4 mb-4">
                         {% now "YmdHis" as todays_date %}
                         {% if todays_date >= event.event_date|date:"YmdHis"%}
                             <h6  class="h6-home d-flex justify-content-center"
