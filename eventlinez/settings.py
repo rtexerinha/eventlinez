@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'stripe',
     'imagekit',
     'crispy_forms',
-    'crispy_bootstrap4',
     'ckeditor',
     'address',
     'customer',
