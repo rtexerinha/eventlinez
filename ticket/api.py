@@ -1,6 +1,10 @@
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from promoter.models import Partner
 from .serializers import TicketSoldSerializers, FreeTicketSerializer, FreeTicketListSerializer
@@ -148,14 +152,21 @@ class FreeTicketDetailsAPIView(ListAPIView):
         return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
 
 
-class FreeTicketResendEmailAPIView(ListAPIView):
-    serializer_class = FreeTicketListSerializer
-    model = serializer_class.Meta.model
-    permission_classes = (IsAuthenticated,)
+@api_view(['GET', 'POST'])
+def send_email_api_view(request, pk):
+    user = request.user
 
-    def get_queryset(self):
-        user = self.request.user
-        pk = self.kwargs['pk']
-        ticket = self.model.objects.get(event_ticket__event__promoter__user=user, id=pk)
-        ticket.send_email()
-        return ticket
+    if request.method == 'GET':
+        ticket = get_object_or_404(FreeTicket, id=pk, event_ticket__event__promoter__user=user)
+
+        try:
+            ticket.send_email()
+        except Exception as e:
+            return Response({"message": "Failed to send email", "error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"message": "Email sent successfully"}, status=status.HTTP_200_OK)
+
+    return Response({"message": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
