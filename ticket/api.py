@@ -6,10 +6,8 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from promoter.models import Partner
-from .serializers import TicketSoldSerializers, FreeTicketSerializer, FreeTicketListSerializer
-from .models import Ticket, FreeTicket
-from itertools import chain
+from .serializers import TicketSoldSerializers, TicketCreateSerializer
+from .models import Ticket
 
 
 def filter_tickets_by_user_and_id(user, pk, is_free=None, model=None):
@@ -42,17 +40,10 @@ class TicketSoldListAPIView(ListAPIView):
                                            event_ticket__event__id=event_id)
         ).order_by('guest_name').distinct()
 
-        free_tickets = FreeTicket.objects.filter(Q(
-            event_ticket__event__promoter__user=user,
-            event_ticket__event__id=event_id) | Q(event_ticket__event__id=event_id,
-                                                  event_ticket__event__partner__user=user)
-        ).order_by('guest_name').distinct()
-
         if guest_name:
             queryset = queryset.filter(guest_name__icontains=guest_name).order_by('guest_name')
-            free_tickets = free_tickets.filter(guest_name__icontains=guest_name).order_by('guest_name')
 
-        return list(chain(queryset, free_tickets))
+        return queryset
 
 
 class TicketSoldCheckinAPIView(UpdateAPIView):
@@ -63,7 +54,7 @@ class TicketSoldCheckinAPIView(UpdateAPIView):
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        is_free = self.request.query_params.get('isFree')
+        # is_free = self.request.query_params.get('isFree')
 
         queryset = self.model.objects.filter(
             Q(event_ticket__event__promoter__user=user) |
@@ -71,10 +62,10 @@ class TicketSoldCheckinAPIView(UpdateAPIView):
 
         queryset = queryset.filter(id=pk).distinct()
 
-        if is_free:
-            queryset = FreeTicket.objects.filter(
-                Q(event_ticket__event__promoter__user=user, id=pk, isFree=is_free) |
-                Q(event_ticket__event__partner__user=user, id=pk,  isFree=is_free))
+        # if is_free:
+        #     queryset = Ticket.objects.filter(
+        #         Q(event_ticket__event__promoter__user=user, id=pk, isFree=is_free) |
+        #         Q(event_ticket__event__partner__user=user, id=pk,  isFree=is_free))
         return queryset
 
 
@@ -85,7 +76,7 @@ class TicketSoldDetailsAPIView(ListAPIView):
 
     def get_queryset(self):
         pk = self.kwargs['pk']
-        is_free = self.request.query_params.get('isFree')
+        # is_free = self.request.query_params.get('isFree')
 
         queryset = self.model.objects.filter(
             Q(event_ticket__event__promoter__user=self.request.user) |
@@ -93,10 +84,7 @@ class TicketSoldDetailsAPIView(ListAPIView):
 
         queryset = queryset.filter(id=pk).distinct()
 
-        if is_free:
-            queryset = FreeTicket.objects.filter(
-                Q(event_ticket__event__promoter__user=self.request.user, id=pk, isFree=is_free) |
-                Q(event_ticket__event__partner__user=self.request.user, id=pk, isFree=is_free)).distinct()
+        # if is_free:
 
         return queryset
 
@@ -111,48 +99,17 @@ class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
     def get_queryset(self):
         user = self.request.user
         uuid = self.kwargs['uuid']
-        partner = Partner.objects.filter(email=user.username).first()
 
         tickets = self.model.objects.filter(
             Q(event_ticket__event__promoter__user=user, uuid=uuid) |
-            Q(event_ticket__event__partner=partner, uuid=uuid)).distinct()
+            Q(event_ticket__event__partner__user=user, uuid=uuid)).distinct()
 
-        if len(tickets) == 0:
-            tickets = FreeTicket.objects.filter(
-                Q(event_ticket__event__promoter__user=user, uuid=uuid) |
-                Q(event_ticket__event__partner=partner, uuid=uuid)).distinct()
         return tickets
 
 
-# --------------------------------FreeTicket
 class FreeTicketAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = FreeTicketSerializer
-
-
-class FreeTicketListAPIView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = FreeTicketListSerializer
-    model = FreeTicket
-
-    def get_queryset(self):
-        event_id = self.request.query_params.get('event_id')
-        queryset = FreeTicket.objects.filter(
-            event_ticket__event__id=event_id
-        )
-
-        return queryset.order_by('guest_name')
-
-
-class FreeTicketDetailsAPIView(ListAPIView):
-    serializer_class = FreeTicketListSerializer
-    model = serializer_class.Meta.model
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        user = self.request.user
-        pk = self.kwargs['pk']
-        return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+    serializer_class = TicketCreateSerializer
 
 
 @api_view(['GET', 'POST'])
@@ -160,7 +117,7 @@ def send_email_api_view(request, pk):
     user = request.user
 
     if request.method == 'GET':
-        ticket = get_object_or_404(FreeTicket, id=pk, event_ticket__event__promoter__user=user)
+        ticket = get_object_or_404(Ticket, id=pk, event_ticket__event__promoter__user=user)
 
         try:
             ticket.send_email()
