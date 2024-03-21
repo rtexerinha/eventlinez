@@ -20,7 +20,7 @@ class TicketSoldSerializers(serializers.Serializer):
         fields = '__all__'
 
     def get_isFree(self, obj):
-        return None
+        return obj.isFree
 
     def update(self, instance, validated_data):
 
@@ -49,13 +49,14 @@ class TicketSoldSerializers(serializers.Serializer):
 
 class TicketCreateSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    checkin_date = serializers.DateTimeField(read_only=True)
+    uuid = serializers.UUIDField(read_only=True)
     guest_name = serializers.CharField(max_length=161)
     email = serializers.EmailField(max_length=80)
     event_ticket = serializers.CharField(max_length=80)
     account_required = serializers.BooleanField()
-    created_at = serializers.DateTimeField(read_only=True)
-    checkin_date = serializers.DateTimeField(read_only=True)
-    uuid = serializers.UUIDField(read_only=True)
+    isFree = serializers.BooleanField()
 
     class Meta:
         model = Ticket

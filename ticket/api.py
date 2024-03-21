@@ -32,6 +32,7 @@ class TicketSoldListAPIView(ListAPIView):
         user = self.request.user
         event_id = self.request.query_params.get('event_id')
         guest_name = self.request.query_params.get('guest_name', None)
+        is_free = self.request.query_params.get('isFree', None)
 
         queryset = Ticket.objects.filter(Q(
             event_ticket__event__promoter__user=user,
@@ -42,6 +43,8 @@ class TicketSoldListAPIView(ListAPIView):
 
         if guest_name:
             queryset = queryset.filter(guest_name__icontains=guest_name).order_by('guest_name')
+        if is_free:
+            queryset = queryset.filter(isFree=is_free)
 
         return queryset
 
@@ -54,7 +57,6 @@ class TicketSoldCheckinAPIView(UpdateAPIView):
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        # is_free = self.request.query_params.get('isFree')
 
         queryset = self.model.objects.filter(
             Q(event_ticket__event__promoter__user=user) |
@@ -62,10 +64,6 @@ class TicketSoldCheckinAPIView(UpdateAPIView):
 
         queryset = queryset.filter(id=pk).distinct()
 
-        # if is_free:
-        #     queryset = Ticket.objects.filter(
-        #         Q(event_ticket__event__promoter__user=user, id=pk, isFree=is_free) |
-        #         Q(event_ticket__event__partner__user=user, id=pk,  isFree=is_free))
         return queryset
 
 
@@ -76,7 +74,7 @@ class TicketSoldDetailsAPIView(ListAPIView):
 
     def get_queryset(self):
         pk = self.kwargs['pk']
-        # is_free = self.request.query_params.get('isFree')
+        is_free = self.request.query_params.get('isFree')
 
         queryset = self.model.objects.filter(
             Q(event_ticket__event__promoter__user=self.request.user) |
@@ -84,7 +82,8 @@ class TicketSoldDetailsAPIView(ListAPIView):
 
         queryset = queryset.filter(id=pk).distinct()
 
-        # if is_free:
+        if is_free:
+            queryset = queryset.filter(isFree=is_free).distinct()
 
         return queryset
 

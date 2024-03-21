@@ -11,12 +11,13 @@ urlpatterns = [
 
     # APIs de ticketSold
     path('api/search', TicketSoldListAPIView.as_view(), name='api_search_guest'),
+    path('api/search/<int:pk>', TicketSoldDetailsAPIView.as_view(),
+         name='api_search_id'),
     path('api/checkin/<int:pk>', TicketSoldCheckinAPIView.as_view(),
          name='api_checkin_guest'),
     path('api/checkin/qrcode/<uuid:uuid>', TicketSoldCheckinQrcodeAPIView.as_view(),
          name='api_checkin_qrcode'),
-    path('api/search/<int:pk>', TicketSoldDetailsAPIView.as_view(),
-         name='api_search_id'),
+
     path('api/free/<int:pk>/resend/email', send_email_api_view,
          name='api_free_ticket_per_id'),
     path('api/free/new', FreeTicketAPIView.as_view()),
