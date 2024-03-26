@@ -147,7 +147,7 @@ class Ticket(models.Model):
         return self.quantity - qty_sold
 
     def qty_sold(self):
-        _qty_sold = self.ticket_set.count()
+        _qty_sold = self.ticket_set.filter(isFree=False).count()
         return _qty_sold
 
     def __str__(self):
