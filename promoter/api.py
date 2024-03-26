@@ -157,7 +157,7 @@ def sales_report(request, event_id):
 
     if by == "day":
         group = TruncDate('order__created')
-        queryset = queryset .annotate(group=group) \
+        queryset = queryset.annotate(group=group) \
             .values("group").annotate(value=calc).order_by("group")
         data = list(queryset)
     elif by == "month":
