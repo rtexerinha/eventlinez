@@ -42,13 +42,13 @@ class Ticket(models.Model):
     is_email_sent = models.BooleanField(default=False)
 
     def clean(self):
-        if self.isFree is False and not self.customer:
+        if self.isFree is False and self.customer is None:
             raise ValidationError({'customer': 'Customer is required'})
 
-        if self.isFree is False and not self.order_item:
+        if self.isFree is False and self.order_item is None:
             raise ValidationError({'Order': 'Order is required'})
 
-        if self.isFree is False and not self.price:
+        if self.isFree is False and self.price is None:
             raise ValidationError({'price': 'price is required'})
 
     def __str__(self):
