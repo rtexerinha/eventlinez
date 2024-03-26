@@ -6,6 +6,7 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from customer.models import Customer
 from .serializers import TicketSoldSerializers, TicketCreateSerializer
 from .models import Ticket
 
@@ -117,7 +118,10 @@ def send_email_api_view(request, pk):
 
     if request.method == 'GET':
         ticket = get_object_or_404(Ticket, id=pk, event_ticket__event__promoter__user=user)
-
+        customer = Customer.objects.filter(email=ticket.email).first()
+        if customer:
+            ticket.customer_id = customer
+            ticket.save()
         try:
             ticket.send_email()
         except Exception as e:
