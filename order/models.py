@@ -98,5 +98,6 @@ def create_tickets(sender, instance, **kwargs):
             order_item=instance,
             price=instance.unit_price,
             guest_name=guest_name,
-            vendor=instance.vendor
+            vendor=instance.vendor,
+            isFree=False
         )
