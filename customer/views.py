@@ -122,7 +122,7 @@ def edit_guest(request):
 def guest_list(request):
     enddate = datetime.today() + timedelta(days=-1)
     tickets = Ticket.objects.filter(
-        customer=request.user.customer,
         event_ticket__event__event_date__gte=enddate).order_by('-created_at')
 
+    tickets = tickets.filter(Q(customer=request.user.customer) | Q(email=request.user.customer.email))
     return render(request, 'ticket/ticket_customer.html', {'tickets': tickets, 'PROD': settings.PROD})
