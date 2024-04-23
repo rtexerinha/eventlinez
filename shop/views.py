@@ -93,7 +93,7 @@ def product_event_detail(request, c_slug, event_slug):
         vendor = Vendor.objects.filter(code=request.GET.get('vendor')).first()
     try:
         event = Event.objects.get(category__slug=c_slug, slug=event_slug)
-        tickets = Ticket.objects.filter(event_id=event, sold_out=False)
+        tickets = Ticket.objects.filter(event_id=event, sold_out=False).order_by('-name')
     except Exception as e:
         raise e
     pathpage = request.META['PATH_INFO']
