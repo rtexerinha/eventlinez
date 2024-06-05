@@ -83,7 +83,7 @@ class EventListAPIView(ListCreateAPIView):
         name = self.request.query_params.get('name')
         state = self.request.query_params.get("state")
         queryset = Event.objects.filter(
-            Q(partner__user=self.request.user) | Q(promoter__user=self.request.user)).distinct()
+            Q(partner__user=self.request.user, partner__disable=False) | Q(promoter__user=self.request.user)).distinct()
 
         dt_reference = timezone.now() + timedelta(-1)
 
