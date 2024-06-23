@@ -1,8 +1,10 @@
 import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 
 from cart.models import Cart
 from cart.views import _cart_id
@@ -35,6 +37,50 @@ def order_list(request):
 def order_detail(request, order_id):
     order = Order.objects.get(id=order_id)
     return render(request, 'order/order_detail.html', {'order': order, 'PROD': settings.PROD})
+
+
+def create_order(session):
+    order = Order.objects.filter(Token=session.id)
+    if order:
+        cart_id = session.client_reference_id
+        cart = Cart.objects.get(cart_id=cart_id)
+
+        order = Order.objects.create(
+            total=cart.amount(),
+            emailAddress=session.customer_details.email,
+            customer='como conseguir esse customer',
+            token=session.id,
+            payment_code=session.payment_intent
+        )
+        return order
+    return None
+
+
+def fulfill_order(session, new_order):
+    if new_order is None:
+        return
+    cart_id = session.client_reference_id
+    cart = Cart.objects.get(cart_id=cart_id)
+
+    items = cart.cartitem_set.filter(active=True)
+    stripe.PaymentIntent.modify(
+        session.payment_intent,
+        metadata={"new_order_id": new_order.id},
+        description="%s (New Order #%s)" % (str(items.first().ticket), new_order.id)
+    )
+    for item in items:
+        OrderItem.objects.create(
+            order=new_order,
+            event_ticket=item.ticket,
+            quantity=item.quantity,
+            unit_price=item.ticket.price,
+            amount=item.price_total(),
+            fee=item.fee(),
+            promo_code=item.promo_code,
+            vendor=item.vendor
+        )
+    cart.delete()
+    send_mail(new_order.id)
 
 
 @login_required()
@@ -79,3 +125,31 @@ def create(request):
     cart.delete()
     send_mail(order.id)
     return redirect('order:thanks', order.id)
+
+
+@csrf_exempt
+def stripe_webhook(request):
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+    endpoint_secret = 'we_1PUAcKK20um2HySCzDcCOCM6'
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        return HttpResponse(status=400)
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        order = create_order(session)
+
+        if session.payment_status == "paid":
+            if order is not None:
+                fulfill_order(session)
+
+    return JsonResponse({'status': 'success'})
