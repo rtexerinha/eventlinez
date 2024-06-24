@@ -39,47 +39,48 @@ def order_detail(request, order_id):
     return render(request, 'order/order_detail.html', {'order': order, 'PROD': settings.PROD})
 
 
-def create_order(session):
-    order = Order.objects.filter(Token=session.id)
-    if order:
-        cart_id = session.client_reference_id
-        cart = Cart.objects.get(cart_id=cart_id)
+# def create_order(session):
+#     print('create order')
+    # order = Order.objects.filter(Token=session.id)
+    # if order:
+    #     cart_id = session.client_reference_id
+    #     cart = Cart.objects.get(cart_id=cart_id)
+    #
+    #     order = Order.objects.create(
+    #         total=cart.amount(),
+    #         emailAddress=session.customer_details.email,
+    #         customer=1,
+    #         token=session.id,
+    #         payment_code=session.payment_intent
+    #     )
+    #     return order
+    # return None
 
-        order = Order.objects.create(
-            total=cart.amount(),
-            emailAddress=session.customer_details.email,
-            customer=1,
-            token=session.id,
-            payment_code=session.payment_intent
-        )
-        return order
-    return None
 
-
-def fulfill_order(session, new_order):
-    if new_order is None:
-        return
-    cart_id = session.client_reference_id
-    cart = Cart.objects.get(cart_id=cart_id)
-
-    items = cart.cartitem_set.filter(active=True)
-    stripe.PaymentIntent.modify(
-        session.payment_intent,
-        metadata={"new_order_id": new_order.id},
-        description="%s (New Order #%s)" % (str(items.first().ticket), new_order.id)
-    )
-    for item in items:
-        OrderItem.objects.create(
-            order=new_order,
-            event_ticket=item.ticket,
-            quantity=item.quantity,
-            unit_price=item.ticket.price,
-            amount=item.price_total(),
-            fee=item.fee(),
-            promo_code=item.promo_code,
-            vendor=item.vendor
-        )
-    cart.delete()
+# def fulfill_order(session, new_order):
+#     # if new_order is None:
+#     #     return
+#     cart_id = session.client_reference_id
+#     cart = Cart.objects.get(cart_id=cart_id)
+#     #
+#     items = cart.cartitem_set.filter(active=True)
+#     stripe.PaymentIntent.modify(
+#         session.payment_intent,
+#         metadata={"new_order_id": new_order.id},
+#         description="%s (New Order #%s)" % (str(items.first().ticket), new_order.id)
+#     )
+    # for item in items:
+    #     OrderItem.objects.create(
+    #         order=new_order,
+    #         event_ticket=item.ticket,
+    #         quantity=item.quantity,
+    #         unit_price=item.ticket.price,
+    #         amount=item.price_total(),
+    #         fee=item.fee(),
+    #         promo_code=item.promo_code,
+    #         vendor=item.vendor
+    #     )
+    # cart.delete()
     # send_mail(new_order.id)
 
 
@@ -146,10 +147,44 @@ def stripe_webhook(request):
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        order = create_order(session)
 
+        create_order(session)
         if session.payment_status == "paid":
-            if order is not None:
-                fulfill_order(session)
+            # Fulfill the purchase
+            fulfill_order(session)
 
-    return JsonResponse({'status': 'success'})
+    elif event['type'] == 'checkout.session.async_payment_succeeded':
+        session = event['data']['object']
+
+        # Fulfill the purchase
+        fulfill_order(session)
+
+    elif event['type'] == 'checkout.session.async_payment_failed':
+        session = event['data']['object']
+
+        email_customer_about_failed_payment(session)
+
+        # Passed signature verification
+    return HttpResponse(status=200)
+
+
+def fulfill_order(session):
+    print("Fulfilling order")
+
+
+def create_order(session):
+    print('create order')
+    cart_id = session.client_reference_id
+    cart = Cart.objects.get(cart_id=cart_id)
+
+    items = cart.cartitem_set.filter(active=True)
+    stripe.PaymentIntent.modify(
+        session.payment_intent,
+        metadata={"order_id": 121},
+        description="%s (Order #%s)" % (str(items.first().ticket), 121)
+    )
+
+
+def email_customer_about_failed_payment(session):
+    # TODO: fill me in
+    print("Emailing customer")
