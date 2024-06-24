@@ -80,7 +80,7 @@ def fulfill_order(session, new_order):
             vendor=item.vendor
         )
     cart.delete()
-    send_mail(new_order.id)
+    # send_mail(new_order.id)
 
 
 @login_required()
@@ -123,7 +123,7 @@ def create(request):
             vendor=item.vendor
         )
     cart.delete()
-    send_mail(order.id)
+    # send_mail(order.id)
     return redirect('order:thanks', order.id)
 
 
