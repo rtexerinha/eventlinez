@@ -1,5 +1,4 @@
 import stripe
-import logging
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
@@ -128,14 +127,10 @@ def create(request):
     return redirect('order:thanks', order.id)
 
 
-logger = logging.getLogger('order')
-
-
 @csrf_exempt
 def stripe_webhook(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
     payload = request.body
-    logger.info('payload', payload)
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
     event = None
     endpoint_secret = 'whsec_Vaq3YFZP8yku64xFhqR9qH0iunP5ZEUj'
@@ -148,8 +143,6 @@ def stripe_webhook(request):
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:
         return HttpResponse(status=400)
-
-    logger.info('event', event)
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
