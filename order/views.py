@@ -48,7 +48,7 @@ def create_order(session):
         order = Order.objects.create(
             total=cart.amount(),
             emailAddress=session.customer_details.email,
-            customer='como conseguir esse customer',
+            customer=1,
             token=session.id,
             payment_code=session.payment_intent
         )
