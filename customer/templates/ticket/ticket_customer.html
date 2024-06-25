@@ -42,6 +42,9 @@
                         </p>
                         <p class="h6-home text-left p-dark text-lg-center pl-2">
                             {{ tickets.event_ticket }}
+                            {% if tickets.isFree %}
+                                <strong style="background: #ccc; color: #1e7e34; margin-left: 15px; padding: 5px 10px; border-radius: 30px">Free Ticket </strong>
+                            {% endif %}
                         </p>
                       </div>
 

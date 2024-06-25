@@ -58,10 +58,16 @@
 }
 
 .button-details-width{
-    width: 330px!important;
+    width: 300px!important;
 }
 
-@media (max-width: 800px) {
+@media (min-width: 820px) {
+    .button-details-width{
+        width: 100%!important;
+    }
+}
+
+@media (max-width: 1020px) {
     .button-details-width{
         width: 100%!important;
     }

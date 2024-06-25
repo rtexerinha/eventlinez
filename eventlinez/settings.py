@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'stripe',
     'imagekit',
     'crispy_forms',
+    # 'crispy_bootstrap4',
     'ckeditor',
     'address',
     'customer',
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
     'order',
     'ticket',
     'rest_framework',
+    'account',
     'rest_framework.authtoken',
 ]
 

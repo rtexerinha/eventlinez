@@ -11,26 +11,48 @@ from django.utils.safestring import mark_safe
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode import qr
 from reportlab.graphics.shapes import Drawing
-
 from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
-
 from customer.models import Customer
 from event.models import Event
 from eventlinez import settings
 from django.utils import timezone
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.template.loader import render_to_string
+from django.contrib.auth.models import User
+from django.core.mail import EmailMessage
+from django.core.exceptions import ValidationError
 
 
 class Ticket(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, blank=True, null=True)
+    order_item = models.ForeignKey('order.OrderItem', on_delete=models.PROTECT, blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], blank=True,
+                                null=True)
+    vendor = models.ForeignKey("promoter.Vendor", blank=True, null=True, on_delete=models.SET_NULL)
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     event_ticket = models.ForeignKey('event.Ticket', on_delete=models.RESTRICT)
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
-    order_item = models.ForeignKey('order.OrderItem', on_delete=models.PROTECT)
-    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     guest_name = models.CharField(max_length=161, blank=True, null=True)
     created_at = models.DateTimeField(auto_now=True)
     checkin_date = models.DateTimeField(blank=True, null=True)
-    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
-    vendor = models.ForeignKey("promoter.Vendor", blank=True, null=True, on_delete=models.SET_NULL)
+    isFree = models.BooleanField(default=False)
+    email = models.EmailField(blank=False, null=False, default='')
+    account_required = models.BooleanField(default=False)
+    is_email_sent = models.BooleanField(default=False)
+
+    def clean(self):
+        if self.isFree is False and self.customer is None:
+            raise ValidationError({'customer': 'Customer is required'})
+
+        if self.isFree is False and self.order_item is None:
+            raise ValidationError({'Order': 'Order is required'})
+
+        if self.isFree is False and self.price is None:
+            raise ValidationError({'price': 'price is required'})
+
+    def __str__(self):
+        return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)
 
     def as_qrcode(self):
         # content = host + '/qrcode/?tkt=' + str(self.uuid)
@@ -95,7 +117,7 @@ class Ticket(models.Model):
 
         p.setFont("Helvetica", 12)
         p.setFillColor(HexColor('#565454'))
-        p.drawString(270, 520, month)
+        p.drawString(250, 520, month)
 
         p.setFont("Helvetica", 10)
         p.drawString(270, 500, hour)
@@ -120,5 +142,43 @@ class Ticket(models.Model):
 
         return pdf
 
-    def __str__(self):
-        return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)
+    def send_email(self):
+        try:
+            user = User.objects.get(username=self.email).first_name
+        except User.DoesNotExist:
+            user = self.guest_name
+
+        if self.account_required and user == self.guest_name:
+            subject = "Eventlinez - Create Account Required"
+            message_template = 'freeticket/email/create-account-email.html'
+            output_pdf = None
+        else:
+            subject = "Eventlinez - Free Ticket"
+            message_template = 'freeticket/email/freeticket-email.html'
+            output_pdf = self.as_pdf()
+
+        message = render_to_string(message_template, {'freeticket': self, 'user': user})
+
+        email = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email='noreply@eventlinez.com',
+            to=[self.email],
+        )
+        email.content_subtype = "html"
+
+        if output_pdf:
+            email.attach('ticket_{}.pdf'.format(self.id), output_pdf, 'application/pdf')
+
+        try:
+            email.send()
+            self.is_email_sent = True
+        except Exception:
+            self.is_email_sent = False
+        self.save()
+
+
+@receiver(post_save, sender=Ticket)
+def freeticket_email(sender, instance, **kwargs):
+    if kwargs.get('created', False):
+        instance.send_email()

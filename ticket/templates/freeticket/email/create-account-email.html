@@ -1,0 +1,44 @@
+{% extends "base-email.html" %}
+{% block content %}
+    <main class="main-size">
+        <section class="section-main">
+            <h1 class="h1-email p-top">Congratulations! You received a free ticket!</h1>
+            <h4 class="h4-email" style="margin-bottom: 5px">
+                This is an automatic notification to inform you about your free ticket
+            </h4>
+        </section>
+
+        <section style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 class="h2-email-section">Hi, {{ user }}</h2>
+
+            <h2 class="h2-email-section">
+                You received this email because a free ticket for the <strong style="color:#E10087">{{ freeticket.event_ticket }}</strong> has been sent to you on Eventlinez.
+            </h2>
+
+            <h2 class="h2-email-section">
+                To receive your free ticket, please create an Eventlinez account.
+                After creating an account, you'll be able to access your free ticket and other features offered by Eventlinez.
+            </h2>
+
+            <div class="div-button">
+            <a class="button-create" href="https://eventlinez.com/customer/account/create/">
+                <p class="p-email" style="color: #fff; padding-bottom: 0"> Create Account </p>
+            </a>
+        </div>
+
+
+            <p class="h4-email" style="color:#605D64">
+                If you have any questions or need further information about your responsibilities or the event itself, please don't hesitate to contact us.
+            </p>
+        </section>
+
+         <p class="h4-email" style="color:#605D64; margin-bottom: 15px">This is an automatic email. Please don't respond.</p>
+    </main>
+{% endblock %}
+
+
+
+
+
+
+

@@ -1,22 +1,23 @@
 from datetime import timedelta
-from django.db.models.functions import (ExtractMonth, ExtractDay, TruncDate, ExtractYear)
-from django.db.models import Sum
-from django.db.models import F
-from django.db.models import FloatField
 
+from django.db.models import F
+from django.db.models import Sum, Q
+from django.db.models.functions import (ExtractMonth, TruncDate, ExtractYear)
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework.decorators import permission_classes
 
-
+from account.api import get_user_role
 from event.models import Event
-from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers
 from promoter.util import transform_month
+from .models import Partner
+from .serializers import PromoterSerializer, EventSerializer, CategoriaSerializers, TicketTypeSerializers, \
+    PartnerSerializer, PartnerCreateSerializer, EventListSerializer
 
 
 class CustomAuthToken(ObtainAuthToken):
@@ -46,30 +47,43 @@ class PromoterListAPIView(ListAPIView):
 
 class EventDetailsAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventSerializers
+    serializer_class = EventListSerializer
     model = serializer_class.Meta.model
 
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        return self.model.objects.filter(promoter__user=user, id=pk)
+        queryset = self.model.objects.filter(promoter__user=user, id=pk)
+
+        partner = Partner.objects.filter(event_id=pk, user=user).first()
+        if partner:
+            queryset = self.model.objects.filter(promoter__event__partner=partner, id=pk)
+
+        queryset_with_roles = []
+
+        for event in queryset:
+            event.role = get_user_role(self.request.user, event)
+            queryset_with_roles.append(event)
+
+        return queryset_with_roles
 
 
 class EventCreateAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventSerializers
+    serializer_class = EventSerializer
     model = Event
 
 
 class EventListAPIView(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventSerializers
+    serializer_class = EventListSerializer
     model = Event
 
     def get_queryset(self):
         name = self.request.query_params.get('name')
         state = self.request.query_params.get("state")
-        queryset = Event.objects.filter(promoter__user=self.request.user)
+        queryset = Event.objects.filter(
+            Q(partner__user=self.request.user, partner__disable=False) | Q(promoter__user=self.request.user)).distinct()
 
         dt_reference = timezone.now() + timedelta(-1)
 
@@ -79,12 +93,19 @@ class EventListAPIView(ListCreateAPIView):
             queryset = queryset.filter(event_date__lte=dt_reference)
         if state == "current":
             queryset = queryset.filter(event_date__gte=dt_reference)
-        return queryset
+
+        events = []
+
+        for event in queryset:
+            event.role = get_user_role(self.request.user, event)
+            events.append(event)
+
+        return events
 
 
 class EventUpdateAPIView(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = EventSerializers
+    serializer_class = EventSerializer
     model = serializer_class.Meta.model
 
     def get_queryset(self):
@@ -136,7 +157,7 @@ def sales_report(request, event_id):
 
     if by == "day":
         group = TruncDate('order__created')
-        queryset = queryset .annotate(group=group) \
+        queryset = queryset.annotate(group=group) \
             .values("group").annotate(value=calc).order_by("group")
         data = list(queryset)
     elif by == "month":
@@ -149,3 +170,31 @@ def sales_report(request, event_id):
         return Response(status=400)
 
     return Response({"data": data})
+
+
+class PartnerUpdateAPIView(UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PartnerSerializer
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        partner_id = self.kwargs['pk']
+        return self.model.objects.filter(id=partner_id)
+
+
+class PartnerCreateAPIView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PartnerCreateSerializer
+
+
+class PartnerListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PartnerSerializer
+    model = serializer_class.Meta.model
+
+    def get_queryset(self):
+        event_id = self.kwargs['event_id']
+        query = self.model.objects.filter(event_id=event_id)
+        return query
+
+

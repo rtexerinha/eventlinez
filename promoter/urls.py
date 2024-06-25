@@ -9,7 +9,7 @@ from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, ticke
 from event.views import event_list, event_create, event_remove, event_update
 from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, CategoryListAPIView, TicketTypeAPIView, \
     EventUpdateAPIView, TicketTypeUpdateAPIView, EventDetailsAPIView, sales_report, TicketTypeListView, \
-    EventCreateAPIView
+    EventCreateAPIView, PartnerCreateAPIView, PartnerUpdateAPIView, PartnerListView
 
 urlpatterns = [
     path('account/create/', signup_view_promoter, name='signup_promoter'),
@@ -84,6 +84,12 @@ urlpatterns = [
     # APIs ticketType
     path('api/ticket/type', TicketTypeAPIView.as_view()),
     path('api/ticket/type/update/<int:pk>', TicketTypeUpdateAPIView.as_view()),
-    path('api/event/<int:event_id>/tickets/type', TicketTypeListView.as_view())
+    path('api/event/<int:event_id>/tickets/type', TicketTypeListView.as_view()),
+
+
+    # APIs partner or doorman
+    path('api/partner', PartnerCreateAPIView.as_view()),
+    path('api/partner/update/<int:pk>', PartnerUpdateAPIView.as_view()),
+    path('api/event/<int:event_id>/partner', PartnerListView.as_view()),
 
 ]
