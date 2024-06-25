@@ -140,13 +140,14 @@ class Ticket(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(Decimal(0))]
     )
+    sold_out = models.BooleanField(default=False)
 
     def qty_available(self):
         qty_sold = self.qty_sold()
         return self.quantity - qty_sold
 
     def qty_sold(self):
-        _qty_sold = self.ticket_set.count()
+        _qty_sold = self.ticket_set.filter(isFree=False).count()
         return _qty_sold
 
     def __str__(self):

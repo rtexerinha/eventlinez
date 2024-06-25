@@ -239,26 +239,30 @@
 
          <!--ELSE to bank_information is NONE-->   
         {% else %}
-            <section class="container" style="min-height: 75vh">
-                <main class="col-12 mt-5 mb-5" style="min-height: 50vh; margin: auto;">
+            <section class="container" style="">
+                <main class="col-12" style="margin: auto; margin-top: 15%;">
                     <div class="row">
-                        <aside class="col-lg-6 pt-lg-4">
-                            <div class="col-12 pt-5" style="justify-content: center">
-                                <h3 class="col-12 h3-home mt-5" style="text-align: center;">
+                        <div class="col-lg-6 mt-5 mt-lg-2 pt-lg-5">
+                            <div style="width: 100%; margin: auto">
+                                <div id="event-div">
+                                <h3 class="col-12 h3-home" style="text-align: center;">
                                     Bank Account Information
                                 </h3>
-                                <h6 class="col-lg-10 col-12 h6-home mt-0 mt-lg-4"
+                                    {% comment %} <a href="{% url 'bank_create' %}" id="button-adm"
+                                        class="btn btn-secondary" style="margin-top: 10px;">Create
+                                    </a> {% endcomment %}
+                                    <h6 class="col-lg-10 col-12 h6-home mt-0 mt-lg-4"
                                     style="text-align: center;margin: auto">
                                     To receive payments it is necessary to register a bank account.
                                 </h6>
+                                </div>
                             </div>
+                        </div>
 
-                        </aside>
-
-                        <article class="col-lg-6 mt-5 mt-lg-2 pt-lg-5">
+                        <article class="col-lg-6 mt-5 mt-lg-2 pt-lg-5" style="text-align: center;">
                             <div style="width: 100%; margin: auto">
                                 <article id="event-div">
-                                    <h4 class="text-default centralized" style="font-size: 1rem">
+                                    <h4 class="text-default centralized h6-home pb-3" style="font-size: 1.25rem">
                                         Register Bank Information
                                     </h4>
                                     {% comment %} <a href="{% url 'bank_create' %}" id="button-adm"
@@ -271,7 +275,7 @@
                                             data-toggle="modal"
                                             data-target="#exampleModalBank">
                                         Create
-                                    </button> 
+                                    </button>
                                 </article>
                             </div>
                         </article>

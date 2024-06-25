@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 import json
 from django.contrib.auth.decorators import login_required
+from django.db.models.query_utils import Q
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+from itertools import chain
 
 from cart.models import Cart, CartItem
 from cart.views import _cart_id
@@ -121,7 +123,7 @@ def edit_guest(request):
 def guest_list(request):
     enddate = datetime.today() + timedelta(days=-1)
     tickets = Ticket.objects.filter(
-        customer=request.user.customer,
         event_ticket__event__event_date__gte=enddate).order_by('-created_at')
 
+    tickets = tickets.filter(Q(customer=request.user.customer) | Q(email=request.user.customer.email))
     return render(request, 'ticket/ticket_customer.html', {'tickets': tickets, 'PROD': settings.PROD})

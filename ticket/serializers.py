@@ -1,7 +1,10 @@
 from datetime import datetime
 from datetime import timedelta
 from rest_framework import serializers
+
+from customer.models import Customer
 from .models import Ticket
+from event.models import Ticket as TypeTicket
 
 
 class TicketSoldSerializers(serializers.Serializer):
@@ -12,10 +15,21 @@ class TicketSoldSerializers(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     checkin_date = serializers.DateTimeField(required=True)
     uuid = serializers.UUIDField(read_only=True)
+    email = serializers.EmailField()
+    customer = serializers.CharField(read_only=True)
+    isFree = serializers.SerializerMethodField(read_only=True)
+    is_email_sent = serializers.SerializerMethodField(read_only=True)
+    account_required = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Ticket
         fields = '__all__'
+
+    def get_isFree(self, obj):
+        return obj.isFree
+
+    def get_is_email_sent(self, obj):
+        return obj.is_email_sent
 
     def update(self, instance, validated_data):
 
@@ -40,3 +54,41 @@ class TicketSoldSerializers(serializers.Serializer):
             return instance
 
         raise serializers.ValidationError({'error': 'Invalid checkin_date'})
+
+
+class TicketCreateSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    checkin_date = serializers.DateTimeField(read_only=True)
+    uuid = serializers.UUIDField(read_only=True)
+    guest_name = serializers.CharField(max_length=161)
+    email = serializers.EmailField(max_length=80)
+    event_ticket = serializers.CharField(max_length=80)
+    account_required = serializers.BooleanField()
+    isFree = serializers.BooleanField()
+
+    class Meta:
+        model = Ticket
+        fields = '__all__'
+
+    def validate(self, data):
+        event_ticket = data['event_ticket']
+        email = data['email']
+
+        if Ticket.objects.filter(event_ticket=event_ticket, email=email).exists():
+            raise serializers.ValidationError("There is already a free ticket for this event with the same email.")
+
+        return data
+
+    def create(self, validated_data):
+        try:
+            event_ticket = validated_data['event_ticket']
+            email = validated_data['email']
+
+            validated_data['customer'] = Customer.objects.filter(email=email).first()
+            validated_data['event_ticket'] = TypeTicket.objects.get(id=event_ticket)
+        except Exception as e:
+            raise serializers.ValidationError(e)
+
+        return Ticket.objects.create(**validated_data)
+
