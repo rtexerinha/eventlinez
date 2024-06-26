@@ -11,18 +11,20 @@
 
 São necessárias algumas configurações no <nome-do-projeto> , como:
 
-| Variável         | Descrição                                                     | Valor Padrão |
-| ---------------- | ------------------------------------------------------------- | ------------ |
-| EVENTLINEZ_FEE   | Taxa de cobraça do eventlinez                                 |              |
-| APP_HOST         | URL base do sistema                                           |              |
-| STATIC_ROOT      | Diretório onde serão replicados os arquivos estáticos         | /static      |
-| DEBUG            | Faz com que o Django execute em modo Debug                    | False        |
-| SECRET_KEY       | Configura chave de segurança do Django                        |              |
-| ALLOWED_HOSTS    | Restringe os HOSTs que irão acessar a aplicação               | 127.0.0.1    | 
-| SENTRY_DSN       | Chave configuração de integração com a Sentry                 |              |
-| MEDIA_ROOT       | Local onde os arquivos de média serão armazenados             |              |
-| STRIPE_PUBLISHABLE_KEY | Chave do stripe                                         |              |
-| STRIPE_SECRET_KEY| Chave do stripe                                               |              |
+| Variável         | Descrição                                             | Valor Padrão |
+| ---------------- |-------------------------------------------------------| ------------ |
+| EVENTLINEZ_FEE   | Taxa de cobraça do eventlinez                         |              |
+| APP_HOST         | URL base do sistema                                   |              |
+| STATIC_ROOT      | Diretório onde serão replicados os arquivos estáticos | /static      |
+| DEBUG            | Faz com que o Django execute em modo Debug            | False        |
+| SECRET_KEY       | Configura chave de segurança do Django                |              |
+| ALLOWED_HOSTS    | Restringe os HOSTs que irão acessar a aplicação       | 127.0.0.1    | 
+| SENTRY_DSN       | Chave configuração de integração com a Sentry         |              |
+| MEDIA_ROOT       | Local onde os arquivos de média serão armazenados     |              |
+| STRIPE_PUBLISHABLE_KEY | Chave do stripe                                       |              |
+| STRIPE_SECRET_KEY| Chave do stripe                                       |              |
+| STRIPE_WEBHOOK_CHECKOUT_SIGNING_SECRET| Chave webhook do stripe                               |              |
+
 
 ## 🚀 Instalando <eventlinez>
 
