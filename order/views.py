@@ -94,7 +94,7 @@ def create(request):
 
 
 @csrf_exempt
-def stripe_webhook(request):
+def checkout_webhook(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
