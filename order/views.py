@@ -68,7 +68,8 @@ def create(request):
             emailAddress=request.user.customer.email,
             customer=request.user.customer,
             token=session_id,
-            payment_code=session.payment_intent
+            payment_code=session.payment_intent,
+            creation_method='CHECKOUT_SESSION'
         )
 
         items = cart.cartitem_set.filter(active=True)
@@ -172,7 +173,8 @@ def create_order(session):
         emailAddress=session.customer_details.email,
         customer=custome_id,
         token=session.id,
-        payment_code=session.payment_intent
+        payment_code=session.payment_intent,
+        creation_method='WEBHOOK'
     )
     return order
 

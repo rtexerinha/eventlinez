@@ -13,6 +13,12 @@ from promoter.models import Vendor
 from ticket.models import Ticket
 
 
+CREATION_METHOD_CHOICES = [
+    ('CHECKOUT_SESSION', 'Checkout Session'),
+    ('WEBHOOK', 'Webhook'),
+]
+
+
 class Order(models.Model):
     token = models.CharField(max_length=250, blank=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
@@ -30,6 +36,11 @@ class Order(models.Model):
     shippingCountry = models.CharField(max_length=200, blank=True)
     payment_code = models.CharField(max_length=200)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    creation_method = models.CharField(
+        max_length=20,
+        choices=CREATION_METHOD_CHOICES,
+        default='CHECKOUT_SESSION',
+    )
 
     class Meta:
         ordering = ['-created']
