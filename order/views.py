@@ -142,7 +142,7 @@ def fulfill_order(session, new_order):
     stripe.PaymentIntent.modify(
         session.payment_intent,
         metadata={"new_order_id": new_order.id},
-        description="%s (New Order #%s)" % (str(items.first().ticket), new_order.id)
+        description="%s (Order #%s)" % (str(items.first().ticket), new_order.id)
     )
 
     for item in items:
