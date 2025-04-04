@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:15
+    container_name: eventlinez_db
+    restart: always
+    environment:
+      POSTGRES_DB: eventlinez
+      POSTGRES_USER: eventlinez
+      POSTGRES_PASSWORD: Texera123@
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: event_app
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+      - static_volume:/app/static
+
+volumes:
+  pg_data:
+  media_volume:
+  static_volume:
