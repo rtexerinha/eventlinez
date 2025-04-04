@@ -145,3 +145,6 @@ eventlinez/media/CACHE/
 media/
 
 .vscode
+
+backup.sql
+/staticfiles/

@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import dj_database_url
+from sshtunnel import SSHTunnelForwarder
+
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,10 +24,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'wv3ra^smy9n*-^&oj%&h4ygkl7&#il(z$hc6$!*6ib+jhbx0rx'
+# SECRET_KEY = 'wv3ra^smy9n*-^&oj%&h4ygkl7&#il(z$hc6$!*6ib+jhbx0rx'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "chave-padrao-segura")
+DEBUG = os.getenv("DEBUG", "False").strip().lower() == "true"
+
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'chave_fake_para_teste')
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 # PROD = True
 PROD = os.environ.get('PROD', False)
@@ -94,14 +106,30 @@ WSGI_APPLICATION = 'eventlinez.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR + 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR + 'db.sqlite3',
+#     }
+# }
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
+
+DATABASES = {
+    'default': dj_database_url.config(default=os.getenv("DATABASE_URL"))
+}
+
+SSH_TUNNEL = SSHTunnelForwarder(
+    (os.getenv("SSH_TUNNEL_HOST"), int(os.getenv("SSH_TUNNEL_PORT"))),
+    ssh_username=os.getenv("SSH_TUNNEL_USER"),
+    ssh_password=os.getenv("SSH_TUNNEL_PASSWORD"),
+    remote_bind_address=('127.0.0.1', 5432)
+)
+
+SSH_TUNNEL.start()
+
+DATABASES['default']['HOST'] = '127.0.0.1'
+DATABASES['default']['PORT'] = str(SSH_TUNNEL.local_bind_port)
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -147,6 +175,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',  # <-- And here
     ],
 }
+
+SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 
 # import itens from excel
 IMPORT_EXPORT_USE_TRANSACTIONS = True
