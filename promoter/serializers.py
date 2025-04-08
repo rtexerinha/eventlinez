@@ -154,6 +154,7 @@ class TicketTypeSerializers(serializers.Serializer):
     event = serializers.CharField()
     quantity = serializers.IntegerField()
     price = serializers.DecimalField(decimal_places=2, max_digits=10)
+    sold_out = serializers.BooleanField(default=False)
 
     class Meta:
         model = Ticket
@@ -186,6 +187,9 @@ class TicketTypeSerializers(serializers.Serializer):
 
         if 'price' in validated_data:
             instance.price = validated_data['price']
+        
+        if 'sold_out' in validated_data:
+            instance.sold_out = validated_data['sold_out']
 
         instance.save()
 
