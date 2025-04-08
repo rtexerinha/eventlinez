@@ -125,7 +125,7 @@ class TicketTypeListView(ListAPIView):
 
     def get_queryset(self):
         event_id = self.kwargs['event_id']
-        queryset = self.model.objects.filter(event_id=event_id)
+        queryset = self.model.objects.filter(event_id=event_id, sold_out=False)
         return queryset
 
 class TicketSoldOutUpdateAPIView(APIView):
