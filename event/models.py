@@ -140,6 +140,7 @@ class Ticket(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(Decimal(0))]
     )
+    sold_out = models.BooleanField(default=False)
 
     def qty_available(self):
         qty_sold = self.qty_sold()
