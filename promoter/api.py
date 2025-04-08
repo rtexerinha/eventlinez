@@ -13,8 +13,12 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
-from event.models import Event
+
+from event.models import Event, Ticket
 from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers
 from promoter.util import transform_month
 
@@ -121,8 +125,20 @@ class TicketTypeListView(ListAPIView):
 
     def get_queryset(self):
         event_id = self.kwargs['event_id']
-        queryset = self.model.objects.filter(event_id=event_id)
+        queryset = self.model.objects.filter(event_id=event_id, sold_out=False)
         return queryset
+
+class TicketSoldOutUpdateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            ticket = Ticket.objects.get(pk=pk, event__promoter__user=request.user)
+            ticket.sold_out = request.data.get("sold_out", ticket.sold_out)
+            ticket.save()
+            return Response({"message": "Status atualizado com sucesso"}, status=status.HTTP_200_OK)
+        except Ticket.DoesNotExist:
+            return Response({"error": "Ticket não encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
