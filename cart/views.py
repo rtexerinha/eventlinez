@@ -14,6 +14,8 @@ from promoter.models import Vendor
 from .models import Cart, CartItem
 from django.conf import settings
 
+from django.contrib import messages 
+
 logger = logging.getLogger(__name__)
 
 
@@ -97,16 +99,25 @@ def change_quantity(request, item_id, operation):
 def cart_detail(request, cart_items=None):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
-        cart_items = CartItem.objects.filter(cart=cart, active=True)
-        item = cart_items.first()
-        promo_code = None
-        if item:
-            promo_code = item.promo_code
-        total = cart.amount()
+        
+        all_items = CartItem.objects.filter(cart=cart, active=True)
+        sold_out_items = all_items.filter(ticket__sold_out=True)
+
+        if sold_out_items.exists():
+            sold_out_names = [item.ticket.name for item in sold_out_items]
+            messages.warning(request, "The following items are no longer available: " + ", ".join(sold_out_names))
+        
+        cart_items = all_items.exclude(ticket__sold_out=True)
+
+        promo_code = cart_items.first().promo_code if cart_items.exists() else None
+        total = sum(item.price_total() for item in cart_items)
+
     except Cart.DoesNotExist:
-        logger.error("The cart doest not exist.")
+        logger.error("The cart does not exist.")
+        cart_items = []
+        promo_code = None
         total = 0
-        pass
+
     return render(request, 'cart.html', dict(total=total, cart_items=cart_items, promo_code=promo_code, PROD=settings.PROD))
 
 
@@ -130,6 +141,13 @@ def checkout(request):
     """
     cart = Cart.objects.get(cart_id=_cart_id(request))
     items = CartItem.objects.filter(cart=cart, active=True)
+
+    invalid_items = items.filter(ticket__sold_out=True)
+    if invalid_items.exists():
+        names = [item.ticket.name for item in invalid_items]
+        messages.error(request, "The following tickets are sold out: " + ", ".join(names))
+        return redirect('cart:cart_detail') 
+
     stripe.api_key = settings.STRIPE_SECRET_KEY
     line_items = []
 
