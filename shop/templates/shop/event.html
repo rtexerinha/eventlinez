@@ -84,8 +84,8 @@
                 </aside>
 
             <div class="col-12" style="padding: 0!important; min-height: 250px">
-                {% if available_tickets %}
-                    {% for ticket in available_tickets %}
+                {% for ticket in event.tickets.all %}
+                    {% if not ticket.sold_out %}
                         <aside class="col-12 mt-4">
                             <div id="ticket-row-{{ ticket.id }}" class="ticket-row row">
                                 <div class="col-8" style="display: block">
@@ -105,10 +105,11 @@
                                 </div>
                             </div>
                         </aside>
-                    {% endfor %}
-                {% else %}
-                    <p class="text-muted mt-3 text-center">No tickets available at the moment.</p>
-                {% endif %}
+                    {% endif %}
+                    {% empty %}
+                        <p class="text-muted mt-3 text-center">No tickets available at the moment.</p>
+                {% endfor %}
+
             </div>
 
             {% if event.qty_available <= 0%}
