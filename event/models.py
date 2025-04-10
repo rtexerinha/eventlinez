@@ -129,6 +129,10 @@ class Event(models.Model):
 
     def __str__(self):
         return '{}'.format(self.name)
+    
+    @property
+    def available_tickets(self):
+        return self.ticket_set.filter(sold_out=False)
 
 
 class Ticket(models.Model):

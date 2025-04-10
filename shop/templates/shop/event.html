@@ -84,27 +84,31 @@
                 </aside>
 
             <div class="col-12" style="padding: 0!important; min-height: 250px">
-                {% for ticket in event.tickets.all %}
-                    <aside class="col-12 mt-4">
-                        <div id="ticket-row-{{ ticket.id }}" class="ticket-row row">
-                            <div class="col-8" style="display: block">
-                                <p class="ticket-id" id="ticket-id" style="display: none">{{ ticket.id }}</p>
-                                <h6 class="weight-height h6-home">
-                                    {{ ticket.name }}
-                                </h6>
-                                <p class="ticket-price editable span-blue" style="color: #007AFF">
-                                    {{ ticket.price }}
-                                </p>
+                {% if available_tickets %}
+                    {% for ticket in available_tickets %}
+                        <aside class="col-12 mt-4">
+                            <div id="ticket-row-{{ ticket.id }}" class="ticket-row row">
+                                <div class="col-8" style="display: block">
+                                    <p class="ticket-id" id="ticket-id" style="display: none">{{ ticket.id }}</p>
+                                    <h6 class="weight-height h6-home">
+                                        {{ ticket.name }}
+                                    </h6>
+                                    <p class="ticket-price editable span-blue" style="color: #007AFF">
+                                        {{ ticket.price }}
+                                    </p>
+                                </div>
+                                <div class="col-4 mt-2" style="display: flex">
+                                    <!-- Quantity Buttons  -->
+                                    <button onclick="controlQty({{ ticket.id }}, 'decrease')" type="button" class="button-increment mr-2">-</button>
+                                    <h6 id="ticket-{{ ticket.id }}-qty" class="ticket-qty h6-home">0</h6>
+                                    <button onclick="controlQty({{ ticket.id }}, 'increase')" type="button" class="plus button-increment ml-2">+</button>
+                                </div>
                             </div>
-                            <div class="col-4 mt-2" style="display: flex">
-                                <!-- Quantity Buttons  -->
-                                <button onclick="controlQty({{ ticket.id }}, 'decrease')" type="button" class="button-increment mr-2">-</button>
-                                <h6 id="ticket-{{ ticket.id }}-qty" class="ticket-qty h6-home">0</h6>
-                                <button onclick="controlQty({{ ticket.id }}, 'increase')" type="button" class="plus button-increment ml-2">+</button>
-                            </div>
-                        </div>
-                    </aside>
-                {% endfor %}
+                        </aside>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mt-3 text-center">No tickets available at the moment.</p>
+                {% endif %}
             </div>
 
             {% if event.qty_available <= 0%}
