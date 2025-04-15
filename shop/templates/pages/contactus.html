@@ -20,16 +20,29 @@
                     </div>
 
                 </aside>
-
+                
                 <article class="col-lg-6 mt-5 mt-lg-2 pt-lg-5">
                     <div class="col-12">
                         <h4 class="h4-home weight-height pb-4">Send a message</h4>
-                        <form role="form" method="POST">
+                          <form role="form" method="POST">
+                            <!-- Replace the variables below. -->
+                          <script>
+                            function onSubmit(token) {
+                              document.getElementById("form").submit();
+                                       }
+                           </script>
                             {% csrf_token %}
                             <div class="form-group">
                                 {{ form.as_p }}
                             </div>
-                            <button type="submit" name="submit" class="float-right buttons-primary">Send</button>
+
+                            <button class="g-recaptcha"
+                                data-sitekey="6Ld-66UpAAAAAPIy7RomMLxZm45TAv-3IT5szOo6"
+                                data-callback='onSubmit'
+                                data-action='submit'>
+                               Submit
+                            </button>
+                            <!--<button type="submit" name="submit" class="float-right buttons-primary">Send</button> -->
                         </form>
                     </div>
                 </article>
