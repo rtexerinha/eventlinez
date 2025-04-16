@@ -10,8 +10,8 @@ urlpatterns = [
     path('search/ticket/sold/', search_ticket_sold, name='search_ticket_sold'),
 
     # APIs de ticketSold
-    path('api/search', TicketSoldListAPIView.as_view(), name='api_search_guest'),
-    path('api/checkin/<int:pk>', TicketSoldCheckinAPIView.as_view(),
+    path('api/search', TicketSoldListAPIView.as_view(), name='api_search_guest'), 
+    path('api/checkin/<int:pk>', TicketSoldCheckinAPIView.as_view(), # checkin ticket mobile
          name='api_checkin_guest'),
     path('api/checkin/qrcode/<uuid:uuid>', TicketSoldCheckinQrcodeAPIView.as_view(),
          name='api_checkin_qrcode'),

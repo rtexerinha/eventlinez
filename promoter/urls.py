@@ -77,7 +77,7 @@ urlpatterns = [
     path('api/event', EventListAPIView.as_view()),
     path('api/event/create', EventCreateAPIView.as_view()),
     path('api/event/update/<int:pk>', EventUpdateAPIView.as_view()),
-    path('api/event/<int:pk>', EventDetailsAPIView.as_view()),
+    path('api/event/<int:pk>', EventDetailsAPIView.as_view()), # Event details mobile
     path("api/event/<int:event_id>/salesReport", sales_report),
 
     path('api/categories', CategoryListAPIView.as_view()),

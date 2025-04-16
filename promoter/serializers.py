@@ -230,7 +230,7 @@ class PartnerCreateSerializer(serializers.Serializer):
         try:
             user = User.objects.get(username=email)
         except User.DoesNotExist:
-            raise serializers.ValidationError('User not Found')
+            raise serializers.ValidationError('The user with this email does not exist. The partner needs to register first.')
 
         queryset = Partner.objects.filter(user__username=email, event=self.initial_data["event_id"])
         if queryset.count() != 0:
