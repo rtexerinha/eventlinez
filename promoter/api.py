@@ -21,9 +21,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from .core.permissions import IsEventParticipant
+from promoter.models import Partner 
+
 
 from event.models import Event, Ticket
-from .serializers import PromoterSerializer, EventSerializers, CategoriaSerializers, TicketTypeSerializers
+from .serializers import PromoterSerializer, CategoriaSerializers, TicketTypeSerializers
 from promoter.util import transform_month
 from .serializers import PromoterSerializer, EventSerializer, CategoriaSerializers, TicketTypeSerializers, \
     PartnerSerializer, PartnerCreateSerializer, EventListSerializer
@@ -55,14 +58,18 @@ class PromoterListAPIView(ListAPIView):
 
 
 class EventDetailsAPIView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated, IsEventParticipant]
     serializer_class = EventListSerializer
     model = serializer_class.Meta.model
 
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        queryset = self.model.objects.filter(promoter__user=user, id=pk)
+
+        is_promoter = Q(promoter__user=user)
+        is_partner = Q(id__in=Partner.objects.filter(user=user).values_list('event_id', flat=True))
+
+        queryset = self.model.objects.filter((is_promoter | is_partner), id=pk)
 
         queryset_with_roles = []
 
