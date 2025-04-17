@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
-from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, ListCreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, ListCreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -66,19 +66,15 @@ class EventDetailsAPIView(ListAPIView):
         user = self.request.user
         pk = self.kwargs['pk']
 
-        is_promoter = Q(promoter__user=user)
-        is_partner = Q(id__in=Partner.objects.filter(user=user).values_list('event_id', flat=True))
+        is_promoter = Q(id=pk, promoter__user=user)
+        is_partner = Q(id=pk, id__in=Partner.objects.filter(user=user, role="PARTNER").values_list('event_id', flat=True))
 
-        queryset = self.model.objects.filter((is_promoter | is_partner), id=pk)
-
-        queryset_with_roles = []
+        queryset = self.model.objects.filter(is_promoter | is_partner)
 
         for event in queryset:
-            event.role = get_user_role(self.request.user, event)
-            queryset_with_roles.append(event)
+            event.role = get_user_role(user, event)
 
-        return queryset_with_roles
-
+        return queryset
 
 class EventCreateAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
