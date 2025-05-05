@@ -3,6 +3,10 @@ from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from .serializers import TicketSoldSerializers
 from .models import Ticket
+from event.models import Promoter
+
+from .core.permissions import IsDoormanAndAssignedToEvent
+from promoter.models import Partner 
 
 
 class TicketSoldListAPIView(ListAPIView):
@@ -27,14 +31,27 @@ class TicketSoldListAPIView(ListAPIView):
 
 
 class TicketSoldCheckinAPIView(UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsDoormanAndAssignedToEvent)
     serializer_class = TicketSoldSerializers
     model = serializer_class.Meta.model
 
     def get_queryset(self):
         user = self.request.user
         pk = self.kwargs['pk']
-        return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
+
+        if Promoter.objects.filter(user=user).exists():
+            return self.model.objects.filter(
+                event_ticket__event__promoter__user=user,
+                id=pk
+            )
+
+        if Partner.objects.filter(user=user, role='DOORMAN').exists():
+            return self.model.objects.filter(
+                event_ticket__event__partner__user=user,
+                id=pk
+            )
+
+        return self.model.objects.none()
 
 
 class TicketSoldDetailsAPIView(ListAPIView):
@@ -49,14 +66,25 @@ class TicketSoldDetailsAPIView(ListAPIView):
 
 
 class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsDoormanAndAssignedToEvent)
     serializer_class = TicketSoldSerializers
     model = serializer_class.Meta.model
-
     lookup_field = 'uuid'
 
     def get_queryset(self):
         user = self.request.user
         uuid = self.kwargs['uuid']
-        return self.model.objects.filter(
-            event_ticket__event__promoter__user=user, uuid=uuid)
+
+        if Promoter.objects.filter(user=user).exists():
+            return self.model.objects.filter(
+                event_ticket__event__promoter__user=user,
+                uuid=uuid
+            )
+
+        if Partner.objects.filter(user=user, role='DOORMAN').exists():
+            return self.model.objects.filter(
+                event_ticket__event__partner__user=user,
+                uuid=uuid
+            )
+
+        return self.model.objects.none()

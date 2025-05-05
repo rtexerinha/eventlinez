@@ -14,6 +14,7 @@ class BankAccountForm(ModelForm):
                    'routing_number': forms.TextInput(attrs={'placeholder': "123456789"}),
                    }
 
+
 class PaymentForm(ModelForm):
     class Meta:
         model = Payment

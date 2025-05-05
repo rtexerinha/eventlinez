@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from promoter.models import Vendor, BankAccount, Payment
+from promoter.models import Vendor, BankAccount, Payment, Partner
 from promoter.forms import PaymentForm
 
 
@@ -18,4 +18,9 @@ class BankAccountAdmin(admin.ModelAdmin):
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ['promoter', 'amount', 'created', 'description']
     form = PaymentForm
+
+
+@admin.register(Partner)
+class PartnerAdmin(admin.ModelAdmin):
+    list_display = ['email', 'role', 'event']
 

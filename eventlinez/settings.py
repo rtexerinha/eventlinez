@@ -33,6 +33,8 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "chave-padrao-segura")
 DEBUG = os.getenv("DEBUG", "False").strip().lower() == "true"
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'chave_fake_para_teste')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'chave_fake_para_teste')
+APP_HOST = os.getenv('APP_HOST', 'localhost')
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
@@ -68,6 +70,7 @@ INSTALLED_APPS = [
     'order',
     'ticket',
     'rest_framework',
+    'account',
     'rest_framework.authtoken',
 ]
 
