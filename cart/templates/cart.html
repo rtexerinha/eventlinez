@@ -5,6 +5,12 @@
 {% endblock %}
 {% block title %}Cart - Eventlinez{% endblock %}
 
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-warning">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
 {% block content %}
 	{% if not cart_items %}
         <section class="container mt-4 mb-5" style="min-height: 70vh">

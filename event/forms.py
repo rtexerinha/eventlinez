@@ -20,7 +20,7 @@ class CityForm(ModelForm):
 class TicketForm(ModelForm):
     class Meta:
         model = Ticket
-        fields = ['name', 'quantity', 'price', 'event']
+        fields = ['name', 'quantity', 'price', 'event', 'sold_out']
 
     def __init__(self, event_id=None, *args, **kwargs):
         super(TicketForm, self).__init__(*args, **kwargs)
