@@ -1,9 +1,12 @@
 import base64
-from rest_framework import serializers
-from django.core.files.base import ContentFile
+
 from django.contrib.auth.models import User
-from event.models import Promoter, Event, Category, Ticket
+from django.core.files.base import ContentFile
+from rest_framework import serializers
+
 from address.models import City
+from event.models import Promoter, Event, Category, Ticket
+from promoter.models import Partner
 
 
 class Base64ImageField(serializers.ImageField):
@@ -55,7 +58,7 @@ class CategoriaSerializers(serializers.Serializer):
         fields = '__all__'
 
 
-class EventSerializers(serializers.Serializer):
+class EventListSerializer(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()
     address = serializers.CharField()
@@ -70,6 +73,7 @@ class EventSerializers(serializers.Serializer):
     quantity = serializers.SerializerMethodField(read_only=True)
     amount = serializers.SerializerMethodField(read_only=True)
     url = serializers.SerializerMethodField(read_only=True)
+    role = serializers.CharField(read_only=True)
 
     class Meta:
         model = Event
@@ -89,6 +93,22 @@ class EventSerializers(serializers.Serializer):
 
     def get_url(self, obj):
         return obj.get_url()
+
+
+class EventSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    description = serializers.CharField()
+    address = serializers.CharField()
+    available = serializers.BooleanField(default=False)
+    image = Base64ImageField()
+    category = serializers.CharField()
+    event_date = serializers.DateTimeField()
+    city = serializers.CharField()
+    id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Event
+        fields = '__all__'
 
     def create(self, validated_data):
 
@@ -194,3 +214,61 @@ class TicketTypeSerializers(serializers.Serializer):
         instance.save()
 
         return instance
+
+
+class PartnerCreateSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    role = serializers.CharField()
+    disable = serializers.BooleanField(default=False)
+    event_id = serializers.IntegerField()
+
+    class Meta:
+        model = Partner
+        fields = ('email', 'role', 'event_id', 'disable')
+
+    def validate_email(self, email):
+        try:
+            user = User.objects.get(username=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError('The user with this email does not exist. The partner needs to register first.')
+
+        queryset = Partner.objects.filter(user__username=email, event=self.initial_data["event_id"])
+        if queryset.count() != 0:
+            raise serializers.ValidationError('The user is already a partner for this event')
+
+        if self.context["request"].user.email == email:
+            raise serializers.ValidationError('The event promoter cannot be a partner')
+
+        return email
+
+    def validate_event_id(self, event_id):
+        try:
+            Event.objects.get(pk=event_id)
+        except Event.DoesNotExist:
+            raise serializers.ValidationError('Event with provided ID does not exist')
+        return event_id
+
+    def create(self, validated_data):
+        user = User.objects.get(username=validated_data["email"])
+        return Partner.objects.create(user=user, **validated_data)
+
+
+class PartnerSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    email = serializers.CharField()
+    user = UserSerializer()
+    role = serializers.CharField()
+    disable = serializers.BooleanField(default=False)
+    event = serializers.CharField()
+    created_at = serializers.DateTimeField()
+
+    class Meta:
+        model = Partner
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save()
+        return instance
+
