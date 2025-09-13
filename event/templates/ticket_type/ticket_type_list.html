@@ -1,80 +1,339 @@
 {% extends "base_promoter.html" %}
 {% load static %}
-{% block title %}Events - Panel Admin{% endblock %}
-{% block stylesheets %}{% endblock stylesheets %}
+{% block title %}Ticket Types - {{ event.name }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+.dashboard-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 1px solid #f1f3f4;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #d90075, #ff6b9d);
+    color: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.stat-card.secondary {
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+}
+
+.stat-card.success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.stat-card.info {
+    background: linear-gradient(135deg, #17a2b8, #20c997);
+}
+
+.progress-container {
+    background-color: #e9ecef;
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+    margin: 5px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #d90075, #ff6b9d);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.table {
+    background-color: white;
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+    padding: 15px 12px;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    padding: 15px 12px;
+    vertical-align: middle;
+    background-color: white;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+.table-hover tbody tr:hover td {
+    background-color: #f8f9fa !important;
+}
+
+.action-btn {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    min-width: 32px;
+    text-align: center;
+}
+
+.action-btn.primary {
+    background-color: #d90075;
+    color: white;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    color: white;
+    text-decoration: none;
+}
+
+.create-ticket-btn {
+    background: linear-gradient(135deg, #d90075, #ff6b9d);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.create-ticket-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(217,0,117,0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.ticket-status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-available {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-low {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-sold-out {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.back-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    background: #5a6268;
+    color: white;
+    text-decoration: none;
+}
+</style>
+{% endblock stylesheets %}
 
 {% block content %}
-    <main>
-        <div class="container-fluid">
-            <h1 class="mt-4 title-dast">Type Ticket</h1>
-            {% if tickets %}
-            <article>
-                <div class="col-lg-12" style="display:flex;">
-                    <div class="col-lg-10 col-md-5"></div>
-                    <div class="col-lg-2 col-md-7 div-adm-newevent" style="justify-content: flex-end;">
-                        <a href="{% url 'ticket_create' event_id %}"
-                           id="button-adm"
-                            class="btn btn-secondary"
-                           style="margin-top: 10px;">
-                            New type
-                        </a>
+<main>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <div class="d-flex align-items-center mb-2">
+                    <a href="{% url 'events_promoter' %}" class="back-btn me-3">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Events
+                    </a>
+                    <div>
+                        <h1 class="mb-0" style="color: #2c3e50;">{{ event.name|truncatechars:50 }}</h1>
+                        <p class="text-muted mb-0">Ticket Types Management</p>
                     </div>
                 </div>
-
-
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" style="width: 99%">
-                        <thead>
-                            <tr style="background-color:#F4F4F4;">
-                                <th class="text-table text-bold">Ticket type</th>
-                                <th class="text-table text-bold">Quantity</th>
-                                <th class="text-table text-bold">Price<br>Qty</th>
-                                <th class="text-table text-bold"></th>
-{#                                <th class="text-table text-bold">Event <br>Sold</th>#}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ticket in tickets %}
-                                <tr>
-                                    <td class="text-table">
-                                        <a href="{% url 'ticket_update'  ticket.id%}" style="color: #d90075; font-size: 12px">
-                                            {{ ticket.name }}
-                                        </a>
-                                    </td>
-
-                                    <td class="text-table">{{ ticket.quantity }}</td>
-                                    <td class="text-table">{{ ticket.price }}</td>
-{#                                  <td class="text-table">{{ ticket.event }}</td>#}
-
-                                    <td colspan="3">
-                                        <div class="div-button-table" style="justify-content: flex-end">
-                                            <button class="button-link">
-                                                 <a href="{% url 'ticket_update'  ticket.id%}" class="icon_remove_a">
-                                                    <i style="color: #d90075" class="far fa-edit icon_remove"></i>
-                                                </a>
-                                            </button>
-                                        </div>
-                                    </td>
-
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </article>
-
-         {% else %}
-                <div style="width: 100%; margin: auto">
-                    <article id="event-div">
-                       <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
-                        <br>
-                        <h4 class="text-default centralized" style="font-size: 1rem">Create ticket types</h4>
-                        <p class="text-default centralized">General admission, Table, or other types </p>
-                        <a href="{% url 'ticket_create' event_id %}" id="button-adm"
-                           class="btn btn-secondary" style="margin-top: 10px;">New type</a>
-                    </article>
-                </div>
-            {% endif %}
+            </div>
+            <a href="{% url 'ticket_create' event_id %}" class="create-ticket-btn">
+                <i class="fas fa-plus me-2"></i>Add Ticket Type
+            </a>
         </div>
-    </main>
+
+        {% if tickets %}
+        <!-- Event Overview Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_tickets }}</h3>
+                            <p class="mb-0">Total Tickets</p>
+                        </div>
+                        <i class="fas fa-ticket-alt fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_sold }}</h3>
+                            <p class="mb-0">Tickets Sold</p>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_available }}</h3>
+                            <p class="mb-0">Available</p>
+                        </div>
+                        <i class="fas fa-tags fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card secondary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">${{ total_revenue|floatformat:2 }}</h3>
+                            <p class="mb-0">Total Revenue</p>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Progress -->
+        <div class="dashboard-card mb-4">
+            <h5 class="mb-3">Overall Sales Progress</h5>
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="progress-container" style="height: 12px;">
+                        <div class="progress-bar" style="width: {{ overall_percentage }}%"></div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <strong>{{ overall_percentage }}% Sold</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticket Types Table -->
+        <div class="dashboard-card">
+            <h4 class="mb-4"><i class="fas fa-list me-2"></i>Ticket Types Breakdown</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ticket Type</th>
+                            <th>Price</th>
+                            <th>Total Qty</th>
+                            <th>Sold</th>
+                            <th>Available</th>
+                            <th>Sales Progress</th>
+                            <th>Revenue</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in ticket_data %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>{{ data.ticket.name }}</strong>
+                                    {% if data.ticket.sold_out %}
+                                        <br><small class="text-danger"><i class="fas fa-ban me-1"></i>Marked as Sold Out</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <strong style="color: #28a745;">${{ data.ticket.price|floatformat:2 }}</strong>
+                            </td>
+                            <td class="text-center">
+                                <strong>{{ data.ticket.quantity }}</strong>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-primary">{{ data.sold }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark">{{ data.available }}</span>
+                            </td>
+                            <td>
+                                <div style="width: 100px;">
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: {{ data.percentage_sold }}%"></div>
+                                    </div>
+                                    <small class="text-muted">{{ data.percentage_sold }}%</small>
+                                </div>
+                            </td>
+                            <td>
+                                <strong style="color: #28a745;">${{ data.revenue|floatformat:2 }}</strong>
+                            </td>
+                            <td>
+                                {% if data.available == 0 or data.ticket.sold_out %}
+                                    <span class="ticket-status-badge status-sold-out">Sold Out</span>
+                                {% elif data.available <= 10 %}
+                                    <span class="ticket-status-badge status-low">Low Stock</span>
+                                {% else %}
+                                    <span class="ticket-status-badge status-available">Available</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'ticket_update' data.ticket.id %}" 
+                                   class="action-btn primary" title="Edit Ticket Type">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="dashboard-card text-center py-5">
+            <i class="fas fa-ticket-alt fa-5x text-muted mb-4"></i>
+            <h4 class="mb-3">Create Your First Ticket Type</h4>
+            <p class="text-muted mb-4">
+                Set up different ticket types for your event like General Admission, VIP, Early Bird, etc.
+            </p>
+            <a href="{% url 'ticket_create' event_id %}" class="create-ticket-btn">
+                <i class="fas fa-plus me-2"></i>Create Ticket Type
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</main>
 {% endblock content %}

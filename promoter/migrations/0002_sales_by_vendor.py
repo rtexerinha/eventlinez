@@ -12,23 +12,24 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(
-            """create or replace view sales_by_vendor as
-                    select ee.id,
-                           ee.id event_id,
-                           ee.name event_name,
-                           ev.id vendor_id,
-                           ev.first_name vendor_name,
-                           count(*) qty,
-                           sum(tt.price) amount
-                    from ticket_ticket tt,
-                         event_ticket et,
-                         event_event ee,
-                         promoter_vendor ev
-                    where tt.event_ticket_id = et.id
-                    and et.event_id = ee.id
-                    and tt.vendor_id = ev.id
-                    group by ee.id, ee.name,  ev.id,
-                             ev.first_name"""
-        ),
-    ]
+    migrations.RunSQL(
+        """drop view if exists sales_by_vendor;
+           create view sales_by_vendor as
+                select ee.id,
+                       ee.id event_id,
+                       ee.name event_name,
+                       ev.id vendor_id,
+                       ev.first_name vendor_name,
+                       count(*) qty,
+                       sum(tt.price) amount
+                from ticket_ticket tt,
+                     event_ticket et,
+                     event_event ee,
+                     promoter_vendor ev
+                where tt.event_ticket_id = et.id
+                and et.event_id = ee.id
+                and tt.vendor_id = ev.id
+                group by ee.id, ee.name, ev.id,
+                         ev.first_name"""
+    ),
+]
