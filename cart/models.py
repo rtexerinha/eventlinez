@@ -6,7 +6,9 @@ from event.models import Event
 from event.models import Ticket
 from django.core.validators import MinValueValidator
 
-from local_settings import EVENTLINEZ_FEE
+from django.conf import settings
+EVENTLINEZ_FEE = getattr(settings, "EVENTLINEZ_FEE", 0.12)
+
 
 
 class Cart(models.Model):

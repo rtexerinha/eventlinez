@@ -1,23 +1,32 @@
-# image: python:3.10
-FROM python:3.10
+FROM python:3.9-slim
 
-# Installing system dependencies
-RUN apt-get update && apt-get install -y \
-    && rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y postgresql-client
+# Core build tools + libs for Pillow/ReportLab/Postgres
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential gcc \
+    libpq-dev \
+    zlib1g-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY . .
+# Install PostgreSQL client
+RUN apt-get update && apt-get install -y postgresql-client
 
-# Installing Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install deps first to leverage layer caching
+COPY requirements.txt /app/
+RUN python -V && pip -V && pip install --no-cache-dir -r requirements.txt
 
-RUN pip install gunicorn
+# App code
+COPY . /app
 
-# Create a script to run the application
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+EXPOSE 8000
+# Replace "eventlinez" if your Django project package differs
+CMD ["gunicorn", "eventlinez.wsgi:application", "--bind", "0.0.0.0:8000"]

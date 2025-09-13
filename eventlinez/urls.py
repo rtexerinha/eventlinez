@@ -31,9 +31,14 @@ admin.site.index_title = 'Admin Panel'
 admin.site.site_title = 'Welcome Eventlinez'
 handler404 = shop.views.handler404
 handler500 = shop.views.handler500
+from django.conf import settings
+from django.conf.urls.static import static
 
+# Properly serve media and static files in development
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL,
-                          document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL,
-                          document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # In production, you should use a proper web server to serve media files
+    # This is a fallback to handle media files in production for testing purposes
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

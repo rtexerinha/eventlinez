@@ -1,16 +1,48 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
 
-from event.forms import EventForm, TicketForm, VendorForm
+from event.forms import EventForm, TicketForm, TicketUpdateForm, VendorForm
 from event.models import Event, Ticket
 from promoter.models import Vendor
 
 
 @login_required(login_url='/promoter/account/login/')
 def event_list(request):
+    from django.utils import timezone
+
     promoter = request.user.promoter.id
-    events = Event.objects.filter(promoter=promoter).order_by('-created')
-    return render(request, 'event/events_list.html', {'events': events})
+    events_list = Event.objects.filter(promoter=promoter).order_by('-created')
+
+    # Separate active and past events
+    active_events = events_list.filter(event_date__gte=timezone.now())
+    past_events = events_list.filter(event_date__lt=timezone.now())
+
+    # Calculate dashboard stats
+    total_events = events_list.count()
+    total_active = active_events.count()
+    total_past = past_events.count()
+
+    # Calculate total revenue and tickets sold
+    total_revenue = sum(event.get_amount() for event in events_list)
+    total_tickets_sold = sum(event.qty_sould() for event in events_list)
+    total_tickets_available = sum(event.quantity() for event in events_list)
+
+    # Add pagination - 10 events per page
+    paginator = Paginator(events_list, 10)
+    page_number = request.GET.get('page')
+    events = paginator.get_page(page_number)
+
+    return render(request, 'event/events_list.html', {
+        'events': events,
+        'events_count': total_events,
+        'active_events_count': total_active,
+        'past_events_count': total_past,
+        'total_revenue': total_revenue,
+        'total_tickets_sold': total_tickets_sold,
+        'total_tickets_available': total_tickets_available,
+        'active_events': active_events[:5],  # Top 5 active events for dashboard
+    })
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -63,40 +95,89 @@ def event_remove(request, event_id):
 def ticket_type_list(request):
     tickets = Ticket.objects.all()
     return render(request, 'ticket_type/ticket_type_list.html', {'tickets': tickets})
-
+# Check if this import exists at the top of the file, if not add it
+from django.core.paginator import Paginator
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_list_per_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
     tickets = Ticket.objects.filter(event=event_id)
-    return render(request, 'ticket_type/ticket_type_list.html', {'tickets': tickets, 'event_id': event_id})
+
+    # Calculate totals for the event
+    total_tickets = sum(ticket.quantity for ticket in tickets)
+    total_sold = sum(ticket.qty_sold() for ticket in tickets)
+    total_available = sum(ticket.qty_available() for ticket in tickets)
+    total_revenue = sum(ticket.qty_sold() * ticket.price for ticket in tickets)
+
+    # Calculate percentages for each ticket type
+    ticket_data = []
+    for ticket in tickets:
+        sold = ticket.qty_sold()
+        available = ticket.qty_available()
+        percentage_sold = (sold / ticket.quantity * 100) if ticket.quantity > 0 else 0
+        revenue = sold * ticket.price
+
+        ticket_data.append({
+            'ticket': ticket,
+            'sold': sold,
+            'available': available,
+            'percentage_sold': round(percentage_sold, 1),
+            'revenue': revenue
+        })
+
+    context = {
+        'tickets': tickets,
+        'ticket_data': ticket_data,
+        'event_id': event_id,
+        'event': event,
+        'total_tickets': total_tickets,
+        'total_sold': total_sold,
+        'total_available': total_available,
+        'total_revenue': total_revenue,
+        'overall_percentage': round((total_sold / total_tickets * 100) if total_tickets > 0 else 0, 1)
+    }
+
+    return render(request, 'ticket_type/ticket_type_list.html', context)
 
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_create(request, event_id):
+    # Get the event object to ensure it exists
+    event = get_object_or_404(Event, id=event_id)
+
     if request.method == 'POST':
-        form = TicketForm(data=request.POST)
+        form = TicketForm(request.POST)
         if form.is_valid():
-            ticket = Ticket(**form.cleaned_data)
-            # ticket.event = Event.objects.filter(id=event_id)
+            ticket = form.save(commit=False)
+            ticket.event = event  # Assign the event directly
             ticket.save()
-            tickets = Ticket.objects.filter(event__id=event_id)
-            return render(request, 'ticket_type/ticket_type_list.html', {'tickets': tickets, 'event_id': event_id})
-            # return redirect('ticket_type_list')
+            # Redirect back to ticket list for this event
+            return redirect('ticket_type_list_per_event', event_id=event_id)
     else:
-        form = TicketForm(event_id)
-    return render(request, 'ticket_type/ticket_type_create.html', {'form': form})
+        # For GET requests, create a simple form without event_id parameter
+        form = TicketForm()
+
+    return render(request, 'ticket_type/ticket_type_create.html', {
+        'form': form, 
+        'event': event,
+        'event_id': event_id
+    })
 
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_update(request, ticket_id):
-    form = None
     instance = get_object_or_404(Ticket, id=ticket_id)
-    if request.method == 'GET':
-        form = TicketForm(event_id=instance.event_id, instance=instance)
+
     if request.method == 'POST':
-        form = TicketForm(event_id=instance.event_id, data=request.POST, instance=instance)
+        form = TicketUpdateForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
-            tickets = Ticket.objects.filter(event=instance.event_id)
-            return render(request, 'ticket_type/ticket_type_list.html', {'tickets': tickets, 'event_id': instance.event_id})
-    return render(request, 'ticket_type/ticket_type_create.html', {'form': form})
+            return redirect('ticket_type_list_per_event', event_id=instance.event_id)
+    else:
+        form = TicketUpdateForm(instance=instance)
+
+    return render(request, 'ticket_type/ticket_type_create.html', {
+        'form': form, 
+        'event': instance.event,
+        'event_id': instance.event_id
+    })

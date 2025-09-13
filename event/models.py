@@ -127,6 +127,47 @@ class Event(models.Model):
         # TODO: Entender a necessidade de ter a categoria como parâmetro da URL
         return reverse('shop:product_event_detail', args=[self.category.slug, self.slug])
 
+    def is_active(self):
+        """Check if event is currently active (event date >= today)"""
+        from django.utils import timezone
+        return self.event_date >= timezone.now()
+
+    def status(self):
+        """Get event status as string"""
+        return 'Active' if self.is_active() else 'Past'
+
+    def status_class(self):
+        """Get CSS class for event status"""
+        return 'success' if self.is_active() else 'secondary'
+
+    def sales_percentage(self):
+        """Calculate percentage of tickets sold"""
+        total_qty = self.quantity()
+        if total_qty == 0:
+            return 0
+        return round((self.qty_sould() / total_qty) * 100, 1)
+
+    def revenue_data(self):
+        """Get revenue data for charts - simplified for now"""
+        from ticket.models import Ticket as TicketSold
+        from django.db.models import Count
+        from django.utils import timezone
+        from datetime import timedelta
+
+        # Get ticket sales over last 30 days
+        end_date = timezone.now()
+        start_date = end_date - timedelta(days=30)
+
+        # This is a simplified version - in reality you'd want daily sales data
+        total_revenue = self.get_amount()
+        total_sold = self.qty_sould()
+
+        return {
+            'total_revenue': float(total_revenue) if total_revenue else 0,
+            'total_sold': total_sold,
+            'sales_percentage': self.sales_percentage()
+        }
+
     def __str__(self):
         return '{}'.format(self.name)
 
