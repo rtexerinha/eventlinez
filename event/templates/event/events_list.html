@@ -1,176 +1,473 @@
 {% extends "base_promoter.html" %}
 {% load static %}
-{% block title %}Events Panel Admin{% endblock %}
-{% block stylesheets %}{% endblock stylesheets %}
+{% block title %}Events Dashboard{% endblock %}
+
+{% block stylesheets %}
+<style>
+.dashboard-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 1px solid #f1f3f4;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #d90075, #ff6b9d);
+    color: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.stat-card.secondary {
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+}
+
+.stat-card.success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.stat-card.info {
+    background: linear-gradient(135deg, #17a2b8, #20c997);
+}
+
+.event-status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-past {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.event-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 4px solid #d90075;
+    transition: transform 0.2s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.event-card.past {
+    border-left-color: #6c757d;
+    opacity: 0.8;
+}
+
+.progress-container {
+    background-color: #e9ecef;
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #d90075, #ff6b9d);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.chart-container {
+    height: 300px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.event-actions {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    min-width: 32px;
+    text-align: center;
+}
+
+.table {
+    background-color: white;
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+    padding: 15px 12px;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    padding: 15px 12px;
+    vertical-align: middle;
+    background-color: white;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+.table-hover tbody tr:hover td {
+    background-color: #f8f9fa !important;
+}
+
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+/* Remove the gray background from past events and use subtle styling instead */
+.table tbody tr.table-secondary {
+    background-color: white !important;
+    opacity: 0.7;
+}
+
+.table tbody tr.table-secondary td {
+    background-color: white !important;
+    color: #6c757d;
+}
+
+.table tbody tr.table-secondary:hover {
+    background-color: #f8f9fa !important;
+}
+
+.table tbody tr.table-secondary:hover td {
+    background-color: #f8f9fa !important;
+}
+
+.action-btn.primary {
+    background-color: #d90075;
+    color: white;
+}
+
+.action-btn.secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    color: white;
+    text-decoration: none;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.create-event-btn {
+    background: linear-gradient(135deg, #d90075, #ff6b9d);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.create-event-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(217,0,117,0.3);
+    color: white;
+    text-decoration: none;
+}
+</style>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock stylesheets %}
 
 {% block content %}
-    <main>
-        <div class="container-fluid">
-            <h1 class="mt-4 title-dast">Events</h1>
-            {% if events %}
+<main>
+    <div class="container-fluid">
+        <div class="dashboard-header">
             <div>
-                <div class="col-lg-12" style="display:flex;">
-                    <div class="col-lg-10 col-md-5"></div>
-                    <div class="col-lg-2 col-md-7 div-adm-newevent" style="justify-content: flex-end;">
-                        <a href="{% url 'new_events' %}"
-                           id="button-adm"
-                            class="btn btn-secondary"
-                           style="margin-top: 10px;">
-                            New Event
-                        </a>
+                <h1 class="mt-4 mb-0" style="color: #2c3e50;">Events Dashboard</h1>
+                <p class="text-muted">Manage your events and track performance</p>
+            </div>
+            <a href="{% url 'new_events' %}" class="create-event-btn">
+                <i class="fas fa-plus me-2"></i>Create New Event
+            </a>
+        </div>
+
+        {% if events %}
+        <!-- Dashboard Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ events_count }}</h3>
+                            <p class="mb-0">Total Events</p>
+                        </div>
+                        <i class="fas fa-calendar fa-2x opacity-75"></i>
                     </div>
                 </div>
-
-
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" style="width: 99%">
-                        <thead>
-                            <tr style="background-color:#F4F4F4;">
-                                <th class="text-table text-bold">Event</th>
-                                <th class="text-table text-bold">Date</th>
-                                <th class="text-table text-bold">Tickets <br>Qty</th>
-                                <th class="text-table text-bold">Tickets <br>Sold</th>
-                                <th class="text-table text-bold">Available <br>Qty</th>
-                                <th class="text-table text-bold">Amount</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for events in events %}
-                                <tr>
-                                    <td class="text-table">
-                                        <a href="{% url 'update_event'  events.id%}" style="color: #d90075; font-size: 12px">
-                                            {{ events.name }}
-                                        </a>
-                                    </td>
-                                    <td class="text-table">{{ events.event_date|date:'Y-m-d H:i' }}</td>
-                                    <td class="text-table">{{ events.quantity}}</td>
-                                    <td class="text-table">{{ events.qty_sould}}</td>
-                                    <td class="text-table">{{ events.qty_available}}</td>
-                                    <td class="text-table">{{ events.get_amount}}</td>
-                                    <td colspan="3">
-                                        <div class="div-button-table" style="justify-content: flex-end">
-                                            <button class="button-link">
-                                                 <a href="{% url 'ticket_type_list_per_event'  events.id%}" class="icon_remove_a">
-                                                    <i class="fas fa-ticket-alt" style="color: #d90075"></i>
-                                                </a>
-                                            </button>
-
-                                            <button class="button-link">
-                                                 <a href="{% url 'update_event'  events.id%}" class="icon_remove_a">
-                                                    <i style="color: #d90075" class="far fa-edit icon_remove"></i>
-                                                </a>
-                                            </button>
-                                            {% if  events.sales_info.amount_sould != 0 %}
-                                               <button class="button-link" data-toggle="modal" data-target="#exampleModal">
-                                                <i style="color: #d90075" class="fas fa-trash-alt icon_remove"></i>
-                                               </button>
-                                            {%  endif %}
-                                            {% if events.sales_info.amount_sould == 0 %}
-                                                <button class="button-link">
-                                                    <a href="{% url 'remove_event'  events.id%}" class="icon_remove_a">
-                                                        <i style=" color: #d90075" class="fas fa-trash-alt icon_remove"></i>
-                                                    </a>
-                                                </button>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ active_events_count }}</h3>
+                            <p class="mb-0">Active Events</p>
+                        </div>
+                        <i class="fas fa-play-circle fa-2x opacity-75"></i>
+                    </div>
                 </div>
             </div>
+            <div class="col-md-3">
+                <div class="stat-card info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">{{ total_tickets_sold }}</h3>
+                            <p class="mb-0">Tickets Sold</p>
+                        </div>
+                        <i class="fas fa-ticket-alt fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card secondary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0">${{ total_revenue|floatformat:2 }}</h3>
+                            <p class="mb-0">Total Revenue</p>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-
-
-                    <!-- MODAL NEW PAYOUT -->
-                    <aside class="modal fade"
-                           id="vendorModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                           aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Payout</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-
-                                <div class="modal-body">
-                                    <form enctype="multipart/form-data"
-                                          method="post" action="/promoter/vendor/new/{{ event.id }}/"
-                                          class="col-lg-12 ml-sm-4 pt-3"
-                                          style="margin-left: 0!important;
-                          padding-left: 5px!important;">
-                                        {% csrf_token %}
-
-                                        <div class="form-row">
-                                            <div class="form-group col-md-12 mb-0">
-                                                <label for="fname">Amount</label><br>
-                                                <input type="text" id="fname" name="fname" value="amount"><br>
-                                            </div>
-
-                                            <div class="form-group col-md-12 mb-0">
-                                                <label for="fname">Amount</label><br>
-                                                <input type="text" id="fname" name="fname" value="amount"><br>
-                                            </div>
-                                        </div>
-
-                                            <button type="submit" id="button-adm"
-                                                    class="btn btn-secondary"
-                                                  style="float: right;margin-top: 10px;border: 1px solid #d90075;">
-                                                Save
-                                            </button>
-                                        </form>
-                                         </div>
-
-                                <div class="modal-footer">
-                               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                </div>
+        <!-- Active Events with Charts -->
+        {% if active_events %}
+        <div class="dashboard-card">
+            <h4 class="mb-4"><i class="fas fa-chart-line me-2"></i>Active Events Performance</h4>
+            <div class="row">
+                {% for event in active_events %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ event.name|truncatechars:25 }}</h6>
+                            <canvas id="chart-{{ event.id }}" width="100" height="100"></canvas>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    {{ event.qty_sould }}/{{ event.quantity }} tickets sold
+                                    ({{ event.sales_percentage }}%)
+                                </small>
                             </div>
                         </div>
-                    </aside>
-
-
-
-
-            {% else %}
-                <div style="width: 100%; margin: auto">
-                    <article id="event-div">
-{#                        <i class="far fa-calendar-plus fa-5x" style="color: #d90075; padding-bottom: 20px"></i>#}
-                        <img src="{% static 'img/icon-calendar-updated.svg' %}" alt="caledar" style="padding-bottom: 20px"/>
-                        <br>
-                        <h4 class="text-default centralized">Create your first event</h4>
-                        <p class="text-default centralized">You do not have any events created yet.</p>
-                        <a href="{% url 'new_events' %}" id="button-adm"
-                           class="btn btn-secondary" style="margin-top: 10px;">New Event</a>
-                    </article>
+                    </div>
                 </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Events List -->
+        <div class="dashboard-card">
+            <h4 class="mb-4"><i class="fas fa-list me-2"></i>All Events</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-bold">Event</th>
+                            <th class="text-bold">Status</th>
+                            <th class="text-bold">Date</th>
+                            <th class="text-bold">Sales Progress</th>
+                            <th class="text-bold">Tickets<br><small>Sold/Total</small></th>
+                            <th class="text-bold">Available</th>
+                            <th class="text-bold">Revenue</th>
+                            <th class="text-bold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr {% if not event.is_active %}class="table-secondary"{% endif %}>
+                            <td>
+                                <div>
+                                    <a href="{% url 'update_event' event.id %}" 
+                                       style="color: #d90075; font-weight: 500; text-decoration: none;">
+                                        {{ event.name|truncatechars:40 }}
+                                    </a>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ event.city.name }}
+                                    </small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="event-status-badge status-{{ event.status|lower }}">
+                                    {{ event.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ event.event_date|date:'M d, Y' }}</strong><br>
+                                    <small class="text-muted">{{ event.event_date|date:'H:i' }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="width: 100px;">
+                                    <div class="progress-container">
+                                        <div class="progress-bar" style="width: {{ event.sales_percentage }}%"></div>
+                                    </div>
+                                    <small class="text-muted">{{ event.sales_percentage }}% sold</small>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <strong>{{ event.qty_sould }}</strong> / {{ event.quantity }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark">{{ event.qty_available }}</span>
+                            </td>
+                            <td>
+                                <strong style="color: #28a745;">${{ event.get_amount|floatformat:2 }}</strong>
+                            </td>
+                            <td>
+                                <div class="event-actions">
+                                    <a href="{% url 'ticket_type_list_per_event' event.id %}" 
+                                       class="action-btn primary" title="Manage Tickets">
+                                        <i class="fas fa-ticket-alt"></i>
+                                    </a>
+                                    <a href="{% url 'update_event' event.id %}" 
+                                       class="action-btn secondary" title="Edit Event">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if event.qty_sould == 0 %}
+                                    <a href="{% url 'remove_event' event.id %}" 
+                                       class="action-btn" style="background:#dc3545;color:white;" 
+                                       title="Delete Event"
+                                       onclick="return confirm('Are you sure you want to delete this event?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    {% else %}
+                                    <button class="action-btn" style="background:#6c757d;color:white;cursor:not-allowed;" 
+                                            title="Cannot delete event with sold tickets" disabled>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if events.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if events.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">&laquo; first</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ events.previous_page_number }}">previous</a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">{{ events.number }} of {{ events.paginator.num_pages }}</span>
+                    </li>
+
+                    {% if events.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ events.next_page_number }}">next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ events.paginator.num_pages }}">last &raquo;</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
             {% endif %}
         </div>
 
-        <!-- Modal -->
-        <aside class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
-             aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Error</h5>
+        {% else %}
+        <!-- Empty State -->
+        <div class="dashboard-card text-center py-5">
+            <i class="fas fa-calendar-plus fa-5x text-muted mb-4"></i>
+            <h4 class="mb-3">Create your first event</h4>
+            <p class="text-muted mb-4">You don't have any events created yet. Start by creating your first event to begin selling tickets.</p>
+            <a href="{% url 'new_events' %}" class="create-event-btn">
+                <i class="fas fa-plus me-2"></i>Create New Event
+            </a>
+        </div>
+        {% endif %}
+    </div>
 
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                 <p>You cannot delete this event because it already have tickets sold</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </aside>
-    </main>
+    <!-- Charts Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for event in active_events %}
+        var ctx{{ event.id }} = document.getElementById('chart-{{ event.id }}').getContext('2d');
+        new Chart(ctx{{ event.id }}, {
+            type: 'doughnut',
+            data: {
+                labels: ['Sold', 'Available'],
+                datasets: [{
+                    data: [{{ event.qty_sould }}, {{ event.qty_available }}],
+                    backgroundColor: ['#d90075', '#e9ecef'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        {% endfor %}
+    });
+    </script>
+</main>
 {% endblock content %}

@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:15
+    container_name: eventlinez_db
+    restart: always
+    environment:
+      POSTGRES_DB: eventlinez
+      POSTGRES_USER: eventlinez
+      POSTGRES_PASSWORD: Texera123@
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: event_app
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env.docker
+    environment:
+      - IN_DOCKER=true
+      - POSTGRES_HOST=db
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+      - static_volume:/app/static
+    platform: linux/amd64
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: eventlinez_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@eventlinez.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+volumes:
+  pg_data:
+  media_volume:
+  static_volume:
+
+# docker-compose.yml

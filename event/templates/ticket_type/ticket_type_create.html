@@ -1,52 +1,173 @@
 {% extends "base_promoter.html" %}
-{% load crispy_forms_filters %}
-{% load crispy_forms_tags %}
-{% crispy form form.helper %}
+{% load static %}
 
-{% block title %} Panel Admin -  Type Ticket{% endblock %}
+{% block title %}Ticket Type - {{ event.name|default:"Panel Admin" }}{% endblock %}
 
-<!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<style>
+.form-container {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    padding: 10px 12px;
+}
+
+.form-control:focus {
+    border-color: #d90075;
+    box-shadow: 0 0 0 0.2rem rgba(217, 0, 117, 0.25);
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #d90075, #ff6b9d);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(217,0,117,0.3);
+    color: white;
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    margin-right: 15px;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+    color: white;
+    text-decoration: none;
+}
+</style>
+{% endblock stylesheets %}
 
 {% block content %}
+<main>
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 style="color: #2c3e50;">
+                    {% if form.instance.pk %}Edit{% else %}Create{% endif %} Ticket Type
+                </h1>
+                {% if event %}
+                    <p class="text-muted mb-0">Event: <strong>{{ event.name }}</strong></p>
+                {% endif %}
+            </div>
+        </div>
 
-    <main>
-        <div class="container-fluid pb-5 mb-5">
-            <h1 class="mt-4 mb-4 title-dast">Type Ticket</h1>
-
-            <form enctype="multipart/form-data"
-                  method="post" class="col-lg-12 ml-sm-4"
-                  style="margin-left: 0!important;
-                          padding-left: 5px!important;">
+        <div class="form-container">
+            <form method="post">
                 {% csrf_token %}
-{#                <div class="form-row">#}
-{#                    <div class="form-group col-md-5 mb-0">#}
-{#                        {{ form|crispy }}#}
-{#                    </div>#}
-{##}
-{#                </div>#}
-                <div class="form-row">
-                    <div class="form-group col-md-12 mb-0">{{ form.event | as_crispy_field }}</div>
 
-                    <div class="form-group col-md-12 mb-0">{{ form.name | as_crispy_field }}</div>
+                {% if form.event %}
+                <div class="form-group mb-3">
+                    <label for="{{ form.event.id_for_label }}">{{ form.event.label }}</label>
+                    {{ form.event }}
+                    {% if form.event.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.event.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="form-group mb-3">
+                    <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.name.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted">e.g., General Admission, VIP, Early Bird</small>
                 </div>
 
-
-                <div class="form-row">
-                    <div class="form-group col-md-2 mb-0">{{ form.quantity | as_crispy_field }}</div>
-
-                    <div class="form-group col-md-2 mb-0">{{ form.price | as_crispy_field }}</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
+                            {{ form.quantity }}
+                            {% if form.quantity.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.quantity.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.price.id_for_label }}">{{ form.price.label }}</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.price }}
+                            </div>
+                            {% if form.price.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.price.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
 
-                <button type="submit" id="button-adm" class="btn btn-secondary" style="height: 40px;
-                        width: 140px;
-                       float: right;
-                       margin-top: 10px;
-                       border: 1px solid #d90075;">
-                    Save
-                </button>
+                <div class="form-group mb-4">
+                    <div class="form-check">
+                        {{ form.sold_out }}
+                        <label class="form-check-label" for="{{ form.sold_out.id_for_label }}">
+                            {{ form.sold_out.label }}
+                        </label>
+                    </div>
+                    {% if form.sold_out.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.sold_out.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <a href="{% if event_id %}{% url 'ticket_type_list_per_event' event_id %}{% else %}{% url 'events_promoter' %}{% endif %}" 
+                       class="btn-cancel">Cancel</a>
+                    <button type="submit" class="btn-save">
+                        {% if form.instance.pk %}Update{% else %}Create{% endif %} Ticket Type
+                    </button>
+                </div>
             </form>
         </div>
-    </main>
-
+    </div>
+</main>
 {% endblock content %}

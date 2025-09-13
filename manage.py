@@ -6,6 +6,12 @@ import sys
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eventlinez.settings')
+
+    # Check for --use-sqlite flag
+    if '--use-sqlite' in sys.argv:
+        os.environ['USE_SQLITE'] = 'true'
+        sys.argv.remove('--use-sqlite')
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
