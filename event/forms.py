@@ -5,7 +5,7 @@ from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 
 from address.models import City
 from event.models import Category, Event, Ticket
-from promoter.models import Vendor, Promoter  # <-- import Promoter here
+from promoter.models import Vendor, Promoter
 
 
 class CityForm(ModelForm):
@@ -61,13 +61,7 @@ class CategoryForm(ModelForm):
 
 
 class EventForm(ModelForm):
-    event_date = forms.DateTimeField(
-        input_formats=["%d/%m/%Y %H:%M"],
-        widget=DateTimePickerInput(
-            format="%d/%m/%Y %H:%M",
-            attrs={"id": "datetimepicker"},
-        ),
-    )
+    event_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DateTimePickerInput(format="%d/%m/%Y %H:%M", attrs={"id": "datetimepicker"}))
 
     class Meta:
         model = Event
