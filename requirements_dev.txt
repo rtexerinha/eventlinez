@@ -1,2 +1,4 @@
 model_bakery
 PyPDF2
+beautifulsoup4
+flake8
