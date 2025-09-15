@@ -19,12 +19,13 @@ class EventsHomeView(TestCase):
                             available=True, event_date=datetime.now() + timedelta(weeks=4))
         client = Client()
         response = client.get(reverse('index'))
-        events = response.context[-1]['events_futures']
-        self.assertEqual(4, len(events))
-        self.assertEqual(events[0], event3)
-        self.assertEqual(events[1], event4)
-        self.assertEqual(events[2], event2)
-        self.assertEqual(events[3], event1)
+        # When there are < 4 future events, they all go in events_all
+        events_all = response.context[-1]['events_all']
+        self.assertEqual(4, len(events_all))
+        self.assertEqual(events_all[0], event3)
+        self.assertEqual(events_all[1], event4)
+        self.assertEqual(events_all[2], event2)
+        self.assertEqual(events_all[3], event1)
 
 
 class EventModel(TestCase):
