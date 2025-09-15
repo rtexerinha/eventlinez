@@ -41,6 +41,13 @@ class TicketForm(ModelForm):
         return quantity
 
 
+class TicketUpdateForm(TicketForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hide event selection on update; event is determined by instance
+        self.fields["event"].widget = forms.HiddenInput()
+
+
 class VendorForm(ModelForm):
     class Meta:
         model = Vendor
