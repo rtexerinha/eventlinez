@@ -57,6 +57,9 @@ jobs:
         DEBUG: False
       run: |
         python manage.py collectstatic --noinput
+        # Drop problematic database views before running migrations
+        python manage.py drop_views --force || true
+        python manage.py migrate --noinput
         python manage.py test
     
     - name: Run linting
