@@ -384,6 +384,54 @@
             transform: rotate(360deg);
         }
     }
+
+    /* Pagination Styles */
+    .pagination-container {
+        margin: 40px 0;
+        padding: 20px 0;
+    }
+
+    .pagination {
+        margin-bottom: 10px;
+    }
+
+    .page-link {
+        color: #d90075;
+        border-color: #e9ecef;
+        padding: 8px 12px;
+        margin: 0 2px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .page-link:hover {
+        color: white;
+        background-color: #d90075;
+        border-color: #d90075;
+    }
+
+    .page-item.active .page-link {
+        background-color: #d90075;
+        border-color: #d90075;
+        color: white;
+    }
+
+    .pagination-info {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive Pagination */
+    @media (max-width: 768px) {
+        .pagination {
+            font-size: 0.8rem;
+        }
+
+        .page-link {
+            padding: 6px 8px;
+            margin: 0 1px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -398,7 +446,7 @@
     </div>
 
     <div class="tickets-container">
-        {% if all_tickets %}
+        {% if page_obj.object_list %}
         <!-- Statistics Section -->
         <div class="tickets-stats">
             <div class="stat-card">
@@ -427,7 +475,7 @@
 
         <!-- Tickets Grid -->
         <div class="tickets-grid" id="ticketsGrid">
-            {% for ticket in all_tickets %}
+            {% for ticket in page_obj.object_list %}
             <div class="ticket-card" data-event="{{ ticket.event_ticket.event.name|lower }}"
                 data-status="{% if ticket.event_ticket.event.event_date >= now %}upcoming{% else %}past{% endif %}">
 
@@ -484,6 +532,58 @@
             </div>
             {% endfor %}
         </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Tickets pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First page">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last page">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                </ul>
+            </nav>
+            <div class="pagination-info text-center mt-2">
+                <small class="text-muted">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+                    tickets
+                </small>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Save Section -->
         <div class="save-section">

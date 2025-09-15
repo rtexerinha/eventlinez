@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
+from django.core.files.base import ContentFile
 
 from event.models import Event
 
@@ -65,6 +66,42 @@ class EventGallery(models.Model):
     def increment_download_count(self):
         self.download_count += 1
         self.save(update_fields=['download_count'])
+    
+    def save(self, *args, **kwargs):
+        # Process image on first save (when creating new instance)
+        if not self.pk and self.photo:
+            try:
+                # Import here to avoid circular imports
+                from .utils import process_gallery_image, generate_unique_filename
+                
+                # Generate unique filename
+                unique_filename = generate_unique_filename(self.photo.name, prefix="gallery")
+                self.photo.name = unique_filename
+                
+                # Process the image (optimize and create thumbnail)
+                processed = process_gallery_image(self.photo)
+                
+                if processed['optimized_image']:
+                    # Replace original with optimized version
+                    self.photo.save(
+                        processed['optimized_image'].name,
+                        processed['optimized_image'],
+                        save=False
+                    )
+                
+                if processed['thumbnail'] and not self.thumbnail:
+                    # Save thumbnail
+                    self.thumbnail.save(
+                        processed['thumbnail'].name,
+                        processed['thumbnail'],
+                        save=False
+                    )
+                    
+            except Exception as e:
+                # Log error but don't fail the save
+                print(f"Error processing gallery image: {e}")
+        
+        super().save(*args, **kwargs)
 
 
 class CustomerPhotoDownload(models.Model):

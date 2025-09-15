@@ -33,7 +33,25 @@ def index(request, c_slug=None):
     
     # Get business partners and featured gallery photos
     business_partners = BusinessPartner.objects.filter(is_active=True).order_by('display_order', 'name')[:8]
-    featured_gallery = EventGallery.objects.filter(is_public=True, is_featured=True).select_related('event').order_by('-uploaded_at')[:6]
+    
+    # Get gallery albums (events with photos) instead of individual photos
+    from django.db.models import Count, Max, Q
+    gallery_albums = Event.objects.filter(
+        gallery_photos__is_public=True
+    ).annotate(
+        photo_count=Count('gallery_photos', filter=Q(gallery_photos__is_public=True)),
+        latest_upload=Max('gallery_photos__uploaded_at')
+    ).prefetch_related('gallery_photos').order_by('-latest_upload')[:6]
+    
+    # Add cover photo to each album and filter out albums without photos
+    albums_with_photos = []
+    for album in gallery_albums:
+        cover_photo = album.gallery_photos.filter(is_public=True).first()
+        if cover_photo:  # Only include albums that have at least one photo
+            album.cover_photo = cover_photo
+            albums_with_photos.append(album)
+    
+    gallery_albums = albums_with_photos
     
     return render(request, 'shop/home.html', {'detachs': detachs,
                                               'category': c_page,
@@ -41,7 +59,7 @@ def index(request, c_slug=None):
                                               'events_old': page[1],
                                               'events_all': page[2],
                                               'business_partners': business_partners,
-                                              'featured_gallery': featured_gallery,
+                                              'gallery_albums': gallery_albums,
                                               'PROD': settings.PROD
                                               })
 

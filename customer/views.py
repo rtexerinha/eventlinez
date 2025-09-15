@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
 
 from cart.models import Cart, CartItem
 from cart.views import _cart_id
@@ -140,6 +141,11 @@ def guest_list(request):
     
     # For now, show upcoming tickets by default (maintaining backward compatibility)
     tickets = upcoming_tickets
+    
+    # Add pagination to all_tickets (which is used in the template for filtering)
+    paginator = Paginator(all_tickets, 10)  # Show 10 tickets per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'ticket/ticket_customer.html', {
         'tickets': tickets,
@@ -150,5 +156,7 @@ def guest_list(request):
         'upcoming_count': upcoming_count,
         'past_count': past_count,
         'now': now,
+        'page_obj': page_obj,  # Add paginated tickets
+        'paginator': paginator,  # Add paginator object
         'PROD': settings.PROD
     })
