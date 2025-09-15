@@ -125,6 +125,10 @@ python manage.py drop_views --force || warning "Could not drop views (might not 
 python manage.py migrate --noinput
 success "Database migrations completed"
 
+# Create database views safely after migrations
+log "Creating database views..."
+python manage.py create_sales_view --force || warning "Could not create sales view (might not be needed)"
+
 # Step 9: Collect static files
 log "📁 Collecting static files..."
 python manage.py collectstatic --noinput --clear
