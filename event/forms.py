@@ -5,7 +5,7 @@ from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 
 from address.models import City
 from event.models import Category, Event, Ticket
-from promoter.models import Vendor, Promoter  # <-- import Promoter here
+from promoter.models import Vendor, Promoter
 
 
 class CityForm(ModelForm):
@@ -41,6 +41,13 @@ class TicketForm(ModelForm):
         return quantity
 
 
+
+class TicketUpdateForm(TicketForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hide event selection on update; event is determined by instance
+        self.fields["event"].widget = forms.HiddenInput()
+
 cursor/fix-ticket-update-form-import-error-dddf
 class TicketUpdateForm(ModelForm):
     class Meta:
@@ -61,6 +68,7 @@ class TicketUpdateForm(TicketForm):
 develop
 
 
+
 class VendorForm(ModelForm):
     class Meta:
         model = Vendor
@@ -74,13 +82,7 @@ class CategoryForm(ModelForm):
 
 
 class EventForm(ModelForm):
-    event_date = forms.DateTimeField(
-        input_formats=["%d/%m/%Y %H:%M"],
-        widget=DateTimePickerInput(
-            format="%d/%m/%Y %H:%M",
-            attrs={"id": "datetimepicker"},
-        ),
-    )
+    event_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DateTimePickerInput(format="%d/%m/%Y %H:%M", attrs={"id": "datetimepicker"}))
 
     class Meta:
         model = Event
