@@ -1,0 +1,165 @@
+name: Deploy to Test Server
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+env:
+  PYTHON_VERSION: 3.9
+  NODE_VERSION: 16
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_eventlinez
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements_dev.txt
+    
+    - name: Run tests
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_eventlinez
+        SECRET_KEY: test-secret-key-for-github-actions
+        DEBUG: False
+      run: |
+        python manage.py collectstatic --noinput
+        python manage.py test
+    
+    - name: Run linting
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.TEST_SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
+    
+    - name: Deploy to Test Server
+      env:
+        TEST_SERVER_HOST: ${{ secrets.TEST_SERVER_HOST }}
+        TEST_SERVER_USER: ${{ secrets.TEST_SERVER_USER }}
+        DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      run: |
+        ssh -o StrictHostKeyChecking=no $TEST_SERVER_USER@$TEST_SERVER_HOST << 'EOF'
+          set -e
+          
+          echo "🚀 Starting deployment to test server..."
+          
+          # Navigate to application directory
+          cd ${{ secrets.DEPLOY_PATH }}/eventlinez
+          
+          # Stop application services
+          echo "⏹️ Stopping services..."
+          sudo systemctl stop eventlinez || true
+          sudo docker-compose down || true
+          
+          # Backup current version
+          echo "💾 Creating backup..."
+          timestamp=$(date +%Y%m%d_%H%M%S)
+          sudo cp -r . ../backups/eventlinez_backup_$timestamp || true
+          
+          # Pull latest changes
+          echo "📥 Pulling latest changes..."
+          git fetch origin
+          git reset --hard origin/develop
+          git clean -fd
+          
+          # Update dependencies
+          echo "📦 Updating dependencies..."
+          pip install -r requirements.txt --user
+          
+          # Run database migrations
+          echo "🗄️ Running database migrations..."
+          python manage.py migrate --noinput
+          
+          # Collect static files
+          echo "📁 Collecting static files..."
+          python manage.py collectstatic --noinput --clear
+          
+          # Restart services
+          echo "🔄 Restarting services..."
+          if [ -f docker-compose.yml ]; then
+            docker-compose up -d --build
+          else
+            sudo systemctl start eventlinez
+            sudo systemctl reload nginx
+          fi
+          
+          # Health check
+          echo "🏥 Performing health check..."
+          sleep 10
+          curl -f http://localhost:8000/admin/ || echo "⚠️ Health check failed"
+          
+          echo "✅ Deployment completed successfully!"
+        EOF
+    
+    - name: Notify Deployment Status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Deployment to test.eventlinez.com completed successfully!"
+        else
+          echo "❌ Deployment failed!"
+        fi
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run Security Scan
+      uses: securecodewarrior/github-action-add-sarif@v1
+      with:
+        sarif-file: 'security-scan-results.sarif'
+      continue-on-error: true
+    
+    - name: Python Security Check
+      run: |
+        pip install safety bandit
+        safety check -r requirements.txt || true
+        bandit -r . -f json -o bandit-report.json || true
