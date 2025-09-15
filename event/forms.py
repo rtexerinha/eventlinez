@@ -41,19 +41,12 @@ class TicketForm(ModelForm):
         return quantity
 
 
-class TicketUpdateForm(ModelForm):
-    class Meta:
-        model = Ticket
+class TicketUpdateForm(TicketForm):
+    """Update form that inherits TicketForm and prevents lowering quantity below sold."""
+    
+    class Meta(TicketForm.Meta):
+        # Override to exclude event field for updates
         fields = ["name", "quantity", "price", "sold_out"]
-        # Exclude event field since we don't want to change it during update
-
-    def clean_quantity(self):
-        quantity = self.cleaned_data["quantity"]
-        if not getattr(self.instance, "pk", None):
-            return quantity
-        if quantity < self.instance.qty_sold():
-            raise ValidationError("Ticket quantity cannot be less than quantity sold")
-        return quantity
 
 
 class VendorForm(ModelForm):
