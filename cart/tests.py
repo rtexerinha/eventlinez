@@ -156,7 +156,7 @@ class CardDetailViewTest(TestCase):
     @override_settings(EVENTLINEZ_FEE=0.12)
     def test_itens_adicionados_ao_carrinho_devem_ser_exibidos_na_listagem_de_tickets(self):
         payload = {
-            "promocode": None,
+            "promo_code": None,
             "tickets": [
                 {"id": self.camarote.id, "quantity": 1},
                 {"id": self.frontstage.id, "quantity": 1},
