@@ -398,7 +398,7 @@
     </div>
 
     <div class="tickets-container">
-        {% if tickets %}
+        {% if all_tickets %}
         <!-- Statistics Section -->
         <div class="tickets-stats">
             <div class="stat-card">
@@ -427,7 +427,7 @@
 
         <!-- Tickets Grid -->
         <div class="tickets-grid" id="ticketsGrid">
-            {% for ticket in tickets %}
+            {% for ticket in all_tickets %}
             <div class="ticket-card" data-event="{{ ticket.event_ticket.event.name|lower }}"
                 data-status="{% if ticket.event_ticket.event.event_date >= now %}upcoming{% else %}past{% endif %}">
 

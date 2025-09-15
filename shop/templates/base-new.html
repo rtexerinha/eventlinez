@@ -1,89 +1,96 @@
 {% load static %}
 
 <!DOCTYPE html>
-    <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-            <meta name="description" content="{% block metadescription %}{% endblock %}">
-            <link rel="shortcut icon" type="image/jpg" href="{% static 'img/logosmall.jpg' %}"/>
-            <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
-                  rel="stylesheet">
+<html lang="en">
 
-            <link rel="stylesheet" href="{% static 'css/resert.css' %}">
-            <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-            <link rel="stylesheet" href="{% static 'css/style2.css' %}">
-            <link rel="stylesheet" href="{% static 'css/typography.css' %}">
-            <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-            <link rel="stylesheet" href="{% static 'css/styles-auxiliary-screen.css' %}">
-            <link rel="stylesheet" href="{% static 'css/ux.css' %}">
-            <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-            <link rel="stylesheet" href="{% static 'css/swiper.css' %}">
-            <link rel="stylesheet" type="text/css" href="{% static 'css/fontawesome-all.min.css' %}">
-            
-            <!-- recaptcha  expired-->
-            <!-- <script src="https://www.google.com/recaptcha/enterprise.js?render=6Ld-66UpAAAAAPIy7RomMLxZm45TAv-3IT5szOo6"></script> -->
-            
-              
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{% block metadescription %}{% endblock %}">
+    <link rel="shortcut icon" type="image/jpg" href="{% static 'img/logosmall.jpg' %}" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
-            <title>{% block title %}{% endblock %}</title>
-        </head>
+    <link rel="stylesheet" href="{% static 'css/resert.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style2.css' %}">
+    <link rel="stylesheet" href="{% static 'css/typography.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles-auxiliary-screen.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ux.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/swiper.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/fontawesome-all.min.css' %}">
 
-        <body class="container-body">
-                {% include 'navbar-new.html' %}
-                {% block content %}
-                {% endblock %}
-                {% include 'footer-new.html' %}
+    <!-- Custom CSS block for page-specific styles -->
+    {% block custom_css %}{% endblock %}
 
-                {% if PROD %}
-                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VK3K55HR9E"></script>
-                    <script>
-                        window.dataLayer = window.dataLayer || [];
-                        function gtag(){dataLayer.push(arguments);}
-                        gtag('js', new Date());
-                        gtag('config', 'G-VK3K55HR9E');
-                    </script>
-                {% endif %}
+    <!-- recaptcha  expired-->
+    <!-- <script src="https://www.google.com/recaptcha/enterprise.js?render=6Ld-66UpAAAAAPIy7RomMLxZm45TAv-3IT5szOo6"></script> -->
 
-                {% if PROD %}
-                <script>
-                    // Replace 'your_pixel_id' with your actual Pixel ID
-                    var pixelId = '1384266455408952';
-                  
-                    !function(f,b,e,v,n,t,s)
-                    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                    n.queue=[];t=b.createElement(e);t.async=!0;
-                    t.src=v;s=b.getElementsByTagName(e)[0];
-                    s.parentNode.insertBefore(t,s)}(window, document,'script',
-                    'https://connect.facebook.net/en_US/fbevents.js');
-                  
-                    // Initialize the Pixel with your Pixel ID
-                    fbq('init', pixelId);
-                  
-                    // Track the purchase event without specifying the value
-                  fbq('track', 'PageView');
-                  fbq('track', 'Purchase');
-                  </script>
-                  <noscript><img height="1" width="1" style="display:none"
-                    src="https://www.facebook.com/tr?id=1384266455408952&ev=PageView&noscript=1"
-                  /></noscript>
-                
 
-                {% endif %}
 
-            <script src="https://unpkg.com/swiper/swiper-bundle.js"></script>
-            <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-            <script src="{% static  'js/swiper.js' %}"></script>
-            <script src="{% static  'js/jquery-3.4.1.js' %}"></script>
+    <title>{% block title %}{% endblock %}</title>
+</head>
 
-            {% block custom_js %}{% endblock %}
-            {% block cart_js  %}{% endblock %}
-                <script src="{% static 'js/cart.js' %}"></script>
-            <script src="{% static 'js/popper.min.js' %}"></script>
-            <script src="{% static 'js/bootstrap.min.js' %}"></script>
-        </body>
-    </html>
+<body class="container-body">
+    {% include 'navbar-new.html' %}
+    {% block content %}
+    {% endblock %}
+    {% include 'footer-new.html' %}
+
+    {% if PROD %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VK3K55HR9E"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-VK3K55HR9E');
+    </script>
+    {% endif %}
+
+    {% if PROD %}
+    <script>
+        // Replace 'your_pixel_id' with your actual Pixel ID
+        var pixelId = '1384266455408952';
+
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+
+        // Initialize the Pixel with your Pixel ID
+        fbq('init', pixelId);
+
+        // Track the purchase event without specifying the value
+        fbq('track', 'PageView');
+        fbq('track', 'Purchase');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=1384266455408952&ev=PageView&noscript=1" /></noscript>
+
+
+    {% endif %}
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.js"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="{% static  'js/swiper.js' %}"></script>
+    <script src="{% static  'js/jquery-3.4.1.js' %}"></script>
+
+    {% block custom_js %}{% endblock %}
+    {% block cart_js %}{% endblock %}
+    <!-- <script src="{% static 'js/cart.js' %}"></script> -->
+    <!-- Temporarily disabled old cart.js as it conflicts with current cart template -->
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</body>
+
+</html>

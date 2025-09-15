@@ -17,7 +17,7 @@ def event_list(request):
     now = timezone.now()
     
     # Optimize queries with select_related and prefetch_related
-    events_list = Event.objects.filter(promoter=promoter).select_related('city').prefetch_related('ticket_set').order_by('-created')
+    events_list = Event.objects.filter(promoter=promoter).select_related('city').prefetch_related('tickets').order_by('-created')
 
     # Separate active and past events with optimized queries
     active_events = events_list.filter(event_date__gte=now)

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Ticket Purchase - Eventlinez</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #d90075, #ff6b9d);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .content {
+            background: #f9f9f9;
+            padding: 30px 20px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .cart-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #d90075;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #d90075;
+            margin-bottom: 5px;
+        }
+
+        .ticket-name {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .event-details {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #d90075;
+            text-align: right;
+        }
+
+        .total {
+            background: #d90075;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .cta-button {
+            display: block;
+            background: linear-gradient(135deg, #d90075, #ff6b9d);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 30px auto;
+            max-width: 250px;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(217, 0, 117, 0.3);
+        }
+
+        .urgency {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            color: #856404;
+        }
+
+        .footer {
+            text-align: center;
+            color: #777;
+            font-size: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Don't Miss Out!</h1>
+        <p>You have {{ items_count }} ticket{{ items_count|pluralize }} waiting in your cart</p>
+    </div>
+
+    <div class="content">
+        <h2>Hello {{ customer_name }},</h2>
+
+        <p>You left some amazing event tickets in your cart at Eventlinez. Don't let these opportunities slip away!</p>
+
+        {% for item in cart_items %}
+        <div class="cart-item">
+            <div class="event-name">{{ item.event_name }}</div>
+            <div class="ticket-name">{{ item.ticket_name }}</div>
+            <div class="event-details">
+                📅 {{ item.event_date|date:"F j, Y at g:i A" }}<br>
+                🎫 Quantity: {{ item.quantity }}
+            </div>
+            <div class="price">${{ item.total_price }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="total">
+            Total: ${{ total_amount }}
+        </div>
+
+        {% if minutes_since_abandonment > 60 %}
+        <div class="urgency">
+            ⚠️ You added these tickets {{ minutes_since_abandonment }} minutes ago. Popular events sell out fast!
+        </div>
+        {% endif %}
+
+        <a href="{{ cart_url }}" class="cta-button">
+            Complete Your Purchase Now
+        </a>
+
+        <p style="text-align: center; color: #666;">
+            Don't wait too long - these tickets might sell out soon!
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <p><strong>Why choose Eventlinez?</strong></p>
+            <p>✓ Secure payment processing<br>
+                ✓ Instant ticket delivery<br>
+                ✓ 24/7 customer support<br>
+                ✓ Mobile-friendly QR codes</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This email was sent because you added tickets to your cart.</p>
+        <p>If you no longer wish to receive these reminders, please contact us.</p>
+        <p>&copy; 2025 Eventlinez. All rights reserved.</p>
+    </div>
+</body>
+
+</html>

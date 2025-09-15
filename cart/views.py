@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from event.models import Ticket
 from promoter.models import Vendor
 from .models import Cart, CartItem
+from .utils import track_cart_abandonment, mark_cart_converted
 from django.conf import settings
 
 from django.contrib import messages 
@@ -118,6 +119,21 @@ def cart_detail(request, cart_items=None):
         promo_code = None
         total = 0
 
+    # Track cart abandonment if user has items in cart
+    if cart_items and request.user.is_authenticated:
+        try:
+            customer_email = getattr(request.user, 'email', '')
+            if not customer_email and hasattr(request.user, 'customer'):
+                customer_email = request.user.customer.email
+            
+            track_cart_abandonment(
+                cart_id=_cart_id(request),
+                user=request.user,
+                email=customer_email
+            )
+        except Exception as e:
+            logger.warning(f"Failed to track cart abandonment: {e}")
+
     return render(request, 'cart.html', dict(total=total, cart_items=cart_items, promo_code=promo_code, PROD=settings.PROD))
 
 
@@ -180,6 +196,12 @@ def checkout(request):
         client_reference_id=cart.id,
         allow_promotion_codes=True
     )
+
+    # Mark cart as about to be converted (we'll mark as fully converted in order processing)
+    try:
+        mark_cart_converted(cart.cart_id, order_id=session.id)
+    except Exception as e:
+        logger.warning(f"Failed to mark cart as converted: {e}")
 
     return JsonResponse({
         'session_id': session.id,
