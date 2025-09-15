@@ -118,6 +118,10 @@ fi
 
 # Step 8: Run database migrations
 log "🗄️ Running database migrations..."
+# Drop problematic database views before migrations
+log "Dropping problematic database views..."
+python manage.py drop_views --force || warning "Could not drop views (might not exist)"
+
 python manage.py migrate --noinput
 success "Database migrations completed"
 
