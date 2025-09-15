@@ -30,6 +30,19 @@ class Command(BaseCommand):
         ]
 
         with connection.cursor() as cursor:
+            # First, check if views exist
+            cursor.execute("""
+                SELECT viewname FROM pg_views 
+                WHERE schemaname = 'public' 
+                AND viewname IN ('sales_by_vendor')
+            """)
+            existing_views = [row[0] for row in cursor.fetchall()]
+            
+            if not existing_views:
+                self.stdout.write(
+                    self.style.SUCCESS('No problematic views found to drop')
+                )
+            
             for view_name in views_to_drop:
                 try:
                     self.stdout.write(f'Attempting to drop view: {view_name}')

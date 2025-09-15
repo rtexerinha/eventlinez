@@ -13,23 +13,33 @@ class Migration(migrations.Migration):
 
     operations = [
     migrations.RunSQL(
-        """drop view if exists sales_by_vendor;
-           create view sales_by_vendor as
-                select ee.id,
-                       ee.id event_id,
-                       ee.name event_name,
-                       ev.id vendor_id,
-                       ev.first_name vendor_name,
-                       count(*) qty,
-                       sum(tt.price) amount
-                from ticket_ticket tt,
-                     event_ticket et,
-                     event_event ee,
-                     promoter_vendor ev
-                where tt.event_ticket_id = et.id
-                and et.event_id = ee.id
-                and tt.vendor_id = ev.id
-                group by ee.id, ee.name, ev.id,
-                         ev.first_name"""
+        """drop view if exists sales_by_vendor cascade;
+           -- Check if all required tables exist before creating view
+           DO $$
+           BEGIN
+               IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ticket_ticket') AND
+                  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'event_ticket') AND
+                  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'event_event') AND
+                  EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'promoter_vendor') THEN
+                  
+                  EXECUTE 'create view sales_by_vendor as
+                           select ee.id,
+                                  ee.id as event_id,
+                                  ee.name as event_name,
+                                  ev.id as vendor_id,
+                                  ev.first_name as vendor_name,
+                                  count(*) as qty,
+                                  sum(tt.price) as amount
+                           from ticket_ticket tt,
+                                event_ticket et,
+                                event_event ee,
+                                promoter_vendor ev
+                           where tt.event_ticket_id = et.id
+                           and et.event_id = ee.id
+                           and tt.vendor_id = ev.id
+                           group by ee.id, ee.name, ev.id, ev.first_name';
+               END IF;
+           END $$;""",
+        reverse_sql="DROP VIEW IF EXISTS sales_by_vendor CASCADE;"
     ),
 ]
