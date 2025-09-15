@@ -1,0 +1,387 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .upload-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .drag-drop-area {
+        border: 3px dashed #d1ecf1;
+        border-radius: 8px;
+        padding: 40px 20px;
+        text-align: center;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        margin: 20px 0;
+    }
+
+    .drag-drop-area.dragover {
+        border-color: #007bff;
+        background: #e3f2fd;
+    }
+
+    .drag-drop-area:hover {
+        border-color: #007bff;
+        background: #f0f8ff;
+    }
+
+    .drag-drop-icon {
+        font-size: 48px;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+
+    .upload-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-right: 15px;
+    }
+
+    .upload-btn:hover {
+        background: #0056b3;
+    }
+
+    .upload-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .file-list {
+        margin-top: 20px;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+    }
+
+    .file-item {
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .file-item:last-child {
+        border-bottom: none;
+    }
+
+    .progress {
+        width: 100%;
+        height: 20px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: #007bff;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .message {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+    }
+
+    .message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <h1>{{ title }}</h1>
+    <p>Upload multiple gallery photos at once. Images will be automatically optimized.</p>
+
+    <form id="upload-form" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Event Selection -->
+        <div class="form-group">
+            <label for="event_id">Select Event:</label>
+            <select id="event_id" name="event_id" class="form-control" required>
+                <option value="">Choose an event...</option>
+                {% for event in events %}
+                <option value="{{ event.id }}">{{ event.name }} - {{ event.event_date|date:"M d, Y" }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- File Upload Area -->
+        <div class="form-group">
+            <label>Select Photos:</label>
+            <div class="drag-drop-area" id="drag-drop-area">
+                <div class="drag-drop-icon">📷</div>
+                <div>
+                    <strong>Drag and drop your images here</strong><br>
+                    or <strong>click to browse</strong>
+                </div>
+                <div style="margin-top: 10px; font-size: 14px; color: #666;">
+                    Supports JPEG, PNG, GIF, WebP | Maximum 10MB per image
+                </div>
+            </div>
+            <input type="file" id="file-input" name="photos" multiple accept="image/*" style="display: none;">
+        </div>
+
+        <!-- Selected Files -->
+        <div id="file-list" class="file-list" style="display: none;">
+            <h4>Selected Files:</h4>
+            <div id="file-items"></div>
+        </div>
+
+        <!-- Optional Fields -->
+        <div class="form-group">
+            <label for="title_prefix">Title Prefix (Optional):</label>
+            <input type="text" id="title_prefix" name="title_prefix" class="form-control"
+                placeholder="e.g., Event Highlights">
+            <small>If provided, each photo will get this prefix + number</small>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description (Optional):</label>
+            <textarea id="description" name="description" class="form-control" rows="3"
+                placeholder="Description for all uploaded photos"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="is_featured" name="is_featured">
+                Mark all photos as featured
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="is_public" name="is_public" checked>
+                Make all photos public
+            </label>
+        </div>
+
+        <!-- Progress -->
+        <div id="progress" class="progress" style="display: none;">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <!-- Messages -->
+        <div id="messages"></div>
+
+        <!-- Submit Button -->
+        <div style="margin-top: 30px;">
+            <button type="submit" id="upload-btn" class="upload-btn" disabled>
+                Upload Photos
+            </button>
+            <a href="{% url 'admin:shop_eventgallery_changelist' %}" class="upload-btn"
+                style="background: #6c757d; text-decoration: none;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dragDropArea = document.getElementById('drag-drop-area');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const fileItems = document.getElementById('file-items');
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadForm = document.getElementById('upload-form');
+        const progress = document.getElementById('progress');
+        const progressBar = document.getElementById('progress-bar');
+        const messages = document.getElementById('messages');
+
+        let selectedFiles = [];
+
+        // Drag and drop handlers
+        dragDropArea.addEventListener('click', () => fileInput.click());
+
+        dragDropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dragDropArea.classList.add('dragover');
+        });
+
+        dragDropArea.addEventListener('dragleave', () => {
+            dragDropArea.classList.remove('dragover');
+        });
+
+        dragDropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragDropArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            selectedFiles = Array.from(files);
+            updateFileList();
+            updateUploadButton();
+        }
+
+        function updateFileList() {
+            if (selectedFiles.length === 0) {
+                fileList.style.display = 'none';
+                return;
+            }
+
+            fileList.style.display = 'block';
+            fileItems.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                <strong>${file.name}</strong> 
+                <span style="color: #666;">(${formatFileSize(file.size)})</span>
+            `;
+                fileItems.appendChild(fileItem);
+            });
+        }
+
+        function updateUploadButton() {
+            const eventSelected = document.getElementById('event_id').value;
+            uploadBtn.disabled = !eventSelected || selectedFiles.length === 0;
+        }
+
+        document.getElementById('event_id').addEventListener('change', updateUploadButton);
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showMessage(text, type = 'success') {
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = text;
+            messages.appendChild(message);
+
+            setTimeout(() => {
+                message.remove();
+            }, 5000);
+        }
+
+        // Form submission
+        uploadForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (selectedFiles.length === 0) {
+                showMessage('Please select at least one image.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            formData.append('event_id', document.getElementById('event_id').value);
+            formData.append('title_prefix', document.getElementById('title_prefix').value);
+            formData.append('description', document.getElementById('description').value);
+
+            if (document.getElementById('is_featured').checked) {
+                formData.append('is_featured', 'on');
+            }
+            if (document.getElementById('is_public').checked) {
+                formData.append('is_public', 'on');
+            }
+
+            selectedFiles.forEach(file => {
+                formData.append('photos', file);
+            });
+
+            // Show progress
+            progress.style.display = 'block';
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+
+            // Upload files
+            fetch('{% url "shop:bulk_upload_handle" %}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    progress.style.display = 'none';
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Upload Photos';
+
+                    if (data.success) {
+                        showMessage(data.message, 'success');
+                        if (data.error_count > 0) {
+                            data.errors.forEach(error => {
+                                showMessage(error, 'error');
+                            });
+                        }
+
+                        // Reset form after successful upload
+                        setTimeout(() => {
+                            selectedFiles = [];
+                            fileInput.value = '';
+                            updateFileList();
+                            updateUploadButton();
+                        }, 2000);
+
+                    } else {
+                        showMessage(data.error || 'Upload failed', 'error');
+                    }
+                })
+                .catch(error => {
+                    progress.style.display = 'none';
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Upload Photos';
+                    showMessage('Upload failed: ' + error.message, 'error');
+                });
+        });
+    });
+</script>
+{% endblock %}

@@ -7,211 +7,698 @@ Eventlinez
 
 {% block custom_css %}
 <style>
-    /* Business Partners Styles */
-    .partners-container {
-        overflow-x: auto;
-        padding: 20px 0;
+    /* Business Partners Carousel Styles */
+    .partners-section {
+        position: relative;
+        padding: 60px 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 50px 0;
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2);
     }
 
-    .partners-slider {
+    .partners-carousel-container {
+        position: relative;
+        overflow: hidden;
+        padding: 0 80px;
+        /* Space for navigation arrows */
+    }
+
+    .partners-carousel {
         display: flex;
-        gap: 30px;
-        min-width: max-content;
-        padding: 20px 0;
+        transition: transform 0.5s ease-in-out;
+        gap: 25px;
     }
 
-    .partner-item {
-        flex: 0 0 200px;
+    .partner-slide {
+        flex: 0 0 280px;
+        opacity: 0.8;
+        transform: scale(0.95);
+        transition: all 0.4s ease;
+    }
+
+    .partner-slide.active {
+        opacity: 1;
+        transform: scale(1);
     }
 
     .partner-card {
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        padding: 30px 25px;
         text-align: center;
-        transition: all 0.3s ease;
-        height: 180px;
+        height: 220px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        border: 1px solid #f1f3f4;
-    }
-
-    .partner-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .partner-logo {
-        max-width: 80px;
-        max-height: 60px;
-        object-fit: contain;
-        margin-bottom: 15px;
-    }
-
-    .partner-placeholder {
-        width: 80px;
-        height: 60px;
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 15px;
-        color: #6c757d;
-        font-size: 24px;
-    }
-
-    .partner-name {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 10px;
-        font-size: 14px;
-    }
-
-    .partner-link {
-        color: #d90075;
-        text-decoration: none;
-        font-size: 12px;
-        transition: color 0.3s ease;
-    }
-
-    .partner-link:hover {
-        color: #ff6b9d;
-        text-decoration: none;
-    }
-
-    /* Gallery Styles */
-    .gallery-container {
-        margin-top: 30px;
-    }
-
-    .gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 25px;
-        margin-top: 20px;
-    }
-
-    .gallery-item {
+        transition: all 0.4s ease;
+        border: 2px solid transparent;
         position: relative;
-    }
-
-    .gallery-card {
-        background: white;
-        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        position: relative;
     }
 
-    .gallery-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .gallery-link {
-        display: block;
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .gallery-image {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .gallery-card:hover .gallery-image {
-        transform: scale(1.05);
-    }
-
-    .gallery-overlay {
+    .partner-card::before {
+        content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        background: linear-gradient(45deg, rgba(217, 0, 117, 0.05), rgba(255, 107, 157, 0.05));
         opacity: 0;
         transition: opacity 0.3s ease;
-        display: flex;
-        align-items: flex-end;
-        padding: 20px;
     }
 
-    .gallery-card:hover .gallery-overlay {
+    .partner-card:hover::before {
         opacity: 1;
     }
 
-    .gallery-info {
-        color: white;
-        width: 100%;
+    .partner-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        border-color: #d90075;
     }
 
-    .gallery-title {
-        font-weight: 600;
-        margin-bottom: 5px;
-        font-size: 16px;
+    .partner-logo {
+        max-width: 90px;
+        max-height: 70px;
+        object-fit: contain;
+        margin-bottom: 15px;
+        transition: transform 0.3s ease;
+        position: relative;
+        z-index: 2;
     }
 
-    .gallery-event {
-        font-size: 12px;
-        opacity: 0.9;
-        margin-bottom: 10px;
+    .partner-card:hover .partner-logo {
+        transform: scale(1.1);
     }
 
-    .gallery-stats {
-        display: flex;
-        justify-content: space-between;
-        font-size: 11px;
-        opacity: 0.8;
-    }
-
-    .gallery-stats span {
+    .partner-placeholder {
+        width: 90px;
+        height: 70px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
         display: flex;
         align-items: center;
-        gap: 5px;
+        justify-content: center;
+        margin-bottom: 15px;
+        color: #6c757d;
+        font-size: 2.2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .partner-name {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .partner-link {
+        color: #d90075;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: rgba(217, 0, 117, 0.1);
+    }
+
+    .partner-link:hover {
+        color: white;
+        background: #d90075;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .carousel-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: white;
+        border: none;
+        border-radius: 50%;
+        width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #d90075;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
+
+    .carousel-nav:hover {
+        background: #d90075;
+        color: white;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-nav.disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .carousel-nav.disabled:hover {
+        background: white;
+        color: #d90075;
+        transform: translateY(-50%) scale(1);
+    }
+
+    .carousel-nav.prev {
+        left: 15px;
+    }
+
+    .carousel-nav.next {
+        right: 15px;
+    }
+
+    .carousel-indicators {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 25px;
+    }
+
+    .carousel-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(217, 0, 117, 0.3);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .carousel-dot.active {
+        background: #d90075;
+        transform: scale(1.2);
+    }
+
+    /* Event Gallery Albums Styles */
+    .gallery-main-section {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        padding: 70px 0;
+        margin: 50px 0;
+        border-radius: 25px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(44, 62, 80, 0.3);
+    }
+
+    .gallery-main-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.03)"><polygon points="0,0 1000,0 1000,60 0,100"/></svg>');
+        pointer-events: none;
+    }
+
+    .gallery-albums-container {
+        margin-top: 40px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .gallery-section-header {
+        text-align: center;
+        margin-bottom: 50px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .gallery-main-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 15px;
+        text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .gallery-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.2rem;
+        margin-bottom: 25px;
+        font-weight: 300;
+    }
+
+    .gallery-view-all-btn {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .gallery-view-all-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .albums-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    .event-album-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        cursor: pointer;
+        border: 2px solid transparent;
+        position: relative;
+    }
+
+    .event-album-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        border-color: #d90075;
+    }
+
+    .album-image-container {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+    }
+
+    .album-cover-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+
+    .event-album-card:hover .album-cover-image {
+        transform: scale(1.08);
+    }
+
+    .album-hover-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg,
+                rgba(217, 0, 117, 0.8) 0%,
+                rgba(255, 107, 157, 0.6) 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+
+    .event-album-card:hover .album-hover-overlay {
+        opacity: 1;
+    }
+
+    .view-gallery-btn {
+        background: rgba(255, 255, 255, 0.95);
+        color: #d90075;
+        padding: 15px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform: translateY(20px);
+        transition: all 0.4s ease;
+        margin-bottom: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .event-album-card:hover .view-gallery-btn {
+        transform: translateY(0);
+    }
+
+    .photo-count-badge {
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transform: translateY(20px);
+        transition: all 0.4s ease 0.1s;
+    }
+
+    .event-album-card:hover .photo-count-badge {
+        transform: translateY(0);
+    }
+
+    .album-card-content {
+        padding: 25px;
+        background: white;
+    }
+
+    .event-album-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        line-height: 1.3;
+        min-height: 50px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .event-album-details {
+        margin-bottom: 20px;
+    }
+
+    .album-location,
+    .album-date {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .album-location i,
+    .album-date i {
+        color: #d90075;
+        width: 16px;
+    }
+
+    .album-action-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #f1f3f4;
+    }
+
+    .latest-update {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .latest-update i {
+        color: #d90075;
+    }
+
+    .view-arrow {
+        color: #d90075;
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .event-album-card:hover .view-arrow {
+        transform: translateX(5px);
+    }
+
+    /* Lightbox Modal Styles */
+    .lightbox-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .lightbox-modal.active {
+        display: flex;
+        opacity: 1;
+    }
+
+    .lightbox-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .lightbox-image {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .lightbox-nav:hover {
+        background: white;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .lightbox-prev {
+        left: 30px;
+    }
+
+    .lightbox-next {
+        right: 30px;
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: 30px;
+        right: 30px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .lightbox-close:hover {
+        background: white;
+        transform: scale(1.1);
+    }
+
+    .lightbox-counter {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
     }
 
     /* Responsive Design */
     @media (max-width: 768px) {
-        .partners-slider {
-            flex-direction: column;
-            gap: 20px;
+        .partners-section {
+            padding: 40px 0;
+            margin: 30px 0;
         }
 
-        .partner-item {
-            flex: 1;
+        .partners-carousel-container {
+            padding: 0 60px;
         }
 
-        .gallery-grid {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+        .partner-slide {
+            flex: 0 0 250px;
         }
 
-        .gallery-image {
-            height: 180px;
+        .partner-card {
+            height: 200px;
+            padding: 25px 20px;
+        }
+
+        .carousel-nav {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+
+        .carousel-nav.prev {
+            left: 10px;
+        }
+
+        .carousel-nav.next {
+            right: 10px;
+        }
+
+        .albums-grid {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .album-image-container {
+            height: 200px;
+        }
+
+        .event-album-title {
+            font-size: 1.3rem;
+            min-height: 45px;
+        }
+
+        .album-card-content {
+            padding: 20px;
+        }
+
+        .gallery-main-section {
+            padding: 50px 0;
+            margin: 40px 0;
+        }
+
+        .gallery-main-title {
+            font-size: 2.2rem;
+        }
+
+        .gallery-subtitle {
+            font-size: 1.1rem;
         }
     }
 
     @media (max-width: 576px) {
-        .gallery-grid {
-            grid-template-columns: 1fr;
+        .partners-carousel-container {
+            padding: 0 50px;
+        }
+
+        .partner-slide {
+            flex: 0 0 220px;
         }
 
         .partner-card {
-            height: 160px;
-            padding: 20px;
+            height: 180px;
+            padding: 20px 15px;
         }
 
-        .partner-logo {
-            max-width: 60px;
-            max-height: 45px;
+        .partner-logo,
+        .partner-placeholder {
+            width: 70px;
+            height: 55px;
+        }
+
+        .partner-name {
+            font-size: 0.9rem;
+        }
+
+        .partner-link {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+        }
+
+        .carousel-nav {
+            width: 45px;
+            height: 45px;
+            font-size: 1.1rem;
+        }
+
+        .albums-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 0 10px;
+        }
+
+        .album-image-container {
+            height: 180px;
+        }
+
+        .event-album-title {
+            font-size: 1.2rem;
+            min-height: 40px;
+        }
+
+        .event-album-details {
+            margin-bottom: 15px;
+        }
+
+        .album-location,
+        .album-date {
+            font-size: 0.9rem;
+        }
+
+        .album-card-content {
+            padding: 18px;
+        }
+
+        .view-gallery-btn {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+        }
+
+        .gallery-main-section {
+            padding: 40px 0;
+            margin: 30px 0;
+        }
+
+        .gallery-main-title {
+            font-size: 2rem;
+        }
+
+        .gallery-subtitle {
+            font-size: 1rem;
+        }
+
+        .gallery-view-all-btn {
+            padding: 10px 25px;
+            font-size: 0.9rem;
         }
     }
 
@@ -493,85 +980,143 @@ Eventlinez
     {% endif %}
 </section>
 
-<!-- Business Partners Section -->
+<!-- Business Partners Carousel Section -->
 {% if business_partners %}
-<section class="container container-center mt-5 mb-5">
-    <div class="row">
-        <div class="col-12 text-center mb-4">
-            <h2 class="h2-home">Our Business Partners</h2>
-            <p class="text-muted">Trusted by leading organizations</p>
-        </div>
-    </div>
-
-    <div class="partners-container">
-        <div class="partners-slider">
-            {% for partner in business_partners %}
-            <div class="partner-item">
-                <div class="partner-card">
-                    {% if partner.logo %}
-                    <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="partner-logo">
-                    {% else %}
-                    <div class="partner-placeholder">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    {% endif %}
-                    <h6 class="partner-name">{{ partner.name }}</h6>
-                    {% if partner.website %}
-                    <a href="{{ partner.website }}" target="_blank" class="partner-link">
-                        <i class="fas fa-external-link-alt"></i> Visit Website
-                    </a>
-                    {% endif %}
-                </div>
+<section class="partners-section">
+    <div class="container container-center">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h2 class="h2-home" style="color: white; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Our
+                    Business Partners</h2>
+                <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; margin-bottom: 0;">Trusted by leading
+                    organizations worldwide</p>
             </div>
+        </div>
+
+        <div class="partners-carousel-container">
+            <button class="carousel-nav prev" id="partnersCarouselPrev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="carousel-nav next" id="partnersCarouselNext">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <div class="partners-carousel" id="partnersCarousel">
+                {% for partner in business_partners %}
+                <div class="partner-slide{% if forloop.first %} active{% endif %}">
+                    <div class="partner-card">
+                        {% if partner.logo %}
+                        <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="partner-logo">
+                        {% else %}
+                        <div class="partner-placeholder">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        {% endif %}
+                        <h6 class="partner-name">{{ partner.name }}</h6>
+                        {% if partner.website %}
+                        <a href="{{ partner.website }}" target="_blank" class="partner-link">
+                            <i class="fas fa-external-link-alt"></i> Visit Website
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="carousel-indicators">
+            {% for partner in business_partners %}
+            <div class="carousel-dot{% if forloop.first %} active{% endif %}" data-slide="{{ forloop.counter0 }}"></div>
             {% endfor %}
         </div>
     </div>
 </section>
 {% endif %}
 
-<!-- Event Gallery Section -->
-{% if featured_gallery %}
-<section class="container container-center mt-5 mb-5">
-    <div class="row">
-        <div class="col-12 text-center mb-4">
-            <h2 class="h2-home">Event Gallery</h2>
-            <p class="text-muted">Capture the moments, download your memories</p>
-            <a href="{% url 'shop:gallery_home' %}" class="btn btn-outline-primary">
-                <i class="fas fa-images me-2"></i>View All Photos
+<!-- Event Gallery Albums Section -->
+{% if gallery_albums %}
+<section class="gallery-main-section">
+    <div class="container container-center">
+        <div class="gallery-section-header">
+            <h2 class="gallery-main-title">Event Photo Albums</h2>
+            <p class="gallery-subtitle">Capture the moments, download your memories</p>
+            <a href="{% url 'shop:gallery_home' %}" class="gallery-view-all-btn">
+                <i class="fas fa-images me-2"></i>View All Albums
             </a>
         </div>
-    </div>
 
-    <div class="gallery-container">
-        <div class="gallery-grid">
-            {% for photo in featured_gallery %}
-            <div class="gallery-item">
-                <div class="gallery-card">
-                    <a href="{% url 'shop:event_gallery' photo.event.slug %}" class="gallery-link">
-                        <img src="{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}"
-                            alt="{{ photo.title|default:photo.event.name }}" class="gallery-image">
-                        <div class="gallery-overlay">
-                            <div class="gallery-info">
-                                <h6 class="gallery-title">{{ photo.title|default:photo.event.name|truncatechars:20 }}
-                                </h6>
-                                <p class="gallery-event">{{ photo.event.name|truncatechars:25 }}</p>
-                                <div class="gallery-stats">
-                                    <span class="download-count">
-                                        <i class="fas fa-download"></i> {{ photo.download_count }}
-                                    </span>
-                                    <span class="photo-date">
-                                        <i class="fas fa-calendar"></i> {{ photo.uploaded_at|date:"M d" }}
-                                    </span>
-                                </div>
+        <div class="gallery-albums-container">
+            <div class="albums-grid">
+                {% for album in gallery_albums %}
+                {% if album.cover_photo and album.event.slug %}
+                <div class="event-album-card" data-event-slug="{{ album.event.slug }}"
+                    onclick="openGalleryAlbum(this.getAttribute('data-event-slug'))">
+                    <div class="album-image-container">
+                        <img src="{% if album.cover_photo.thumbnail %}{{ album.cover_photo.thumbnail.url }}{% else %}{{ album.cover_photo.photo.url }}{% endif %}"
+                            alt="{{ album.event.name }}" class="album-cover-image">
+
+                        <div class="album-hover-overlay">
+                            <div class="view-gallery-btn">
+                                <i class="fas fa-images"></i>
+                                <span>View Gallery</span>
+                            </div>
+                            <div class="photo-count-badge">
+                                {{ album.photo_count }} photo{{ album.photo_count|pluralize }}
                             </div>
                         </div>
-                    </a>
+                    </div>
+
+                    <div class="album-card-content">
+                        <h3 class="event-album-title">{{ album.event.name }}</h3>
+                        <div class="event-album-details">
+                            <div class="album-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>{{ album.event.city }}</span>
+                            </div>
+                            <div class="album-date">
+                                <i class="fas fa-calendar"></i>
+                                <span>{{ album.event.event_date|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                        <div class="album-action-footer">
+                            <span class="latest-update">
+                                <i class="fas fa-clock"></i>
+                                Updated {{ album.latest_upload|date:"M d" }}
+                            </span>
+                            <span class="view-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </div>
                 </div>
+                {% endif %}
+                {% endfor %}
             </div>
-            {% endfor %}
+        </div>
+</section>
+
+<!-- Lightbox Modal for Photo Navigation -->
+<div class="lightbox-modal" id="lightboxModal">
+    <div class="lightbox-content">
+        <button class="lightbox-close" onclick="closeLightbox()">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <button class="lightbox-nav lightbox-prev" onclick="previousPhoto()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <img class="lightbox-image" id="lightboxImage" src="" alt="">
+
+        <button class="lightbox-nav lightbox-next" onclick="nextPhoto()">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <div class="lightbox-counter" id="lightboxCounter">
+            1 / 10
         </div>
     </div>
-</section>
+</div>
 {% endif %}
 
 <section class="col-12 mt-5 subcribe">
@@ -588,4 +1133,190 @@ Eventlinez
 </section>
 
 
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Partners Carousel Functionality
+        const carousel = document.getElementById('partnersCarousel');
+        const prevBtn = document.getElementById('partnersCarouselPrev');
+        const nextBtn = document.getElementById('partnersCarouselNext');
+        const dots = document.querySelectorAll('.carousel-dot');
+        const slides = document.querySelectorAll('.partner-slide');
+
+        if (carousel && slides.length > 0) {
+            let currentSlide = 0;
+            const slidesToShow = Math.min(3, slides.length); // Show 3 slides at a time
+            const maxSlide = Math.max(0, slides.length - slidesToShow);
+
+            function updateCarousel() {
+                const translateX = -(currentSlide * (280 + 25)); // slide width + gap
+                carousel.style.transform = `translateX(${translateX}px)`;
+
+                // Update active states
+                slides.forEach((slide, index) => {
+                    slide.classList.remove('active');
+                    if (index >= currentSlide && index < currentSlide + slidesToShow) {
+                        slide.classList.add('active');
+                    }
+                });
+
+                // Update dots
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentSlide);
+                });
+
+                // Update navigation buttons
+                prevBtn.classList.toggle('disabled', currentSlide === 0);
+                nextBtn.classList.toggle('disabled', currentSlide >= maxSlide);
+            }
+
+            function nextSlide() {
+                if (currentSlide < maxSlide) {
+                    currentSlide++;
+                    updateCarousel();
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateCarousel();
+                }
+            }
+
+            function goToSlide(index) {
+                currentSlide = Math.min(index, maxSlide);
+                updateCarousel();
+            }
+
+            // Event listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => goToSlide(index));
+            });
+
+            // Auto-advance carousel
+            let autoAdvance = setInterval(nextSlide, 4000);
+
+            // Pause auto-advance on hover
+            carousel.addEventListener('mouseenter', () => clearInterval(autoAdvance));
+            carousel.addEventListener('mouseleave', () => {
+                autoAdvance = setInterval(nextSlide, 4000);
+            });
+
+            // Initialize
+            updateCarousel();
+        }
+    });
+
+    // Gallery Album and Lightbox Functionality
+    let currentAlbumPhotos = [];
+    let currentPhotoIndex = 0;
+
+    function openGalleryAlbum(eventSlug) {
+        console.log('openGalleryAlbum called with:', eventSlug, 'Type:', typeof eventSlug);
+
+        // Check if eventSlug is valid before navigating
+        if (!eventSlug || eventSlug.trim() === '') {
+            console.error('Invalid event slug provided:', eventSlug);
+            // For development, let's make this less intrusive
+            console.warn('Gallery album click ignored due to invalid slug');
+            return;
+        }
+
+        // Additional validation for slug format
+        const slugPattern = /^[a-z0-9-]+$/;
+        if (!slugPattern.test(eventSlug)) {
+            console.error('Invalid event slug format:', eventSlug);
+            console.warn('Gallery album click ignored due to invalid slug format');
+            return;
+        }
+
+        console.log('Navigating to gallery:', `/shop/gallery/${eventSlug}/`);
+
+        // Navigate to the event gallery page
+        window.location.href = `/shop/gallery/${eventSlug}/`;
+    }
+
+    // Lightbox functions for when viewing individual photos
+    function openLightbox(photos, startIndex = 0) {
+        currentAlbumPhotos = photos;
+        currentPhotoIndex = startIndex;
+        const modal = document.getElementById('lightboxModal');
+        const image = document.getElementById('lightboxImage');
+        const counter = document.getElementById('lightboxCounter');
+
+        if (modal && image && currentAlbumPhotos.length > 0) {
+            image.src = currentAlbumPhotos[currentPhotoIndex].url;
+            image.alt = currentAlbumPhotos[currentPhotoIndex].title || 'Event Photo';
+            counter.textContent = `${currentPhotoIndex + 1} / ${currentAlbumPhotos.length}`;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeLightbox() {
+        const modal = document.getElementById('lightboxModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function nextPhoto() {
+        if (currentPhotoIndex < currentAlbumPhotos.length - 1) {
+            currentPhotoIndex++;
+            updateLightboxPhoto();
+        }
+    }
+
+    function previousPhoto() {
+        if (currentPhotoIndex > 0) {
+            currentPhotoIndex--;
+            updateLightboxPhoto();
+        }
+    }
+
+    function updateLightboxPhoto() {
+        const image = document.getElementById('lightboxImage');
+        const counter = document.getElementById('lightboxCounter');
+
+        if (image && counter && currentAlbumPhotos[currentPhotoIndex]) {
+            image.src = currentAlbumPhotos[currentPhotoIndex].url;
+            image.alt = currentAlbumPhotos[currentPhotoIndex].title || 'Event Photo';
+            counter.textContent = `${currentPhotoIndex + 1} / ${currentAlbumPhotos.length}`;
+        }
+    }
+
+    // Keyboard navigation for lightbox
+    document.addEventListener('keydown', function (e) {
+        const modal = document.getElementById('lightboxModal');
+        if (modal && modal.classList.contains('active')) {
+            switch (e.key) {
+                case 'ArrowLeft':
+                    previousPhoto();
+                    break;
+                case 'ArrowRight':
+                    nextPhoto();
+                    break;
+                case 'Escape':
+                    closeLightbox();
+                    break;
+            }
+        }
+    });
+
+    // Close lightbox on background click
+    document.addEventListener('click', function (e) {
+        const modal = document.getElementById('lightboxModal');
+        if (modal && e.target === modal) {
+            closeLightbox();
+        }
+    });
+</script>
 {% endblock %}
