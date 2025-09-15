@@ -41,6 +41,11 @@ class TicketForm(ModelForm):
         return quantity
 
 
+class TicketUpdateForm(TicketForm):
+    """Form for updating existing Ticket instances. Inherits all behaviour from TicketForm without changes."""
+    pass
+
+
 class VendorForm(ModelForm):
     class Meta:
         model = Vendor
