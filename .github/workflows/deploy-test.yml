@@ -13,6 +13,20 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_eventlinez
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
     - uses: actions/checkout@v3
@@ -38,13 +52,14 @@ jobs:
     
     - name: Run tests
       env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_eventlinez
         SECRET_KEY: test-secret-key-for-github-actions
         DEBUG: False
-        # Use SQLite for tests to avoid PostgreSQL view conflicts
-        DATABASE_URL: sqlite:///test_db.sqlite3
       run: |
         python manage.py collectstatic --noinput
         python manage.py migrate --noinput
+        # Create views safely after migrations (PostgreSQL only)
+        python manage.py create_sales_view --force || true
         python manage.py test
     
     - name: Run linting
