@@ -1,0 +1,26 @@
+Hello {{ customer_name }},
+
+You left some tickets in your cart at Eventlinez!
+
+Don't miss out on these amazing events:
+
+{% for item in cart_items %}
+- {{ item.ticket_name }} for {{ item.event_name }}
+  Date: {{ item.event_date|date:"F j, Y at g:i A" }}
+  Quantity: {{ item.quantity }}
+  Price: ${{ item.total_price }}
+
+{% endfor %}
+
+Cart Total: ${{ total_amount }}
+
+Complete your purchase now: {{ cart_url }}
+
+These tickets might sell out soon, so don't wait too long!
+
+Best regards,
+The Eventlinez Team
+
+---
+This email was sent because you added tickets to your cart {{ minutes_since_abandonment }} minutes ago.
+If you no longer wish to receive these reminders, please contact us.
