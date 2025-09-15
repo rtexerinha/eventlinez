@@ -7,6 +7,27 @@ from address.models import City
 from event.models import Category, Event, Ticket
 from promoter.models import Vendor, Promoter  # <-- import Promoter here
 
+# event/forms.py
+from django.core.exceptions import ValidationError
+
+# assumes TicketForm already exists and sets model/fields for Ticket
+class TicketUpdateForm(TicketForm):
+    """Update form that inherits TicketForm and prevents lowering quantity below sold."""
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get("quantity")
+        # On updates (instance has a PK), enforce quantity >= qty_sold()
+        if getattr(self.instance, "pk", None):
+            sold = self.instance.qty_sold() if hasattr(self.instance, "qty_sold") else 0
+            if quantity is not None and quantity < sold:
+                raise ValidationError("Ticket quantity cannot be less than quantity sold")
+        return quantity
+
+    # If TicketForm.Meta doesn't already set fields/model, uncomment this:
+    # class Meta(TicketForm.Meta):
+    #     fields = ["name", "quantity", "price", "sold_out"]
+
+
 
 class CityForm(ModelForm):
     class Meta:
