@@ -5,7 +5,7 @@ from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 
 from address.models import City
 from event.models import Category, Event, Ticket
-from promoter.models import Vendor, Promoter  # <-- import Promoter here
+from promoter.models import Vendor, Promoter
 
 
 class CityForm(ModelForm):
@@ -41,12 +41,41 @@ class TicketForm(ModelForm):
         return quantity
 
 
+
 class TicketUpdateForm(TicketForm):
     """Update form that inherits TicketForm and prevents lowering quantity below sold."""
     
     class Meta(TicketForm.Meta):
         # Override to exclude event field for updates
         fields = ["name", "quantity", "price", "sold_out"]
+
+
+class TicketUpdateForm(TicketForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hide event selection on update; event is determined by instance
+        self.fields["event"].widget = forms.HiddenInput()
+
+cursor/fix-ticket-update-form-import-error-dddf
+class TicketUpdateForm(ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ["name", "quantity", "price", "sold_out"]
+        
+    def clean_quantity(self):
+        quantity = self.cleaned_data["quantity"]
+        if not getattr(self.instance, "pk", None):
+            return quantity
+        if quantity < self.instance.qty_sold():
+            raise ValidationError("Ticket quantity cannot be less than quantity sold")
+        return quantity
+
+class TicketUpdateForm(TicketForm):
+    """Form for updating existing Ticket instances. Inherits all behaviour from TicketForm without changes."""
+    pass
+develop
+
+
 
 
 class VendorForm(ModelForm):
@@ -62,13 +91,7 @@ class CategoryForm(ModelForm):
 
 
 class EventForm(ModelForm):
-    event_date = forms.DateTimeField(
-        input_formats=["%d/%m/%Y %H:%M"],
-        widget=DateTimePickerInput(
-            format="%d/%m/%Y %H:%M",
-            attrs={"id": "datetimepicker"},
-        ),
-    )
+    event_date = forms.DateTimeField(input_formats=["%d/%m/%Y %H:%M"], widget=DateTimePickerInput(format="%d/%m/%Y %H:%M", attrs={"id": "datetimepicker"}))
 
     class Meta:
         model = Event
