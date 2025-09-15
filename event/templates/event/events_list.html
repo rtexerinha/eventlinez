@@ -4,216 +4,444 @@
 
 {% block stylesheets %}
 <style>
-.dashboard-card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    padding: 25px;
-    margin-bottom: 25px;
-    border: 1px solid #f1f3f4;
-}
+    .dashboard-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid #f1f3f4;
+    }
 
-.stat-card {
-    background: linear-gradient(135deg, #d90075, #ff6b9d);
-    color: white;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
+    .stat-card {
+        background: linear-gradient(135deg, #d90075, #ff6b9d);
+        color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
 
-.stat-card.secondary {
-    background: linear-gradient(135deg, #6c757d, #adb5bd);
-}
+    .stat-card.secondary {
+        background: linear-gradient(135deg, #6c757d, #adb5bd);
+    }
 
-.stat-card.success {
-    background: linear-gradient(135deg, #28a745, #20c997);
-}
+    .stat-card.success {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
 
-.stat-card.info {
-    background: linear-gradient(135deg, #17a2b8, #20c997);
-}
+    .stat-card.info {
+        background: linear-gradient(135deg, #17a2b8, #20c997);
+    }
 
-.event-status-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
+    .event-status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
 
-.status-active {
-    background-color: #d4edda;
-    color: #155724;
-}
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
 
-.status-past {
-    background-color: #d1ecf1;
-    color: #0c5460;
-}
+    .status-past {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
 
-.event-card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    padding: 20px;
-    margin-bottom: 15px;
-    border-left: 4px solid #d90075;
-    transition: transform 0.2s ease;
-}
+    .event-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 4px solid #d90075;
+        transition: transform 0.2s ease;
+    }
 
-.event-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
+    .event-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
 
-.event-card.past {
-    border-left-color: #6c757d;
-    opacity: 0.8;
-}
+    .event-card.past {
+        border-left-color: #6c757d;
+        opacity: 0.8;
+    }
 
-.progress-container {
-    background-color: #e9ecef;
-    border-radius: 10px;
-    height: 8px;
-    overflow: hidden;
-}
+    .progress-container {
+        background-color: #e9ecef;
+        border-radius: 10px;
+        height: 8px;
+        overflow: hidden;
+    }
 
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #d90075, #ff6b9d);
-    border-radius: 10px;
-    transition: width 0.3s ease;
-}
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #d90075, #ff6b9d);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
 
-.chart-container {
-    height: 300px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0;
-}
+    .chart-container {
+        height: 300px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px 0;
+    }
 
-.event-actions {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    justify-content: center;
-}
+    .event-actions {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        justify-content: center;
+    }
 
-.action-btn {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 12px;
-    transition: all 0.2s ease;
-    min-width: 32px;
-    text-align: center;
-}
+    .action-btn {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        min-width: 32px;
+        text-align: center;
+    }
 
-.table {
-    background-color: white;
-    margin-bottom: 0;
-}
+    .table {
+        background-color: white;
+        margin-bottom: 0;
+    }
 
-.table th {
-    border-top: none;
-    font-weight: 600;
-    color: #495057;
-    font-size: 14px;
-    padding: 15px 12px;
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-}
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+        padding: 15px 12px;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
 
-.table td {
-    padding: 15px 12px;
-    vertical-align: middle;
-    background-color: white;
-    border-bottom: 1px solid #f1f3f4;
-}
+    .table td {
+        padding: 15px 12px;
+        vertical-align: middle;
+        background-color: white;
+        border-bottom: 1px solid #f1f3f4;
+    }
 
-.table-hover tbody tr:hover {
-    background-color: #f8f9fa !important;
-}
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa !important;
+    }
 
-.table-hover tbody tr:hover td {
-    background-color: #f8f9fa !important;
-}
+    .table-hover tbody tr:hover td {
+        background-color: #f8f9fa !important;
+    }
 
-.table-responsive {
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
 
-.table tbody tr {
-    transition: all 0.2s ease;
-}
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
 
-/* Remove the gray background from past events and use subtle styling instead */
-.table tbody tr.table-secondary {
-    background-color: white !important;
-    opacity: 0.7;
-}
+    /* Remove the gray background from past events and use subtle styling instead */
+    .table tbody tr.table-secondary {
+        background-color: white !important;
+        opacity: 0.7;
+    }
 
-.table tbody tr.table-secondary td {
-    background-color: white !important;
-    color: #6c757d;
-}
+    .table tbody tr.table-secondary td {
+        background-color: white !important;
+        color: #6c757d;
+    }
 
-.table tbody tr.table-secondary:hover {
-    background-color: #f8f9fa !important;
-}
+    .table tbody tr.table-secondary:hover {
+        background-color: #f8f9fa !important;
+    }
 
-.table tbody tr.table-secondary:hover td {
-    background-color: #f8f9fa !important;
-}
+    .table tbody tr.table-secondary:hover td {
+        background-color: #f8f9fa !important;
+    }
 
-.action-btn.primary {
-    background-color: #d90075;
-    color: white;
-}
+    .action-btn.primary {
+        background-color: #d90075;
+        color: white;
+    }
 
-.action-btn.secondary {
-    background-color: #6c757d;
-    color: white;
-}
+    .action-btn.secondary {
+        background-color: #6c757d;
+        color: white;
+    }
 
-.action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    color: white;
-    text-decoration: none;
-}
+    .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        color: white;
+        text-decoration: none;
+    }
 
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
 
-.create-event-btn {
-    background: linear-gradient(135deg, #d90075, #ff6b9d);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.2s ease;
-}
+    .create-event-btn {
+        background: linear-gradient(135deg, #d90075, #ff6b9d);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.2s ease;
+    }
 
-.create-event-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(217,0,117,0.3);
-    color: white;
-    text-decoration: none;
-}
+    .create-event-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(217, 0, 117, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Performance Cards Styles */
+    .performance-cards-container {
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+
+    .performance-cards-scroll {
+        display: flex;
+        gap: 20px;
+        min-width: max-content;
+        padding: 10px 0;
+    }
+
+    .performance-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        min-width: 280px;
+        max-width: 320px;
+        border: 1px solid #f1f3f4;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .performance-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .performance-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .performance-card-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+        line-height: 1.3;
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    .performance-metrics {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        gap: 10px;
+    }
+
+    .metric-item {
+        text-align: center;
+        flex: 1;
+    }
+
+    .metric-value {
+        font-size: 18px;
+        font-weight: bold;
+        color: #d90075;
+        line-height: 1;
+    }
+
+    .metric-label {
+        font-size: 11px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+    }
+
+    .performance-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #f1f3f4;
+    }
+
+    .performance-actions {
+        display: flex;
+        gap: 5px;
+    }
+
+    .performance-actions .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    /* Enhanced Table Styles */
+    .events-table-container {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .events-table {
+        margin-bottom: 0;
+        table-layout: fixed;
+        width: 100%;
+        min-width: 1000px;
+    }
+
+    .events-table th {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border: none;
+        font-weight: 600;
+        color: #495057;
+        font-size: 13px;
+        padding: 15px 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .events-table td {
+        padding: 15px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f4;
+        font-size: 14px;
+    }
+
+    .events-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .events-table tbody tr:hover {
+        background-color: #f8f9fa !important;
+        transform: scale(1.01);
+    }
+
+    .events-table tbody tr:hover td {
+        background-color: #f8f9fa !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .performance-cards-scroll {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .performance-card {
+            min-width: 100%;
+            max-width: 100%;
+        }
+
+        .events-table-container {
+            font-size: 12px;
+        }
+
+        .events-table th,
+        .events-table td {
+            padding: 10px 8px;
+        }
+    }
+
+    /* Search and Filter Styles */
+    .input-group-sm .form-control {
+        border-radius: 6px 0 0 6px;
+    }
+
+    .input-group-sm .btn {
+        border-radius: 0 6px 6px 0;
+    }
+
+    .form-select-sm {
+        border-radius: 6px;
+    }
+
+    /* Loading States */
+    .table-loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #d90075;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        border-radius: 8px;
+    }
+
+    .loading-overlay span {
+        margin-top: 10px;
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .events-table-container {
+        position: relative;
+    }
 </style>
 
 <!-- Chart.js -->
@@ -282,55 +510,109 @@
             </div>
         </div>
 
-        <!-- Active Events with Charts -->
+        <!-- Active Events Performance - Horizontal Cards -->
         {% if active_events %}
         <div class="dashboard-card">
-            <h4 class="mb-4"><i class="fas fa-chart-line me-2"></i>Active Events Performance</h4>
-            <div class="row">
-                {% for event in active_events %}
-                <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title">{{ event.name|truncatechars:25 }}</h6>
-                            <canvas id="chart-{{ event.id }}" width="100" height="100"></canvas>
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    {{ event.qty_sould }}/{{ event.quantity }} tickets sold
-                                    ({{ event.sales_percentage }}%)
-                                </small>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0"><i class="fas fa-chart-line me-2"></i>Active Events Performance</h4>
+                <span class="badge bg-primary">{{ active_events|length }} Active Events</span>
+            </div>
+
+            <!-- Horizontal Scrollable Performance Cards -->
+            <div class="performance-cards-container">
+                <div class="performance-cards-scroll">
+                    {% for event in active_events %}
+                    <div class="performance-card">
+                        <div class="performance-card-header">
+                            <h6 class="performance-card-title">{{ event.name|truncatechars:30 }}</h6>
+                            <span class="event-status-badge status-active">Active</span>
+                        </div>
+
+                        <div class="performance-metrics">
+                            <div class="metric-item">
+                                <div class="metric-value">{{ event.sales_percentage }}%</div>
+                                <div class="metric-label">Sold</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">{{ event.qty_sould }}</div>
+                                <div class="metric-label">Tickets</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-value">${{ event.get_amount|floatformat:0 }}</div>
+                                <div class="metric-label">Revenue</div>
+                            </div>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: {{ event.sales_percentage }}%"></div>
+                        </div>
+
+                        <div class="performance-card-footer">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ event.event_date|date:'M d, Y' }}
+                            </small>
+                            <div class="performance-actions">
+                                <a href="{% url 'update_event' event.id %}" class="btn btn-sm btn-outline-primary"
+                                    title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'ticket_type_list_per_event' event.id %}" class="btn btn-sm btn-primary"
+                                    title="Tickets">
+                                    <i class="fas fa-ticket-alt"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
         </div>
         {% endif %}
 
         <!-- Events List -->
         <div class="dashboard-card">
-            <h4 class="mb-4"><i class="fas fa-list me-2"></i>All Events</h4>
-            <div class="table-responsive">
-                <table class="table table-hover">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0"><i class="fas fa-list me-2"></i>All Events</h4>
+                <div class="d-flex gap-2">
+                    <div class="input-group input-group-sm" style="width: 250px;">
+                        <input type="text" class="form-control" placeholder="Search events..." id="eventSearch">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <select class="form-select form-select-sm" style="width: 150px;" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="past">Past</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive events-table-container">
+                <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Loading events...</span>
+                </div>
+                <table class="table table-hover events-table" id="eventsTable">
                     <thead class="table-light">
                         <tr>
-                            <th class="text-bold">Event</th>
-                            <th class="text-bold">Status</th>
-                            <th class="text-bold">Date</th>
-                            <th class="text-bold">Sales Progress</th>
-                            <th class="text-bold">Tickets<br><small>Sold/Total</small></th>
-                            <th class="text-bold">Available</th>
-                            <th class="text-bold">Revenue</th>
-                            <th class="text-bold">Actions</th>
+                            <th class="text-bold" style="min-width: 200px;">Event</th>
+                            <th class="text-bold" style="min-width: 100px;">Status</th>
+                            <th class="text-bold" style="min-width: 120px;">Date & Time</th>
+                            <th class="text-bold" style="min-width: 150px;">Sales Progress</th>
+                            <th class="text-bold" style="min-width: 100px;">Tickets</th>
+                            <th class="text-bold" style="min-width: 80px;">Available</th>
+                            <th class="text-bold" style="min-width: 100px;">Revenue</th>
+                            <th class="text-bold" style="min-width: 120px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for event in events %}
-                        <tr {% if not event.is_active %}class="table-secondary"{% endif %}>
+                        <tr {% if not event.is_active %}class="table-secondary" {% endif %}>
                             <td>
                                 <div>
-                                    <a href="{% url 'update_event' event.id %}" 
-                                       style="color: #d90075; font-weight: 500; text-decoration: none;">
+                                    <a href="{% url 'update_event' event.id %}"
+                                        style="color: #d90075; font-weight: 500; text-decoration: none;">
                                         {{ event.name|truncatechars:40 }}
                                     </a>
                                     <br>
@@ -369,24 +651,24 @@
                             </td>
                             <td>
                                 <div class="event-actions">
-                                    <a href="{% url 'ticket_type_list_per_event' event.id %}" 
-                                       class="action-btn primary" title="Manage Tickets">
+                                    <a href="{% url 'ticket_type_list_per_event' event.id %}" class="action-btn primary"
+                                        title="Manage Tickets">
                                         <i class="fas fa-ticket-alt"></i>
                                     </a>
-                                    <a href="{% url 'update_event' event.id %}" 
-                                       class="action-btn secondary" title="Edit Event">
+                                    <a href="{% url 'update_event' event.id %}" class="action-btn secondary"
+                                        title="Edit Event">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     {% if event.qty_sould == 0 %}
-                                    <a href="{% url 'remove_event' event.id %}" 
-                                       class="action-btn" style="background:#dc3545;color:white;" 
-                                       title="Delete Event"
-                                       onclick="return confirm('Are you sure you want to delete this event?')">
+                                    <a href="{% url 'remove_event' event.id %}" class="action-btn"
+                                        style="background:#dc3545;color:white;" title="Delete Event"
+                                        onclick="return confirm('Are you sure you want to delete this event?')">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                     {% else %}
-                                    <button class="action-btn" style="background:#6c757d;color:white;cursor:not-allowed;" 
-                                            title="Cannot delete event with sold tickets" disabled>
+                                    <button class="action-btn"
+                                        style="background:#6c757d;color:white;cursor:not-allowed;"
+                                        title="Cannot delete event with sold tickets" disabled>
                                         <i class="fas fa-trash"></i>
                                     </button>
                                     {% endif %}
@@ -403,12 +685,12 @@
             <nav aria-label="Page navigation" class="mt-4">
                 <ul class="pagination justify-content-center">
                     {% if events.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page=1">&laquo; first</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ events.previous_page_number }}">previous</a>
-                        </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; first</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ events.previous_page_number }}">previous</a>
+                    </li>
                     {% endif %}
 
                     <li class="page-item active">
@@ -416,12 +698,12 @@
                     </li>
 
                     {% if events.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ events.next_page_number }}">next</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ events.paginator.num_pages }}">last &raquo;</a>
-                        </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ events.next_page_number }}">next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ events.paginator.num_pages }}">last &raquo;</a>
+                    </li>
                     {% endif %}
                 </ul>
             </nav>
@@ -433,7 +715,8 @@
         <div class="dashboard-card text-center py-5">
             <i class="fas fa-calendar-plus fa-5x text-muted mb-4"></i>
             <h4 class="mb-3">Create your first event</h4>
-            <p class="text-muted mb-4">You don't have any events created yet. Start by creating your first event to begin selling tickets.</p>
+            <p class="text-muted mb-4">You don't have any events created yet. Start by creating your first event to
+                begin selling tickets.</p>
             <a href="{% url 'new_events' %}" class="create-event-btn">
                 <i class="fas fa-plus me-2"></i>Create New Event
             </a>
@@ -441,33 +724,118 @@
         {% endif %}
     </div>
 
-    <!-- Charts Script -->
+    <!-- Enhanced JavaScript -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        {% for event in active_events %}
-        var ctx{{ event.id }} = document.getElementById('chart-{{ event.id }}').getContext('2d');
-        new Chart(ctx{{ event.id }}, {
-            type: 'doughnut',
-            data: {
-                labels: ['Sold', 'Available'],
-                datasets: [{
-                    data: [{{ event.qty_sould }}, {{ event.qty_available }}],
-                    backgroundColor: ['#d90075', '#e9ecef'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
+        document.addEventListener('DOMContentLoaded', function () {
+            // Search functionality
+            const searchInput = document.getElementById('eventSearch');
+            const statusFilter = document.getElementById('statusFilter');
+            const eventsTable = document.getElementById('eventsTable');
+            const tableBody = eventsTable.querySelector('tbody');
+
+            function filterEvents() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const statusFilterValue = statusFilter.value;
+                const rows = tableBody.querySelectorAll('tr');
+
+                rows.forEach(row => {
+                    const eventName = row.querySelector('td:first-child').textContent.toLowerCase();
+                    const statusBadge = row.querySelector('.event-status-badge');
+                    const isActive = !row.classList.contains('table-secondary');
+
+                    let matchesSearch = eventName.includes(searchTerm);
+                    let matchesStatus = true;
+
+                    if (statusFilterValue === 'active') {
+                        matchesStatus = isActive;
+                    } else if (statusFilterValue === 'past') {
+                        matchesStatus = !isActive;
                     }
-                }
+
+                    if (matchesSearch && matchesStatus) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
             }
+
+            // Event listeners
+            searchInput.addEventListener('input', filterEvents);
+            statusFilter.addEventListener('change', filterEvents);
+
+            // Add loading state to search
+            searchInput.addEventListener('input', function () {
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                if (this.value.length > 0) {
+                    loadingOverlay.style.display = 'flex';
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                    }, 300);
+                }
+            });
+
+            // Smooth scroll for performance cards
+            const performanceContainer = document.querySelector('.performance-cards-container');
+            if (performanceContainer) {
+                let isScrolling = false;
+
+                performanceContainer.addEventListener('wheel', function (e) {
+                    if (e.deltaY !== 0) {
+                        e.preventDefault();
+                        this.scrollLeft += e.deltaY;
+                    }
+                });
+
+                // Touch support for mobile
+                let startX = 0;
+                let scrollLeft = 0;
+
+                performanceContainer.addEventListener('touchstart', function (e) {
+                    startX = e.touches[0].pageX - this.offsetLeft;
+                    scrollLeft = this.scrollLeft;
+                });
+
+                performanceContainer.addEventListener('touchmove', function (e) {
+                    if (!isScrolling) {
+                        e.preventDefault();
+                        const x = e.touches[0].pageX - this.offsetLeft;
+                        const walk = (x - startX) * 2;
+                        this.scrollLeft = scrollLeft - walk;
+                    }
+                });
+            }
+
+            // Add hover effects to table rows
+            const tableRows = document.querySelectorAll('.events-table tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function () {
+                    this.style.transform = 'scale(1.01)';
+                });
+
+                row.addEventListener('mouseleave', function () {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+
+            // Performance cards hover effects
+            const performanceCards = document.querySelectorAll('.performance-card');
+            performanceCards.forEach(card => {
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-4px) scale(1.02)';
+                });
+
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Initialize tooltips for action buttons
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
-        {% endfor %}
-    });
     </script>
 </main>
 {% endblock content %}

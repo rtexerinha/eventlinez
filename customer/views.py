@@ -119,9 +119,36 @@ def edit_guest(request):
 
 @login_required()
 def guest_list(request):
-    enddate = datetime.today() + timedelta(days=-1)
-    tickets = Ticket.objects.filter(
-        customer=request.user.customer,
-        event_ticket__event__event_date__gte=enddate).order_by('-created_at')
+    from django.utils import timezone
+    
+    now = timezone.now()
+    enddate = now - timedelta(days=1)
+    
+    # Get all tickets for the customer
+    all_tickets = Ticket.objects.filter(
+        customer=request.user.customer
+    ).select_related('event_ticket', 'event_ticket__event', 'event_ticket__event__city').order_by('-created_at')
+    
+    # Separate upcoming and past tickets
+    upcoming_tickets = all_tickets.filter(event_ticket__event__event_date__gte=now)
+    past_tickets = all_tickets.filter(event_ticket__event__event_date__lt=now)
+    
+    # Calculate statistics
+    total_tickets = all_tickets.count()
+    upcoming_count = upcoming_tickets.count()
+    past_count = past_tickets.count()
+    
+    # For now, show upcoming tickets by default (maintaining backward compatibility)
+    tickets = upcoming_tickets
 
-    return render(request, 'ticket/ticket_customer.html', {'tickets': tickets, 'PROD': settings.PROD})
+    return render(request, 'ticket/ticket_customer.html', {
+        'tickets': tickets,
+        'all_tickets': all_tickets,
+        'upcoming_tickets': upcoming_tickets,
+        'past_tickets': past_tickets,
+        'total_tickets': total_tickets,
+        'upcoming_count': upcoming_count,
+        'past_count': past_count,
+        'now': now,
+        'PROD': settings.PROD
+    })

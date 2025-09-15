@@ -1,0 +1,283 @@
+{% extends "base-new.html" %}
+{% load static %}
+
+{% block title %}{{ event.name }} Gallery - Eventlinez{% endblock %}
+
+{% block custom_css %}
+<style>
+    .event-header {
+        background: linear-gradient(135deg, #d90075, #ff6b9d);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .event-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .event-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+
+    .event-info {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        display: inline-block;
+    }
+
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        padding: 0 20px;
+    }
+
+    .gallery-item {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .gallery-item:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .gallery-image {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover .gallery-image {
+        transform: scale(1.05);
+    }
+
+    .gallery-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 15px;
+    }
+
+    .gallery-item:hover .gallery-overlay {
+        opacity: 1;
+    }
+
+    .gallery-info {
+        color: white;
+        margin-top: auto;
+    }
+
+    .gallery-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .gallery-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        opacity: 0.8;
+        margin-top: 10px;
+    }
+
+    .gallery-actions {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .gallery-item:hover .gallery-actions {
+        opacity: 1;
+    }
+
+    .download-btn {
+        background: rgba(255, 255, 255, 0.9);
+        color: #d90075;
+        border: none;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .download-btn:hover {
+        background: white;
+        color: #d90075;
+        transform: scale(1.1);
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .empty-gallery {
+        text-align: center;
+        padding: 80px 20px;
+        color: #6c757d;
+    }
+
+    .empty-gallery i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #d90075;
+    }
+
+    .download-info {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .download-info h4 {
+        color: #d90075;
+        margin-bottom: 10px;
+    }
+
+    .download-info p {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-image {
+            height: 200px;
+        }
+
+        .event-header h1 {
+            font-size: 2rem;
+        }
+
+        .back-btn {
+            top: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="event-header">
+    <div class="container">
+        <a href="{% url 'shop:gallery_home' %}" class="back-btn" title="Back to Gallery">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
+        <h1><i class="fas fa-camera me-3"></i>{{ event.name }} Gallery</h1>
+        <p>Photos from {{ event.name }}</p>
+
+        <div class="event-info">
+            <div><i class="fas fa-calendar me-2"></i>{{ event.event_date|date:"F d, Y" }}</div>
+            <div><i class="fas fa-map-marker-alt me-2"></i>{{ event.city }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    {% if user.is_authenticated %}
+    <div class="download-info">
+        <h4><i class="fas fa-info-circle me-2"></i>Download Information</h4>
+        <p>You can download photos if you have purchased tickets for this event. Click the download button on any photo
+            to get started.</p>
+    </div>
+    {% else %}
+    <div class="download-info">
+        <h4><i class="fas fa-lock me-2"></i>Login Required</h4>
+        <p>Please <a href="{% url 'signin' %}">login</a> to download photos from this event.</p>
+    </div>
+    {% endif %}
+
+    {% if gallery_photos %}
+    <div class="gallery-grid">
+        {% for photo in gallery_photos %}
+        <div class="gallery-item">
+            <img src="{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}"
+                alt="{{ photo.title|default:photo.event.name }}" class="gallery-image">
+
+            <div class="gallery-overlay">
+                <div class="gallery-actions">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'shop:download_photo' photo.id %}" class="download-btn" title="Download Photo">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div class="gallery-info">
+                    {% if photo.title %}
+                    <h5 class="gallery-title">{{ photo.title|truncatechars:20 }}</h5>
+                    {% endif %}
+                    <div class="gallery-stats">
+                        <span><i class="fas fa-download"></i> {{ photo.download_count }}</span>
+                        <span><i class="fas fa-calendar"></i> {{ photo.uploaded_at|date:"M d" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-gallery">
+        <i class="fas fa-camera"></i>
+        <h3>No photos available for this event yet</h3>
+        <p>Photos will be uploaded after the event. Check back soon!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

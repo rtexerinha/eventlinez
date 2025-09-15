@@ -2,267 +2,590 @@
 {% load static %}
 {% block metadescription %}{% endblock %}
 {% block title %}
-	Eventlinez
+Eventlinez
+{% endblock %}
+
+{% block custom_css %}
+<style>
+    /* Business Partners Styles */
+    .partners-container {
+        overflow-x: auto;
+        padding: 20px 0;
+    }
+
+    .partners-slider {
+        display: flex;
+        gap: 30px;
+        min-width: max-content;
+        padding: 20px 0;
+    }
+
+    .partner-item {
+        flex: 0 0 200px;
+    }
+
+    .partner-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #f1f3f4;
+    }
+
+    .partner-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .partner-logo {
+        max-width: 80px;
+        max-height: 60px;
+        object-fit: contain;
+        margin-bottom: 15px;
+    }
+
+    .partner-placeholder {
+        width: 80px;
+        height: 60px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        color: #6c757d;
+        font-size: 24px;
+    }
+
+    .partner-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+
+    .partner-link {
+        color: #d90075;
+        text-decoration: none;
+        font-size: 12px;
+        transition: color 0.3s ease;
+    }
+
+    .partner-link:hover {
+        color: #ff6b9d;
+        text-decoration: none;
+    }
+
+    /* Gallery Styles */
+    .gallery-container {
+        margin-top: 30px;
+    }
+
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+    }
+
+    .gallery-item {
+        position: relative;
+    }
+
+    .gallery-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .gallery-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .gallery-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .gallery-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .gallery-card:hover .gallery-image {
+        transform: scale(1.05);
+    }
+
+    .gallery-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: flex-end;
+        padding: 20px;
+    }
+
+    .gallery-card:hover .gallery-overlay {
+        opacity: 1;
+    }
+
+    .gallery-info {
+        color: white;
+        width: 100%;
+    }
+
+    .gallery-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        font-size: 16px;
+    }
+
+    .gallery-event {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-bottom: 10px;
+    }
+
+    .gallery-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        opacity: 0.8;
+    }
+
+    .gallery-stats span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .partners-slider {
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .partner-item {
+            flex: 1;
+        }
+
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-image {
+            height: 180px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .gallery-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .partner-card {
+            height: 160px;
+            padding: 20px;
+        }
+
+        .partner-logo {
+            max-width: 60px;
+            max-height: 45px;
+        }
+    }
+
+    /* Smooth scrolling for partners */
+    .partners-container::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .partners-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .partners-container::-webkit-scrollbar-thumb {
+        background: #d90075;
+        border-radius: 3px;
+    }
+
+    .partners-container::-webkit-scrollbar-thumb:hover {
+        background: #ff6b9d;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-    {% if detachs %}
-        <section class="container container-center pl-0 pr-0">
-            <main class="slider">
-                <div class="swiper-container slider-banner mt-0 mt-lg-4">
-                    <aside class="swiper-wrapper">
-                        <div class="swiper-slide col-12 mt-0 div-article">
-                            <div class="row" style="margin: 0">
-                                <article class="col-lg-5 desktop" style="padding: 0!important;">
-                                    <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
-                                        <div style="min-height: 18rem;">
-                                            <h1 class="h1-home pt-2 pt-lg-4">It is more than a ticket , it is an Experience!</h1>
-{#                                            <h6 class="h6-home p-date h6-banner mt-lg-4 m-0"> It is more than a ticket , it is an Experience!</h6>#}
-                                        </div>
-
-                                        <a class="buttons-primary h6-home center-text-button height-17 float-right"
-                                           href="{% url 'about' %}" style="width: 138px!important;">
-                                            <i class="fas fa-plus-circle mr-2"></i>
-                                              About us
-                                        </a>
-                                    </div>
-
-                                </article>
-
-                                <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
-                                    <img class="m-img-card-banner" src="{% static 'img/banner.png' %}" alt="Eventlinez"/>
-                                </a>
-
-                                <aside class="col-lg-7 col-12 background-container desktop" style="padding: 0!important;">
-    {#                                            <img class="m-img-card-banner" src="{% static 'img/banner.jpg' %}" alt="Eventlinez"/>#}
-                                </aside>
-                            </div>
-                        </div>
-
-                        {% for detach in detachs %}
-                            {% for special_events in detach.event.all %}
-                                <div class="swiper-slide col-12 mt-0 div-article">
-                                    <div class="row" style="margin: 0">
-                                        <article class="col-lg-5 desktop" style="padding: 0!important;">
-                                            <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
-                                                <div style="min-height: 18rem;">
-                                                    <h1 class="h1-home pt-2 pt-lg-4">{{ special_events.name }}</h1>
-                                                    <h6 class="h6-home p-date h6-banner mt-lg-4 m-0">{{special_events.event_date|date:"D, d M H:i"}}</h6>
-                                                    <h6 class="h6-home h6-banner mt-1">
-                                                        <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                                        {{special_events.city}}
-                                                    </h6>
-                                                </div>
-
-                                                <a class="buttons-primary h6-home center-text-button height-17 float-right"
-                                                   href="{{special_events.get_url}}" style="width: 138px!important;">
-                                                    <i class="fas fa-plus-circle mr-2"></i>
-                                                    See details
-                                                </a>
-                                            </div>
-
-                                        </article>
-
-                                        <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
-                                            <img class="m-img-card-banner" src="{{special_events.image_sized.url }}" alt="{{special_events.name}}"/>
-                                        </a>
-
-                                        <aside class="col-lg-7 col-12 desktop" style="padding: 0!important;">
-                                            <img class="m-img-card-banner" src="{{special_events.image_sized.url}}" alt="{{special_events.name}}"/>
-                                        </aside>
-
-                                    </div>
+{% if detachs %}
+<section class="container container-center pl-0 pr-0">
+    <main class="slider">
+        <div class="swiper-container slider-banner mt-0 mt-lg-4">
+            <aside class="swiper-wrapper">
+                <div class="swiper-slide col-12 mt-0 div-article">
+                    <div class="row" style="margin: 0">
+                        <article class="col-lg-5 desktop" style="padding: 0!important;">
+                            <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
+                                <div style="min-height: 18rem;">
+                                    <h1 class="h1-home pt-2 pt-lg-4">It is more than a ticket , it is an Experience!
+                                    </h1>
+                                    {# <h6 class="h6-home p-date h6-banner mt-lg-4 m-0"> It is more than a ticket , it
+                                        is an Experience!</h6>#}
                                 </div>
-                            {% endfor %}
-                        {% endfor %}
-                    </aside>
 
-                    <div class="swiper-pagination swiper-pagination-banner"></div>
+                                <a class="buttons-primary h6-home center-text-button height-17 float-right"
+                                    href="{% url 'about' %}" style="width: 138px!important;">
+                                    <i class="fas fa-plus-circle mr-2"></i>
+                                    About us
+                                </a>
+                            </div>
+
+                        </article>
+
+                        <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile"
+                            style="padding: 0!important;">
+                            <img class="m-img-card-banner" src="{% static 'img/banner.png' %}" alt="Eventlinez" />
+                        </a>
+
+                        <aside class="col-lg-7 col-12 background-container desktop" style="padding: 0!important;">
+                            {# <img class="m-img-card-banner" src="{% static 'img/banner.jpg' %}" alt="Eventlinez" />#}
+                        </aside>
+                    </div>
                 </div>
-            </main>
-    </section>
+
+                {% for detach in detachs %}
+                {% for special_events in detach.event.all %}
+                <div class="swiper-slide col-12 mt-0 div-article">
+                    <div class="row" style="margin: 0">
+                        <article class="col-lg-5 desktop" style="padding: 0!important;">
+                            <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
+                                <div style="min-height: 18rem;">
+                                    <h1 class="h1-home pt-2 pt-lg-4">{{ special_events.name }}</h1>
+                                    <h6 class="h6-home p-date h6-banner mt-lg-4 m-0">
+                                        {{special_events.event_date|date:"D, d M H:i"}}</h6>
+                                    <h6 class="h6-home h6-banner mt-1">
+                                        <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
+                                        {{special_events.city}}
+                                    </h6>
+                                </div>
+
+                                <a class="buttons-primary h6-home center-text-button height-17 float-right"
+                                    href="{{special_events.get_url}}" style="width: 138px!important;">
+                                    <i class="fas fa-plus-circle mr-2"></i>
+                                    See details
+                                </a>
+                            </div>
+
+                        </article>
+
+                        <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile"
+                            style="padding: 0!important;">
+                            <img class="m-img-card-banner" src="{{special_events.image_sized.url }}"
+                                alt="{{special_events.name}}" />
+                        </a>
+
+                        <aside class="col-lg-7 col-12 desktop" style="padding: 0!important;">
+                            <img class="m-img-card-banner" src="{{special_events.image_sized.url}}"
+                                alt="{{special_events.name}}" />
+                        </aside>
+
+                    </div>
+                </div>
+                {% endfor %}
+                {% endfor %}
+            </aside>
+
+            <div class="swiper-pagination swiper-pagination-banner"></div>
+        </div>
+    </main>
+</section>
+
+{% else %}
+<section class="container container-center pl-0 pr-0">
+    <main class="slider">
+        <div class="swiper-container slider-banner mt-0 mt-lg-4">
+            <aside class="swiper-wrapper">
+                <div class="swiper-slide col-12 mt-0 div-article">
+                    <div class="row" style="margin: 0">
+                        <article class="col-lg-5 desktop" style="padding: 0!important;">
+                            <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
+                                <div style="min-height: 18rem;">
+                                    <h1 class="h1-home pt-2 pt-lg-4">It is more than a ticket , it is an Experience!
+                                    </h1>
+                                    {# <h6 class="h6-home p-date h6-banner mt-lg-4 m-0"> It is more than a ticket , it
+                                        is an Experience!</h6>#}
+                                </div>
+
+                                <a class="buttons-primary h6-home center-text-button height-17 float-right"
+                                    href="{% url 'about' %}" style="width: 138px!important;">
+                                    <i class="fas fa-plus-circle mr-2"></i>
+                                    About us
+                                </a>
+                            </div>
+
+                        </article>
+
+                        <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile"
+                            style="padding: 0!important;">
+                            <img class="m-img-card-banner" src="{% static 'img/banner.png' %}" alt="Eventlinez" />
+                        </a>
+
+                        <aside class="col-lg-7 col-12 background-container desktop" style="padding: 0!important;">
+                            {# <img class="m-img-card-banner" src="{% static 'img/banner.jpg' %}" alt="Eventlinez" />#}
+                        </aside>
+                    </div>
+                </div>
+
+            </aside>
+
+            <div class="swiper-pagination swiper-pagination-banner"></div>
+        </div>
+    </main>
+</section>
+{% endif %}
+
+
+<section class="container container-center">
+    {% if events_all %}
+    <main class="slider">
+        <article class="m-slider swiper-container slider-card">
+            <div class="col-12 d-flex mt-0 mb-4 p-0">
+                <div class="col-lg-8 ml-0 pl-0">
+                    <h2 class="h3-home">Events</h2>
+                </div>
+
+                <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
+            </div>
+
+            <div class="swiper-wrapper">
+                {% if events_all %}
+                {% for event in events_all %}
+                <aside class="m-slider__item swiper-slide">
+                    <div class="m-card" ontouchstart>
+                        <a class="m-card__header" href="{{event.get_url}}">
+                            <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}" />
+                        </a>
+
+                        <a class="m-card__body" href="{{event.get_url}}">
+                            <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
+
+                            <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
+                            <h6 class="h6-home">
+                                <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
+                                {{event.city}}
+                            </h6>
+                        </a>
+                    </div>
+                </aside>
+                {% endfor %}
+                {% else %}
+                <h2>No events at the moment</h2>
+                {% endif %}
+            </div>
+        </article><!-- .m-slider // -->
+    </main><!-- .slider // -->
 
     {% else %}
-        <section class="container container-center pl-0 pr-0">
-            <main class="slider">
-                <div class="swiper-container slider-banner mt-0 mt-lg-4">
-                    <aside class="swiper-wrapper">
-                        <div class="swiper-slide col-12 mt-0 div-article">
-                            <div class="row" style="margin: 0">
-                                <article class="col-lg-5 desktop" style="padding: 0!important;">
-                                    <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
-                                        <div style="min-height: 18rem;">
-                                            <h1 class="h1-home pt-2 pt-lg-4">It is more than a ticket , it is an Experience!</h1>
-{#                                            <h6 class="h6-home p-date h6-banner mt-lg-4 m-0"> It is more than a ticket , it is an Experience!</h6>#}
-                                        </div>
+    <section class="slider">
+        <main class="m-slider swiper-container slider-card">
+            <div class="col-12 d-flex p-0 mt-0 mb-4">
+                <div class="col-lg-8 ml-0 pl-0">
+                    <h2 class="h3-home">Upcoming Events</h2>
+                </div>
 
-                                        <a class="buttons-primary h6-home center-text-button height-17 float-right"
-                                           href="{% url 'about' %}" style="width: 138px!important;">
-                                            <i class="fas fa-plus-circle mr-2"></i>
-                                              About us
-                                        </a>
-                                    </div>
+                <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
+            </div>
 
-                                </article>
+            <div class="swiper-wrapper">
+                {% if events_futures %}
+                {% for event in events_futures %}
+                <aside class="m-slider__item swiper-slide">
+                    <div class="m-card" ontouchstart>
+                        <a class="m-card__header" href="{{event.get_url}}">
+                            <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}" />
+                        </a>
 
-                                <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile" style="padding: 0!important;">
-                                    <img class="m-img-card-banner" src="{% static 'img/banner.png' %}" alt="Eventlinez"/>
-                                </a>
+                        <a class="m-card__body" href="{{event.get_url}}">
+                            <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
 
-                                <aside class="col-lg-7 col-12 background-container desktop" style="padding: 0!important;">
-    {#                                            <img class="m-img-card-banner" src="{% static 'img/banner.jpg' %}" alt="Eventlinez"/>#}
-                                </aside>
+                            <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
+                            <h6 class="h6-home">
+                                <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
+                                {{event.city}}
+                            </h6>
+                        </a>
+                    </div>
+                </aside>
+                {% endfor %}
+                {% else %}
+                <h2>No events at the moment</h2>
+                {% endif %}
+            </div>
+        </main><!-- .m-slider // -->
+    </section><!-- .slider // -->
+
+
+    {% if events_old %}
+    <main class="slider">
+        <article class="m-slider swiper-container slider-card">
+            <div class="col-12 d-flex p-0 mt-0 mb-4">
+                <div class="col-lg-8 ml-0  pl-0">
+                    <h2 class="h3-home">Past Events</h2>
+                </div>
+
+                <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
+            </div>
+
+            <div class="swiper-wrapper">
+                {% for event in events_old %}
+                <aside class="m-slider__item swiper-slide">
+                    <div class="m-card" ontouchstart>
+                        <a class="m-card__header" href="{{event.get_url}}">
+                            <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}" />
+                        </a>
+
+                        <a class="m-card__body" href="{{event.get_url}}">
+                            <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
+                            <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
+                            <h6 class="h6-home">
+                                <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
+                                {{event.city}}
+                            </h6>
+                        </a>
+                    </div>
+                </aside>
+                {% endfor %}
+                {# {% else %}#}
+                {# <h2>No events at the moment</h2>#}
+                {% endif %}
+            </div>
+        </article><!-- .m-slider // -->
+    </main><!-- .slider // -->
+    {% endif %}
+</section>
+
+<!-- Business Partners Section -->
+{% if business_partners %}
+<section class="container container-center mt-5 mb-5">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h2 class="h2-home">Our Business Partners</h2>
+            <p class="text-muted">Trusted by leading organizations</p>
+        </div>
+    </div>
+
+    <div class="partners-container">
+        <div class="partners-slider">
+            {% for partner in business_partners %}
+            <div class="partner-item">
+                <div class="partner-card">
+                    {% if partner.logo %}
+                    <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="partner-logo">
+                    {% else %}
+                    <div class="partner-placeholder">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    {% endif %}
+                    <h6 class="partner-name">{{ partner.name }}</h6>
+                    {% if partner.website %}
+                    <a href="{{ partner.website }}" target="_blank" class="partner-link">
+                        <i class="fas fa-external-link-alt"></i> Visit Website
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Event Gallery Section -->
+{% if featured_gallery %}
+<section class="container container-center mt-5 mb-5">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h2 class="h2-home">Event Gallery</h2>
+            <p class="text-muted">Capture the moments, download your memories</p>
+            <a href="{% url 'shop:gallery_home' %}" class="btn btn-outline-primary">
+                <i class="fas fa-images me-2"></i>View All Photos
+            </a>
+        </div>
+    </div>
+
+    <div class="gallery-container">
+        <div class="gallery-grid">
+            {% for photo in featured_gallery %}
+            <div class="gallery-item">
+                <div class="gallery-card">
+                    <a href="{% url 'shop:event_gallery' photo.event.slug %}" class="gallery-link">
+                        <img src="{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}"
+                            alt="{{ photo.title|default:photo.event.name }}" class="gallery-image">
+                        <div class="gallery-overlay">
+                            <div class="gallery-info">
+                                <h6 class="gallery-title">{{ photo.title|default:photo.event.name|truncatechars:20 }}
+                                </h6>
+                                <p class="gallery-event">{{ photo.event.name|truncatechars:25 }}</p>
+                                <div class="gallery-stats">
+                                    <span class="download-count">
+                                        <i class="fas fa-download"></i> {{ photo.download_count }}
+                                    </span>
+                                    <span class="photo-date">
+                                        <i class="fas fa-calendar"></i> {{ photo.uploaded_at|date:"M d" }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-
-                    </aside>
-
-                    <div class="swiper-pagination swiper-pagination-banner"></div>
+                    </a>
                 </div>
-            </main>
-    </section>
-    {% endif %}
-
-
-    <section class="container container-center">
-        {% if events_all %}
-         <main class="slider">
-             <article class="m-slider swiper-container slider-card">
-                <div class="col-12 d-flex mt-0 mb-4 p-0">
-                    <div class="col-lg-8 ml-0 pl-0">
-                        <h2 class="h3-home">Events</h2>
-                    </div>
-
-                    <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
-                        <div class="swiper-button-prev"></div>
-                        <div class="swiper-button-next"></div>
-                    </div>
-                </div>
-
-                 <div class="swiper-wrapper">
-                    {% if events_all %}
-                        {% for event in events_all %}
-                            <aside class="m-slider__item swiper-slide">
-                                <div class="m-card" ontouchstart>
-                                    <a class="m-card__header" href="{{event.get_url}}">
-                                        <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
-                                    </a>
-
-                                    <a class="m-card__body" href="{{event.get_url}}">
-                                        <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
-
-                                        <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
-                                        <h6 class="h6-home">
-                                             <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                            {{event.city}}</h6>
-                                    </a>
-                                </div>
-                            </aside>
-                        {% endfor %}
-                    {% else %}
-                        <h2>No events at the moment</h2>
-                    {% endif %}
-                    </div>
-                </article><!-- .m-slider // -->
-            </main><!-- .slider // -->
-
-        {% else %}
-        <section class="slider">
-            <main class="m-slider swiper-container slider-card">
-                <div class="col-12 d-flex p-0 mt-0 mb-4">
-                    <div class="col-lg-8 ml-0 pl-0">
-                        <h2 class="h3-home">Upcoming Events</h2>
-                    </div>
-
-                    <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
-                        <div class="swiper-button-prev"></div>
-                        <div class="swiper-button-next"></div>
-                    </div>
-                </div>
-
-                <div class="swiper-wrapper">
-                    {% if events_futures %}
-                        {% for event in events_futures %}
-                            <aside class="m-slider__item swiper-slide">
-                                <div class="m-card" ontouchstart>
-                                    <a class="m-card__header" href="{{event.get_url}}">
-                                        <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
-                                    </a>
-
-                                    <a class="m-card__body" href="{{event.get_url}}">
-                                        <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
-
-                                        <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
-                                        <h6 class="h6-home">
-                                            <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                            {{event.city}}
-                                        </h6>
-                                    </a>
-                                </div>
-                            </aside>
-                        {% endfor %}
-                    {% else %}
-                        <h2>No events at the moment</h2>
-                    {% endif %}
-                </div>
-            </main><!-- .m-slider // -->
-        </section><!-- .slider // -->
-
-
-        {% if events_old %}
-        <main class="slider">
-            <article class="m-slider swiper-container slider-card">
-                <div class="col-12 d-flex p-0 mt-0 mb-4">
-                    <div class="col-lg-8 ml-0  pl-0">
-                        <h2 class="h3-home">Past Events</h2>
-                    </div>
-
-                    <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
-                        <div class="swiper-button-prev"></div>
-                        <div class="swiper-button-next"></div>
-                    </div>
-                </div>
-
-		        <div class="swiper-wrapper">
-                    {% for event in events_old %}
-			            <aside class="m-slider__item swiper-slide" >
-                            <div class="m-card" ontouchstart>
-					            <a class="m-card__header" href="{{event.get_url}}">
-                                        <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}"/>
-                                </a>
-
-                                <a class="m-card__body" href="{{event.get_url}}">
-						            <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
-                                    <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
-                                    <h6 class="h6-home">
-                                         <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                        {{event.city}}</h6>
-                                </a>
-				            </div>
-                        </aside>
-                    {% endfor %}
-{#                {% else %}#}
-{#                    <h2>No events at the moment</h2>#}
-                {% endif %}
-                </div>
-	        </article><!-- .m-slider // -->
-        </main><!-- .slider // -->
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 {% endif %}
-    </section>
 
-    <section class="col-12 mt-5 subcribe">
-        <!-- form inconsistent in application -->
-        <!-- <iframe src="https://app2.simpletexting.com/join/joinWebForm?webFormId=65f903953dd74d1b60be01f5&c=USA" width="470" height="370" scrolling="no"></iframe> -->
+<section class="col-12 mt-5 subcribe">
+    <!-- form inconsistent in application -->
+    <!-- <iframe src="https://app2.simpletexting.com/join/joinWebForm?webFormId=65f903953dd74d1b60be01f5&c=USA" width="470" height="370" scrolling="no"></iframe> -->
 
 
-        <form class="subcribe-intern div-center" action="{% url 'shop:search' %}" method="get">
-            <h2 class="h2-home t-center mb-4 mt-5">Did you find what you were looking for?</h2>
-            {% csrf_token %}
-            <input class="col-lg-8 col-sm-10 input-subcribe center-block"
-                   style="width: 90%"
-                   type="search" placeholder="Search for events" aria-label="Search" name="q">
-        </form>
-    </section>
+    <form class="subcribe-intern div-center" action="{% url 'shop:search' %}" method="get">
+        <h2 class="h2-home t-center mb-4 mt-5">Did you find what you were looking for?</h2>
+        {% csrf_token %}
+        <input class="col-lg-8 col-sm-10 input-subcribe center-block" style="width: 90%" type="search"
+            placeholder="Search for events" aria-label="Search" name="q">
+    </form>
+</section>
 
 
 {% endblock %}

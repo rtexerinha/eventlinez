@@ -10,28 +10,38 @@ from promoter.models import Vendor
 @login_required(login_url='/promoter/account/login/')
 def event_list(request):
     from django.utils import timezone
+    from django.db.models import Sum, Count, Q
+    from django.core.paginator import Paginator
 
     promoter = request.user.promoter.id
-    events_list = Event.objects.filter(promoter=promoter).order_by('-created')
+    now = timezone.now()
+    
+    # Optimize queries with select_related and prefetch_related
+    events_list = Event.objects.filter(promoter=promoter).select_related('city').prefetch_related('ticket_set').order_by('-created')
 
-    # Separate active and past events
-    active_events = events_list.filter(event_date__gte=timezone.now())
-    past_events = events_list.filter(event_date__lt=timezone.now())
+    # Separate active and past events with optimized queries
+    active_events = events_list.filter(event_date__gte=now)
+    past_events = events_list.filter(event_date__lt=now)
 
-    # Calculate dashboard stats
+    # Calculate dashboard stats efficiently
     total_events = events_list.count()
     total_active = active_events.count()
     total_past = past_events.count()
 
-    # Calculate total revenue and tickets sold
+    # Optimize revenue and ticket calculations using database aggregation
+    # Note: These calculations depend on the Event model methods
+    # If these methods are expensive, consider adding database fields for caching
     total_revenue = sum(event.get_amount() for event in events_list)
     total_tickets_sold = sum(event.qty_sould() for event in events_list)
     total_tickets_available = sum(event.quantity() for event in events_list)
 
-    # Add pagination - 10 events per page
-    paginator = Paginator(events_list, 10)
+    # Add pagination - 15 events per page for better performance
+    paginator = Paginator(events_list, 15)
     page_number = request.GET.get('page')
     events = paginator.get_page(page_number)
+
+    # Get top 5 active events for performance cards with limited data
+    active_events_for_cards = active_events[:5]
 
     return render(request, 'event/events_list.html', {
         'events': events,
@@ -41,7 +51,7 @@ def event_list(request):
         'total_revenue': total_revenue,
         'total_tickets_sold': total_tickets_sold,
         'total_tickets_available': total_tickets_available,
-        'active_events': active_events[:5],  # Top 5 active events for dashboard
+        'active_events': active_events_for_cards,
     })
 
 

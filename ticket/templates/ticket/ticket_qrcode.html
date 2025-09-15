@@ -2,53 +2,338 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>QR Code Generator</title>
-        <link rel="stylesheet" href="{% static 'css/ticket.css' %}" />
-    </head>
 
-    <body>
-        <article class="ticket">
-            <header class="ticket__wrapper">
-                <div class="ticket__header">EVENTLINEZ 🎟</div>
-                <div class="ticket__header__name">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket QR Code - Eventlinez</title>
+    <link rel="stylesheet" href="{% static 'css/ticket.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/fontawesome-all.min.css' %}" />
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #d90075, #ff6b9d);
+        }
+
+        .ticket-header {
+            margin-bottom: 30px;
+        }
+
+        .ticket-title {
+            color: #d90075;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .ticket-subtitle {
+            color: #6c757d;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .qr-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #e9ecef;
+        }
+
+        .qr-code {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .qr-code svg {
+            max-width: 200px;
+            height: auto;
+        }
+
+        .ticket-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .event-details {
+            background: linear-gradient(135deg, #d90075, #ff6b9d);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .event-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .event-location {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 25px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: #5a6268;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #d90075, #ff6b9d);
+        }
+
+        .action-btn.primary:hover {
+            background: linear-gradient(135deg, #c7006b, #e55a8a);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(108, 117, 125, 0.2);
+            color: #6c757d;
+            text-decoration: none;
+        }
+
+        .ticket-id {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .qr-container {
+                margin: 10px;
+                padding: 30px 20px;
+            }
+
+            .ticket-info {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="qr-container">
+        <a href="javascript:history.back()" class="back-btn" title="Go Back">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
+        <div class="ticket-id">#{{ ticket.id }}</div>
+
+        <div class="ticket-header">
+            <div class="ticket-title">
+                <i class="fas fa-ticket-alt"></i>
+                EVENTLINEZ
+            </div>
+            <div class="ticket-subtitle">Your Event Ticket QR Code</div>
+        </div>
+
+        <div class="qr-section">
+            <h3 style="margin-bottom: 20px; color: #2c3e50;">Scan QR Code at Event</h3>
+            <div class="qr-code">
+                {{ svg|safe }}
+            </div>
+            <p style="color: #6c757d; font-size: 0.9rem; margin-top: 15px;">
+                Show this QR code at the event entrance for check-in
+            </p>
+        </div>
+
+        <div class="ticket-info">
+            <div class="info-item">
+                <div class="info-label">Guest Name</div>
+                <div class="info-value">
                     {% if ticket.guest_name %}
-                        <h6>{{ ticket.guest_name }}</h6>
+                    {{ ticket.guest_name }}
                     {% else %}
-                        <h6>{{ ticket.customer }}</h6>
+                    {{ ticket.customer }}
                     {% endif %}
-                    <p>{{ ticket.id }}</p>
                 </div>
-            </header>
-
-            <div class="ticket__divider">
-                <div class="ticket__notch"></div>
-                <div class="ticket__notch ticket__notch--right"></div>
             </div>
-
-            <div class="ticket__body">
-                <section class="ticket__section">
-                    <div>{{ svg }}</div>
-                    <h2>{{ ticket.event_ticket.event.event_date|date:"d" }}</h2>
-                    <p>{{ ticket.event_ticket.event.event_date|date:"F Y" }}</p>
-                </section>
-
-                <section class="ticket__section">
-                    <p style="font-size: 0.8rem">
-                        {{ ticket.event_ticket.event.event_date|date:"l H:i" }}
-                    </p>
-                </section>
+            <div class="info-item">
+                <div class="info-label">Ticket Type</div>
+                <div class="info-value">{{ ticket.event_ticket.name }}</div>
             </div>
+            <div class="info-item">
+                <div class="info-label">Price</div>
+                <div class="info-value">${{ ticket.price }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Date</div>
+                <div class="info-value">{{ ticket.event_ticket.event.event_date|date:"M d, Y" }}</div>
+            </div>
+        </div>
 
-            <footer class="ticket__footer">
-                <h6>{{ ticket.event_ticket.event.name }}</h6>
-                <p>
+        <div class="event-details">
+            <div class="event-name">{{ ticket.event_ticket.event.name }}</div>
+            <div class="event-location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>
                     {{ ticket.event_ticket.event.address }},
-                    {{ticket.event_ticket.event.city }},
-                    {{ticket.event_ticket.event.city.state }}
-                </p>
-            </footer>
-        </article>
-    </body>
+                    {{ ticket.event_ticket.event.city }},
+                    {{ ticket.event_ticket.event.city.state }}
+                </span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn" onclick="window.print()">
+                <i class="fas fa-print"></i>
+                Print Ticket
+            </button>
+            <button class="action-btn" onclick="downloadTicket()">
+                <i class="fas fa-download"></i>
+                Download
+            </button>
+            <a href="{% url 'guest_list' %}" class="action-btn primary">
+                <i class="fas fa-list"></i>
+                My Tickets
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function downloadTicket() {
+            // Create a canvas to convert the QR code to image
+            const qrElement = document.querySelector('.qr-code svg');
+            if (qrElement) {
+                // Simple download implementation
+                const link = document.createElement('a');
+                link.download = 'ticket-{{ ticket.id }}-qr-code.png';
+                link.href = 'data:image/svg+xml;base64,' + btoa(qrElement.outerHTML);
+                link.click();
+            } else {
+                alert('QR code not found');
+            }
+        }
+
+        // Add print styles
+        const printStyles = `
+                @media print {
+                    body { background: white !important; }
+                    .qr-container { box-shadow: none !important; }
+                    .action-buttons { display: none !important; }
+                    .back-btn { display: none !important; }
+                }
+            `;
+
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = printStyles;
+        document.head.appendChild(styleSheet);
+    </script>
+</body>
+
 </html>

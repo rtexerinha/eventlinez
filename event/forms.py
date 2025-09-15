@@ -10,25 +10,6 @@ from promoter.models import Vendor, Promoter  # <-- import Promoter here
 # event/forms.py
 from django.core.exceptions import ValidationError
 
-# assumes TicketForm already exists and sets model/fields for Ticket
-class TicketUpdateForm(TicketForm):
-    """Update form that inherits TicketForm and prevents lowering quantity below sold."""
-
-    def clean_quantity(self):
-        quantity = self.cleaned_data.get("quantity")
-        # On updates (instance has a PK), enforce quantity >= qty_sold()
-        if getattr(self.instance, "pk", None):
-            sold = self.instance.qty_sold() if hasattr(self.instance, "qty_sold") else 0
-            if quantity is not None and quantity < sold:
-                raise ValidationError("Ticket quantity cannot be less than quantity sold")
-        return quantity
-
-    # If TicketForm.Meta doesn't already set fields/model, uncomment this:
-    # class Meta(TicketForm.Meta):
-    #     fields = ["name", "quantity", "price", "sold_out"]
-
-
-
 class CityForm(ModelForm):
     class Meta:
         model = City
@@ -62,24 +43,9 @@ class TicketForm(ModelForm):
         return quantity
 
 
-cursor/fix-ticket-update-form-import-error-dddf
-class TicketUpdateForm(ModelForm):
-    class Meta:
-        model = Ticket
-        fields = ["name", "quantity", "price", "sold_out"]
-        
-    def clean_quantity(self):
-        quantity = self.cleaned_data["quantity"]
-        if not getattr(self.instance, "pk", None):
-            return quantity
-        if quantity < self.instance.qty_sold():
-            raise ValidationError("Ticket quantity cannot be less than quantity sold")
-        return quantity
-
 class TicketUpdateForm(TicketForm):
     """Form for updating existing Ticket instances. Inherits all behaviour from TicketForm without changes."""
     pass
-develop
 
 
 class VendorForm(ModelForm):
