@@ -136,6 +136,11 @@ jobs:
           git reset --hard origin/develop
           git clean -fd
           
+          # Create directories for static files and media (Docker bind mounts)
+          echo "📁 Creating directories for static files..."
+          mkdir -p staticfiles media
+          chmod 755 staticfiles media
+          
           # Install system dependencies for Python packages
           echo "📦 Checking system dependencies..."
           # Try to install PostgreSQL development headers and other build tools
