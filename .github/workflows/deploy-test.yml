@@ -75,7 +75,24 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - name: Check SSH Configuration
+      id: check_ssh
+      run: |
+        if [ -z "${{ secrets.TEST_SERVER_SSH_KEY }}" ] || [ -z "${{ secrets.TEST_SERVER_HOST }}" ] || [ -z "${{ secrets.TEST_SERVER_USER }}" ]; then
+          echo "🔑 SSH secrets not configured. Skipping deployment."
+          echo "📋 To enable automatic deployment, add these secrets to your GitHub repository:"
+          echo "   - TEST_SERVER_SSH_KEY"
+          echo "   - TEST_SERVER_HOST" 
+          echo "   - TEST_SERVER_USER"
+          echo "   - DEPLOY_PATH"
+          echo "deployment_enabled=false" >> $GITHUB_OUTPUT
+        else
+          echo "✅ SSH secrets configured. Proceeding with deployment."
+          echo "deployment_enabled=true" >> $GITHUB_OUTPUT
+        fi
+    
     - name: Setup SSH
+      if: steps.check_ssh.outputs.deployment_enabled == 'true'
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.TEST_SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
@@ -83,6 +100,7 @@ jobs:
         ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
     
     - name: Deploy to Test Server
+      if: steps.check_ssh.outputs.deployment_enabled == 'true'
       env:
         TEST_SERVER_HOST: ${{ secrets.TEST_SERVER_HOST }}
         TEST_SERVER_USER: ${{ secrets.TEST_SERVER_USER }}
@@ -142,7 +160,7 @@ jobs:
         EOF
     
     - name: Notify Deployment Status
-      if: always()
+      if: always() && steps.check_ssh.outputs.deployment_enabled == 'true'
       run: |
         if [ "${{ job.status }}" == "success" ]; then
           echo "✅ Deployment to test.eventlinez.com completed successfully!"
