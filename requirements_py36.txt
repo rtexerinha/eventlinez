@@ -27,12 +27,12 @@ sentry-sdk>=1.0.0,<2.0.0
 # Excel export
 xlsxwriter==1.4.4
 
-# Date picker widget
-django-bootstrap-datepicker-plus==5.0.5
+# Date picker widget - Python 3.6 compatible version
+django-bootstrap-datepicker-plus==4.0.0
 
 # Environment and database utilities
-python-dotenv>=0.19.0,<1.0.0
-dj-database-url>=1.0.0,<2.0.0
+python-dotenv
+dj-database-url
 
 # SSH tunneling (if needed)
 sshtunnel==0.4.0
@@ -47,6 +47,6 @@ reportlab==3.5.68
 # WSGI server
 gunicorn>=20,<22
 
-# Task queue (compatible versions for Python 3.6)
-celery>=5.2.0,<5.3.0
-redis>=4.0.0,<5.0.0
+# Task queue - compatible with Python 3.6
+celery==5.2.7
+redis>=4.5,<6
