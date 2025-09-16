@@ -5,413 +5,419 @@
 
 {% block stylesheets %}
 <style>
-/* Modern Professional Design for Ticket Creation */
-.ticket-creation-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.page-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
-    padding: 40px;
-    color: white;
-    margin-bottom: 40px;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
-}
-
-.page-header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    color: white;
-}
-
-.page-header .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    margin-bottom: 0;
-}
-
-.event-info {
-    background: #f8f9fa;
-    border-left: 4px solid #667eea;
-    padding: 15px 20px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-}
-
-.event-info .event-name {
-    font-weight: 600;
-    color: #2c3e50;
-    font-size: 1.1rem;
-}
-
-/* Progress Steps */
-.progress-steps {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 40px;
-    padding: 0 20px;
-}
-
-.step {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    max-width: 200px;
-}
-
-.step-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    color: #6c757d;
-    margin-right: 12px;
-    transition: all 0.3s ease;
-}
-
-.step.active .step-circle {
-    background: #667eea;
-    color: white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.step-line {
-    flex: 1;
-    height: 2px;
-    background: #e9ecef;
-    margin: 0 10px;
-}
-
-.step.active + .step .step-line {
-    background: #667eea;
-}
-
-/* Form Container */
-.form-container {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    margin-bottom: 30px;
-}
-
-.form-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 30px;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.form-header h2 {
-    color: #2c3e50;
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.form-header p {
-    color: #6c757d;
-    margin-bottom: 0;
-}
-
-.form-body {
-    padding: 40px;
-}
-
-/* Form Groups */
-.form-group {
-    margin-bottom: 30px;
-}
-
-.form-group label {
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 8px;
-    display: block;
-    font-size: 0.95rem;
-}
-
-.form-control {
-    border-radius: 8px;
-    border: 2px solid #e9ecef;
-    padding: 12px 16px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    width: 100%;
-}
-
-.form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    outline: none;
-}
-
-.form-control:hover {
-    border-color: #cbd5e0;
-}
-
-/* Input Groups */
-.input-group {
-    display: flex;
-    align-items: stretch;
-}
-
-.input-group-text {
-    background: #f8f9fa;
-    border: 2px solid #e9ecef;
-    border-right: none;
-    border-radius: 8px 0 0 8px;
-    padding: 12px 16px;
-    font-weight: 600;
-    color: #495057;
-}
-
-.input-group .form-control {
-    border-left: none;
-    border-radius: 0 8px 8px 0;
-}
-
-/* Form Grid */
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-}
-
-/* Help Text */
-.form-text {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 6px;
-    display: flex;
-    align-items: center;
-}
-
-.form-text i {
-    margin-right: 6px;
-    color: #667eea;
-}
-
-/* Checkbox */
-.form-check {
-    display: flex;
-    align-items: center;
-    padding: 16px 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 2px solid #e9ecef;
-    transition: all 0.3s ease;
-}
-
-.form-check:hover {
-    background: #e9ecef;
-}
-
-.form-check input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-right: 12px;
-    accent-color: #667eea;
-}
-
-.form-check-label {
-    font-weight: 500;
-    color: #2c3e50;
-    margin-bottom: 0;
-    cursor: pointer;
-}
-
-/* Error Messages */
-.text-danger {
-    color: #dc3545 !important;
-    font-size: 0.875rem;
-    margin-top: 6px;
-    display: flex;
-    align-items: center;
-}
-
-.text-danger i {
-    margin-right: 6px;
-}
-
-/* Action Buttons */
-.form-actions {
-    background: #f8f9fa;
-    padding: 30px 40px;
-    border-top: 1px solid #e9ecef;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.btn-group {
-    display: flex;
-    gap: 15px;
-}
-
-.btn-save {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 14px 28px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-}
-
-.btn-save:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-    color: white;
-    text-decoration: none;
-}
-
-.btn-save i {
-    margin-right: 8px;
-}
-
-.btn-cancel {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 14px 28px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-}
-
-.btn-cancel:hover {
-    background: #5a6268;
-    color: white;
-    text-decoration: none;
-    transform: translateY(-1px);
-}
-
-.btn-cancel i {
-    margin-right: 8px;
-}
-
-/* Preview Card */
-.ticket-preview {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-top: 20px;
-}
-
-.ticket-preview h4 {
-    color: white;
-    margin-bottom: 15px;
-}
-
-.preview-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.preview-item:last-child {
-    border-bottom: none;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
+    /* Modern Professional Design for Ticket Creation */
     .ticket-creation-container {
-        padding: 15px;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
     }
-    
+
     .page-header {
-        padding: 30px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 40px;
+        color: white;
+        margin-bottom: 40px;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: white;
+    }
+
+    .page-header .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .event-info {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 15px 20px;
+        border-radius: 8px;
         margin-bottom: 30px;
     }
-    
-    .page-header h1 {
-        font-size: 2rem;
+
+    .event-info .event-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
     }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .form-body {
-        padding: 30px 20px;
-    }
-    
-    .form-actions {
-        padding: 20px;
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .btn-group {
-        width: 100%;
-        flex-direction: column;
-    }
-    
-    .btn-save, .btn-cancel {
-        width: 100%;
-        justify-content: center;
-    }
-    
+
+    /* Progress Steps */
     .progress-steps {
-        flex-direction: column;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 40px;
+        padding: 0 20px;
+    }
+
+    .step {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        max-width: 200px;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #6c757d;
+        margin-right: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .step.active .step-circle {
+        background: #667eea;
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .step-line {
+        flex: 1;
+        height: 2px;
+        background: #e9ecef;
+        margin: 0 10px;
+    }
+
+    .step.active+.step .step-line {
+        background: #667eea;
+    }
+
+    /* Form Container */
+    .form-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 30px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .form-header h2 {
+        color: #2c3e50;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .form-header p {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .form-body {
+        padding: 40px;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 30px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .form-control:hover {
+        border-color: #cbd5e0;
+    }
+
+    /* Input Groups */
+    .input-group {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .input-group-text {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-right: none;
+        border-radius: 8px 0 0 8px;
+        padding: 12px 16px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+        border-radius: 0 8px 8px 0;
+    }
+
+    /* Form Grid */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    /* Help Text */
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-text i {
+        margin-right: 6px;
+        color: #667eea;
+    }
+
+    /* Checkbox */
+    .form-check {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .form-check:hover {
+        background: #e9ecef;
+    }
+
+    .form-check input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        accent-color: #667eea;
+    }
+
+    .form-check-label {
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+
+    /* Error Messages */
+    .text-danger {
+        color: #dc3545 !important;
+        font-size: 0.875rem;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+    }
+
+    .text-danger i {
+        margin-right: 6px;
+    }
+
+    /* Action Buttons */
+    .form-actions {
+        background: #f8f9fa;
+        padding: 30px 40px;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-group {
+        display: flex;
         gap: 15px;
     }
-    
-    .step {
-        max-width: none;
+
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
     }
-    
-    .step-line {
-        display: none;
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        color: white;
+        text-decoration: none;
     }
-}
 
-/* Loading States */
-.btn-save:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
+    .btn-save i {
+        margin-right: 8px;
+    }
 
-.btn-save.loading {
-    pointer-events: none;
-}
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
 
-.btn-save.loading::after {
-    content: "";
-    width: 16px;
-    height: 16px;
-    margin-left: 10px;
-    border: 2px solid #ffffff;
-    border-top: 2px solid transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
+    .btn-cancel:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+    .btn-cancel i {
+        margin-right: 8px;
+    }
+
+    /* Preview Card */
+    .ticket-preview {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 20px;
+    }
+
+    .ticket-preview h4 {
+        color: white;
+        margin-bottom: 15px;
+    }
+
+    .preview-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .preview-item:last-child {
+        border-bottom: none;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .ticket-creation-container {
+            padding: 15px;
+        }
+
+        .page-header {
+            padding: 30px 20px;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .form-body {
+            padding: 30px 20px;
+        }
+
+        .form-actions {
+            padding: 20px;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-group {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .btn-save,
+        .btn-cancel {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .progress-steps {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .step {
+            max-width: none;
+        }
+
+        .step-line {
+            display: none;
+        }
+    }
+
+    /* Loading States */
+    .btn-save:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-save.loading {
+        pointer-events: none;
+    }
+
+    .btn-save.loading::after {
+        content: "";
+        width: 16px;
+        height: 16px;
+        margin-left: 10px;
+        border: 2px solid #ffffff;
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 {% endblock stylesheets %}
 
@@ -437,7 +443,7 @@
                 <div class="event-name">{{ event.name }}</div>
                 <small class="text-muted">
                     <i class="fas fa-map-marker-alt" style="margin-right: 5px;"></i>
-                    {{ event.city|default:"Location not specified" }} • 
+                    {{ event.city|default:"Location not specified" }} •
                     {{ event.event_date|date:"M d, Y" }}
                 </small>
             </div>
@@ -466,7 +472,7 @@
     <!-- Main Form -->
     <form method="post" id="ticketForm">
         {% csrf_token %}
-        
+
         <div class="form-container">
             <!-- Form Header -->
             <div class="form-header">
@@ -494,12 +500,12 @@
                     </label>
                     {{ form.name }}
                     {% if form.name.errors %}
-                        <div class="text-danger">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {% for error in form.name.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
+                    <div class="text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {% for error in form.name.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
                     {% endif %}
                     <div class="form-text">
                         <i class="fas fa-info-circle"></i>
@@ -517,12 +523,12 @@
                         </label>
                         {{ form.quantity }}
                         {% if form.quantity.errors %}
-                            <div class="text-danger">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {% for error in form.quantity.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
+                        <div class="text-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% for error in form.quantity.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
                         {% endif %}
                         <div class="form-text">
                             <i class="fas fa-info-circle"></i>
@@ -543,12 +549,12 @@
                             {{ form.price }}
                         </div>
                         {% if form.price.errors %}
-                            <div class="text-danger">
-                                <i class="fas fa-exclamation-circle"></i>
-                                {% for error in form.price.errors %}
-                                    {{ error }}
-                                {% endfor %}
-                            </div>
+                        <div class="text-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% for error in form.price.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
                         {% endif %}
                         <div class="form-text">
                             <i class="fas fa-info-circle"></i>
@@ -567,12 +573,12 @@
                         </label>
                     </div>
                     {% if form.sold_out.errors %}
-                        <div class="text-danger">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {% for error in form.sold_out.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
+                    <div class="text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {% for error in form.sold_out.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
                     {% endif %}
                 </div>
 
@@ -607,10 +613,10 @@
                     <i class="fas fa-shield-alt" style="margin-right: 8px; color: #28a745;"></i>
                     Your data is automatically saved as you type
                 </div>
-                
+
                 <div class="btn-group">
-                    <a href="{% if event_id %}{% url 'ticket_type_list_per_event' event_id %}{% else %}{% url 'events_promoter' %}{% endif %}" 
-                       class="btn-cancel">
+                    <a href="{% if event_id %}{% url 'ticket_type_list_per_event' event_id %}{% else %}{% url 'events_promoter' %}{% endif %}"
+                        class="btn-cancel">
                         <i class="fas fa-times"></i>
                         Cancel
                     </a>
@@ -626,88 +632,88 @@
 
 <!-- JavaScript for Enhanced UX -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const nameInput = document.getElementById('{{ form.name.id_for_label }}');
-    const quantityInput = document.getElementById('{{ form.quantity.id_for_label }}');
-    const priceInput = document.getElementById('{{ form.price.id_for_label }}');
-    const soldOutInput = document.getElementById('{{ form.sold_out.id_for_label }}');
-    
-    const previewName = document.getElementById('previewName');
-    const previewQuantity = document.getElementById('previewQuantity');
-    const previewPrice = document.getElementById('previewPrice');
-    const previewStatus = document.getElementById('previewStatus');
-    
-    // Update preview in real-time
-    function updatePreview() {
-        previewName.textContent = nameInput.value || 'Enter ticket name';
-        previewQuantity.textContent = quantityInput.value || '0';
-        previewPrice.textContent = '$' + (parseFloat(priceInput.value) || 0).toFixed(2);
-        previewStatus.textContent = soldOutInput.checked ? 'Sold Out' : 'Available';
-        previewStatus.style.color = soldOutInput.checked ? '#dc3545' : '#28a745';
-    }
-    
-    // Add event listeners
-    nameInput.addEventListener('input', updatePreview);
-    quantityInput.addEventListener('input', updatePreview);
-    priceInput.addEventListener('input', updatePreview);
-    soldOutInput.addEventListener('change', updatePreview);
-    
-    // Form submission handling
-    const form = document.getElementById('ticketForm');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    form.addEventListener('submit', function(e) {
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
-    });
-    
-    // Progress steps animation
-    const steps = document.querySelectorAll('.step');
-    
-    // Animate progress based on form completion
-    function updateProgress() {
-        let completedSteps = 1; // Always start with step 1 active
-        
-        if (nameInput.value && quantityInput.value && priceInput.value) {
-            completedSteps = 2;
+    document.addEventListener('DOMContentLoaded', function () {
+        const nameInput = document.getElementById('{{ form.name.id_for_label }}');
+        const quantityInput = document.getElementById('{{ form.quantity.id_for_label }}');
+        const priceInput = document.getElementById('{{ form.price.id_for_label }}');
+        const soldOutInput = document.getElementById('{{ form.sold_out.id_for_label }}');
+
+        const previewName = document.getElementById('previewName');
+        const previewQuantity = document.getElementById('previewQuantity');
+        const previewPrice = document.getElementById('previewPrice');
+        const previewStatus = document.getElementById('previewStatus');
+
+        // Update preview in real-time
+        function updatePreview() {
+            previewName.textContent = nameInput.value || 'Enter ticket name';
+            previewQuantity.textContent = quantityInput.value || '0';
+            previewPrice.textContent = '$' + (parseFloat(priceInput.value) || 0).toFixed(2);
+            previewStatus.textContent = soldOutInput.checked ? 'Sold Out' : 'Available';
+            previewStatus.style.color = soldOutInput.checked ? '#dc3545' : '#28a745';
         }
-        
-        if (nameInput.value && quantityInput.value && priceInput.value && 
-            parseInt(quantityInput.value) > 0 && parseFloat(priceInput.value) > 0) {
-            completedSteps = 3;
+
+        // Add event listeners
+        nameInput.addEventListener('input', updatePreview);
+        quantityInput.addEventListener('input', updatePreview);
+        priceInput.addEventListener('input', updatePreview);
+        soldOutInput.addEventListener('change', updatePreview);
+
+        // Form submission handling
+        const form = document.getElementById('ticketForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', function (e) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        });
+
+        // Progress steps animation
+        const steps = document.querySelectorAll('.step');
+
+        // Animate progress based on form completion
+        function updateProgress() {
+            let completedSteps = 1; // Always start with step 1 active
+
+            if (nameInput.value && quantityInput.value && priceInput.value) {
+                completedSteps = 2;
+            }
+
+            if (nameInput.value && quantityInput.value && priceInput.value &&
+                parseInt(quantityInput.value) > 0 && parseFloat(priceInput.value) > 0) {
+                completedSteps = 3;
+            }
+
+            steps.forEach((step, index) => {
+                if (index < completedSteps) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
         }
-        
-        steps.forEach((step, index) => {
-            if (index < completedSteps) {
-                step.classList.add('active');
-            } else {
-                step.classList.remove('active');
-            }
+
+        // Update progress on input changes
+        [nameInput, quantityInput, priceInput].forEach(input => {
+            input.addEventListener('input', updateProgress);
         });
-    }
-    
-    // Update progress on input changes
-    [nameInput, quantityInput, priceInput].forEach(input => {
-        input.addEventListener('input', updateProgress);
-    });
-    
-    // Initial preview update
-    updatePreview();
-    updateProgress();
-    
-    // Form validation feedback
-    const inputs = [nameInput, quantityInput, priceInput];
-    inputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            if (this.value) {
-                this.style.borderColor = '#28a745';
-            }
-        });
-        
-        input.addEventListener('focus', function() {
-            this.style.borderColor = '#667eea';
+
+        // Initial preview update
+        updatePreview();
+        updateProgress();
+
+        // Form validation feedback
+        const inputs = [nameInput, quantityInput, priceInput];
+        inputs.forEach(input => {
+            input.addEventListener('blur', function () {
+                if (this.value) {
+                    this.style.borderColor = '#28a745';
+                }
+            });
+
+            input.addEventListener('focus', function () {
+                this.style.borderColor = '#667eea';
+            });
         });
     });
-});
 </script>
 {% endblock content %}
