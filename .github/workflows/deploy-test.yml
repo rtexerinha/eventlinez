@@ -78,35 +78,40 @@ jobs:
     - name: Check SSH Configuration
       id: check_ssh
       run: |
-        if [ -z "${{ secrets.TEST_SERVER_SSH_KEY }}" ] || [ -z "${{ secrets.TEST_SERVER_HOST }}" ] || [ -z "${{ secrets.TEST_SERVER_USER }}" ]; then
-          echo "🔑 SSH secrets not configured. Skipping deployment."
+        if [ -z "${{ secrets.TEST_SERVER_HOST }}" ] || [ -z "${{ secrets.TEST_SERVER_USER }}" ] || [ -z "${{ secrets.DEPLOY_PATH }}" ]; then
+          echo "🔑 Server connection secrets not configured. Skipping deployment."
           echo "📋 To enable automatic deployment, add these secrets to your GitHub repository:"
-          echo "   - TEST_SERVER_SSH_KEY"
           echo "   - TEST_SERVER_HOST" 
           echo "   - TEST_SERVER_USER"
           echo "   - DEPLOY_PATH"
+          echo "   - TEST_SERVER_PASSWORD (for password auth)"
           echo "deployment_enabled=false" >> $GITHUB_OUTPUT
         else
-          echo "✅ SSH secrets configured. Proceeding with deployment."
+          echo "✅ Server connection secrets configured. Proceeding with deployment."
           echo "deployment_enabled=true" >> $GITHUB_OUTPUT
         fi
     
-    - name: Setup SSH
+    - name: Setup SSH Connection
       if: steps.check_ssh.outputs.deployment_enabled == 'true'
       run: |
+        # Install sshpass for password authentication
+        sudo apt-get update && sudo apt-get install -y sshpass
+        
+        # Setup known_hosts
         mkdir -p ~/.ssh
-        echo "${{ secrets.TEST_SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
+        
+        echo "✅ SSH connection setup completed"
     
     - name: Deploy to Test Server
       if: steps.check_ssh.outputs.deployment_enabled == 'true'
       env:
         TEST_SERVER_HOST: ${{ secrets.TEST_SERVER_HOST }}
         TEST_SERVER_USER: ${{ secrets.TEST_SERVER_USER }}
+        TEST_SERVER_PASSWORD: ${{ secrets.TEST_SERVER_PASSWORD }}
         DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
       run: |
-        ssh -o StrictHostKeyChecking=no $TEST_SERVER_USER@$TEST_SERVER_HOST << 'EOF'
+        sshpass -p "$TEST_SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $TEST_SERVER_USER@$TEST_SERVER_HOST << 'EOF'
           set -e
           
           echo "🚀 Starting deployment to test server..."
