@@ -165,13 +165,18 @@ class CardDetailViewTest(TestCase):
         }
         self.client.login(username='john', password='johnpassword')
 
-        self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+        # Debug: check cart_add response
+        add_response = self.client.post(reverse('cart:add_cart'), payload, 'application/json')
+        print(f"Cart add response status: {add_response.status_code}")
+        if add_response.status_code != 201:
+            print(f"Cart add response content: {add_response.content}")
+
         response = self.client.get(reverse("cart:detail"))
         
         # Debug: print response content if status is not 200
         if response.status_code != 200:
-            print(f"Response status: {response.status_code}")
-            print(f"Response content: {response.content}")
+            print(f"Cart detail response status: {response.status_code}")
+            print(f"Cart detail response content: {response.content}")
         
         self.assertEqual(200, response.status_code)
         self.assertEqual(2, response.context['cart_items'].count())
