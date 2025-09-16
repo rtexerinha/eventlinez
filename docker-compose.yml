@@ -50,8 +50,8 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-      - media_volume:/app/media
-      - static_volume:/app/staticfiles
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
     platform: linux/amd64
 
   pgadmin:
@@ -68,7 +68,5 @@ services:
 
 volumes:
   pg_data:
-  media_volume:
-  static_volume:
 
     # docker-compose.yml
