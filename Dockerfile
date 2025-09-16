@@ -1,7 +1,11 @@
 FROM python:3.9-slim
 
+# Environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    VIRTUAL_ENV=/app/venv \
+    PATH="/app/venv/bin:$PATH" \
+    IN_DOCKER=true
 
 # Core build tools + libs for Pillow/ReportLab/Postgres
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -13,20 +17,36 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libtiff5-dev \
     libfreetype6-dev \
     libwebp-dev \
+    postgresql-client \
+    curl \
+    git \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install PostgreSQL client
-RUN apt-get update && apt-get install -y postgresql-client
+# Create virtual environment (consistent with deployment script)
+RUN python -m venv $VIRTUAL_ENV
 
-# Install deps first to leverage layer caching
+# Upgrade pip and install dependencies
 COPY requirements.txt /app/
-RUN python -V && pip -V && pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# App code
+# Copy application code
 COPY . /app
 
+# Create necessary directories
+RUN mkdir -p /app/media /app/staticfiles
+
+# Create entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Set proper permissions
+RUN chmod -R 755 /app
+
 EXPOSE 8000
-# Replace "eventlinez" if your Django project package differs
+
+# Use entrypoint script to handle migrations and static files
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["gunicorn", "eventlinez.wsgi:application", "--bind", "0.0.0.0:8000"]
