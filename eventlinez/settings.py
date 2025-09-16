@@ -97,7 +97,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "imagekit",
     "crispy_forms",
-    "crispy_bootstrap4",
     "bootstrap_datepicker_plus",
     "ckeditor",
     "address",
@@ -113,6 +112,14 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "eventlinez",
 ]
+
+# Conditionally add crispy_bootstrap4 if available
+try:
+    import crispy_bootstrap4
+    INSTALLED_APPS.append("crispy_bootstrap4")
+except ImportError:
+    # crispy_bootstrap4 not available, using built-in bootstrap4 support in django-crispy-forms
+    pass
 
 # Crispy Forms Configuration
 # Handle different versions based on available packages
