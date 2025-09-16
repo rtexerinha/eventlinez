@@ -48,5 +48,5 @@ reportlab==3.5.68
 gunicorn>=20,<22
 
 # Task queue - compatible with Python 3.6
-celery==5.2.7
-redis>=4.5,<6
+celery==5.1.2
+redis>=3.0.0,<5.0.0
