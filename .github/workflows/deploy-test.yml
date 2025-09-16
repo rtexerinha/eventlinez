@@ -193,6 +193,19 @@ jobs:
             fi
           fi
           
+          # Drop problematic views before migrations
+          echo "🗄️ Dropping PostgreSQL views..."
+          if [ -n "$VIRTUAL_ENV" ]; then
+            python manage.py drop_views --noinput 2>/dev/null || echo "Drop views completed or not needed"
+          else
+            if [ -d "venv" ]; then
+              source venv/bin/activate
+              python manage.py drop_views --noinput 2>/dev/null || echo "Drop views completed or not needed"
+            else
+              python3 manage.py drop_views --noinput 2>/dev/null || echo "Drop views completed or not needed"
+            fi
+          fi
+          
           # Run database migrations
           echo "🗄️ Running database migrations..."
           # Ensure we're using the right Python environment
@@ -204,6 +217,19 @@ jobs:
               python manage.py migrate --noinput
             else
               python3 manage.py migrate --noinput
+            fi
+          fi
+          
+          # Recreate views after migrations
+          echo "🗄️ Recreating PostgreSQL views..."
+          if [ -n "$VIRTUAL_ENV" ]; then
+            python manage.py create_sales_view --noinput 2>/dev/null || echo "Create sales view completed or not needed"
+          else
+            if [ -d "venv" ]; then
+              source venv/bin/activate
+              python manage.py create_sales_view --noinput 2>/dev/null || echo "Create sales view completed or not needed"
+            else
+              python3 manage.py create_sales_view --noinput 2>/dev/null || echo "Create sales view completed or not needed"
             fi
           fi
           

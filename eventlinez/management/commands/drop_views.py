@@ -27,6 +27,8 @@ class Command(BaseCommand):
         views_to_drop = [
             'sales_by_vendor',
             'public.sales_by_vendor',
+            'ticket_report',
+            'public.ticket_report',
         ]
 
         with connection.cursor() as cursor:
@@ -34,7 +36,7 @@ class Command(BaseCommand):
             cursor.execute("""
                 SELECT viewname FROM pg_views 
                 WHERE schemaname = 'public' 
-                AND viewname IN ('sales_by_vendor')
+                AND viewname IN ('sales_by_vendor', 'ticket_report')
             """)
             existing_views = [row[0] for row in cursor.fetchall()]
             
