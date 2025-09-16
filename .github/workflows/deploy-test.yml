@@ -139,7 +139,15 @@ jobs:
           # Create directories for static files and media (Docker bind mounts)
           echo "📁 Creating directories for static files..."
           mkdir -p staticfiles media
-          chmod 755 staticfiles media
+          
+          # Set permissions safely (ignore failures due to existing ownership)
+          echo "🔐 Setting directory permissions..."
+          chmod 755 staticfiles 2>/dev/null || echo "⚠️ Could not change staticfiles permissions (may be owned by docker)"
+          chmod 755 media 2>/dev/null || echo "⚠️ Could not change media permissions (may be owned by docker)"
+          
+          # Ensure current user can write to these directories if possible
+          sudo chown -R $(whoami):$(whoami) staticfiles 2>/dev/null || echo "⚠️ Could not change staticfiles ownership"
+          sudo chown -R $(whoami):$(whoami) media 2>/dev/null || echo "⚠️ Could not change media ownership"
           
           # Install system dependencies for Python packages
           echo "📦 Checking system dependencies..."
