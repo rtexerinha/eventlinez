@@ -7,6 +7,7 @@ from shop.models import EventGallery
 from promoter.models import Promoter
 from customer.models import Customer
 from address.models import State, City, Address
+from django.conf import settings
 import random
 
 
@@ -203,6 +204,65 @@ class Command(BaseCommand):
             
         return customers
 
+    def create_dummy_image(self, filename, size=(800, 600)):
+        """Create a dummy image file for events"""
+        import os
+        from PIL import Image, ImageDraw, ImageFont
+        from django.core.files.base import ContentFile
+        from io import BytesIO
+        
+        # Create directory if it doesn't exist
+        media_root = settings.MEDIA_ROOT
+        event_media_path = os.path.join(media_root, 'event')
+        os.makedirs(event_media_path, exist_ok=True)
+        
+        # Generate a colorful image
+        colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+        ]
+        
+        # Create image
+        image = Image.new('RGB', size, random.choice(colors))
+        draw = ImageDraw.Draw(image)
+        
+        # Add some geometric shapes for visual interest
+        for _ in range(3):
+            shape_type = random.choice(['rectangle', 'ellipse'])
+            x1, y1 = random.randint(0, size[0]//2), random.randint(0, size[1]//2)
+            x2, y2 = random.randint(size[0]//2, size[0]), random.randint(size[1]//2, size[1])
+            
+            if shape_type == 'rectangle':
+                draw.rectangle([x1, y1, x2, y2], fill=random.choice(colors), width=2)
+            else:
+                draw.ellipse([x1, y1, x2, y2], fill=random.choice(colors))
+        
+        # Add text
+        try:
+            # Try to use a better font if available
+            font = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", 40)
+        except:
+            # Fallback to default font
+            font = ImageFont.load_default()
+        
+        text = "EVENT"
+        text_bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = text_bbox[2] - text_bbox[0]
+        text_height = text_bbox[3] - text_bbox[1]
+        text_x = (size[0] - text_width) // 2
+        text_y = (size[1] - text_height) // 2
+        
+        # Add text with shadow
+        draw.text((text_x + 2, text_y + 2), text, font=font, fill='black')
+        draw.text((text_x, text_y), text, font=font, fill='white')
+        
+        # Save to BytesIO
+        image_io = BytesIO()
+        image.save(image_io, format='JPEG', quality=85)
+        image_io.seek(0)
+        
+        return ContentFile(image_io.getvalue(), name=filename)
+
     def create_events(self, promoters):
         """Create test events with tickets"""
         self.stdout.write('🎉 Creating events...')
@@ -260,6 +320,7 @@ class Command(BaseCommand):
             event_date = timezone.now() + timedelta(days=data['days_ahead'])
             promoter = promoters[i % len(promoters)]
             
+            # Create the event first
             event = Event.objects.create(
                 name=data['name'],
                 description=data['description'],
@@ -271,6 +332,26 @@ class Command(BaseCommand):
                 is_active=True,
                 category=data['category']
             )
+            
+            # Create and assign images
+            try:
+                # Create main image
+                main_image_name = f'event_{event.id}_main.jpg'
+                main_image_content = self.create_dummy_image(main_image_name, (1200, 600))
+                event.image.save(main_image_name, main_image_content, save=False)
+                
+                # Create thumbnail image
+                thumb_image_name = f'event_{event.id}_thumb.jpg'
+                thumb_image_content = self.create_dummy_image(thumb_image_name, (400, 300))
+                event.thumbnail.save(thumb_image_name, thumb_image_content, save=False)
+                
+                # Save the event with images
+                event.save()
+                
+                self.stdout.write(f'  🖼️ Created images for: {event.name}')
+                
+            except Exception as e:
+                self.stdout.write(f'  ⚠️ Could not create images for {event.name}: {e}')
             
             # Create ticket types for each event
             ticket_types_data = [
