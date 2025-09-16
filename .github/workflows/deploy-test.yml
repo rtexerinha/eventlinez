@@ -278,6 +278,32 @@ jobs:
               echo "⚠️ Database readiness check timed out, but continuing..."
             fi
             
+            # Wait for container initialization to complete (includes auto-seeding)
+            echo "⏳ Waiting for container initialization to complete..."
+            sleep 20
+            
+            # Check if container is running and accessible
+            echo "🔍 Verifying container is ready..."
+            max_attempts=15
+            attempt=1
+            while [ $attempt -le $max_attempts ]; do
+              if $DOCKER_COMPOSE_CMD exec -T web python --version >/dev/null 2>&1; then
+                echo "✅ Container is ready and accessible"
+                break
+              else
+                echo "⏳ Container not ready yet (attempt $attempt/$max_attempts)..."
+                sleep 3
+                attempt=$((attempt + 1))
+              fi
+            done
+            
+            # Optional: Force re-seed if needed (manual trigger)
+            if [ "$FORCE_RESEED" = "true" ]; then
+              echo "🔄 Force re-seeding database..."
+              $DOCKER_COMPOSE_CMD exec -T web python manage.py flush --noinput || echo "⚠️ Flush failed"
+              $DOCKER_COMPOSE_CMD exec -T web python manage.py seed_data --force || echo "⚠️ Re-seeding failed"
+            fi
+            
             # Check Django application status
             echo "🔍 Checking Django application status..."
             $DOCKER_COMPOSE_CMD logs --tail=20 web
@@ -285,6 +311,23 @@ jobs:
             echo "✅ Docker services started and ready"
           else
             echo "📦 Using traditional deployment..."
+            
+            # Reset database and run seeders for test environment (traditional deployment)
+            echo "🗑️ Resetting database for fresh test data..."
+            python manage.py flush --noinput || echo "⚠️ Database flush failed, continuing..."
+            
+            echo "🗄️ Running migrations..."
+            python manage.py migrate --noinput
+            
+            echo "📊 Creating database views..."
+            python manage.py create_sales_view --force || echo "⚠️ View creation failed, continuing..."
+            
+            echo "🌱 Seeding database with test data..."
+            python manage.py seed_data --force
+            
+            echo "📁 Collecting static files..."
+            python manage.py collectstatic --noinput
+            
             systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
             # Try to reload nginx if available
             systemctl reload nginx 2>/dev/null || echo "Nginx not available or no permission"

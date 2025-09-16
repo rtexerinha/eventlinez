@@ -57,6 +57,12 @@ python manage.py create_sales_view --force || echo "⚠️ Could not create sale
 echo "📁 Collecting static files..."
 python manage.py collectstatic --noinput --clear
 
+# Check if we should seed data for test environment
+if [ "$ENVIRONMENT" = "test" ] || [ "$SEED_DATA" = "true" ]; then
+    echo "🌱 Seeding database with test data (test environment)..."
+    python manage.py seed_data --force || echo "⚠️ Database seeding failed"
+fi
+
 echo "✅ Initialization complete!"
 
 # Execute the passed command
