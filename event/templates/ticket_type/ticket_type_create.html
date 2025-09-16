@@ -632,88 +632,176 @@
 
 <!-- JavaScript for Enhanced UX -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const nameInput = document.getElementById('{{ form.name.id_for_label }}');
-        const quantityInput = document.getElementById('{{ form.quantity.id_for_label }}');
-        const priceInput = document.getElementById('{{ form.price.id_for_label }}');
-        const soldOutInput = document.getElementById('{{ form.sold_out.id_for_label }}');
-
-        const previewName = document.getElementById('previewName');
-        const previewQuantity = document.getElementById('previewQuantity');
-        const previewPrice = document.getElementById('previewPrice');
-        const previewStatus = document.getElementById('previewStatus');
-
-        // Update preview in real-time
-        function updatePreview() {
-            previewName.textContent = nameInput.value || 'Enter ticket name';
-            previewQuantity.textContent = quantityInput.value || '0';
-            previewPrice.textContent = '$' + (parseFloat(priceInput.value) || 0).toFixed(2);
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Ticket form JavaScript loaded');
+    
+    // More robust element selection with multiple fallbacks
+    const nameInput = document.getElementById('{{ form.name.id_for_label }}') || 
+                     document.querySelector('input[name="name"]') ||
+                     document.querySelector('#id_name');
+    const quantityInput = document.getElementById('{{ form.quantity.id_for_label }}') || 
+                         document.querySelector('input[name="quantity"]') ||
+                         document.querySelector('#id_quantity');
+    const priceInput = document.getElementById('{{ form.price.id_for_label }}') || 
+                      document.querySelector('input[name="price"]') ||
+                      document.querySelector('#id_price');
+    const soldOutInput = document.getElementById('{{ form.sold_out.id_for_label }}') || 
+                        document.querySelector('input[name="sold_out"]') ||
+                        document.querySelector('#id_sold_out');
+    
+    const previewName = document.getElementById('previewName');
+    const previewQuantity = document.getElementById('previewQuantity');
+    const previewPrice = document.getElementById('previewPrice');
+    const previewStatus = document.getElementById('previewStatus');
+    
+    // Debug logging
+    console.log('Form elements found:', {
+        nameInput: !!nameInput,
+        quantityInput: !!quantityInput,
+        priceInput: !!priceInput,
+        soldOutInput: !!soldOutInput,
+        previewElements: !!(previewName && previewQuantity && previewPrice && previewStatus)
+    });
+    
+    if (nameInput) console.log('Name input ID:', nameInput.id);
+    if (quantityInput) console.log('Quantity input ID:', quantityInput.id);
+    if (priceInput) console.log('Price input ID:', priceInput.id);
+    if (soldOutInput) console.log('Sold out input ID:', soldOutInput.id);
+    
+    // Update preview in real-time
+    function updatePreview() {
+        if (!previewName || !previewQuantity || !previewPrice || !previewStatus) {
+            console.log('⚠️ Preview elements not found');
+            return;
+        }
+        
+        if (nameInput) previewName.textContent = nameInput.value || 'Enter ticket name';
+        if (quantityInput) previewQuantity.textContent = quantityInput.value || '0';
+        if (priceInput) previewPrice.textContent = '$' + (parseFloat(priceInput.value) || 0).toFixed(2);
+        if (soldOutInput) {
             previewStatus.textContent = soldOutInput.checked ? 'Sold Out' : 'Available';
             previewStatus.style.color = soldOutInput.checked ? '#dc3545' : '#28a745';
         }
-
-        // Add event listeners
-        nameInput.addEventListener('input', updatePreview);
-        quantityInput.addEventListener('input', updatePreview);
-        priceInput.addEventListener('input', updatePreview);
-        soldOutInput.addEventListener('change', updatePreview);
-
-        // Form submission handling
-        const form = document.getElementById('ticketForm');
-        const submitBtn = document.getElementById('submitBtn');
-
-        form.addEventListener('submit', function (e) {
+    }
+    
+    // Add event listeners with error handling
+    function addEventListenerSafely(element, event, handler) {
+        if (element) {
+            element.addEventListener(event, handler);
+            console.log(`✅ Added ${event} listener to`, element.tagName, element.id || element.name);
+        } else {
+            console.log(`⚠️ Could not add ${event} listener - element not found`);
+        }
+    }
+    
+    addEventListenerSafely(nameInput, 'input', updatePreview);
+    addEventListenerSafely(quantityInput, 'input', updatePreview);
+    addEventListenerSafely(priceInput, 'input', updatePreview);
+    addEventListenerSafely(soldOutInput, 'change', updatePreview);
+    
+    // Form submission handling
+    const form = document.getElementById('ticketForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            console.log('🚀 Form submitted');
+            
+            // Client-side validation
+            let isValid = true;
+            let errors = [];
+            
+            if (nameInput && !nameInput.value.trim()) {
+                errors.push('Ticket name is required');
+                isValid = false;
+            }
+            
+            if (quantityInput && (!quantityInput.value || parseInt(quantityInput.value) <= 0)) {
+                errors.push('Quantity must be greater than 0');
+                isValid = false;
+            }
+            
+            if (priceInput && (!priceInput.value || parseFloat(priceInput.value) < 0)) {
+                errors.push('Price must be 0 or greater');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fix the following errors:\n\n' + errors.join('\n'));
+                return false;
+            }
+            
+            // Show loading state
             submitBtn.classList.add('loading');
             submitBtn.disabled = true;
+            
+            // Re-enable button after 10 seconds as fallback
+            setTimeout(function() {
+                if (submitBtn.disabled) {
+                    console.log('⚠️ Re-enabling submit button after timeout');
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }, 10000);
         });
-
-        // Progress steps animation
-        const steps = document.querySelectorAll('.step');
-
-        // Animate progress based on form completion
-        function updateProgress() {
-            let completedSteps = 1; // Always start with step 1 active
-
+        console.log('✅ Form submission handler added');
+    } else {
+        console.log('⚠️ Form or submit button not found', {form: !!form, submitBtn: !!submitBtn});
+    }
+    
+    // Progress steps animation
+    const steps = document.querySelectorAll('.step');
+    console.log('Found', steps.length, 'progress steps');
+    
+    // Animate progress based on form completion
+    function updateProgress() {
+        let completedSteps = 1; // Always start with step 1 active
+        
+        if (nameInput && quantityInput && priceInput) {
             if (nameInput.value && quantityInput.value && priceInput.value) {
                 completedSteps = 2;
             }
-
-            if (nameInput.value && quantityInput.value && priceInput.value &&
+            
+            if (nameInput.value && quantityInput.value && priceInput.value && 
                 parseInt(quantityInput.value) > 0 && parseFloat(priceInput.value) > 0) {
                 completedSteps = 3;
             }
-
-            steps.forEach((step, index) => {
-                if (index < completedSteps) {
-                    step.classList.add('active');
-                } else {
-                    step.classList.remove('active');
-                }
-            });
         }
-
-        // Update progress on input changes
-        [nameInput, quantityInput, priceInput].forEach(input => {
-            input.addEventListener('input', updateProgress);
+        
+        steps.forEach((step, index) => {
+            if (index < completedSteps) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
+            }
         });
-
-        // Initial preview update
-        updatePreview();
-        updateProgress();
-
-        // Form validation feedback
-        const inputs = [nameInput, quantityInput, priceInput];
-        inputs.forEach(input => {
-            input.addEventListener('blur', function () {
-                if (this.value) {
-                    this.style.borderColor = '#28a745';
-                }
-            });
-
-            input.addEventListener('focus', function () {
-                this.style.borderColor = '#667eea';
-            });
+    }
+    
+    // Update progress on input changes
+    [nameInput, quantityInput, priceInput].filter(Boolean).forEach(input => {
+        addEventListenerSafely(input, 'input', updateProgress);
+    });
+    
+    // Initial preview update
+    updatePreview();
+    updateProgress();
+    
+    // Form validation feedback
+    const validationInputs = [nameInput, quantityInput, priceInput].filter(Boolean);
+    validationInputs.forEach(input => {
+        addEventListenerSafely(input, 'blur', function() {
+            if (this.value) {
+                this.style.borderColor = '#28a745';
+            }
+        });
+        
+        addEventListenerSafely(input, 'focus', function() {
+            this.style.borderColor = '#667eea';
         });
     });
+    
+    console.log('✅ Ticket form JavaScript initialization complete');
+});
 </script>
 {% endblock content %}
