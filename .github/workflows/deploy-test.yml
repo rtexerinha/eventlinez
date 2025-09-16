@@ -338,6 +338,45 @@ jobs:
             systemctl reload nginx 2>/dev/null || echo "Nginx not available or no permission"
           fi
           
+          # Fix nginx static file configuration
+          echo "🌐 Fixing nginx static files configuration..."
+          cat > /tmp/nginx_static_fix.conf << 'NGINX_EOF'
+# Add this to your nginx server block for static files
+location /static/ {
+    alias /app/eventlinez/staticfiles/;
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+    add_header Access-Control-Allow-Origin "*";
+    try_files \$uri \$uri/ =404;
+}
+
+location /media/ {
+    alias /app/eventlinez/media/;
+    expires 1y;
+    add_header Cache-Control "public";
+    add_header Access-Control-Allow-Origin "*";
+    try_files \$uri \$uri/ =404;
+}
+NGINX_EOF
+          
+          # Check if static files exist and are accessible
+          echo "🔍 Checking static files..."
+          if [ -d "/app/eventlinez/staticfiles" ]; then
+            echo "✅ Static files directory exists"
+            ls -la /app/eventlinez/staticfiles/ | head -10
+          else
+            echo "❌ Static files directory missing"
+          fi
+          
+          # Test direct file access
+          if [ -f "/app/eventlinez/staticfiles/css/bootstrap.min.css" ]; then
+            echo "✅ Bootstrap CSS file exists"
+          else
+            echo "❌ Bootstrap CSS file missing"
+            echo "📋 Contents of staticfiles/css/:"
+            ls -la /app/eventlinez/staticfiles/css/ 2>/dev/null || echo "CSS directory not found"
+          fi
+          
           # Health check
           echo "🏥 Performing health check..."
           sleep 10
