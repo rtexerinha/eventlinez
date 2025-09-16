@@ -193,68 +193,63 @@ jobs:
             fi
           fi
           
-          # Drop problematic views before migrations
-          echo "🗄️ Dropping PostgreSQL views..."
-          if [ -n "$VIRTUAL_ENV" ]; then
-            python manage.py drop_views --noinput 2>/dev/null || echo "Drop views completed or not needed"
-          else
-            if [ -d "venv" ]; then
-              source venv/bin/activate
-              python manage.py drop_views --noinput 2>/dev/null || echo "Drop views completed or not needed"
-            else
-              python3 manage.py drop_views --noinput 2>/dev/null || echo "Drop views completed or not needed"
-            fi
-          fi
-          
-          # Run database migrations
-          echo "🗄️ Running database migrations..."
-          # Ensure we're using the right Python environment
-          if [ -n "$VIRTUAL_ENV" ]; then
-            python manage.py migrate --noinput
-          else
-            if [ -d "venv" ]; then
-              source venv/bin/activate
-              python manage.py migrate --noinput
-            else
-              python3 manage.py migrate --noinput
-            fi
-          fi
-          
-          # Recreate views after migrations
-          echo "🗄️ Recreating PostgreSQL views..."
-          if [ -n "$VIRTUAL_ENV" ]; then
-            python manage.py create_sales_view --noinput 2>/dev/null || echo "Create sales view completed or not needed"
-          else
-            if [ -d "venv" ]; then
-              source venv/bin/activate
-              python manage.py create_sales_view --noinput 2>/dev/null || echo "Create sales view completed or not needed"
-            else
-              python3 manage.py create_sales_view --noinput 2>/dev/null || echo "Create sales view completed or not needed"
-            fi
-          fi
-          
-          # Collect static files
-          echo "📁 Collecting static files..."
-          if [ -n "$VIRTUAL_ENV" ]; then
-            python manage.py collectstatic --noinput --clear
-          else
-            if [ -d "venv" ]; then
-              source venv/bin/activate
-              python manage.py collectstatic --noinput --clear
-            else
-              python3 manage.py collectstatic --noinput --clear
-            fi
-          fi
-          
-          # Restart services
-          echo "🔄 Restarting services..."
+          # Restart services using Docker Compose
+          echo "🔄 Managing Docker Compose services..."
           if [ -f docker-compose.yml ]; then
             echo "🐳 Using Docker Compose for deployment..."
-            # Stop existing containers
-            docker-compose down || echo "No containers to stop"
+            
+            # Stop existing containers gracefully
+            echo "⏹️ Stopping existing containers..."
+            docker-compose down --timeout 30 || echo "No containers to stop"
+            
+            # Clean up any orphaned containers and networks
+            echo "🧹 Cleaning up Docker resources..."
+            docker system prune -f --volumes || echo "Docker cleanup completed"
+            
             # Build and start new containers
-            docker-compose up -d --build
-            echo "✅ Docker services started"
+            echo "🏗️ Building and starting containers..."
+            docker-compose up -d --build --force-recreate
+            
+            # Wait for services to be ready
+            echo "⏳ Waiting for services to start..."
+            sleep 15
+            
+            # Check if containers are running
+            echo "🔍 Checking container status..."
+            docker-compose ps
+            
+            # Wait for database to be ready (if using PostgreSQL)
+            echo "🗄️ Waiting for database to be ready..."
+            max_attempts=30
+            attempt=1
+            while [ $attempt -le $max_attempts ]; do
+              if docker-compose exec -T web python -c "
+import django
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eventlinez.settings')
+django.setup()
+from django.db import connection
+connection.ensure_connection()
+print('Database is ready!')
+" 2>/dev/null; then
+                echo "✅ Database connection successful"
+                break
+              else
+                echo "⏳ Database not ready yet (attempt $attempt/$max_attempts)..."
+                sleep 2
+                attempt=$((attempt + 1))
+              fi
+            done
+            
+            if [ $attempt -gt $max_attempts ]; then
+              echo "⚠️ Database readiness check timed out, but continuing..."
+            fi
+            
+            # Check Django application status
+            echo "🔍 Checking Django application status..."
+            docker-compose logs --tail=20 web
+            
+            echo "✅ Docker services started and ready"
           else
             echo "📦 Using traditional deployment..."
             systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
