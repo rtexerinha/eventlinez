@@ -40,6 +40,8 @@ services:
       - STATIC_ROOT=/app/staticfiles/
       - MEDIA_URL=/media/
       - MEDIA_ROOT=/app/media/
+      - ENVIRONMENT=test
+      - SEED_DATA=true
 
       # Email Configuration
       - EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
