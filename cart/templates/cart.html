@@ -112,7 +112,15 @@ This is the shopping cart page. Proceed to review your items and place the order
                     </a>
 
                     <a href="{{item.ticket.event.get_url}}" class="mr-3">
-                        <img src="{{item.ticket.event.thumbnail.url }}" alt="img event" class="custom_img">
+                        {% if item.ticket.event.thumbnail %}
+                            <img src="{{item.ticket.event.thumbnail.url }}" alt="img event" class="custom_img">
+                        {% elif item.ticket.event.image %}
+                            <img src="{{item.ticket.event.image.url }}" alt="img event" class="custom_img">
+                        {% else %}
+                            <div class="custom_img bg-light d-flex align-items-center justify-content-center">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                        {% endif %}
                     </a>
 
                     <div>
