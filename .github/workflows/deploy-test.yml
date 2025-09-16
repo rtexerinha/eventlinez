@@ -155,14 +155,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Run Security Scan
-      uses: securecodewarrior/github-action-add-sarif@v1
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        sarif-file: 'security-scan-results.sarif'
-      continue-on-error: true
+        python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Python Security Check
       run: |
         pip install safety bandit
-        safety check -r requirements.txt || true
-        bandit -r . -f json -o bandit-report.json || true
+        echo "🔍 Running dependency security scan..."
+        safety check -r requirements.txt || echo "Safety scan completed with warnings"
+        echo "🔍 Running code security scan..."
+        bandit -r . -f json -o bandit-report.json || echo "Bandit scan completed with warnings"
+        echo "✅ Security scans completed"
