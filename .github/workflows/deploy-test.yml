@@ -137,10 +137,27 @@ jobs:
           git clean -fd
           
           # Install system dependencies for Python packages
-          echo "📦 Installing system dependencies..."
-          # Install PostgreSQL development headers and other build tools
-          sudo apt-get update || echo "Could not update package list"
-          sudo apt-get install -y postgresql-server-dev-all python3-dev build-essential libpq-dev || echo "Could not install system packages"
+          echo "📦 Checking system dependencies..."
+          # Try to install PostgreSQL development headers and other build tools
+          # If sudo fails, try alternative approaches or skip (packages might already be installed)
+          if command -v apt-get >/dev/null 2>&1; then
+            echo "🔧 Attempting to install PostgreSQL development packages..."
+            sudo apt-get update 2>/dev/null || echo "⚠️ Could not update package list (might not have sudo access)"
+            sudo apt-get install -y postgresql-server-dev-all python3-dev build-essential libpq-dev 2>/dev/null || echo "⚠️ Could not install system packages (might already be installed or no sudo access)"
+          elif command -v yum >/dev/null 2>&1; then
+            echo "🔧 Attempting to install PostgreSQL development packages (CentOS/RHEL)..."
+            sudo yum update -y 2>/dev/null || echo "⚠️ Could not update package list (might not have sudo access)"
+            sudo yum install -y postgresql-devel python3-devel gcc gcc-c++ 2>/dev/null || echo "⚠️ Could not install system packages (might already be installed or no sudo access)"
+          else
+            echo "⚠️ Package manager not recognized, skipping system package installation"
+          fi
+          
+          # Check if pg_config is available (required for psycopg2 compilation)
+          if command -v pg_config >/dev/null 2>&1; then
+            echo "✅ PostgreSQL development tools are available"
+          else
+            echo "⚠️ PostgreSQL development tools not found - using pre-compiled binaries"
+          fi
           
           # Update dependencies
           echo "📦 Updating Python dependencies..."
