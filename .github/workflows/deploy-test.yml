@@ -136,21 +136,43 @@ jobs:
           git reset --hard origin/develop
           git clean -fd
           
+          # Install system dependencies for Python packages
+          echo "📦 Installing system dependencies..."
+          # Install PostgreSQL development headers and other build tools
+          sudo apt-get update || echo "Could not update package list"
+          sudo apt-get install -y postgresql-server-dev-all python3-dev build-essential libpq-dev || echo "Could not install system packages"
+          
           # Update dependencies
-          echo "📦 Updating dependencies..."
+          echo "📦 Updating Python dependencies..."
+          
+          # Detect Python version and choose appropriate requirements file
+          PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+          echo "🐍 Detected Python version: $PYTHON_VERSION"
+          
+          if [ "$PYTHON_VERSION" = "3.6" ]; then
+            REQUIREMENTS_FILE="requirements_py36.txt"
+            echo "📋 Using Python 3.6 compatible requirements"
+          else
+            REQUIREMENTS_FILE="requirements.txt"
+            echo "📋 Using standard requirements"
+          fi
+          
           # Check if we're in a virtual environment
           if [ -n "$VIRTUAL_ENV" ]; then
-            pip install -r requirements.txt
+            pip install --upgrade pip
+            pip install -r $REQUIREMENTS_FILE
           else
             # If not in virtual environment, try to activate one or install globally
             if [ -d "venv" ]; then
               source venv/bin/activate
-              pip install -r requirements.txt
+              pip install --upgrade pip
+              pip install -r $REQUIREMENTS_FILE
             else
               # Create virtual environment if it doesn't exist
               python3 -m venv venv
               source venv/bin/activate
-              pip install -r requirements.txt
+              pip install --upgrade pip
+              pip install -r $REQUIREMENTS_FILE
             fi
           fi
           
