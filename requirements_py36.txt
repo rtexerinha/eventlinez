@@ -9,7 +9,8 @@ psycopg2-binary==2.9.5
 
 # Crispy forms stack compatible with Python 3.6 and Django 3.2
 django-crispy-forms==1.13.0
-crispy-bootstrap4==2022.1
+# Note: crispy-bootstrap4 2022.1 not available for Python 3.6, using older compatible version
+crispy-bootstrap4==2021.2
 
 # CKEditor for rich text editing
 django-ckeditor==6.1.0
