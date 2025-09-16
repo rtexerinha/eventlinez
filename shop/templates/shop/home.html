@@ -7,14 +7,261 @@ Eventlinez
 
 {% block custom_css %}
 <style>
-    /* Business Partners Carousel Styles - Professional & Clean */
+    /* Modern Mobile-First Responsive Design */
+    :root {
+        --primary-color: #007bff;
+        --secondary-color: #6c757d;
+        --accent-color: #d90075;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --dark-color: #2c3e50;
+        --light-color: #f8f9fa;
+        --border-color: #e0e0e0;
+        --shadow-light: 0 2px 12px rgba(0, 0, 0, 0.08);
+        --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.12);
+        --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.16);
+        --border-radius: 12px;
+        --border-radius-lg: 16px;
+        --transition-fast: 0.2s ease;
+        --transition-normal: 0.3s ease;
+        --transition-slow: 0.5s ease;
+    }
+
+    /* Global Responsive Improvements */
+    .container-center {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    @media (min-width: 768px) {
+        .container-center {
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+    }
+
+    /* Hero Section Improvements */
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .hero-title {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+        opacity: 0.9;
+        margin-bottom: 2rem;
+        line-height: 1.5;
+    }
+
+    .hero-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        padding: 15px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: var(--transition-normal);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .hero-cta:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Enhanced Event Cards */
+    .events-section {
+        padding: 60px 0;
+        background: white;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .section-title {
+        font-size: clamp(2rem, 4vw, 2.5rem);
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 15px;
+    }
+
+    .section-subtitle {
+        color: var(--secondary-color);
+        font-size: 1.2rem;
+        margin-bottom: 0;
+    }
+
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    @media (max-width: 767px) {
+        .events-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 0 10px;
+        }
+    }
+
+    .event-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition-normal);
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    .event-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-heavy);
+        border-color: var(--primary-color);
+    }
+
+    .event-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .event-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform var(--transition-slow);
+    }
+
+    .event-card:hover .event-image img {
+        transform: scale(1.05);
+    }
+
+    .event-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: var(--accent-color);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .event-content {
+        padding: 25px;
+    }
+
+    .event-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 15px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 50px;
+    }
+
+    .event-details {
+        margin-bottom: 20px;
+    }
+
+    .event-detail {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+        color: var(--secondary-color);
+        font-size: 0.95rem;
+    }
+
+    .event-detail i {
+        color: var(--primary-color);
+        width: 16px;
+        text-align: center;
+    }
+
+    .event-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #f1f3f4;
+    }
+
+    .event-price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--success-color);
+    }
+
+    .event-arrow {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        transition: transform var(--transition-fast);
+    }
+
+    .event-card:hover .event-arrow {
+        transform: translateX(5px);
+    }
+
+    /* Business Partners Section - Improved */
     .partners-section {
         position: relative;
-        padding: 80px 0;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 60px 0;
+        background: linear-gradient(135deg, var(--light-color) 0%, #e9ecef 100%);
         margin: 60px 0;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-radius: var(--border-radius-lg);
         overflow: hidden;
     }
 
@@ -25,7 +272,223 @@ Eventlinez
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #007bff, #6610f2, #e83e8c, #fd7e14);
+        background: linear-gradient(90deg, var(--primary-color), #6610f2, var(--accent-color), var(--warning-color));
+    }
+
+    /* Mobile-Optimized Partners Carousel */
+    .partners-carousel-container {
+        position: relative;
+        overflow: hidden;
+        padding: 0 60px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+        .partners-carousel-container {
+            padding: 0 40px;
+        }
+    }
+
+    .partners-carousel {
+        display: flex;
+        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        gap: 20px;
+        align-items: center;
+    }
+
+    .partner-slide {
+        flex: 0 0 280px;
+        opacity: 0.8;
+        transform: scale(0.95);
+        transition: all var(--transition-slow);
+    }
+
+    @media (max-width: 768px) {
+        .partner-slide {
+            flex: 0 0 250px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .partner-slide {
+            flex: 0 0 220px;
+        }
+    }
+
+    .partner-slide.active {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .partner-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-light);
+        padding: 30px 20px;
+        text-align: center;
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: all var(--transition-normal);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
+        .partner-card {
+            height: 180px;
+            padding: 25px 15px;
+        }
+    }
+
+    .partner-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-heavy);
+        border-color: var(--primary-color);
+    }
+
+    /* Search Section Improvements */
+    .search-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, white 100%);
+        padding: 60px 0;
+        text-align: center;
+    }
+
+    .search-form {
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 20px 60px 20px 25px;
+        border: 2px solid var(--border-color);
+        border-radius: 50px;
+        font-size: 1.1rem;
+        outline: none;
+        transition: var(--transition-normal);
+        background: white;
+        box-shadow: var(--shadow-light);
+    }
+
+    .search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .search-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition-normal);
+    }
+
+    .search-btn:hover {
+        background: var(--accent-color);
+        transform: translateY(-50%) scale(1.05);
+    }
+
+    /* Loading States and Animations */
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Enhanced Responsive Design */
+    @media (max-width: 576px) {
+        .hero-section {
+            padding: 40px 0;
+        }
+
+        .events-section {
+            padding: 40px 0;
+        }
+
+        .partners-section {
+            padding: 40px 0;
+            margin: 40px 0;
+        }
+
+        .search-section {
+            padding: 40px 0;
+        }
+
+        .search-input {
+            padding: 15px 50px 15px 20px;
+            font-size: 1rem;
+        }
+
+        .search-btn {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    /* Accessibility Improvements */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+        .event-card:hover,
+        .partner-card:hover {
+            transform: none;
+        }
+
+        .event-card:active,
+        .partner-card:active {
+            transform: scale(0.98);
+        }
+    }
+
+    /* Focus states for keyboard navigation */
+    .event-card:focus,
+    .partner-card:focus,
+    .hero-cta:focus,
+    .search-input:focus,
+    .search-btn:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
     }
 
     .partners-section-title {
@@ -773,260 +1236,137 @@ Eventlinez
 {% endblock %}
 
 {% block content %}
-{% if detachs %}
-<section class="container container-center pl-0 pr-0">
-    <main class="slider">
-        <div class="swiper-container slider-banner mt-0 mt-lg-4">
-            <aside class="swiper-wrapper">
-                <div class="swiper-slide col-12 mt-0 div-article">
-                    <div class="row" style="margin: 0">
-                        <article class="col-lg-5 desktop" style="padding: 0!important;">
-                            <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
-                                <div style="min-height: 18rem;">
-                                    <h1 class="h1-home pt-2 pt-lg-4">It is more than a ticket , it is an Experience!
-                                    </h1>
-                                    {# <h6 class="h6-home p-date h6-banner mt-lg-4 m-0"> It is more than a ticket , it
-                                        is an Experience!</h6>#}
-                                </div>
-
-                                <a class="buttons-primary h6-home center-text-button height-17 float-right"
-                                    href="{% url 'about' %}" style="width: 138px!important;">
-                                    <i class="fas fa-plus-circle mr-2"></i>
-                                    About us
-                                </a>
-                            </div>
-
-                        </article>
-
-                        <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile"
-                            style="padding: 0!important;">
-                            <img class="m-img-card-banner" src="{% static 'img/banner.png' %}" alt="Eventlinez" />
-                        </a>
-
-                        <aside class="col-lg-7 col-12 background-container desktop" style="padding: 0!important;">
-                            {# <img class="m-img-card-banner" src="{% static 'img/banner.jpg' %}" alt="Eventlinez" />#}
-                        </aside>
-                    </div>
-                </div>
-
-                {% for detach in detachs %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        {% if detachs %}
+            {% for detach in detachs %}
                 {% for special_events in detach.event.all %}
-                <div class="swiper-slide col-12 mt-0 div-article">
-                    <div class="row" style="margin: 0">
-                        <article class="col-lg-5 desktop" style="padding: 0!important;">
-                            <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
-                                <div style="min-height: 18rem;">
-                                    <h1 class="h1-home pt-2 pt-lg-4">{{ special_events.name }}</h1>
-                                    <h6 class="h6-home p-date h6-banner mt-lg-4 m-0">
-                                        {{special_events.event_date|date:"D, d M H:i"}}</h6>
-                                    <h6 class="h6-home h6-banner mt-1">
-                                        <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                        {{special_events.city}}
-                                    </h6>
-                                </div>
-
-                                <a class="buttons-primary h6-home center-text-button height-17 float-right"
-                                    href="{{special_events.get_url}}" style="width: 138px!important;">
-                                    <i class="fas fa-plus-circle mr-2"></i>
-                                    See details
-                                </a>
-                            </div>
-
-                        </article>
-
-                        <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile"
-                            style="padding: 0!important;">
-                            <img class="m-img-card-banner" src="{{special_events.image_sized.url }}"
-                                alt="{{special_events.name}}" />
+                    {% if forloop.first %}
+                        <h1 class="hero-title">{{ special_events.name }}</h1>
+                        <p class="hero-subtitle">
+                            {{ special_events.event_date|date:"l, F d, Y \a\t g:i A" }} • {{ special_events.city }}
+                        </p>
+                        <a href="{{ special_events.get_url }}" class="hero-cta">
+                            <i class="fas fa-ticket-alt"></i>
+                            Get Tickets Now
                         </a>
-
-                        <aside class="col-lg-7 col-12 desktop" style="padding: 0!important;">
-                            <img class="m-img-card-banner" src="{{special_events.image_sized.url}}"
-                                alt="{{special_events.name}}" />
-                        </aside>
-
-                    </div>
-                </div>
+                    {% endif %}
                 {% endfor %}
-                {% endfor %}
-            </aside>
-
-            <div class="swiper-pagination swiper-pagination-banner"></div>
-        </div>
-    </main>
+            {% endfor %}
+        {% else %}
+            <h1 class="hero-title">It's more than a ticket, it's an Experience!</h1>
+            <p class="hero-subtitle">
+                Discover amazing events, connect with your community, and create unforgettable memories.
+            </p>
+            <a href="{% url 'about' %}" class="hero-cta">
+                <i class="fas fa-info-circle"></i>
+                Learn More
+            </a>
+        {% endif %}
+    </div>
 </section>
 
-{% else %}
-<section class="container container-center pl-0 pr-0">
-    <main class="slider">
-        <div class="swiper-container slider-banner mt-0 mt-lg-4">
-            <aside class="swiper-wrapper">
-                <div class="swiper-slide col-12 mt-0 div-article">
-                    <div class="row" style="margin: 0">
-                        <article class="col-lg-5 desktop" style="padding: 0!important;">
-                            <div class="col-12 float-right mt-0 mt-lg-4 div-banner-home">
-                                <div style="min-height: 18rem;">
-                                    <h1 class="h1-home pt-2 pt-lg-4">It is more than a ticket , it is an Experience!
-                                    </h1>
-                                    {# <h6 class="h6-home p-date h6-banner mt-lg-4 m-0"> It is more than a ticket , it
-                                        is an Experience!</h6>#}
-                                </div>
 
-                                <a class="buttons-primary h6-home center-text-button height-17 float-right"
-                                    href="{% url 'about' %}" style="width: 138px!important;">
-                                    <i class="fas fa-plus-circle mr-2"></i>
-                                    About us
-                                </a>
-                            </div>
-
-                        </article>
-
-                        <a href="{{special_events.get_url}}" class="col-lg-7 col-12 mobile"
-                            style="padding: 0!important;">
-                            <img class="m-img-card-banner" src="{% static 'img/banner.png' %}" alt="Eventlinez" />
-                        </a>
-
-                        <aside class="col-lg-7 col-12 background-container desktop" style="padding: 0!important;">
-                            {# <img class="m-img-card-banner" src="{% static 'img/banner.jpg' %}" alt="Eventlinez" />#}
-                        </aside>
-                    </div>
-                </div>
-
-            </aside>
-
-            <div class="swiper-pagination swiper-pagination-banner"></div>
+<!-- Events Section -->
+<section class="events-section">
+    <div class="container container-center">
+        <div class="section-header fade-in">
+            <h2 class="section-title">
+                {% if events_all %}Discover Events{% else %}Upcoming Events{% endif %}
+            </h2>
+            <p class="section-subtitle">Find your next unforgettable experience</p>
         </div>
-    </main>
-</section>
-{% endif %}
 
-
-<section class="container container-center">
-    {% if events_all %}
-    <main class="slider">
-        <article class="m-slider swiper-container slider-card">
-            <div class="col-12 d-flex mt-0 mb-4 p-0">
-                <div class="col-lg-8 ml-0 pl-0">
-                    <h2 class="h3-home">Events</h2>
+        {% if events_all or events_futures %}
+        <div class="events-grid">
+            {% for event in events_all|default:events_futures %}
+            <article class="event-card fade-in" onclick="window.location.href='{{ event.get_url }}'" tabindex="0" role="button" aria-label="View {{ event.name }} event details">
+                <div class="event-image">
+                    {% if event.thumbnail %}
+                        <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}" loading="lazy">
+                    {% else %}
+                        <div class="loading-skeleton" style="height: 100%; border-radius: 0;"></div>
+                    {% endif %}
+                    <div class="event-badge">Event</div>
                 </div>
-
-                <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
-                    <div class="swiper-button-prev"></div>
-                    <div class="swiper-button-next"></div>
-                </div>
-            </div>
-
-            <div class="swiper-wrapper">
-                {% if events_all %}
-                {% for event in events_all %}
-                <aside class="m-slider__item swiper-slide">
-                    <div class="m-card" ontouchstart>
-                        <a class="m-card__header" href="{{event.get_url}}">
-                            <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}" />
-                        </a>
-
-                        <a class="m-card__body" href="{{event.get_url}}">
-                            <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
-
-                            <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
-                            <h6 class="h6-home">
-                                <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                {{event.city}}
-                            </h6>
-                        </a>
+                
+                <div class="event-content">
+                    <h3 class="event-title">{{ event.name }}</h3>
+                    
+                    <div class="event-details">
+                        <div class="event-detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ event.event_date|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="event-detail">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ event.event_date|date:"g:i A" }}</span>
+                        </div>
+                        <div class="event-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ event.city }}</span>
+                        </div>
                     </div>
-                </aside>
-                {% endfor %}
-                {% else %}
-                <h2>No events at the moment</h2>
-                {% endif %}
-            </div>
-        </article><!-- .m-slider // -->
-    </main><!-- .slider // -->
-
-    {% else %}
-    <section class="slider">
-        <main class="m-slider swiper-container slider-card">
-            <div class="col-12 d-flex p-0 mt-0 mb-4">
-                <div class="col-lg-8 ml-0 pl-0">
-                    <h2 class="h3-home">Upcoming Events</h2>
-                </div>
-
-                <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
-                    <div class="swiper-button-prev"></div>
-                    <div class="swiper-button-next"></div>
-                </div>
-            </div>
-
-            <div class="swiper-wrapper">
-                {% if events_futures %}
-                {% for event in events_futures %}
-                <aside class="m-slider__item swiper-slide">
-                    <div class="m-card" ontouchstart>
-                        <a class="m-card__header" href="{{event.get_url}}">
-                            <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}" />
-                        </a>
-
-                        <a class="m-card__body" href="{{event.get_url}}">
-                            <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
-
-                            <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
-                            <h6 class="h6-home">
-                                <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                {{event.city}}
-                            </h6>
-                        </a>
+                    
+                    <div class="event-footer">
+                        <span class="event-price">Free</span>
+                        <i class="fas fa-arrow-right event-arrow"></i>
                     </div>
-                </aside>
-                {% endfor %}
-                {% else %}
-                <h2>No events at the moment</h2>
-                {% endif %}
-            </div>
-        </main><!-- .m-slider // -->
-    </section><!-- .slider // -->
-
-
-    {% if events_old %}
-    <main class="slider">
-        <article class="m-slider swiper-container slider-card">
-            <div class="col-12 d-flex p-0 mt-0 mb-4">
-                <div class="col-lg-8 ml-0  pl-0">
-                    <h2 class="h3-home">Past Events</h2>
                 </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No events available</h3>
+            <p class="text-muted">Check back soon for exciting new events!</p>
+        </div>
+        {% endif %}
 
-                <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
-                    <div class="swiper-button-prev"></div>
-                    <div class="swiper-button-next"></div>
+        {% if events_old %}
+        <div class="section-header fade-in mt-5">
+            <h2 class="section-title">Past Events</h2>
+            <p class="section-subtitle">Relive the memories</p>
+        </div>
+        
+        <div class="events-grid">
+            {% for event in events_old|slice:":6" %}
+            <article class="event-card fade-in" onclick="window.location.href='{{ event.get_url }}'" tabindex="0" role="button" aria-label="View {{ event.name }} event details">
+                <div class="event-image">
+                    {% if event.thumbnail %}
+                        <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}" loading="lazy">
+                    {% else %}
+                        <div class="loading-skeleton" style="height: 100%; border-radius: 0;"></div>
+                    {% endif %}
+                    <div class="event-badge" style="background: var(--secondary-color);">Past</div>
                 </div>
-            </div>
-
-            <div class="swiper-wrapper">
-                {% for event in events_old %}
-                <aside class="m-slider__item swiper-slide">
-                    <div class="m-card" ontouchstart>
-                        <a class="m-card__header" href="{{event.get_url}}">
-                            <img class="m-img-card" src="{{event.thumbnail.url}}" alt="{{event.name}}" />
-                        </a>
-
-                        <a class="m-card__body" href="{{event.get_url}}">
-                            <h4 class="h4-home" style="min-height: 60px;">{{event.name}}</h4>
-                            <h6 class="h6-home p-date m-0">{{event.event_date|date:"D, d M H:i"}}</h6>
-                            <h6 class="h6-home">
-                                <i class="fas fa-map-marker-alt" style="color: #909090;"></i>
-                                {{event.city}}
-                            </h6>
-                        </a>
+                
+                <div class="event-content">
+                    <h3 class="event-title">{{ event.name }}</h3>
+                    
+                    <div class="event-details">
+                        <div class="event-detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ event.event_date|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="event-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ event.city }}</span>
+                        </div>
                     </div>
-                </aside>
-                {% endfor %}
-                {# {% else %}#}
-                {# <h2>No events at the moment</h2>#}
-                {% endif %}
-            </div>
-        </article><!-- .m-slider // -->
-    </main><!-- .slider // -->
-    {% endif %}
+                    
+                    <div class="event-footer">
+                        <span class="event-price" style="color: var(--secondary-color);">View Photos</span>
+                        <i class="fas fa-arrow-right event-arrow"></i>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
 </section>
 
 <!-- Business Partners Carousel Section -->
@@ -1166,17 +1506,29 @@ Eventlinez
 </div>
 {% endif %}
 
-<section class="col-12 mt-5 subcribe">
-    <!-- form inconsistent in application -->
-    <!-- <iframe src="https://app2.simpletexting.com/join/joinWebForm?webFormId=65f903953dd74d1b60be01f5&c=USA" width="470" height="370" scrolling="no"></iframe> -->
-
-
-    <form class="subcribe-intern div-center" action="{% url 'shop:search' %}" method="get">
-        <h2 class="h2-home t-center mb-4 mt-5">Did you find what you were looking for?</h2>
-        {% csrf_token %}
-        <input class="col-lg-8 col-sm-10 input-subcribe center-block" style="width: 90%" type="search"
-            placeholder="Search for events" aria-label="Search" name="q">
-    </form>
+<!-- Search Section -->
+<section class="search-section">
+    <div class="container container-center">
+        <div class="section-header fade-in">
+            <h2 class="section-title">Find Your Perfect Event</h2>
+            <p class="section-subtitle">Search through hundreds of amazing experiences</p>
+        </div>
+        
+        <form class="search-form fade-in" action="{% url 'shop:search' %}" method="get">
+            {% csrf_token %}
+            <input 
+                type="search" 
+                name="q" 
+                class="search-input" 
+                placeholder="Search for events, artists, venues..." 
+                aria-label="Search for events"
+                autocomplete="off"
+            >
+            <button type="submit" class="search-btn" aria-label="Search">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
 </section>
 
 
@@ -1185,7 +1537,62 @@ Eventlinez
 {% block custom_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Partners Carousel Functionality
+        // Modern Mobile-First JavaScript
+        
+        // Fade-in animations on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Observe all fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Enhanced event card interactions
+        document.querySelectorAll('.event-card').forEach(card => {
+            // Add keyboard navigation
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+
+            // Add touch feedback for mobile
+            card.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            });
+
+            card.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 100);
+            });
+
+            // Preload images on hover (desktop only)
+            if (window.matchMedia('(hover: hover)').matches) {
+                card.addEventListener('mouseenter', function() {
+                    const img = this.querySelector('img');
+                    if (img && !img.complete) {
+                        img.loading = 'eager';
+                    }
+                });
+            }
+        });
+
+        // Partners Carousel with Touch Support
         const carousel = document.getElementById('partnersCarousel');
         const prevBtn = document.getElementById('partnersCarouselPrev');
         const nextBtn = document.getElementById('partnersCarouselNext');
@@ -1194,11 +1601,25 @@ Eventlinez
 
         if (carousel && slides.length > 0) {
             let currentSlide = 0;
-            const slidesToShow = Math.min(3, slides.length); // Show 3 slides at a time
+            let isTouch = false;
+            let startX = 0;
+            let currentX = 0;
+            
+            // Responsive slides calculation
+            function getSlidesToShow() {
+                const width = window.innerWidth;
+                if (width < 480) return 1;
+                if (width < 768) return 2;
+                return 3;
+            }
+
+            const slidesToShow = Math.min(getSlidesToShow(), slides.length);
             const maxSlide = Math.max(0, slides.length - slidesToShow);
 
             function updateCarousel() {
-                const translateX = -(currentSlide * (280 + 25)); // slide width + gap
+                const slideWidth = slides[0].offsetWidth;
+                const gap = 20;
+                const translateX = -(currentSlide * (slideWidth + gap));
                 carousel.style.transform = `translateX(${translateX}px)`;
 
                 // Update active states
@@ -1215,8 +1636,10 @@ Eventlinez
                 });
 
                 // Update navigation buttons
-                prevBtn.classList.toggle('disabled', currentSlide === 0);
-                nextBtn.classList.toggle('disabled', currentSlide >= maxSlide);
+                if (prevBtn && nextBtn) {
+                    prevBtn.classList.toggle('disabled', currentSlide === 0);
+                    nextBtn.classList.toggle('disabled', currentSlide >= maxSlide);
+                }
             }
 
             function nextSlide() {
@@ -1233,30 +1656,124 @@ Eventlinez
                 }
             }
 
-            function goToSlide(index) {
-                currentSlide = Math.min(index, maxSlide);
-                updateCarousel();
-            }
-
-            // Event listeners
-            nextBtn.addEventListener('click', nextSlide);
-            prevBtn.addEventListener('click', prevSlide);
-
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => goToSlide(index));
+            // Touch/Swipe support
+            carousel.addEventListener('touchstart', (e) => {
+                isTouch = true;
+                startX = e.touches[0].clientX;
+                carousel.style.transition = 'none';
             });
 
-            // Auto-advance carousel
-            let autoAdvance = setInterval(nextSlide, 4000);
+            carousel.addEventListener('touchmove', (e) => {
+                if (!isTouch) return;
+                currentX = e.touches[0].clientX;
+                const diff = startX - currentX;
+                
+                if (Math.abs(diff) > 10) {
+                    e.preventDefault();
+                }
+            });
 
-            // Pause auto-advance on hover
-            carousel.addEventListener('mouseenter', () => clearInterval(autoAdvance));
-            carousel.addEventListener('mouseleave', () => {
-                autoAdvance = setInterval(nextSlide, 4000);
+            carousel.addEventListener('touchend', () => {
+                if (!isTouch) return;
+                isTouch = false;
+                carousel.style.transition = '';
+                
+                const diff = startX - currentX;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        nextSlide();
+                    } else {
+                        prevSlide();
+                    }
+                }
+            });
+
+            // Button event listeners
+            if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+            if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentSlide = Math.min(index, maxSlide);
+                    updateCarousel();
+                });
+            });
+
+            // Auto-advance (pause on mobile)
+            if (!window.matchMedia('(max-width: 768px)').matches) {
+                let autoAdvance = setInterval(nextSlide, 5000);
+
+                carousel.addEventListener('mouseenter', () => clearInterval(autoAdvance));
+                carousel.addEventListener('mouseleave', () => {
+                    autoAdvance = setInterval(nextSlide, 5000);
+                });
+            }
+
+            // Responsive updates
+            window.addEventListener('resize', () => {
+                updateCarousel();
             });
 
             // Initialize
             updateCarousel();
+        }
+
+        // Enhanced search functionality
+        const searchInput = document.querySelector('.search-input');
+        const searchForm = document.querySelector('.search-form');
+
+        if (searchInput) {
+            // Auto-focus on desktop (not mobile to avoid keyboard popup)
+            if (window.innerWidth > 768) {
+                searchInput.focus();
+            }
+
+            // Live search suggestions (placeholder for future implementation)
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+                
+                if (query.length > 2) {
+                    searchTimeout = setTimeout(() => {
+                        // Future: Implement live search suggestions
+                        console.log('Search query:', query);
+                    }, 300);
+                }
+            });
+
+            // Enhanced form submission
+            searchForm.addEventListener('submit', function(e) {
+                const query = searchInput.value.trim();
+                if (!query) {
+                    e.preventDefault();
+                    searchInput.focus();
+                    searchInput.style.borderColor = 'var(--danger-color)';
+                    setTimeout(() => {
+                        searchInput.style.borderColor = '';
+                    }, 2000);
+                }
+            });
+        }
+
+        // Performance: Lazy load images that are not immediately visible
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            imageObserver.unobserve(img);
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                imageObserver.observe(img);
+            });
         }
     });
 
