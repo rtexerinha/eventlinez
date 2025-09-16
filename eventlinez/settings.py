@@ -114,8 +114,17 @@ INSTALLED_APPS = [
     "eventlinez",
 ]
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
-CRISPY_TEMPLATE_PACK = "bootstrap4"
+# Crispy Forms Configuration
+# Handle different versions based on available packages
+try:
+    import crispy_bootstrap4
+    CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+    CRISPY_TEMPLATE_PACK = "bootstrap4"
+except ImportError:
+    # Fallback for Python 3.6 or when crispy-bootstrap4 is not available
+    # Use built-in bootstrap4 support in older django-crispy-forms versions
+    CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+    CRISPY_TEMPLATE_PACK = "bootstrap4"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 MIDDLEWARE = [
