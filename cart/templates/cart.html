@@ -131,7 +131,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 <aside class="col-lg-2 col-6 pt-lg-5 d-justy">
 
                     {% if item.quantity < item.ticket.qty_available %} <div class="h6-home text-lg-center">
-                        <a href="{% url 'cart:change-quantity' item.id " decrement" %}"
+                        <a href="{% url 'cart:change-quantity' item.id "decrement" %}"
                             class="button-increment ml-2 pl-5px">
                             <i class="fas fa-minus"></i>
                         </a>&nbsp;
@@ -140,7 +140,7 @@ This is the shopping cart page. Proceed to review your items and place the order
 
                         {% if item.ticket.qty_available == 1 %}
                         <a style="pointer-events: none; cursor: not-allowed;" class="button-increment mr-2 pl-5px"
-                            href="{% url 'cart:change-quantity' item.id " increment" %}">
+                            href="{% url 'cart:change-quantity' item.id "increment" %}">
                             <i class="fas fa-plus" style=" color: gray!important; text-decoration: none"></i>
                         </a>
 
@@ -157,7 +157,7 @@ This is the shopping cart page. Proceed to review your items and place the order
 
                         {% else %}
                         <div class="h6-home">
-                            <a href="{% url 'cart:change-quantity' item.id " decrement" %}"
+                            <a href="{% url 'cart:change-quantity' item.id "decrement" %}"
                                 class="button-increment ml-2 pl-5px">
                                 <i class="fas fa-minus"></i>
                             </a>&nbsp;
@@ -165,7 +165,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                             {{item.quantity }}&nbsp;
 
                             <a style="pointer-events: none; cursor: not-allowed; background: #909090"
-                                href="{% url 'cart:change-quantity' item.id " increment" %}"
+                                href="{% url 'cart:change-quantity' item.id "increment" %}"
                                 class="button-increment mr-2 pl-5px">
                                 <i class="fas fa-plus" style=" color: white; text-decoration: none"></i>
                             </a>
