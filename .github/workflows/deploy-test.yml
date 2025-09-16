@@ -121,13 +121,14 @@ jobs:
           
           # Stop application services
           echo "⏹️ Stopping services..."
-          sudo systemctl stop eventlinez || true
-          sudo docker-compose down || true
+          systemctl --user stop eventlinez 2>/dev/null || echo "Service not running or not user service"
+          docker-compose down 2>/dev/null || echo "Docker compose not running"
           
           # Backup current version
           echo "💾 Creating backup..."
           timestamp=$(date +%Y%m%d_%H%M%S)
-          sudo cp -r . ../backups/eventlinez_backup_$timestamp || true
+          mkdir -p ../backups
+          cp -r . ../backups/eventlinez_backup_$timestamp || echo "Backup failed, continuing..."
           
           # Pull latest changes
           echo "📥 Pulling latest changes..."
@@ -137,23 +138,63 @@ jobs:
           
           # Update dependencies
           echo "📦 Updating dependencies..."
-          pip install -r requirements.txt --user
+          # Check if we're in a virtual environment
+          if [ -n "$VIRTUAL_ENV" ]; then
+            pip install -r requirements.txt
+          else
+            # If not in virtual environment, try to activate one or install globally
+            if [ -d "venv" ]; then
+              source venv/bin/activate
+              pip install -r requirements.txt
+            else
+              # Create virtual environment if it doesn't exist
+              python3 -m venv venv
+              source venv/bin/activate
+              pip install -r requirements.txt
+            fi
+          fi
           
           # Run database migrations
           echo "🗄️ Running database migrations..."
-          python manage.py migrate --noinput
+          # Ensure we're using the right Python environment
+          if [ -n "$VIRTUAL_ENV" ]; then
+            python manage.py migrate --noinput
+          else
+            if [ -d "venv" ]; then
+              source venv/bin/activate
+              python manage.py migrate --noinput
+            else
+              python3 manage.py migrate --noinput
+            fi
+          fi
           
           # Collect static files
           echo "📁 Collecting static files..."
-          python manage.py collectstatic --noinput --clear
+          if [ -n "$VIRTUAL_ENV" ]; then
+            python manage.py collectstatic --noinput --clear
+          else
+            if [ -d "venv" ]; then
+              source venv/bin/activate
+              python manage.py collectstatic --noinput --clear
+            else
+              python3 manage.py collectstatic --noinput --clear
+            fi
+          fi
           
           # Restart services
           echo "🔄 Restarting services..."
           if [ -f docker-compose.yml ]; then
+            echo "🐳 Using Docker Compose for deployment..."
+            # Stop existing containers
+            docker-compose down || echo "No containers to stop"
+            # Build and start new containers
             docker-compose up -d --build
+            echo "✅ Docker services started"
           else
-            sudo systemctl start eventlinez
-            sudo systemctl reload nginx
+            echo "📦 Using traditional deployment..."
+            systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
+            # Try to reload nginx if available
+            systemctl reload nginx 2>/dev/null || echo "Nginx not available or no permission"
           fi
           
           # Health check
