@@ -223,15 +223,7 @@ jobs:
             max_attempts=30
             attempt=1
             while [ $attempt -le $max_attempts ]; do
-              if docker-compose exec -T web python -c "
-import django
-import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eventlinez.settings')
-django.setup()
-from django.db import connection
-connection.ensure_connection()
-print('Database is ready!')
-" 2>/dev/null; then
+              if docker-compose exec -T web python -c "import django; import os; os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eventlinez.settings'); django.setup(); from django.db import connection; connection.ensure_connection(); print('Database is ready!')" 2>/dev/null; then
                 echo "✅ Database connection successful"
                 break
               else
