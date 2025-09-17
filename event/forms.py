@@ -1,13 +1,10 @@
 from django import forms
 from django.forms import ModelForm, ValidationError, TextInput
 from django.contrib.auth.forms import PasswordChangeForm
-from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 
 from address.models import City
 from event.models import Category, Event, Ticket
-from promoter.models import Vendor, Promoter  # <-- import Promoter here
-
-# event/forms.py
+from promoter.models import Vendor, Promoter
 from django.core.exceptions import ValidationError
 
 class CityForm(ModelForm):
@@ -63,15 +60,22 @@ class CategoryForm(ModelForm):
 class EventForm(ModelForm):
     event_date = forms.DateTimeField(
         input_formats=["%d/%m/%Y %H:%M"],
-        widget=DateTimePickerInput(
-            format="%d/%m/%Y %H:%M",
-            attrs={"id": "datetimepicker"},
+        widget=forms.DateTimeInput(
+            attrs={"type": "datetime-local", "id": "datetimepicker"},
         ),
     )
 
     class Meta:
         model = Event
         exclude = ("slug", "created", "updated", "promoter", "vendors")
+        
+    def clean_event_date(self):
+        """Ensure event_date is timezone-aware"""
+        from django.utils import timezone
+        event_date = self.cleaned_data.get('event_date')
+        if event_date and timezone.is_naive(event_date):
+            event_date = timezone.make_aware(event_date)
+        return event_date
 
 
 class PromoterForm(ModelForm):

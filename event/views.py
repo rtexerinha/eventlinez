@@ -153,19 +153,49 @@ def ticket_type_list_per_event(request, event_id):
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_create(request, event_id):
     # Get the event object to ensure it exists
-    event = get_object_or_404(Event, id=event_id)
+    try:
+        event = get_object_or_404(Event, id=event_id)
+    except Exception as e:
+        print(f"Error getting event {event_id}: {e}")
+        return render(request, 'ticket_type/ticket_type_create.html', {
+            'error': f'Event not found: {e}',
+            'event_id': event_id
+        })
 
     if request.method == 'POST':
-        form = TicketForm(request.POST)
-        if form.is_valid():
-            ticket = form.save(commit=False)
-            ticket.event = event  # Assign the event directly
-            ticket.save()
-            # Redirect back to ticket list for this event
-            return redirect('ticket_type_list_per_event', event_id=event_id)
+        try:
+            # Pass event_id to the form for proper initialization
+            form = TicketForm(request.POST, event_id=event_id)
+            print(f"Form created with data: {request.POST}")
+            
+            if form.is_valid():
+                print("Form is valid, attempting to save...")
+                try:
+                    ticket = form.save(commit=False)
+                    ticket.event = event  # Assign the event directly
+                    ticket.save()
+                    print(f"Ticket saved successfully: {ticket}")
+                    # Redirect back to ticket list for this event
+                    return redirect('ticket_type_list_per_event', event_id=event_id)
+                except Exception as save_error:
+                    print(f"Error saving ticket: {save_error}")
+                    form.add_error(None, f"Error saving ticket: {save_error}")
+            else:
+                print(f"Form validation failed. Errors: {form.errors}")
+                
+        except Exception as form_error:
+            print(f"Error creating form: {form_error}")
+            # Create a fresh form if there's an error
+            form = TicketForm(event_id=event_id)
+            form.add_error(None, f"Error processing form: {form_error}")
     else:
-        # For GET requests, create a simple form without event_id parameter
-        form = TicketForm()
+        # For GET requests, create form with event_id parameter
+        try:
+            form = TicketForm(event_id=event_id)
+        except Exception as e:
+            print(f"Error creating GET form: {e}")
+            form = TicketForm()
+            form.add_error(None, f"Error creating form: {e}")
 
     return render(request, 'ticket_type/ticket_type_create.html', {
         'form': form, 
@@ -176,15 +206,44 @@ def ticket_type_create(request, event_id):
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_update(request, ticket_id):
-    instance = get_object_or_404(Ticket, id=ticket_id)
+    try:
+        instance = get_object_or_404(Ticket, id=ticket_id)
+    except Exception as e:
+        print(f"Error getting ticket {ticket_id}: {e}")
+        return render(request, 'ticket_type/ticket_type_create.html', {
+            'error': f'Ticket not found: {e}',
+            'ticket_id': ticket_id
+        })
 
     if request.method == 'POST':
-        form = TicketUpdateForm(request.POST, instance=instance)
-        if form.is_valid():
-            form.save()
-            return redirect('ticket_type_list_per_event', event_id=instance.event_id)
+        try:
+            form = TicketUpdateForm(request.POST, instance=instance)
+            print(f"Update form created with data: {request.POST}")
+            
+            if form.is_valid():
+                print("Update form is valid, attempting to save...")
+                try:
+                    form.save()
+                    print(f"Ticket updated successfully: {instance}")
+                    return redirect('ticket_type_list_per_event', event_id=instance.event_id)
+                except Exception as save_error:
+                    print(f"Error saving updated ticket: {save_error}")
+                    form.add_error(None, f"Error saving ticket: {save_error}")
+            else:
+                print(f"Update form validation failed. Errors: {form.errors}")
+                
+        except Exception as form_error:
+            print(f"Error creating update form: {form_error}")
+            # Create a fresh form if there's an error
+            form = TicketUpdateForm(instance=instance)
+            form.add_error(None, f"Error processing form: {form_error}")
     else:
-        form = TicketUpdateForm(instance=instance)
+        try:
+            form = TicketUpdateForm(instance=instance)
+        except Exception as e:
+            print(f"Error creating GET update form: {e}")
+            form = TicketUpdateForm(instance=instance)
+            form.add_error(None, f"Error creating form: {e}")
 
     return render(request, 'ticket_type/ticket_type_create.html', {
         'form': form, 
