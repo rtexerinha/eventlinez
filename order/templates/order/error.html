@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Order Error - EventLinez{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .error-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 40px;
+        text-align: center;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-icon {
+        font-size: 4rem;
+        color: #dc3545;
+        margin-bottom: 20px;
+    }
+
+    .error-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+
+    .error-message {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .btn i {
+        margin-right: 8px;
+    }
+
+    .support-info {
+        margin-top: 40px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .support-info h4 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .support-info p {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+        .error-container {
+            margin: 20px;
+            padding: 30px 20px;
+        }
+
+        .error-actions {
+            flex-direction: column;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+    </div>
+
+    <h1 class="error-title">Order Processing Error</h1>
+
+    <div class="error-message">
+        {% if error %}
+        {{ error }}
+        {% else %}
+        We encountered an issue while processing your order. Please try again or contact support if the problem
+        persists.
+        {% endif %}
+    </div>
+
+    <div class="error-actions">
+        <a href="/cart/" class="btn-primary">
+            <i class="fas fa-shopping-cart"></i>
+            Return to Cart
+        </a>
+        <a href="/shop/" class="btn-secondary">
+            <i class="fas fa-store"></i>
+            Continue Shopping
+        </a>
+    </div>
+
+    <div class="support-info">
+        <h4>
+            <i class="fas fa-life-ring" style="color: #667eea; margin-right: 8px;"></i>
+            Need Help?
+        </h4>
+        <p>
+            If you continue to experience issues, please contact our support team.
+            Your payment has been processed securely, and we'll help resolve any order problems.
+        </p>
+    </div>
+</div>
+
+<script>
+    // Auto-refresh error details for debugging (only in development)
+    {% if not PROD %}
+    console.log('Order Error Details:', {
+        error: '{{ error|escapejs }}',
+        timestamp: new Date().toISOString(),
+        url: window.location.href
+    });
+    {% endif %}
+</script>
+{% endblock content %}
