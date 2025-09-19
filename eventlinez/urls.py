@@ -1,15 +1,27 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
-
+from django.urls import path, include, re_path
+from django.views.static import serve
+import os
 
 import shop
 from shop.views import index
 from customer.views import signin_view
 from shop.views import index
 
-urlpatterns = [
+urlpatterns = []
+
+# Add media files for development and Docker environment first
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+elif os.path.exists('/.dockerenv') or os.environ.get('IN_DOCKER', False):
+    # For Docker environment, manually add media serving
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
+
+urlpatterns += [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
     path('accounts/login/', signin_view, name='signin'),
@@ -26,17 +38,8 @@ urlpatterns = [
     path('address/', include('address.urls'))
 ]
 
-# WhiteNoise middleware handles static files automatically
-# Only add media files for development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
 admin.site.site_header = 'Eventlinez'
 admin.site.index_title = 'Admin Panel'
 admin.site.site_title = 'Welcome Eventlinez'
 handler404 = shop.views.handler404
 handler500 = shop.views.handler500
-from django.conf import settings
-from django.conf.urls.static import static
-
-# Static files are now handled early in the urlpatterns list above
