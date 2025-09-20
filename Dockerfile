@@ -3,8 +3,8 @@ FROM python:3.9-slim
 # Environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    VIRTUAL_ENV=/app/venv \
-    PATH="/app/venv/bin:$PATH" \
+    VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:$PATH" \
     IN_DOCKER=true
 
 # Core build tools + libs for Pillow/ReportLab/Postgres
@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Create virtual environment (consistent with deployment script)
+# Create virtual environment in /opt/venv to avoid conflicts with local .venv
 RUN python -m venv $VIRTUAL_ENV
 
 # Upgrade pip and install dependencies

@@ -1,0 +1,38 @@
+# Local development files
+.venv
+.venv/
+.env
+node_modules/
+.git/
+.idea/
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# Local database
+db.sqlite3
+
+# Build artifacts
+*.egg-info/
+build/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage and test files
+.coverage
+htmlcov/
+.tox/
+.cache
+
+# IDE files
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
