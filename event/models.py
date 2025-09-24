@@ -168,6 +168,28 @@ class Event(models.Model):
             'sales_percentage': self.sales_percentage()
         }
 
+    def safe_image_sized_url(self):
+        """Safely get the image_sized URL"""
+        try:
+            if self.image and self.image_sized:
+                return self.image_sized.url
+            elif self.image:
+                return self.image.url
+            return None
+        except Exception:
+            return self.image.url if self.image else None
+
+    def safe_thumbnail_url(self):
+        """Safely get the thumbnail URL"""
+        try:
+            if self.image and self.thumbnail:
+                return self.thumbnail.url
+            elif self.image:
+                return self.image.url
+            return None
+        except Exception:
+            return self.image.url if self.image else None
+
     def __str__(self):
         return '{}'.format(self.name)
 

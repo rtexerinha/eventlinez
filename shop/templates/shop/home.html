@@ -412,8 +412,13 @@ Eventlinez
     }
 
     @keyframes loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
     }
 
     .fade-in {
@@ -470,6 +475,7 @@ Eventlinez
 
     /* Touch-friendly improvements */
     @media (hover: none) and (pointer: coarse) {
+
         .event-card:hover,
         .partner-card:hover {
             transform: none;
@@ -1240,29 +1246,29 @@ Eventlinez
 <section class="hero-section">
     <div class="hero-content">
         {% if detachs %}
-            {% for detach in detachs %}
-                {% for special_events in detach.event.all %}
-                    {% if forloop.first %}
-                        <h1 class="hero-title">{{ special_events.name }}</h1>
-                        <p class="hero-subtitle">
-                            {{ special_events.event_date|date:"l, F d, Y \a\t g:i A" }} • {{ special_events.city }}
-                        </p>
-                        <a href="{{ special_events.get_url }}" class="hero-cta">
-                            <i class="fas fa-ticket-alt"></i>
-                            Get Tickets Now
-                        </a>
-                    {% endif %}
-                {% endfor %}
-            {% endfor %}
+        {% for detach in detachs %}
+        {% for special_events in detach.event.all %}
+        {% if forloop.first %}
+        <h1 class="hero-title">{{ special_events.name }}</h1>
+        <p class="hero-subtitle">
+            {{ special_events.event_date|date:"l, F d, Y \a\t g:i A" }} • {{ special_events.city }}
+        </p>
+        <a href="{{ special_events.get_url }}" class="hero-cta">
+            <i class="fas fa-ticket-alt"></i>
+            Get Tickets Now
+        </a>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
         {% else %}
-            <h1 class="hero-title">It's more than a ticket, it's an Experience!</h1>
-            <p class="hero-subtitle">
-                Discover amazing events, connect with your community, and create unforgettable memories.
-            </p>
-            <a href="{% url 'about' %}" class="hero-cta">
-                <i class="fas fa-info-circle"></i>
-                Learn More
-            </a>
+        <h1 class="hero-title">It's more than a ticket, it's an Experience!</h1>
+        <p class="hero-subtitle">
+            Discover amazing events, connect with your community, and create unforgettable memories.
+        </p>
+        <a href="{% url 'about' %}" class="hero-cta">
+            <i class="fas fa-info-circle"></i>
+            Learn More
+        </a>
         {% endif %}
     </div>
 </section>
@@ -1281,19 +1287,25 @@ Eventlinez
         {% if events_all or events_futures %}
         <div class="events-grid">
             {% for event in events_all|default:events_futures %}
-            <article class="event-card fade-in" onclick="window.location.href='{{ event.get_url }}'" tabindex="0" role="button" aria-label="View {{ event.name }} event details">
+            <article class="event-card fade-in" onclick="window.location.href='{{ event.get_url }}'" tabindex="0"
+                role="button" aria-label="View {{ event.name }} event details">
                 <div class="event-image">
-                    {% if event.thumbnail %}
-                        <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}" loading="lazy">
+                    {% if event.image and event.thumbnail %}
+                    <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}" loading="lazy">
+                    {% elif event.image %}
+                    <img src="{{ event.image.url }}" alt="{{ event.name }}" loading="lazy">
                     {% else %}
-                        <div class="loading-skeleton" style="height: 100%; border-radius: 0;"></div>
+                    <div class="loading-skeleton"
+                        style="height: 100%; border-radius: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
+                        <i class="fas fa-image" style="font-size: 2rem; opacity: 0.7;"></i>
+                    </div>
                     {% endif %}
                     <div class="event-badge">Event</div>
                 </div>
-                
+
                 <div class="event-content">
                     <h3 class="event-title">{{ event.name }}</h3>
-                    
+
                     <div class="event-details">
                         <div class="event-detail">
                             <i class="fas fa-calendar-alt"></i>
@@ -1308,7 +1320,7 @@ Eventlinez
                             <span>{{ event.city }}</span>
                         </div>
                     </div>
-                    
+
                     <div class="event-footer">
                         <span class="event-price">Free</span>
                         <i class="fas fa-arrow-right event-arrow"></i>
@@ -1330,22 +1342,28 @@ Eventlinez
             <h2 class="section-title">Past Events</h2>
             <p class="section-subtitle">Relive the memories</p>
         </div>
-        
+
         <div class="events-grid">
             {% for event in events_old|slice:":6" %}
-            <article class="event-card fade-in" onclick="window.location.href='{{ event.get_url }}'" tabindex="0" role="button" aria-label="View {{ event.name }} event details">
+            <article class="event-card fade-in" onclick="window.location.href='{{ event.get_url }}'" tabindex="0"
+                role="button" aria-label="View {{ event.name }} event details">
                 <div class="event-image">
-                    {% if event.thumbnail %}
-                        <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}" loading="lazy">
+                    {% if event.image and event.thumbnail %}
+                    <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}" loading="lazy">
+                    {% elif event.image %}
+                    <img src="{{ event.image.url }}" alt="{{ event.name }}" loading="lazy">
                     {% else %}
-                        <div class="loading-skeleton" style="height: 100%; border-radius: 0;"></div>
+                    <div class="loading-skeleton"
+                        style="height: 100%; border-radius: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
+                        <i class="fas fa-image" style="font-size: 2rem; opacity: 0.7;"></i>
+                    </div>
                     {% endif %}
                     <div class="event-badge" style="background: var(--secondary-color);">Past</div>
                 </div>
-                
+
                 <div class="event-content">
                     <h3 class="event-title">{{ event.name }}</h3>
-                    
+
                     <div class="event-details">
                         <div class="event-detail">
                             <i class="fas fa-calendar-alt"></i>
@@ -1356,7 +1374,7 @@ Eventlinez
                             <span>{{ event.city }}</span>
                         </div>
                     </div>
-                    
+
                     <div class="event-footer">
                         <span class="event-price" style="color: var(--secondary-color);">View Photos</span>
                         <i class="fas fa-arrow-right event-arrow"></i>
@@ -1439,8 +1457,15 @@ Eventlinez
                 <div class="event-album-card" data-event-slug="{{ album.event.slug }}"
                     onclick="openGalleryAlbum(this.getAttribute('data-event-slug'))">
                     <div class="album-image-container">
+                        {% if album.cover_photo %}
                         <img src="{% if album.cover_photo.thumbnail %}{{ album.cover_photo.thumbnail.url }}{% else %}{{ album.cover_photo.photo.url }}{% endif %}"
                             alt="{{ album.event.name }}" class="album-cover-image">
+                        {% else %}
+                        <div class="album-cover-image"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-images" style="font-size: 2rem; opacity: 0.7;"></i>
+                        </div>
+                        {% endif %}
 
                         <div class="album-hover-overlay">
                             <div class="view-gallery-btn">
@@ -1513,17 +1538,11 @@ Eventlinez
             <h2 class="section-title">Find Your Perfect Event</h2>
             <p class="section-subtitle">Search through hundreds of amazing experiences</p>
         </div>
-        
+
         <form class="search-form fade-in" action="{% url 'shop:search' %}" method="get">
             {% csrf_token %}
-            <input 
-                type="search" 
-                name="q" 
-                class="search-input" 
-                placeholder="Search for events, artists, venues..." 
-                aria-label="Search for events"
-                autocomplete="off"
-            >
+            <input type="search" name="q" class="search-input" placeholder="Search for events, artists, venues..."
+                aria-label="Search for events" autocomplete="off">
             <button type="submit" class="search-btn" aria-label="Search">
                 <i class="fas fa-search"></i>
             </button>
@@ -1538,7 +1557,7 @@ Eventlinez
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Modern Mobile-First JavaScript
-        
+
         // Fade-in animations on scroll
         const observerOptions = {
             threshold: 0.1,
@@ -1563,7 +1582,7 @@ Eventlinez
         // Enhanced event card interactions
         document.querySelectorAll('.event-card').forEach(card => {
             // Add keyboard navigation
-            card.addEventListener('keydown', function(e) {
+            card.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     this.click();
@@ -1571,11 +1590,11 @@ Eventlinez
             });
 
             // Add touch feedback for mobile
-            card.addEventListener('touchstart', function() {
+            card.addEventListener('touchstart', function () {
                 this.style.transform = 'scale(0.98)';
             });
 
-            card.addEventListener('touchend', function() {
+            card.addEventListener('touchend', function () {
                 setTimeout(() => {
                     this.style.transform = '';
                 }, 100);
@@ -1583,7 +1602,7 @@ Eventlinez
 
             // Preload images on hover (desktop only)
             if (window.matchMedia('(hover: hover)').matches) {
-                card.addEventListener('mouseenter', function() {
+                card.addEventListener('mouseenter', function () {
                     const img = this.querySelector('img');
                     if (img && !img.complete) {
                         img.loading = 'eager';
@@ -1604,7 +1623,7 @@ Eventlinez
             let isTouch = false;
             let startX = 0;
             let currentX = 0;
-            
+
             // Responsive slides calculation
             function getSlidesToShow() {
                 const width = window.innerWidth;
@@ -1667,7 +1686,7 @@ Eventlinez
                 if (!isTouch) return;
                 currentX = e.touches[0].clientX;
                 const diff = startX - currentX;
-                
+
                 if (Math.abs(diff) > 10) {
                     e.preventDefault();
                 }
@@ -1677,7 +1696,7 @@ Eventlinez
                 if (!isTouch) return;
                 isTouch = false;
                 carousel.style.transition = '';
-                
+
                 const diff = startX - currentX;
                 if (Math.abs(diff) > 50) {
                     if (diff > 0) {
@@ -1730,10 +1749,10 @@ Eventlinez
 
             // Live search suggestions (placeholder for future implementation)
             let searchTimeout;
-            searchInput.addEventListener('input', function() {
+            searchInput.addEventListener('input', function () {
                 clearTimeout(searchTimeout);
                 const query = this.value.trim();
-                
+
                 if (query.length > 2) {
                     searchTimeout = setTimeout(() => {
                         // Future: Implement live search suggestions
@@ -1743,7 +1762,7 @@ Eventlinez
             });
 
             // Enhanced form submission
-            searchForm.addEventListener('submit', function(e) {
+            searchForm.addEventListener('submit', function (e) {
                 const query = searchInput.value.trim();
                 if (!query) {
                     e.preventDefault();
