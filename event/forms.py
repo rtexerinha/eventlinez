@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import ModelForm, ValidationError, TextInput
 from django.contrib.auth.forms import PasswordChangeForm
+from django.utils import timezone
 
 from address.models import City
 from event.models import Category, Event, Ticket
@@ -71,7 +72,6 @@ class EventForm(ModelForm):
         
     def clean_event_date(self):
         """Ensure event_date is timezone-aware"""
-        from django.utils import timezone
         event_date = self.cleaned_data.get('event_date')
         if event_date and timezone.is_naive(event_date):
             event_date = timezone.make_aware(event_date)
