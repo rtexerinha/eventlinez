@@ -662,22 +662,22 @@
     document.addEventListener('DOMContentLoaded', function () {
         console.log('🚀 Ticket form JavaScript loaded');
 
-    // Check if event field still exists and remove it completely
-    const eventField = document.querySelector('select[name="event"]') || document.querySelector('input[name="event"]');
-    if (eventField) {
-        console.log('⚠️ Event field still exists, removing it completely');
-        eventField.remove();
-        console.log('✅ Event field removed from DOM');
-    } else {
-        console.log('✅ No event field found, form is clean');
-    }
-    
-    // Also check for any remaining event-related elements
-    const eventElements = document.querySelectorAll('[name="event"], #id_event, select[name="event"]');
-    eventElements.forEach(element => {
-        console.log('🔧 Removing remaining event element:', element);
-        element.remove();
-    });
+        // Check if event field still exists and remove it completely
+        const eventField = document.querySelector('select[name="event"]') || document.querySelector('input[name="event"]');
+        if (eventField) {
+            console.log('⚠️ Event field still exists, removing it completely');
+            eventField.remove();
+            console.log('✅ Event field removed from DOM');
+        } else {
+            console.log('✅ No event field found, form is clean');
+        }
+
+        // Also check for any remaining event-related elements
+        const eventElements = document.querySelectorAll('[name="event"], #id_event, select[name="event"]');
+        eventElements.forEach(element => {
+            console.log('🔧 Removing remaining event element:', element);
+            element.remove();
+        });
 
         // More robust element selection with multiple fallbacks
         const nameInput = document.getElementById('{{ form.name.id_for_label }}') ||
