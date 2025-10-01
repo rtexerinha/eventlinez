@@ -675,7 +675,34 @@
             eventField.style.visibility = 'hidden';
             eventField.setAttribute('tabindex', '-1');
             eventField.setAttribute('aria-hidden', 'true');
+            eventField.setAttribute('disabled', 'true');
+            // Remove from form validation completely
+            eventField.setAttribute('formnovalidate', 'true');
         }
+
+        // Also check for any select elements with name="event" that might be rendered differently
+        const eventSelects = document.querySelectorAll('select[name="event"]');
+        eventSelects.forEach(select => {
+            console.log('🔧 Fixing additional event select field');
+            select.removeAttribute('required');
+            select.style.display = 'none';
+            select.style.visibility = 'hidden';
+            select.setAttribute('tabindex', '-1');
+            select.setAttribute('aria-hidden', 'true');
+            select.setAttribute('disabled', 'true');
+            select.setAttribute('formnovalidate', 'true');
+
+            // If it's still causing issues, try to replace it with a hidden input
+            if (select.tagName === 'SELECT') {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'event';
+                hiddenInput.value = select.value || '{{ event_id }}';
+                hiddenInput.setAttribute('formnovalidate', 'true');
+                select.parentNode.replaceChild(hiddenInput, select);
+                console.log('🔧 Replaced select with hidden input');
+            }
+        });
 
         // More robust element selection with multiple fallbacks
         const nameInput = document.getElementById('{{ form.name.id_for_label }}') ||
@@ -754,7 +781,19 @@
                     eventField.removeAttribute('required');
                     eventField.style.display = 'none';
                     eventField.style.visibility = 'hidden';
+                    eventField.setAttribute('disabled', 'true');
+                    eventField.setAttribute('formnovalidate', 'true');
                 }
+
+                // Also handle any select elements with name="event"
+                const eventSelects = document.querySelectorAll('select[name="event"]');
+                eventSelects.forEach(select => {
+                    select.removeAttribute('required');
+                    select.style.display = 'none';
+                    select.style.visibility = 'hidden';
+                    select.setAttribute('disabled', 'true');
+                    select.setAttribute('formnovalidate', 'true');
+                });
 
                 // Client-side validation
                 let isValid = true;

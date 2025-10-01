@@ -50,12 +50,21 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements_dev.txt
     
-    - name: Run tests
+    - name: Clean caches and run tests
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_eventlinez
         SECRET_KEY: test-secret-key-for-github-actions
         DEBUG: False
       run: |
+        # Clean caches before testing
+        echo "🧹 Cleaning caches..."
+        python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || echo "Could not clear Django cache"
+        find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
+        find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
+        pip cache purge 2>/dev/null || echo "Could not clear pip cache"
+        echo "✅ Caches cleaned"
+        
+        # Run tests
         python manage.py collectstatic --noinput
         python manage.py migrate --noinput
         # Create views safely after migrations (PostgreSQL only)
@@ -135,6 +144,13 @@ jobs:
           git fetch origin
           git reset --hard origin/develop
           git clean -fd
+          
+          # Clean caches after code update
+          echo "🧹 Cleaning caches after code update..."
+          find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
+          find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
+          rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
+          echo "✅ Caches cleaned"
           
           # Create directories for static files and media (Docker bind mounts)
           echo "📁 Creating directories for static files..."
@@ -260,6 +276,13 @@ jobs:
             echo "🧹 Cleaning up Docker resources..."
             $DOCKER_CMD system prune -f --volumes || echo "Docker cleanup completed"
             
+            # Clean application caches
+            echo "🧹 Cleaning application caches..."
+            find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
+            find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
+            rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
+            echo "✅ Application caches cleaned"
+            
             # Build and start new containers
             echo "🏗️ Building and starting containers..."
             $DOCKER_COMPOSE_CMD up -d --build --force-recreate
@@ -321,6 +344,13 @@ jobs:
             echo "🔍 Checking Django application status..."
             $DOCKER_COMPOSE_CMD logs --tail=20 web
             
+            # Clean caches in Docker containers after deployment
+            echo "🧹 Cleaning caches in Docker containers..."
+            $DOCKER_COMPOSE_CMD exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || echo "Could not clear Django cache in container"
+            $DOCKER_COMPOSE_CMD exec -T web find /app -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache in container"
+            $DOCKER_COMPOSE_CMD exec -T web find /app -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files in container"
+            echo "✅ Docker container caches cleaned"
+            
             echo "✅ Docker services started and ready"
           else
             echo "📦 Using traditional deployment..."
@@ -340,6 +370,15 @@ jobs:
             
             echo "📁 Collecting static files..."
             python manage.py collectstatic --noinput
+            
+            # Clean caches after deployment
+            echo "🧹 Cleaning caches after deployment..."
+            python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || echo "Could not clear Django cache"
+            find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
+            find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
+            pip cache purge 2>/dev/null || echo "Could not clear pip cache"
+            rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
+            echo "✅ Caches cleaned after deployment"
             
             systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
             # Try to reload nginx if available

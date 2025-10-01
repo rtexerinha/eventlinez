@@ -129,7 +129,23 @@ success "Database migrations completed"
 log "Creating database views..."
 python manage.py create_sales_view --force || warning "Could not create sales view (might not be needed)"
 
-# Step 9: Collect static files
+# Step 9: Clean caches and collect static files
+log "🧹 Cleaning application caches..."
+# Clear Django cache
+python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || warning "Could not clear Django cache"
+
+# Clear Python bytecode cache
+find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || warning "Could not clear Python cache"
+find . -name "*.pyc" -delete 2>/dev/null || warning "Could not delete .pyc files"
+
+# Clear pip cache
+pip cache purge 2>/dev/null || warning "Could not clear pip cache"
+
+# Clear any temporary files
+rm -rf /tmp/eventlinez_* 2>/dev/null || warning "Could not clear temp files"
+
+success "Caches cleaned"
+
 log "📁 Collecting static files..."
 python manage.py collectstatic --noinput --clear
 success "Static files collected"
