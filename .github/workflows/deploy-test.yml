@@ -392,14 +392,36 @@ jobs:
             echo "📁 Collecting static files..."
             python manage.py collectstatic --noinput
             
-            # Clean caches after deployment
-            echo "🧹 Cleaning caches after deployment..."
-            python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || echo "Could not clear Django cache"
-            find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
-            find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
-            pip cache purge 2>/dev/null || echo "Could not clear pip cache"
-            rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
-            echo "✅ Caches cleaned after deployment"
+          # Clean caches after deployment
+          echo "🧹 Cleaning caches after deployment..."
+          python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || echo "Could not clear Django cache"
+          find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
+          find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
+          find . -name "*.pyo" -delete 2>/dev/null || echo "Could not delete .pyo files"
+          pip cache purge 2>/dev/null || echo "Could not clear pip cache"
+          rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
+          rm -rf /tmp/django_* 2>/dev/null || echo "Could not clear Django temp files"
+          
+          # Clear static files cache
+          echo "📁 Clearing static files cache..."
+          rm -rf staticfiles/* 2>/dev/null || echo "Could not clear static files"
+          python manage.py collectstatic --noinput --clear 2>/dev/null || echo "Could not collect static files"
+          
+          # Clear media cache
+          echo "🖼️ Clearing media cache..."
+          find media/ -name "*.tmp" -delete 2>/dev/null || echo "Could not clear media temp files"
+          
+          # Clear system cache
+          echo "💾 Clearing system cache..."
+          sync 2>/dev/null || echo "Could not sync"
+          echo 3 > /proc/sys/vm/drop_caches 2>/dev/null || echo "Could not clear system cache"
+          
+          # Clear nginx cache
+          echo "🌐 Clearing nginx cache..."
+          rm -rf /var/cache/nginx/* 2>/dev/null || echo "Could not clear nginx cache"
+          nginx -s reload 2>/dev/null || echo "Could not reload nginx"
+          
+          echo "✅ Caches cleaned after deployment"
             
             systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
             # Try to reload nginx if available
