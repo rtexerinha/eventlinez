@@ -675,55 +675,55 @@
     document.addEventListener('DOMContentLoaded', function () {
         console.log('🚀 Ticket form JavaScript loaded');
 
-    // Aggressively remove any event field elements
-    function removeEventField() {
-        const eventField = document.querySelector('select[name="event"]') || document.querySelector('input[name="event"]');
-        if (eventField) {
-            console.log('⚠️ Event field still exists, removing it completely');
-            eventField.remove();
-            console.log('✅ Event field removed from DOM');
-        }
-        
-        // Also check for any remaining event-related elements
-        const eventElements = document.querySelectorAll('[name="event"], #id_event, select[name="event"]');
-        eventElements.forEach(element => {
-            console.log('🔧 Removing remaining event element:', element);
-            element.remove();
-        });
-        
-        // Check if any event field containers exist and remove them
-        const eventContainers = document.querySelectorAll('div:has(select[name="event"]), div:has(input[name="event"])');
-        eventContainers.forEach(container => {
-            console.log('🔧 Removing event field container:', container);
-            container.remove();
-        });
-        
-        // Also check for any form elements that might contain event fields
-        const forms = document.querySelectorAll('form');
-        forms.forEach(form => {
-            const eventFields = form.querySelectorAll('select[name="event"], input[name="event"]');
-            eventFields.forEach(field => {
-                console.log('🔧 Removing event field from form:', field);
-                field.remove();
+        // Aggressively remove any event field elements
+        function removeEventField() {
+            const eventField = document.querySelector('select[name="event"]') || document.querySelector('input[name="event"]');
+            if (eventField) {
+                console.log('⚠️ Event field still exists, removing it completely');
+                eventField.remove();
+                console.log('✅ Event field removed from DOM');
+            }
+
+            // Also check for any remaining event-related elements
+            const eventElements = document.querySelectorAll('[name="event"], #id_event, select[name="event"]');
+            eventElements.forEach(element => {
+                console.log('🔧 Removing remaining event element:', element);
+                element.remove();
             });
-        });
-    }
-    
-    // Remove event field immediately
-    removeEventField();
-    
-    // Also remove it after a short delay to catch any dynamically added elements
-    setTimeout(removeEventField, 100);
-    setTimeout(removeEventField, 500);
-    setTimeout(removeEventField, 1000);
-    
-    // Also remove it when the form is submitted
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            removeEventField();
-        });
-    }
+
+            // Check if any event field containers exist and remove them
+            const eventContainers = document.querySelectorAll('div:has(select[name="event"]), div:has(input[name="event"])');
+            eventContainers.forEach(container => {
+                console.log('🔧 Removing event field container:', container);
+                container.remove();
+            });
+
+            // Also check for any form elements that might contain event fields
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                const eventFields = form.querySelectorAll('select[name="event"], input[name="event"]');
+                eventFields.forEach(field => {
+                    console.log('🔧 Removing event field from form:', field);
+                    field.remove();
+                });
+            });
+        }
+
+        // Remove event field immediately
+        removeEventField();
+
+        // Also remove it after a short delay to catch any dynamically added elements
+        setTimeout(removeEventField, 100);
+        setTimeout(removeEventField, 500);
+        setTimeout(removeEventField, 1000);
+
+        // Also remove it when the form is submitted
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                removeEventField();
+            });
+        }
 
         // More robust element selection with multiple fallbacks
         const nameInput = document.getElementById('{{ form.name.id_for_label }}') ||

@@ -150,6 +150,20 @@ jobs:
           find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
           find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
           rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
+          
+          # Clear Django cache
+          echo "🧹 Clearing Django cache..."
+          python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" 2>/dev/null || echo "Could not clear Django cache"
+          
+          # Clear any compiled Python files
+          echo "🧹 Clearing compiled Python files..."
+          find . -name "*.pyo" -delete 2>/dev/null || echo "Could not delete .pyo files"
+          find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
+          
+          # Clear any cached templates
+          echo "🧹 Clearing template cache..."
+          find . -name "*.pyc" -path "*/templates/*" -delete 2>/dev/null || echo "Could not clear template cache"
+          
           echo "✅ Caches cleaned"
           
           # Create directories for static files and media (Docker bind mounts)
@@ -280,12 +294,19 @@ jobs:
             echo "🧹 Cleaning application caches..."
             find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
             find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
+            find . -name "*.pyo" -delete 2>/dev/null || echo "Could not delete .pyo files"
             rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
+            
+            # Clear Django cache
+            echo "🧹 Clearing Django cache..."
+            python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" 2>/dev/null || echo "Could not clear Django cache"
+            
             echo "✅ Application caches cleaned"
             
             # Build and start new containers
             echo "🏗️ Building and starting containers..."
-            $DOCKER_COMPOSE_CMD up -d --build --force-recreate
+            $DOCKER_COMPOSE_CMD build --no-cache --pull
+            $DOCKER_COMPOSE_CMD up -d --force-recreate
             
             # Wait for services to be ready
             echo "⏳ Waiting for services to start..."
