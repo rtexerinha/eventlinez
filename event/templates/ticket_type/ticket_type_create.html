@@ -662,8 +662,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         console.log('🚀 Ticket form JavaScript loaded');
 
-    // Event field is now handled server-side, no client-side fixes needed
-    console.log('✅ Event field is handled server-side, no validation issues expected');
+        // Event field is now handled server-side, no client-side fixes needed
+        console.log('✅ Event field is handled server-side, no validation issues expected');
 
         // More robust element selection with multiple fallbacks
         const nameInput = document.getElementById('{{ form.name.id_for_label }}') ||
@@ -737,7 +737,7 @@
             form.addEventListener('submit', function (e) {
                 console.log('🚀 Form submitted');
 
-            // Event field is handled server-side, no client-side validation needed
+                // Event field is handled server-side, no client-side validation needed
 
                 // Client-side validation
                 let isValid = true;
