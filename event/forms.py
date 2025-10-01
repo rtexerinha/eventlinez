@@ -17,34 +17,28 @@ class CityForm(ModelForm):
 class TicketForm(ModelForm):
     class Meta:
         model = Ticket
-        fields = ["name", "quantity", "price", "event", "sold_out"]
+        fields = ["name", "quantity", "price", "sold_out"]  # Removed "event" from fields
 
     def __init__(self, *args, **kwargs):
         event_id = kwargs.pop("event_id", None)
         super().__init__(*args, **kwargs)
 
         if self.instance and self.instance.pk:
-            self.fields["event"].queryset = Event.objects.filter(pk=self.instance.event_id)
+            # For existing tickets, we don't need the event field
+            pass
         elif event_id is not None:
             # Store the event_id for later use
             self.event_id = event_id
-            # Completely remove the event field from the form
-            if 'event' in self.fields:
-                print(f"Removing event field from form. Event ID: {event_id}")
-                del self.fields['event']
-                print(f"Event field removed. Remaining fields: {list(self.fields.keys())}")
-            else:
-                print(f"Event field not found in form fields: {list(self.fields.keys())}")
-            
-            # Double-check: ensure event field is completely gone
-            if 'event' in self.fields:
-                print(f"ERROR: Event field still exists after deletion!")
-                del self.fields['event']
-                print(f"Force removed event field. Remaining fields: {list(self.fields.keys())}")
+            print(f"Form created with event_id: {event_id}")
+            print(f"Form fields: {list(self.fields.keys())}")
+            print(f"Event field not included in form fields")
         else:
-            # If no event_id provided, keep the field but make it not required
-            if 'event' in self.fields:
-                self.fields["event"].required = False
+            # If no event_id provided, add the event field
+            self.fields["event"] = forms.ModelChoiceField(
+                queryset=Event.objects.all(),
+                required=False,
+                empty_label="Select an event"
+            )
 
     def clean_quantity(self):
         quantity = self.cleaned_data["quantity"]
