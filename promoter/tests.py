@@ -15,6 +15,7 @@ from django.contrib.auth import get_user_model
 from promoter.models import Promoter, Event
 from order.models import Order, OrderItem
 from event.models import Ticket, Category
+from address.models import State, City
 
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import force_authenticate
@@ -30,11 +31,51 @@ class SearchEventTest(TestCase):
         self.view = EventListAPIView.as_view()
 
     def test_filter_by_state(self):
-        event1 = Event.objects.create(name="Event 1", description="foo", event_date=timezone.now() + timedelta(days=-4))
-        event2 = Event.objects.create(name="Event 2", description="foo", event_date=timezone.now() + timedelta(days=-3))
-        event3 = Event.objects.create(name="Event 3", description="foo", event_date=timezone.now() + timedelta(days=-2))
-        event4 = Event.objects.create(name="Event 4", description="foo", event_date=timezone.now() + timedelta(days=-1, minutes=1))
-        event5 = Event.objects.create(name="Event 5", description="foo", event_date=timezone.now() + timedelta(days=1))
+        # Create required objects
+        category = Category.objects.create(name="Test Category", slug="test-category")
+        state = State.objects.create(name="Test State")
+        city = City.objects.create(name="Test City", state=state)
+        
+        event1 = Event.objects.create(
+            name="Event 1", 
+            description="foo", 
+            event_date=timezone.now() + timedelta(days=-4),
+            category=category,
+            promoter=self.promoter,
+            city=city
+        )
+        event2 = Event.objects.create(
+            name="Event 2", 
+            description="foo", 
+            event_date=timezone.now() + timedelta(days=-3),
+            category=category,
+            promoter=self.promoter,
+            city=city
+        )
+        event3 = Event.objects.create(
+            name="Event 3", 
+            description="foo", 
+            event_date=timezone.now() + timedelta(days=-2),
+            category=category,
+            promoter=self.promoter,
+            city=city
+        )
+        event4 = Event.objects.create(
+            name="Event 4", 
+            description="foo", 
+            event_date=timezone.now() + timedelta(days=-1, minutes=1),
+            category=category,
+            promoter=self.promoter,
+            city=city
+        )
+        event5 = Event.objects.create(
+            name="Event 5", 
+            description="foo", 
+            event_date=timezone.now() + timedelta(days=1),
+            category=category,
+            promoter=self.promoter,
+            city=city
+        )
         
         self.promoter.event_set.add(event1, event2, event3, event4, event5)
 
@@ -49,8 +90,27 @@ class SearchEventTest(TestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_filter_by_name(self):
-        event1 = Event.objects.create(name="Beatles", description="foo")
-        event2 = Event.objects.create(name="Rolling Stones", description="foo")
+        # Create required objects
+        category = Category.objects.create(name="Music Category", slug="music-category")
+        state = State.objects.create(name="Music State")
+        city = City.objects.create(name="Music City", state=state)
+        
+        event1 = Event.objects.create(
+            name="Beatles", 
+            description="foo",
+            event_date=timezone.now() + timedelta(days=30),
+            category=category,
+            promoter=self.promoter,
+            city=city
+        )
+        event2 = Event.objects.create(
+            name="Rolling Stones", 
+            description="foo",
+            event_date=timezone.now() + timedelta(days=30),
+            category=category,
+            promoter=self.promoter,
+            city=city
+        )
         self.promoter.event_set.add(event1, event2)
 
         request = self.factory.get('/promoter/api/event', data={"name": "Beatles"})
@@ -66,18 +126,21 @@ class TestSalesReportAPI(TestCase):
         self.promoter = Promoter.objects.create(user=user, email='test2@example.com')
         self.factory = APIRequestFactory()
         
-        # Create a category
+        # Create required objects
         category = Category.objects.create(name="Test Category", slug="test-category")
+        state = State.objects.create(name="Test State")
+        city = City.objects.create(name="Test City", state=state)
         
         self.event = Event.objects.create(
             name="Test Event", 
             description="foo",
             event_date=timezone.now() + timedelta(days=30),
             category=category,
-            promoter=self.promoter
+            promoter=self.promoter,
+            city=city
         )
 
-        ticket_type = Ticket.objects.create(name="Test Ticket", event=self.event, price=50)
+        ticket_type = Ticket.objects.create(name="Test Ticket", event=self.event, price=50, quantity=100)
 
         order1 = Order.objects.create(
             emailAddress='test1@example.com',
@@ -111,14 +174,18 @@ class TestSalesReportAPI(TestCase):
         OrderItem.objects.create(quantity=5, unit_price=50, fee=2, amount=100, order=order3, event_ticket=ticket_type)
 
     def test_sales_report_should_filter_by_event(self):
-        # Create another category for this event
+        # Create another category and city for this event
         another_category = Category.objects.create(name="Another Category", slug="another-category")
+        another_state = State.objects.create(name="Another State")
+        another_city = City.objects.create(name="Another City", state=another_state)
+        
         another_event = Event.objects.create(
             name="Another Event", 
             description="another event",
             event_date=timezone.now() + timedelta(days=30),
             category=another_category,
-            promoter=self.promoter
+            promoter=self.promoter,
+            city=another_city
         )
 
         request = self.factory.get(f"/promoter/api/event/{another_event.id}/salesReport", data={"by": "month"})
