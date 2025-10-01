@@ -516,7 +516,7 @@
             <div class="form-body">
                 <!-- Hidden Event Field -->
                 {% if form.event %}
-                <div style="display: none;">
+                <div style="display: none !important; visibility: hidden !important;">
                     {{ form.event }}
                 </div>
                 {% endif %}
@@ -664,6 +664,17 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Ticket form JavaScript loaded');
     
+    // Fix event field validation issue
+    const eventField = document.querySelector('select[name="event"]') || document.querySelector('input[name="event"]');
+    if (eventField) {
+        console.log('🔧 Fixing event field validation');
+        eventField.removeAttribute('required');
+        eventField.style.display = 'none';
+        eventField.style.visibility = 'hidden';
+        eventField.setAttribute('tabindex', '-1');
+        eventField.setAttribute('aria-hidden', 'true');
+    }
+    
     // More robust element selection with multiple fallbacks
     const nameInput = document.getElementById('{{ form.name.id_for_label }}') || 
                      document.querySelector('input[name="name"]') ||
@@ -735,6 +746,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (form && submitBtn) {
         form.addEventListener('submit', function(e) {
             console.log('🚀 Form submitted');
+            
+            // Ensure event field doesn't cause validation issues
+            if (eventField) {
+                eventField.removeAttribute('required');
+                eventField.style.display = 'none';
+                eventField.style.visibility = 'hidden';
+            }
             
             // Client-side validation
             let isValid = true;

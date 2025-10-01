@@ -33,6 +33,12 @@ class TicketForm(ModelForm):
             self.fields["event"].widget = forms.HiddenInput()
             # Remove required attribute since it's hidden and predetermined
             self.fields["event"].required = False
+            # Ensure the field is not validated as required
+            self.fields["event"].widget.attrs.update({
+                'style': 'display: none !important; visibility: hidden !important;',
+                'tabindex': '-1',
+                'aria-hidden': 'true'
+            })
 
     def clean_quantity(self):
         quantity = self.cleaned_data["quantity"]
