@@ -26,19 +26,15 @@ class TicketForm(ModelForm):
         if self.instance and self.instance.pk:
             self.fields["event"].queryset = Event.objects.filter(pk=self.instance.event_id)
         elif event_id is not None:
-            # Set the queryset and initial value for the event field
-            self.fields["event"].queryset = Event.objects.filter(pk=event_id)
-            self.fields["event"].initial = event_id
-            # Make the event field hidden since it's predetermined
-            self.fields["event"].widget = forms.HiddenInput()
-            # Remove required attribute since it's hidden and predetermined
-            self.fields["event"].required = False
-            # Ensure the field is not validated as required
-            self.fields["event"].widget.attrs.update({
-                'style': 'display: none !important; visibility: hidden !important;',
-                'tabindex': '-1',
-                'aria-hidden': 'true'
-            })
+            # Store the event_id for later use
+            self.event_id = event_id
+            # Completely remove the event field from the form
+            if 'event' in self.fields:
+                del self.fields['event']
+        else:
+            # If no event_id provided, keep the field but make it not required
+            if 'event' in self.fields:
+                self.fields["event"].required = False
 
     def clean_quantity(self):
         quantity = self.cleaned_data["quantity"]

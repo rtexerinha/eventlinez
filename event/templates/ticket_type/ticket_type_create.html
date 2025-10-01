@@ -516,12 +516,8 @@
 
             <!-- Form Body -->
             <div class="form-body">
-                <!-- Hidden Event Field -->
-                {% if form.event %}
-                <div style="display: none !important; visibility: hidden !important;">
-                    {{ form.event }}
-                </div>
-                {% endif %}
+                <!-- Event ID is handled server-side, no form field needed -->
+                <input type="hidden" name="event_id" value="{{ event_id }}" />
 
                 <!-- Ticket Name -->
                 <div class="form-group">
@@ -666,43 +662,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         console.log('🚀 Ticket form JavaScript loaded');
 
-        // Fix event field validation issue
-        const eventField = document.querySelector('select[name="event"]') || document.querySelector('input[name="event"]');
-        if (eventField) {
-            console.log('🔧 Fixing event field validation');
-            eventField.removeAttribute('required');
-            eventField.style.display = 'none';
-            eventField.style.visibility = 'hidden';
-            eventField.setAttribute('tabindex', '-1');
-            eventField.setAttribute('aria-hidden', 'true');
-            eventField.setAttribute('disabled', 'true');
-            // Remove from form validation completely
-            eventField.setAttribute('formnovalidate', 'true');
-        }
-
-        // Also check for any select elements with name="event" that might be rendered differently
-        const eventSelects = document.querySelectorAll('select[name="event"]');
-        eventSelects.forEach(select => {
-            console.log('🔧 Fixing additional event select field');
-            select.removeAttribute('required');
-            select.style.display = 'none';
-            select.style.visibility = 'hidden';
-            select.setAttribute('tabindex', '-1');
-            select.setAttribute('aria-hidden', 'true');
-            select.setAttribute('disabled', 'true');
-            select.setAttribute('formnovalidate', 'true');
-
-            // If it's still causing issues, try to replace it with a hidden input
-            if (select.tagName === 'SELECT') {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'event';
-                hiddenInput.value = select.value || '{{ event_id }}';
-                hiddenInput.setAttribute('formnovalidate', 'true');
-                select.parentNode.replaceChild(hiddenInput, select);
-                console.log('🔧 Replaced select with hidden input');
-            }
-        });
+    // Event field is now handled server-side, no client-side fixes needed
+    console.log('✅ Event field is handled server-side, no validation issues expected');
 
         // More robust element selection with multiple fallbacks
         const nameInput = document.getElementById('{{ form.name.id_for_label }}') ||
@@ -776,24 +737,7 @@
             form.addEventListener('submit', function (e) {
                 console.log('🚀 Form submitted');
 
-                // Ensure event field doesn't cause validation issues
-                if (eventField) {
-                    eventField.removeAttribute('required');
-                    eventField.style.display = 'none';
-                    eventField.style.visibility = 'hidden';
-                    eventField.setAttribute('disabled', 'true');
-                    eventField.setAttribute('formnovalidate', 'true');
-                }
-
-                // Also handle any select elements with name="event"
-                const eventSelects = document.querySelectorAll('select[name="event"]');
-                eventSelects.forEach(select => {
-                    select.removeAttribute('required');
-                    select.style.display = 'none';
-                    select.style.visibility = 'hidden';
-                    select.setAttribute('disabled', 'true');
-                    select.setAttribute('formnovalidate', 'true');
-                });
+            // Event field is handled server-side, no client-side validation needed
 
                 // Client-side validation
                 let isValid = true;
