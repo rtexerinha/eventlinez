@@ -192,6 +192,9 @@ def ticket_type_create(request, event_id):
         # For GET requests, create form with event_id parameter
         try:
             form = TicketForm(event_id=event_id)
+            print(f"Form created with event_id: {event_id}")
+            print(f"Event field widget: {form.fields['event'].widget}")
+            print(f"Event field required: {form.fields['event'].required}")
         except Exception as e:
             print(f"Error creating GET form: {e}")
             form = TicketForm()
