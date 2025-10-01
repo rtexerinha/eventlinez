@@ -32,6 +32,14 @@ class TicketForm(ModelForm):
             print(f"Form created with event_id: {event_id}")
             print(f"Form fields: {list(self.fields.keys())}")
             print(f"Event field not included in form fields")
+            
+            # Double-check: ensure event field is completely gone
+            if 'event' in self.fields:
+                print(f"ERROR: Event field still exists after Meta.fields removal!")
+                del self.fields['event']
+                print(f"Force removed event field. Remaining fields: {list(self.fields.keys())}")
+            else:
+                print(f"✅ Event field successfully removed from form")
         else:
             # If no event_id provided, add the event field
             self.fields["event"] = forms.ModelChoiceField(
