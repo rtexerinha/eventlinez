@@ -14,6 +14,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from promoter.models import Promoter, Event
 from order.models import Order, OrderItem
+from customer.models import Customer
 from event.models import Ticket, Category
 from address.models import State, City
 
@@ -142,10 +143,35 @@ class TestSalesReportAPI(TestCase):
 
         ticket_type = Ticket.objects.create(name="Test Ticket", event=self.event, price=50, quantity=100)
 
+        # Create users and customers for orders
+        user1 = User.objects.create_user(username='customer1', email='test1@example.com')
+        user2 = User.objects.create_user(username='customer2', email='test2@example.com')
+        user3 = User.objects.create_user(username='customer3', email='test3@example.com')
+        
+        customer1 = Customer.objects.create(
+            email='test1@example.com',
+            first_name='Test',
+            last_name='Customer1',
+            user=user1
+        )
+        customer2 = Customer.objects.create(
+            email='test2@example.com',
+            first_name='Test',
+            last_name='Customer2',
+            user=user2
+        )
+        customer3 = Customer.objects.create(
+            email='test3@example.com',
+            first_name='Test',
+            last_name='Customer3',
+            user=user3
+        )
+
         order1 = Order.objects.create(
             emailAddress='test1@example.com',
             total=100,
-            token='test_token_1'
+            token='test_token_1',
+            customer=customer1
         )
         order1.created = datetime.datetime(day=5, month=12, year=2022)
         order1.save()
@@ -153,7 +179,8 @@ class TestSalesReportAPI(TestCase):
         order2 = Order.objects.create(
             emailAddress='test2@example.com',
             total=100,
-            token='test_token_2'
+            token='test_token_2',
+            customer=customer2
         )
         order2.created = timezone.now() - timedelta(days=60)  # 2 months ago
         order2.save()
@@ -161,7 +188,8 @@ class TestSalesReportAPI(TestCase):
         order3 = Order.objects.create(
             emailAddress='test3@example.com',
             total=100,
-            token='test_token_3'
+            token='test_token_3',
+            customer=customer3
         )
         order3.created = timezone.now() - timedelta(days=1)  # 1 day ago (current month)
         order3.save()
@@ -211,12 +239,13 @@ class TestSalesReportAPI(TestCase):
         force_authenticate(request, user=self.promoter.user)
         response = sales_report(request, self.event.id)
 
-        # The test now expects 2 months since order2 and order3 are in the same month
-        self.assertEqual(len(response.data["data"]), 2)
+        # The test expects 3 months of data
+        self.assertEqual(len(response.data["data"]), 3)
         self.assertEqual(response.data["data"][0]["group"], "Dec 22")
 
         self.assertEqual(response.data["data"][0]["value"], 5)  # Dec 22: 2+3=5
-        self.assertEqual(response.data["data"][1]["value"], 21)  # Current month: 8+8+5=21
+        self.assertEqual(response.data["data"][1]["value"], 8)  # 2 months ago: 8
+        self.assertEqual(response.data["data"][2]["value"], 13)  # Current month: 8+5=13
 
 
 class TestUtil(TestCase):
