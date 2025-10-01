@@ -30,7 +30,11 @@ class TicketForm(ModelForm):
             self.event_id = event_id
             # Completely remove the event field from the form
             if 'event' in self.fields:
+                print(f"Removing event field from form. Event ID: {event_id}")
                 del self.fields['event']
+                print(f"Event field removed. Remaining fields: {list(self.fields.keys())}")
+            else:
+                print(f"Event field not found in form fields: {list(self.fields.keys())}")
         else:
             # If no event_id provided, keep the field but make it not required
             if 'event' in self.fields:

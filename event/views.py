@@ -194,11 +194,11 @@ def ticket_type_create(request, event_id):
         try:
             form = TicketForm(event_id=event_id)
             print(f"Form created with event_id: {event_id}")
-            print(f"Event field widget: {form.fields['event'].widget}")
-            print(f"Event field required: {form.fields['event'].required}")
+            print(f"Form fields: {list(form.fields.keys())}")
+            print(f"Event field removed: {'event' not in form.fields}")
         except Exception as e:
             print(f"Error creating GET form: {e}")
-            form = TicketForm()
+            form = TicketForm(event_id=event_id)
             form.add_error(None, f"Error creating form: {e}")
 
     return render(request, 'ticket_type/ticket_type_create.html', {
