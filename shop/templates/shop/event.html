@@ -171,4 +171,15 @@
 
 {% block cart_js %}
 <script src="{% static 'js/cart.js' %}"></script>
+<script>
+    // Update total when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Event page loaded, calling _updateTotal()');
+        if (typeof _updateTotal === 'function') {
+            _updateTotal();
+        } else {
+            console.error('_updateTotal function not found');
+        }
+    });
+</script>
 {% endblock %}

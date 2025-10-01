@@ -164,38 +164,56 @@ def checkout(request):
         messages.error(request, "The following tickets are sold out: " + ", ".join(names))
         return redirect('cart:cart_detail') 
 
+    # Check if Stripe is properly configured with real keys
+    if not settings.STRIPE_SECRET_KEY or settings.STRIPE_SECRET_KEY in ['sk_test_51234567890abcdef', 'sk_live_51H1234567890abcdef']:
+        return JsonResponse({
+            'error': 'Payment processing is not available. Please contact administrator for checkout assistance.'
+        }, status=500)
+    
     stripe.api_key = settings.STRIPE_SECRET_KEY
     line_items = []
 
     # https://stripe.com/docs/billing/subscriptions/decimal-amounts
     cents = 100
 
-    for item in items:
-        product = stripe.Product.create(name=str(item.ticket))
-        line_item = {
-            'price_data': {
-                'product': product.id,
-                'unit_amount_decimal': item.price_total() * cents,
-                'currency': 'usd'
-            },
-            'quantity': 1,
-        }
-        line_items.append(line_item)
+    try:
+        for item in items:
+            product = stripe.Product.create(name=str(item.ticket))
+            line_item = {
+                'price_data': {
+                    'product': product.id,
+                    'unit_amount_decimal': item.price_total() * cents,
+                    'currency': 'usd'
+                },
+                'quantity': 1,
+            }
+            line_items.append(line_item)
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe error: {e}")
+        return JsonResponse({
+            'error': f'Payment processing error: {str(e)}'
+        }, status=500)
 
-    server = request.get_raw_uri().replace(request.get_full_path(), "")
-    session = stripe.checkout.Session.create(
-        payment_intent_data={
-            'setup_future_usage': 'off_session',
-        },
-        mode='payment',
-        payment_method_types=['card'],
-        success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url=server + '/cart/',
-        line_items=line_items,
-        customer_email=request.user.username,
-        client_reference_id=cart.id,
-        allow_promotion_codes=True
-    )
+    try:
+        server = request.get_raw_uri().replace(request.get_full_path(), "")
+        session = stripe.checkout.Session.create(
+            payment_intent_data={
+                'setup_future_usage': 'off_session',
+            },
+            mode='payment',
+            payment_method_types=['card'],
+            success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=server + '/cart/',
+            line_items=line_items,
+            customer_email=request.user.username,
+            client_reference_id=cart.id,
+            allow_promotion_codes=True
+        )
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe session creation error: {e}")
+        return JsonResponse({
+            'error': f'Payment session creation failed: {str(e)}'
+        }, status=500)
 
     # Mark cart as about to be converted (we'll mark as fully converted in order processing)
     try:

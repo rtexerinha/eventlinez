@@ -148,3 +148,7 @@ media/
 
 backup.sql
 /staticfiles/
+
+# Local development files with sensitive data
+docker-compose.local.yml
+.env.local

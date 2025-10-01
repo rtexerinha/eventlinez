@@ -11,6 +11,7 @@ urlpatterns = [
     
     # Gallery URLs
     path('gallery/', views.gallery_home, name='gallery_home'),
+    path('gallery/<slug:event_slug>/photos.json', views.event_photos_json, name='event_photos_json'),
     path('gallery/<slug:event_slug>/', views.event_gallery, name='event_gallery'),
     path('gallery/download/<int:photo_id>/', views.download_photo, name='download_photo'),
     

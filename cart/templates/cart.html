@@ -103,7 +103,7 @@ This is the shopping cart page. Proceed to review your items and place the order
         </article>
 
         {% for item in cart_items %}
-        <article class="col-12 border-b">
+        <article class="col-12 border-b ticket-row">
             <aside class="row">
 
                 <div class="col-lg-5 col-12 pt-3 d-flex">
@@ -139,44 +139,46 @@ This is the shopping cart page. Proceed to review your items and place the order
                 <aside class="col-lg-2 col-6 pt-lg-5 d-justy">
 
                     {% if item.quantity < item.ticket.qty_available %} <div class="h6-home text-lg-center">
-                        <a href="{% url 'cart:change-quantity' item.id " decrement" %}"
+                        <button
+                            onclick="console.log('Decrease clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'decrease')"
                             class="button-increment ml-2 pl-5px">
                             <i class="fas fa-minus"></i>
-                        </a>&nbsp;
+                        </button>&nbsp;
 
-                        {{item.quantity }}&nbsp;
+                        <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
 
                         {% if item.ticket.qty_available == 1 %}
-                        <a style="pointer-events: none; cursor: not-allowed;" class="button-increment mr-2 pl-5px"
-                            href="{% url 'cart:change-quantity' item.id " increment" %}">
+                        <button style="pointer-events: none; cursor: not-allowed;" class="button-increment mr-2 pl-5px"
+                            disabled>
                             <i class="fas fa-plus" style=" color: gray!important; text-decoration: none"></i>
-                        </a>
+                        </button>
 
                         <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
 
                         {% else %}
-                        <a class="plus button-increment mr-2 pl-5px" href="{% url 'cart:change-quantity' item.id "
-                            increment" %}">
+                        <button
+                            onclick="console.log('Increase clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'increase')"
+                            class="button-increment mr-2 pl-5px">
                             <i class="fas fa-plus"></i>
-                        </a>
+                        </button>
                         {% endif %}
 
                         </div>
 
                         {% else %}
                         <div class="h6-home">
-                            <a href="{% url 'cart:change-quantity' item.id " decrement" %}"
+                            <button
+                                onclick="console.log('Decrease clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'decrease')"
                                 class="button-increment ml-2 pl-5px">
                                 <i class="fas fa-minus"></i>
-                            </a>&nbsp;
+                            </button>&nbsp;
 
-                            {{item.quantity }}&nbsp;
+                            <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
 
-                            <a style="pointer-events: none; cursor: not-allowed; background: #909090"
-                                href="{% url 'cart:change-quantity' item.id " increment" %}"
+                            <button style="pointer-events: none; cursor: not-allowed; background: #909090" disabled
                                 class="button-increment mr-2 pl-5px">
                                 <i class="fas fa-plus" style=" color: white; text-decoration: none"></i>
-                            </a>
+                            </button>
 
                             <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
                                 There are only {{item.quantity }} tickets available
@@ -189,7 +191,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 <div class="col-lg-1 col-12 pt-lg-5 d-flex">
                     <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Unit Price</p>
                     <p class="h6-home text-lg-center">
-                        $ {{item.ticket.price }}
+                        <span class="ticket-price">{{item.ticket.price }}</span>
                     </p>
                 </div>
 
@@ -202,7 +204,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 <div class="col-lg-1 col-12 pt-lg-5 d-flex">
                     <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Amount</p>
                     <p class="h6-home text-lg-center">
-                        ${{item.price_total| floatformat:2 }}
+                        <span class="ticket-amount">${{item.price_total| floatformat:2 }}</span>
                     </p>
                 </div>
             </aside>
@@ -228,8 +230,8 @@ This is the shopping cart page. Proceed to review your items and place the order
                     <div class="col-lg-12 mb-3 p-0">
                         <div class="d-flex justify-content-end">
                             <strong class="col-6 h4-home pt-1">Your total is:</strong>
-                            <strong class="col-6 h3-home d-flex justify-content-end p-0">${{ total|floatformat:2
-                                }}</strong>
+                            <strong class="col-6 h3-home d-flex justify-content-end p-0" id="total">${{
+                                total|floatformat:2 }}</strong>
                         </div>
                     </div>
 
@@ -255,7 +257,19 @@ This is the shopping cart page. Proceed to review your items and place the order
 {% endblock %}
 
 {% block cart_js %}
+<script src="{% static 'js/cart.js' %}"></script>
 <script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Update total when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Cart page loaded, calling _updateTotal()');
+        if (typeof _updateTotal === 'function') {
+            _updateTotal();
+        } else {
+            console.error('_updateTotal function not found');
+        }
+    });
+</script>
 <script>
     // Enhanced doCheckout function with better error handling
     function doCheckout() {

@@ -1,7 +1,7 @@
 {% extends "base-new.html" %}
 {% load static %}
 
-{% block title %}Event Gallery - Eventlinez{% endblock %}
+{% block title %}Event Albums - Eventlinez{% endblock %}
 
 {% block custom_css %}
 <style>
@@ -149,6 +149,152 @@
         justify-content: center;
     }
 
+    /* Lightbox Modal Styles */
+    .lightbox-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .lightbox-modal.active {
+        display: flex;
+        opacity: 1;
+    }
+
+    .lightbox-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .lightbox-image {
+        max-width: 85%;
+        max-height: 85%;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .lightbox-nav:hover {
+        background: white;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .lightbox-prev {
+        left: 30px;
+    }
+
+    .lightbox-next {
+        right: 30px;
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: 30px;
+        right: 30px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .lightbox-close:hover {
+        background: white;
+        transform: scale(1.1);
+    }
+
+    .lightbox-info {
+        position: absolute;
+        bottom: 30px;
+        left: 30px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px 20px;
+        border-radius: 10px;
+        color: #333;
+        max-width: 320px;
+    }
+
+    .lightbox-info h4 {
+        margin: 0 0 5px 0;
+        font-size: 1.1rem;
+    }
+
+    .lightbox-info p {
+        margin: 0 0 10px 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .lightbox-download-btn {
+        background: #d90075;
+        color: white;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .lightbox-download-btn:hover {
+        background: #ff6b9d;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .lightbox-counter {
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+    }
+
     @media (max-width: 768px) {
         .gallery-grid {
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -175,60 +321,48 @@
 </div>
 
 <div class="container">
-    {% if gallery_photos %}
+    {% if albums %}
     <div class="gallery-grid">
-        {% for photo in gallery_photos %}
-        <div class="gallery-item">
-            <img src="{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}"
-                alt="{{ photo.title|default:photo.event.name }}" class="gallery-image">
+        {% for album in albums %}
+        <div class="gallery-item" data-event-slug="{{ album.event.slug }}" style="cursor: pointer;"
+            onclick="openAlbumLightbox('{{ album.event.slug }}')">
+            <img src="{% if album.cover_photo.thumbnail %}{{ album.cover_photo.thumbnail.url }}{% else %}{{ album.cover_photo.photo.url }}{% endif %}"
+                alt="{{ album.event.name }}" class="gallery-image">
 
             <div class="gallery-overlay">
-                <div class="gallery-actions">
-                    {% if user.is_authenticated %}
-                    <a href="{% url 'shop:download_photo' photo.id %}" class="download-btn" title="Download Photo">
-                        <i class="fas fa-download"></i>
-                    </a>
-                    {% endif %}
-                </div>
-
                 <div class="gallery-info">
-                    <h3 class="gallery-title">{{ photo.title|default:photo.event.name|truncatechars:25 }}</h3>
-                    <p class="gallery-event">{{ photo.event.name|truncatechars:30 }}</p>
-                    <div class="gallery-stats">
-                        <span><i class="fas fa-download"></i> {{ photo.download_count }} downloads</span>
-                        <span><i class="fas fa-calendar"></i> {{ photo.uploaded_at|date:"M d, Y" }}</span>
-                    </div>
+                    <h3 class="gallery-title">{{ album.event.name|truncatechars:40 }}</h3>
+                    <p class="gallery-event">{{ album.photo_count }} photo{{ album.photo_count|pluralize }}</p>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <!-- Pagination -->
-    {% if gallery_photos.has_other_pages %}
+    <!-- Pagination for albums -->
+    {% if albums_page.has_other_pages %}
     <div class="pagination-container">
-        <nav aria-label="Gallery pagination">
+        <nav aria-label="Albums pagination">
             <ul class="pagination">
-                {% if gallery_photos.has_previous %}
+                {% if albums_page.has_previous %}
                 <li class="page-item">
                     <a class="page-link" href="?page=1">&laquo; First</a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ gallery_photos.previous_page_number }}">Previous</a>
+                    <a class="page-link" href="?page={{ albums_page.previous_page_number }}">Previous</a>
                 </li>
                 {% endif %}
 
                 <li class="page-item active">
-                    <span class="page-link">{{ gallery_photos.number }} of {{ gallery_photos.paginator.num_pages
-                        }}</span>
+                    <span class="page-link">{{ albums_page.number }} of {{ albums_page.paginator.num_pages }}</span>
                 </li>
 
-                {% if gallery_photos.has_next %}
+                {% if albums_page.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ gallery_photos.next_page_number }}">Next</a>
+                    <a class="page-link" href="?page={{ albums_page.next_page_number }}">Next</a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ gallery_photos.paginator.num_pages }}">Last &raquo;</a>
+                    <a class="page-link" href="?page={{ albums_page.paginator.num_pages }}">Last &raquo;</a>
                 </li>
                 {% endif %}
             </ul>
@@ -238,9 +372,152 @@
     {% else %}
     <div class="empty-gallery">
         <i class="fas fa-camera"></i>
-        <h3>No photos available yet</h3>
+        <h3>No event albums available yet</h3>
         <p>Check back soon for event photos!</p>
     </div>
     {% endif %}
 </div>
+
+<!-- Lightbox Modal -->
+<div class="lightbox-modal" id="albumLightbox">
+    <div class="lightbox-content">
+        <button class="lightbox-close" onclick="closeAlbumLightbox()">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <button class="lightbox-nav lightbox-prev" onclick="previousAlbumPhoto()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <img class="lightbox-image" id="albumLightboxImage" src="" alt="">
+
+        <button class="lightbox-nav lightbox-next" onclick="nextAlbumPhoto()">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <div class="lightbox-info">
+            <h4 id="albumLightboxTitle">Photo Title</h4>
+            <p id="albumLightboxDate">Date</p>
+            {% if user.is_authenticated %}
+            <a id="albumLightboxDownloadBtn" href="#" class="lightbox-download-btn">
+                <i class="fas fa-download"></i>Download Original
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="lightbox-counter" id="albumLightboxCounter">1 / 1</div>
+    </div>
+</div>
+<script>
+    let currentAlbumSlug = null;
+    let albumPhotos = [];
+    let currentAlbumIndex = 0;
+
+    async function openAlbumLightbox(eventSlug) {
+        currentAlbumSlug = eventSlug;
+        const modal = document.getElementById('albumLightbox');
+        // Open immediately to give feedback
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        try {
+            const resp = await fetch(`/shop/gallery/${eventSlug}/photos.json`);
+            if (!resp.ok) throw new Error('Failed to load photos');
+            const data = await resp.json();
+            albumPhotos = data.photos || [];
+            currentAlbumIndex = 0;
+            updateAlbumLightboxContent();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function closeAlbumLightbox() {
+        const modal = document.getElementById('albumLightbox');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function nextAlbumPhoto() {
+        if (currentAlbumIndex < albumPhotos.length - 1) {
+            currentAlbumIndex++;
+            updateAlbumLightboxContent();
+        }
+    }
+
+    function previousAlbumPhoto() {
+        if (currentAlbumIndex > 0) {
+            currentAlbumIndex--;
+            updateAlbumLightboxContent();
+        }
+    }
+
+    function updateAlbumLightboxContent() {
+        if (albumPhotos.length === 0) return;
+
+        const photo = albumPhotos[currentAlbumIndex];
+        const imgEl = document.getElementById('albumLightboxImage');
+        const titleEl = document.getElementById('albumLightboxTitle');
+        const dateEl = document.getElementById('albumLightboxDate');
+        const counterEl = document.getElementById('albumLightboxCounter');
+        const downloadEl = document.getElementById('albumLightboxDownloadBtn');
+
+        imgEl.src = photo.fullsize;
+        titleEl.textContent = photo.title || 'Event Photo';
+        dateEl.textContent = photo.uploaded_at ? new Date(photo.uploaded_at).toLocaleDateString() : '';
+        counterEl.textContent = `${currentAlbumIndex + 1} / ${albumPhotos.length}`;
+        if (downloadEl && photo.download_url) {
+            downloadEl.href = photo.download_url;
+        }
+
+        // Update nav buttons state
+        const prevBtn = document.querySelector('.lightbox-prev');
+        const nextBtn = document.querySelector('.lightbox-next');
+        if (prevBtn) {
+            prevBtn.style.opacity = currentAlbumIndex === 0 ? '0.5' : '1';
+            prevBtn.style.cursor = currentAlbumIndex === 0 ? 'not-allowed' : 'pointer';
+        }
+        if (nextBtn) {
+            nextBtn.style.opacity = currentAlbumIndex === albumPhotos.length - 1 ? '0.5' : '1';
+            nextBtn.style.cursor = currentAlbumIndex === albumPhotos.length - 1 ? 'not-allowed' : 'pointer';
+        }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function (e) {
+        const modal = document.getElementById('albumLightbox');
+        if (modal && modal.classList.contains('active')) {
+            switch (e.key) {
+                case 'ArrowLeft': e.preventDefault(); previousAlbumPhoto(); break;
+                case 'ArrowRight': e.preventDefault(); nextAlbumPhoto(); break;
+                case 'Escape': e.preventDefault(); closeAlbumLightbox(); break;
+            }
+        }
+    });
+
+    // Close on background click
+    document.addEventListener('click', function (e) {
+        const modal = document.getElementById('albumLightbox');
+        if (modal && e.target === modal) closeAlbumLightbox();
+    });
+
+    // Also attach listeners in JS as a fallback in case inline onclick fails
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.gallery-item').forEach(function (card) {
+            card.addEventListener('click', function () {
+                const slug = card.getAttribute('data-event-slug');
+                if (slug) openAlbumLightbox(slug);
+            });
+            card.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const slug = card.getAttribute('data-event-slug');
+                    if (slug) openAlbumLightbox(slug);
+                }
+            });
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+        });
+    });
+</script>
+
 {% endblock %}
