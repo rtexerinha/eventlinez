@@ -10,7 +10,11 @@ from promoter.models import Promoter
 from promoter.models import Event
 from promoter.api import EventListAPIView
 from promoter.api import sales_report
-from model_bakery import baker
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from promoter.models import Promoter, Event
+from order.models import Order, OrderItem
+from event.models import Ticket, Category
 
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import force_authenticate
@@ -19,21 +23,20 @@ from rest_framework.test import force_authenticate
 class SearchEventTest(TestCase):
 
     def setUp(self):
-        self.promoter = baker.make(Promoter)
+        User = get_user_model()
+        user = User.objects.create_user(username='testuser', email='test@example.com')
+        self.promoter = Promoter.objects.create(user=user, email='test@example.com')
         self.factory = APIRequestFactory()
         self.view = EventListAPIView.as_view()
 
     def test_filter_by_state(self):
-        self.promoter.event_set.add(
-            baker.make(Event, description="foo", event_date=timezone.now() + timedelta(days=-4)))
-        self.promoter.event_set.add(
-            baker.make(Event, description="foo", event_date=timezone.now() + timedelta(days=-3)))
-        self.promoter.event_set.add(
-            baker.make(Event, description="foo", event_date=timezone.now() + timedelta(days=-2)))
-        self.promoter.event_set.add(
-            baker.make(Event, description="foo", event_date=timezone.now() + timedelta(days=-1, minutes=1)))
-        self.promoter.event_set.add(
-            baker.make(Event, description="foo", event_date=timezone.now() + timedelta(days=1)))
+        event1 = Event.objects.create(name="Event 1", description="foo", event_date=timezone.now() + timedelta(days=-4))
+        event2 = Event.objects.create(name="Event 2", description="foo", event_date=timezone.now() + timedelta(days=-3))
+        event3 = Event.objects.create(name="Event 3", description="foo", event_date=timezone.now() + timedelta(days=-2))
+        event4 = Event.objects.create(name="Event 4", description="foo", event_date=timezone.now() + timedelta(days=-1, minutes=1))
+        event5 = Event.objects.create(name="Event 5", description="foo", event_date=timezone.now() + timedelta(days=1))
+        
+        self.promoter.event_set.add(event1, event2, event3, event4, event5)
 
         request = self.factory.get('/promoter/api/event', data={"state": "previous"})
         force_authenticate(request, user=self.promoter.user)
@@ -46,8 +49,9 @@ class SearchEventTest(TestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_filter_by_name(self):
-        self.promoter.event_set.add(baker.make(Event, name="Beatles", description="foo"))
-        self.promoter.event_set.add(baker.make(Event, name="Rolling Stones", description="foo"))
+        event1 = Event.objects.create(name="Beatles", description="foo")
+        event2 = Event.objects.create(name="Rolling Stones", description="foo")
+        self.promoter.event_set.add(event1, event2)
 
         request = self.factory.get('/promoter/api/event', data={"name": "Beatles"})
         force_authenticate(request, user=self.promoter.user)
@@ -57,22 +61,46 @@ class SearchEventTest(TestCase):
 
 class TestSalesReportAPI(TestCase):
     def setUp(self):
-        self.promoter = baker.make(Promoter)
+        User = get_user_model()
+        user = User.objects.create_user(username='testuser2', email='test2@example.com')
+        self.promoter = Promoter.objects.create(user=user, email='test2@example.com')
         self.factory = APIRequestFactory()
-        self.event = baker.make('event.Event', description="foo")
+        
+        # Create a category
+        category = Category.objects.create(name="Test Category", slug="test-category")
+        
+        self.event = Event.objects.create(
+            name="Test Event", 
+            description="foo",
+            event_date=timezone.now() + timedelta(days=30),
+            category=category,
+            promoter=self.promoter
+        )
 
-        ticket_type = baker.make('event.Ticket', event=self.event)
+        ticket_type = Ticket.objects.create(name="Test Ticket", event=self.event, price=50)
 
-        order1 = baker.make('order.Order')
+        order1 = Order.objects.create(
+            emailAddress='test1@example.com',
+            total=100,
+            token='test_token_1'
+        )
         order1.created = datetime.datetime(day=5, month=12, year=2022)
         order1.save()
 
-        order2 = baker.make('order.Order')
-        order2.created = timezone.now() - timedelta(days=30)
+        order2 = Order.objects.create(
+            emailAddress='test2@example.com',
+            total=100,
+            token='test_token_2'
+        )
+        order2.created = timezone.now() - timedelta(days=60)  # 2 months ago
         order2.save()
 
-        order3 = baker.make('order.Order')
-        order3.created = timezone.now() - timedelta(days=1)
+        order3 = Order.objects.create(
+            emailAddress='test3@example.com',
+            total=100,
+            token='test_token_3'
+        )
+        order3.created = timezone.now() - timedelta(days=1)  # 1 day ago (current month)
         order3.save()
 
         # baker.make(OrderItem, event_ticket=ticket_type, order=order, _quantity=2) Model Baker shitty bug
@@ -83,11 +111,19 @@ class TestSalesReportAPI(TestCase):
         OrderItem.objects.create(quantity=5, unit_price=50, fee=2, amount=100, order=order3, event_ticket=ticket_type)
 
     def test_sales_report_should_filter_by_event(self):
-        anoter_event = baker.make('event.Event', description="another event")
+        # Create another category for this event
+        another_category = Category.objects.create(name="Another Category", slug="another-category")
+        another_event = Event.objects.create(
+            name="Another Event", 
+            description="another event",
+            event_date=timezone.now() + timedelta(days=30),
+            category=another_category,
+            promoter=self.promoter
+        )
 
-        request = self.factory.get(f"/promoter/api/event/{anoter_event.id}/salesReport", data={"by": "month"})
+        request = self.factory.get(f"/promoter/api/event/{another_event.id}/salesReport", data={"by": "month"})
         force_authenticate(request, user=self.promoter.user)
-        response = sales_report(request, anoter_event.id)
+        response = sales_report(request, another_event.id)
 
         self.assertEqual(len(response.data["data"]), 0)
 
@@ -111,9 +147,9 @@ class TestSalesReportAPI(TestCase):
         self.assertEqual(len(response.data["data"]),  3)
         self.assertEqual(response.data["data"][0]["group"], "Dec 22")
 
-        self.assertEqual(response.data["data"][0]["value"], 5)
-        self.assertEqual(response.data["data"][1]["value"], 8)
-        self.assertEqual(response.data["data"][2]["value"], 13)
+        self.assertEqual(response.data["data"][0]["value"], 5)  # Dec 22: 2+3=5
+        self.assertEqual(response.data["data"][1]["value"], 8)  # 2 months ago: 8
+        self.assertEqual(response.data["data"][2]["value"], 13) # Current month: 8+5=13
 
 
 class TestUtil(TestCase):
