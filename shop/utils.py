@@ -167,7 +167,7 @@ def process_gallery_image(image_file, title=None):
     return result
 
 
-def generate_unique_filename(original_filename, prefix="gallery"):
+def generate_unique_filename(original_filename, prefix="gallery", dir_path=None):
     """
     Generate a unique filename for uploaded images.
     
@@ -178,8 +178,9 @@ def generate_unique_filename(original_filename, prefix="gallery"):
     Returns:
         str: Unique filename
     """
-    # Extract extension
-    name, ext = os.path.splitext(original_filename)
+    # Extract basename and extension (strip any directories from original)
+    base = os.path.basename(original_filename)
+    name, ext = os.path.splitext(base)
     
     # Generate unique identifier
     unique_id = str(uuid.uuid4())[:8]
@@ -188,10 +189,13 @@ def generate_unique_filename(original_filename, prefix="gallery"):
     clean_name = "".join(c for c in name if c.isalnum() or c in (' ', '-', '_')).rstrip()
     clean_name = clean_name.replace(' ', '_')
     
-    # Construct new filename
-    new_filename = f"{prefix}_{clean_name}_{unique_id}{ext.lower()}"
-    
-    return new_filename
+    # Construct new filename, optionally inside a directory path
+    filename_only = f"{prefix}_{clean_name}_{unique_id}{ext.lower()}"
+    if dir_path:
+        # Normalize directory separators
+        dir_path = dir_path.strip("/")
+        return f"{dir_path}/{filename_only}"
+    return filename_only
 
 
 def get_image_info(image_file):

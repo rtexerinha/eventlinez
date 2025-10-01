@@ -74,25 +74,29 @@ class EventGallery(models.Model):
                 # Import here to avoid circular imports
                 from .utils import process_gallery_image, generate_unique_filename
                 
-                # Generate unique filename
-                unique_filename = generate_unique_filename(self.photo.name, prefix="gallery")
-                self.photo.name = unique_filename
-                
-                # Process the image (optimize and create thumbnail)
+                # Process the image (optimize and create thumbnail) BEFORE renaming
                 processed = process_gallery_image(self.photo)
-                
+
+                # Generate unique filename under gallery/events for the optimized image
+                unique_filename = generate_unique_filename(
+                    self.photo.name,
+                    prefix="gallery",
+                    dir_path="gallery/events"
+                )
+
                 if processed['optimized_image']:
-                    # Replace original with optimized version
+                    # Replace original with optimized version using our target path/name
                     self.photo.save(
-                        processed['optimized_image'].name,
+                        unique_filename,
                         processed['optimized_image'],
                         save=False
                     )
-                
+
                 if processed['thumbnail'] and not self.thumbnail:
-                    # Save thumbnail
+                    # Save thumbnail next to the photo using a deterministic name
+                    thumb_name = unique_filename.rsplit('.', 1)[0] + "_thumb.jpg"
                     self.thumbnail.save(
-                        processed['thumbnail'].name,
+                        thumb_name,
                         processed['thumbnail'],
                         save=False
                     )

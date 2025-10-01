@@ -4,6 +4,7 @@ import itertools
 import os
 import uuid
 from django.http import FileResponse, Http404
+from django.http import JsonResponse
 from django.utils import timezone
 
 from django.core.mail import send_mail
@@ -254,18 +255,57 @@ def download_photo(request, photo_id):
 
 
 def gallery_home(request):
-    """Display all public gallery photos"""
-    gallery_photos = EventGallery.objects.filter(
-        is_public=True
-    ).select_related('event').order_by('-uploaded_at')
-    
-    # Add pagination
-    paginator = Paginator(gallery_photos, 12)
+    """Display album grid (one cover per event) for all events with public photos"""
+    from django.db.models import Count, Max, Q
+
+    # Build album list: one entry per event with public photos
+    events_with_photos = Event.objects.filter(
+        gallery_photos__is_public=True
+    ).annotate(
+        photo_count=Count('gallery_photos', filter=Q(gallery_photos__is_public=True), distinct=True),
+        latest_upload=Max('gallery_photos__uploaded_at')
+    ).order_by('-latest_upload')
+
+    # Simple pagination for albums
+    paginator = Paginator(events_with_photos, 12)
     page_number = request.GET.get('page')
-    photos = paginator.get_page(page_number)
-    
+    albums_page = paginator.get_page(page_number)
+
+    # Attach a cover photo for each event on the current page
+    albums = []
+    for ev in albums_page:
+        cover_photo = ev.gallery_photos.filter(is_public=True).order_by('-is_featured', '-uploaded_at').first()
+        if cover_photo:
+            albums.append({
+                'event': ev,
+                'cover_photo': cover_photo,
+                'photo_count': ev.photo_count,
+            })
+
     context = {
-        'gallery_photos': photos,
-        'PROD': settings.PROD
+        'albums_page': albums_page,
+        'albums': albums,
+        'PROD': settings.PROD,
     }
     return render(request, 'shop/gallery/gallery_home.html', context)
+
+
+def event_photos_json(request, event_slug):
+    """Return JSON list of public photos for the specified event (for lightbox)."""
+    event = get_object_or_404(Event, slug=event_slug)
+    photos_qs = EventGallery.objects.filter(event=event, is_public=True).order_by('-is_featured', '-uploaded_at')
+
+    photos = []
+    for p in photos_qs:
+        photos.append({
+            'id': p.id,
+            'title': p.title or event.name,
+            'thumbnail': p.thumbnail.url if p.thumbnail else (p.photo.url if p.photo else ''),
+            'fullsize': p.photo.url if p.photo else '',
+            'uploaded_at': p.uploaded_at.strftime('%Y-%m-%dT%H:%M:%S%z') if p.uploaded_at else '',
+            'download_url': request.build_absolute_uri(
+                redirect('shop:download_photo', photo_id=p.id).url
+            ),
+        })
+
+    return JsonResponse({'event': {'name': event.name, 'slug': event.slug}, 'photos': photos})
