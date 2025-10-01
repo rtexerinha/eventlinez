@@ -172,7 +172,8 @@ def ticket_type_create(request, event_id):
                 print("Form is valid, attempting to save...")
                 try:
                     ticket = form.save(commit=False)
-                    ticket.event = event  # Assign the event directly
+                    # Assign the event directly since we removed it from the form
+                    ticket.event = event
                     ticket.save()
                     print(f"Ticket saved successfully: {ticket}")
                     # Redirect back to ticket list for this event
