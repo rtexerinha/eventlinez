@@ -3,13 +3,13 @@ import logging
 import dj_database_url
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
-
-logger = logging.getLogger(__name__)
-
 # ----- Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Load environment variables from .env file
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+logger = logging.getLogger(__name__)
 
 # ----- Helpers
 def env_bool(key, default=False):
@@ -213,10 +213,11 @@ SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 EVENTLINEZ_FEE = float(os.getenv("EVENTLINEZ_FEE", "0.12"))
 
 # Google reCAPTCHA settings (optional - for contact form spam protection)
-RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", "")
-RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_PRIVATE_KEY", "")
+# Using standard reCAPTCHA v2 keys
+RECAPTCHA_PUBLIC_KEY = "6Ldz6-ErAAAAACsnGmRffP5TA4MyzT23kA-IGejK"
+RECAPTCHA_PRIVATE_KEY = "6Ldz6-ErAAAAAB7i8oaDjn7YVlZn5sLbTh5qQ57B"
 # Score threshold for reCAPTCHA validation (0.0 - 1.0)
-RECAPTCHA_REQUIRED_SCORE = float(os.getenv("RECAPTCHA_REQUIRED_SCORE", "0.5"))
+RECAPTCHA_REQUIRED_SCORE = 0.5
 
 
 def env_bool(key, default=False):
