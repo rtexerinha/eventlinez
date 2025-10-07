@@ -1,6 +1,10 @@
 import os
 import logging
 import dj_database_url
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -207,6 +211,12 @@ REST_FRAMEWORK = {
 # Feature flags / misc
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 EVENTLINEZ_FEE = float(os.getenv("EVENTLINEZ_FEE", "0.12"))
+
+# Google reCAPTCHA settings (optional - for contact form spam protection)
+RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", "")
+RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_PRIVATE_KEY", "")
+# Score threshold for reCAPTCHA validation (0.0 - 1.0)
+RECAPTCHA_REQUIRED_SCORE = float(os.getenv("RECAPTCHA_REQUIRED_SCORE", "0.5"))
 
 
 def env_bool(key, default=False):

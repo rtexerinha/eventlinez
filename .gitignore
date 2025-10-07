@@ -152,3 +152,4 @@ backup.sql
 # Local development files with sensitive data
 docker-compose.local.yml
 .env.local
+.env.docker

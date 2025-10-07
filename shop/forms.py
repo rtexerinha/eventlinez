@@ -135,8 +135,42 @@ class EventGalleryForm(forms.ModelForm):
 
 
 class ContactForm(forms.Form):
-    """Simple contact form"""
-    name = forms.CharField(max_length=100)
-    email = forms.EmailField()
-    subject = forms.CharField(max_length=200)
-    message = forms.CharField(widget=forms.Textarea)
+    """Contact form with validation"""
+    subject = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'What is this about?',
+            'required': True
+        }),
+        label='Subject'
+    )
+    
+    mail = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'your.email@example.com',
+            'required': True
+        }),
+        label='Email Address'
+    )
+    
+    cellphone = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '+1 (555) 123-4567',
+        }),
+        label='Phone Number (Optional)'
+    )
+    
+    message = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 5,
+            'placeholder': 'Tell us more about your inquiry...',
+            'required': True
+        }),
+        label='Message'
+    )

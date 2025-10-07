@@ -21,6 +21,14 @@ from promoter.models import Vendor
 from .forms import ContactForm
 from .models import SpecialEvents, BusinessPartner, EventGallery, CustomerPhotoDownload
 from django.conf import settings
+
+# Try to import requests for reCAPTCHA validation
+try:
+    import requests
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -156,15 +164,64 @@ def terms(request):
 def contact(request):
     if request.method == 'GET':
         form = ContactForm()
-        return render(request, 'pages/contactus.html', {'form': form, 'PROD': settings.PROD})
+        return render(request, 'pages/contactus.html', {
+            'form': form, 
+            'PROD': settings.PROD,
+            'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
+        })
+    
     form = ContactForm(request.POST)
+    
+    # Validate reCAPTCHA
+    recaptcha_response = request.POST.get('g-recaptcha-response')
+    
+    # Only validate reCAPTCHA if keys are configured and requests library is available
+    if settings.RECAPTCHA_PUBLIC_KEY and settings.RECAPTCHA_PRIVATE_KEY and REQUESTS_AVAILABLE:
+        recaptcha_verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+        recaptcha_data = {
+            'secret': settings.RECAPTCHA_PRIVATE_KEY,
+            'response': recaptcha_response
+        }
+        
+        try:
+            recaptcha_result = requests.post(recaptcha_verify_url, data=recaptcha_data)
+            recaptcha_json = recaptcha_result.json()
+            
+            # Check if reCAPTCHA validation passed
+            if not recaptcha_json.get('success', False):
+                messages.error(request, 'reCAPTCHA validation failed. Please try again.')
+                return render(request, 'pages/contactus.html', {
+                    'form': form,
+                    'PROD': settings.PROD,
+                    'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
+                })
+            
+            # For reCAPTCHA v3, check the score
+            score = recaptcha_json.get('score', 0)
+            if score < settings.RECAPTCHA_REQUIRED_SCORE:
+                logger.warning(f"reCAPTCHA score too low: {score}")
+                messages.error(request, 'Security validation failed. Please try again.')
+                return render(request, 'pages/contactus.html', {
+                    'form': form,
+                    'PROD': settings.PROD,
+                    'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
+                })
+        except Exception as e:
+            logger.error(f"reCAPTCHA verification error: {e}")
+            messages.error(request, 'Security validation error. Please try again later.')
+            return render(request, 'pages/contactus.html', {
+                'form': form,
+                'PROD': settings.PROD,
+                'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
+            })
+    
     if form.is_valid():
         subject = form.cleaned_data['subject']
         cellphone = form.cleaned_data['cellphone']
         mail = form.cleaned_data['mail']
         message = form.cleaned_data['message']
 
-        subject_select = "Subject: {0}".format(subject)
+        subject_select = "Contact: {0}".format(subject)
         mail_params = dict(mail=mail, cellphone=cellphone, subject=subject_select, message=message)
 
         msg = "# Eventlinez - New Contact \n  \n \n Mail: {0} \n Cellphone: {1} \n Subject: {2} " \
@@ -180,10 +237,20 @@ def contact(request):
                 recipient_list=["eventlinez.adm@gmail.com"],
                 html_message=html_message
             )
+            messages.success(request, 'Your message has been sent successfully! We will get back to you soon.')
+            return redirect('shop:index')
         except BadHeaderError:
-            return HttpResponse('Invalid header found.')
-        return redirect('shop:index')
-    return render(request, 'pages/contactus.html', {'form': form})
+            logger.error("Invalid email header detected in contact form")
+            messages.error(request, 'Invalid email content. Please check your input.')
+        except Exception as e:
+            logger.error(f"Failed to send contact email: {e}")
+            messages.error(request, 'Failed to send message. Please try again later.')
+    
+    return render(request, 'pages/contactus.html', {
+        'form': form,
+        'PROD': settings.PROD,
+        'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
+    })
 
 
 def handler404(request, exception):
