@@ -23,30 +23,24 @@ class TicketForm(ModelForm):
         event_id = kwargs.pop("event_id", None)
         super().__init__(*args, **kwargs)
 
+        # ALWAYS remove the event field from the form to prevent HTML5 validation errors
+        # The event will be set in the view when saving
+        if 'event' in self.fields:
+            del self.fields['event']
+            print(f"✅ Event field removed from form fields")
+        
         if self.instance and self.instance.pk:
             # For existing tickets, we don't need the event field
             pass
         elif event_id is not None:
-            # Store the event_id for later use
+            # Store the event_id for later use in the view
             self.event_id = event_id
             print(f"Form created with event_id: {event_id}")
             print(f"Form fields: {list(self.fields.keys())}")
-            print(f"Event field not included in form fields")
-            
-            # Double-check: ensure event field is completely gone
-            if 'event' in self.fields:
-                print(f"ERROR: Event field still exists after Meta.fields removal!")
-                del self.fields['event']
-                print(f"Force removed event field. Remaining fields: {list(self.fields.keys())}")
-            else:
-                print(f"✅ Event field successfully removed from form")
         else:
-            # If no event_id provided, add the event field
-            self.fields["event"] = forms.ModelChoiceField(
-                queryset=Event.objects.all(),
-                required=False,
-                empty_label="Select an event"
-            )
+            # If no event_id provided and not updating, we can't create a ticket
+            # This shouldn't happen in normal flow since the URL requires event_id
+            pass
 
     def clean_quantity(self):
         quantity = self.cleaned_data["quantity"]
