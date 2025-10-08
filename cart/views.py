@@ -195,10 +195,29 @@ def checkout(request):
         }, status=500)
 
     try:
+        # Build description and metadata for Stripe payment using helper functions
+        from order.stripe_utils import build_stripe_description, build_stripe_metadata_from_cart
+        
+        first_item = items.first()
+        if first_item:
+            event_name = first_item.ticket.event.name
+            tier_name = first_item.ticket.name
+            description = build_stripe_description(event_name, tier_name, cart_id=cart.id)
+        else:
+            description = f"Event Tickets (Cart #{cart.id})"
+        
+        # Build comprehensive metadata
+        metadata = build_stripe_metadata_from_cart(
+            cart=cart,
+            customer_email=request.user.username
+        )
+        
         server = request.get_raw_uri().replace(request.get_full_path(), "")
         session = stripe.checkout.Session.create(
             payment_intent_data={
                 'setup_future_usage': 'off_session',
+                'description': description,
+                'metadata': metadata,
             },
             mode='payment',
             payment_method_types=['card'],

@@ -236,16 +236,32 @@ def create(request):
                 'PROD': settings.PROD
             })
 
-        # Update Stripe PaymentIntent with order metadata
+        # Update Stripe PaymentIntent with order metadata and comprehensive description
         try:
+            from order.stripe_utils import build_stripe_description, build_stripe_metadata_from_order
+            
+            # Build comprehensive description with event name and order number
+            first_item = items.first()
+            if first_item:
+                event_name = first_item.ticket.event.name
+                tier_name = first_item.ticket.name
+                description = build_stripe_description(event_name, tier_name, order_id=order.id)
+            else:
+                description = f"Order #{order.id}"
+            
+            # Build comprehensive metadata using helper function
+            metadata = build_stripe_metadata_from_order(order)
+            
             stripe.PaymentIntent.modify(
                 session.payment_intent,
-                metadata={"order_id": order.id},
-                description="%s (Order #%s)" % (str(items.first().ticket), order.id)
+                metadata=metadata,
+                description=description
             )
-            print(f"Updated Stripe PaymentIntent: {session.payment_intent}")
+            print(f"Updated Stripe PaymentIntent {session.payment_intent} with description: {description}")
         except Exception as e:
             print(f"WARNING: Failed to update Stripe metadata: {e}")
+            import traceback
+            traceback.print_exc()
             # Continue anyway as this is not critical
 
         # Create order items
