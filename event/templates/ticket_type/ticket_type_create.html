@@ -516,21 +516,7 @@
 
             <!-- Form Body -->
             <div class="form-body">
-                <!-- Event ID is handled server-side, no form field needed -->
-                <input type="hidden" name="event_id" value="{{ event_id }}" />
-
-                <!-- Prevent any event field from being rendered -->
-                <script>
-                    // Override form rendering to prevent event field
-                    document.addEventListener('DOMContentLoaded', function () {
-                        // Remove any event field that might be rendered
-                        const eventFields = document.querySelectorAll('select[name="event"], input[name="event"], #id_event');
-                        eventFields.forEach(field => {
-                            console.log('🚫 Preventing event field rendering:', field);
-                            field.remove();
-                        });
-                    });
-                </script>
+                <!-- Note: Event is assigned server-side via the URL parameter, no form field needed -->
 
                 <!-- Ticket Name -->
                 <div class="form-group">
@@ -675,73 +661,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         console.log('🚀 Ticket form JavaScript loaded');
 
-        // Aggressively remove any event field elements
-        function removeEventField() {
-            const eventField = document.querySelector('select[name="event"]') || document.querySelector('input[name="event"]');
-            if (eventField) {
-                console.log('⚠️ Event field still exists, removing it completely');
-                eventField.remove();
-                console.log('✅ Event field removed from DOM');
-            }
-
-            // Also check for any remaining event-related elements
-            const eventElements = document.querySelectorAll('[name="event"], #id_event, select[name="event"]');
-            eventElements.forEach(element => {
-                console.log('🔧 Removing remaining event element:', element);
-                element.remove();
-            });
-
-            // Check if any event field containers exist and remove them
-            const eventContainers = document.querySelectorAll('div:has(select[name="event"]), div:has(input[name="event"])');
-            eventContainers.forEach(container => {
-                console.log('🔧 Removing event field container:', container);
-                container.remove();
-            });
-
-            // Also check for any form elements that might contain event fields
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                const eventFields = form.querySelectorAll('select[name="event"], input[name="event"]');
-                eventFields.forEach(field => {
-                    console.log('🔧 Removing event field from form:', field);
-                    field.remove();
-                });
-            });
-
-            // Remove any remaining event field labels
-            const eventLabels = document.querySelectorAll('label[for="id_event"]');
-            eventLabels.forEach(label => {
-                console.log('🔧 Removing event field label:', label);
-                label.remove();
-            });
-
-            // Remove any event field help text
-            const eventHelp = document.querySelectorAll('.help-text, .form-text, .text-muted');
-            eventHelp.forEach(help => {
-                if (help.textContent.includes('event') || help.textContent.includes('Event')) {
-                    console.log('🔧 Removing event field help text:', help);
-                    help.remove();
-                }
-            });
-        }
-
-        // Remove event field immediately
-        removeEventField();
-
-        // Also remove it after a short delay to catch any dynamically added elements
-        setTimeout(removeEventField, 100);
-        setTimeout(removeEventField, 500);
-        setTimeout(removeEventField, 1000);
-
-        // Also remove it when the form is submitted
-        const formElement = document.querySelector('form');
-        if (formElement) {
-            formElement.addEventListener('submit', function (e) {
-                removeEventField();
-            });
-        }
-
-        // More robust element selection with multiple fallbacks
+        // Element selection with multiple fallbacks
         const nameInput = document.getElementById('{{ form.name.id_for_label }}') ||
             document.querySelector('input[name="name"]') ||
             document.querySelector('#id_name');
@@ -812,8 +732,6 @@
         if (form && submitBtn) {
             form.addEventListener('submit', function (e) {
                 console.log('🚀 Form submitted');
-
-                // Event field is handled server-side, no client-side validation needed
 
                 // Client-side validation
                 let isValid = true;
