@@ -134,9 +134,10 @@ log "🧹 Cleaning application caches..."
 # Clear Django cache
 python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || warning "Could not clear Django cache"
 
-# Clear Python bytecode cache
+# Clear Python bytecode cache (more thorough)
 find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || warning "Could not clear Python cache"
 find . -name "*.pyc" -delete 2>/dev/null || warning "Could not delete .pyc files"
+find . -name "*.pyo" -delete 2>/dev/null || warning "Could not delete .pyo files"
 
 # Clear pip cache
 pip cache purge 2>/dev/null || warning "Could not clear pip cache"
@@ -144,11 +145,29 @@ pip cache purge 2>/dev/null || warning "Could not clear pip cache"
 # Clear any temporary files
 rm -rf /tmp/eventlinez_* 2>/dev/null || warning "Could not clear temp files"
 
+# Clear nginx cache if it exists
+sudo rm -rf /var/cache/nginx/* 2>/dev/null || warning "Could not clear nginx cache"
+
 success "Caches cleaned"
 
 log "📁 Collecting static files..."
+# Remove old static files first
+rm -rf $DEPLOY_PATH/staticfiles/* 2>/dev/null || true
+
 python manage.py collectstatic --noinput --clear
-success "Static files collected"
+
+# CRITICAL: Ensure no HTML templates were collected as static files
+log "🔍 Verifying templates are not in static files..."
+TEMPLATE_COUNT=$(find $DEPLOY_PATH/staticfiles -name "*.html" -type f 2>/dev/null | wc -l)
+if [ "$TEMPLATE_COUNT" -gt 0 ]; then
+    warning "Found $TEMPLATE_COUNT HTML templates in staticfiles - removing them..."
+    find $DEPLOY_PATH/staticfiles -name "*.html" -type f -delete
+    success "Removed HTML templates from staticfiles"
+else
+    log "✅ No HTML templates in staticfiles (correct)"
+fi
+
+success "Static files collected and verified"
 
 # Step 10: Set proper permissions
 log "🔐 Setting proper file permissions..."
@@ -157,21 +176,30 @@ chmod -R 755 $DEPLOY_PATH
 chmod 644 $DEPLOY_PATH/.env
 success "Permissions set"
 
-# Step 11: Create systemd service file if it doesn't exist
+# Step 11: Install gunicorn if not present
+log "📦 Ensuring gunicorn is installed..."
+pip install gunicorn || warning "Could not install gunicorn"
+
+# Step 12: Create systemd service file (always update it for consistency)
 log "⚙️ Setting up systemd service..."
-if [ ! -f "/etc/systemd/system/eventlinez.service" ]; then
-    sudo tee /etc/systemd/system/eventlinez.service > /dev/null << EOF
+sudo tee /etc/systemd/system/eventlinez.service > /dev/null << EOF
 [Unit]
-Description=Eventlinez Django App
+Description=Eventlinez Django App (Gunicorn)
 After=network.target
 
 [Service]
-Type=simple
+Type=notify
 User=$DEPLOY_USER
 Group=$DEPLOY_USER
 WorkingDirectory=$DEPLOY_PATH
-Environment=PATH=$DEPLOY_PATH/venv/bin
-ExecStart=$DEPLOY_PATH/venv/bin/python $DEPLOY_PATH/manage.py runserver 0.0.0.0:8000
+Environment="PATH=$DEPLOY_PATH/venv/bin"
+ExecStart=$DEPLOY_PATH/venv/bin/gunicorn eventlinez.wsgi:application \\
+    --bind 0.0.0.0:8000 \\
+    --workers 3 \\
+    --timeout 120 \\
+    --log-level info \\
+    --access-logfile /var/log/eventlinez-access.log \\
+    --error-logfile /var/log/eventlinez-error.log
 ExecReload=/bin/kill -HUP \$MAINPID
 Restart=always
 RestartSec=3
@@ -179,12 +207,11 @@ RestartSec=3
 [Install]
 WantedBy=multi-user.target
 EOF
-    sudo systemctl daemon-reload
-    sudo systemctl enable eventlinez.service
-    success "Systemd service created and enabled"
-fi
+sudo systemctl daemon-reload
+sudo systemctl enable eventlinez.service
+success "Systemd service configured with Gunicorn"
 
-# Step 12: Set up Nginx configuration if it doesn't exist
+# Step 13: Set up Nginx configuration if it doesn't exist
 log "🌐 Setting up Nginx configuration..."
 if [ ! -f "/etc/nginx/sites-available/eventlinez" ]; then
     sudo tee /etc/nginx/sites-available/eventlinez > /dev/null << EOF
@@ -222,13 +249,13 @@ EOF
     success "Nginx configuration created and enabled"
 fi
 
-# Step 13: Start services
+# Step 14: Start services
 log "🔄 Starting application services..."
 sudo systemctl start eventlinez.service
 sudo systemctl start nginx
 success "Services started"
 
-# Step 14: Health check
+# Step 15: Health check
 log "🏥 Performing health check..."
 sleep 10
 
@@ -243,13 +270,13 @@ else
     sudo journalctl -u eventlinez.service --no-pager -n 20
 fi
 
-# Step 15: Cleanup old backups (keep last 5)
+# Step 16: Cleanup old backups (keep last 5)
 log "🧹 Cleaning up old backups..."
 cd $BACKUP_DIR
 ls -t eventlinez_backup_* 2>/dev/null | tail -n +6 | xargs -r rm -rf
 success "Old backups cleaned up"
 
-# Step 16: Display deployment summary
+# Step 17: Display deployment summary
 log "📊 Deployment Summary:"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🎯 Application: Eventlinez"
