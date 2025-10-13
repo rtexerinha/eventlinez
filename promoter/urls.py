@@ -3,7 +3,8 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
     signout_view_promoter, vendors_list, vendor_create, vendor_update, vendor_remove, vendor_create_per_event, \
     vendor_update_per_event, vendors_reports, vendor_export_excel, \
     payment_list, payment_pdf_view, bank_account_list, bank_create, \
-    bank_account_update, bank_remove
+    bank_account_update, bank_remove, promo_codes_list, promo_code_create, \
+    promo_code_update, promo_code_delete, promo_code_toggle_status
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
@@ -68,6 +69,13 @@ urlpatterns = [
     path('bank/update/<int:bank_id>/',
          bank_account_update, name='bank_account_update'),
     path('bank/remove/<int:bank_id>/', bank_remove, name='bank_remove'),
+
+    # Promo Codes
+    path('promo-codes/', promo_codes_list, name='promo_codes_list'),
+    path('promo-codes/new/', promo_code_create, name='promo_code_create'),
+    path('promo-codes/<int:promo_code_id>/edit/', promo_code_update, name='promo_code_update'),
+    path('promo-codes/<int:promo_code_id>/delete/', promo_code_delete, name='promo_code_delete'),
+    path('promo-codes/<int:promo_code_id>/toggle/', promo_code_toggle_status, name='promo_code_toggle'),
 
     # auth
     path('api-token-auth/', CustomAuthToken.as_view()),

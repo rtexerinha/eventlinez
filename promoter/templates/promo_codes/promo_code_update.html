@@ -1,0 +1,208 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block title %}Edit Promo Code - Panel Admin{% endblock %}
+
+{% block content %}
+<main>
+    <div class="container-fluid">
+        <div class="d-flex pt-5 pb-2">
+            <i style="font-size: 1.5rem;" class="fas fa-tags title-color mt-1"></i>
+            <h1 class="title-dast pl-2 title-color">Edit Promo Code</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 col-12">
+                <div class="dashboard-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0">Edit "{{ promo_code.code }}"</h4>
+                        <a href="{% url 'promo_codes_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.code.id_for_label }}">Promo Code *</label>
+                                    {{ form.code }}
+                                    {% if form.code.errors %}
+                                    <div class="text-danger small">{{ form.code.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Enter a unique code (e.g., SAVE20,
+                                        EARLYBIRD)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.event.id_for_label }}">Event *</label>
+                                    {{ form.event }}
+                                    {% if form.event.errors %}
+                                    <div class="text-danger small">{{ form.event.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.discount_type.id_for_label }}">Discount Type *</label>
+                                    {{ form.discount_type }}
+                                    {% if form.discount_type.errors %}
+                                    <div class="text-danger small">{{ form.discount_type.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.discount_value.id_for_label }}">Discount Value *</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend" id="discount-symbol">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                        {{ form.discount_value }}
+                                    </div>
+                                    {% if form.discount_value.errors %}
+                                    <div class="text-danger small">{{ form.discount_value.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted" id="discount-help">Enter percentage (1-100) or
+                                        dollar amount</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.max_uses.id_for_label }}">Max Uses *</label>
+                                    {{ form.max_uses }}
+                                    {% if form.max_uses.errors %}
+                                    <div class="text-danger small">{{ form.max_uses.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Total number of uses allowed</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.max_uses_per_customer.id_for_label }}">Max Uses Per Customer
+                                        *</label>
+                                    {{ form.max_uses_per_customer }}
+                                    {% if form.max_uses_per_customer.errors %}
+                                    <div class="text-danger small">{{ form.max_uses_per_customer.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.valid_from.id_for_label }}">Valid From *</label>
+                                    {{ form.valid_from }}
+                                    {% if form.valid_from.errors %}
+                                    <div class="text-danger small">{{ form.valid_from.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.valid_until.id_for_label }}">Valid Until *</label>
+                                    {{ form.valid_until }}
+                                    {% if form.valid_until.errors %}
+                                    <div class="text-danger small">{{ form.valid_until.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.description.id_for_label }}">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors.0 }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Internal description for this promo code
+                                (optional)</small>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn" style="background-color: #d90075; color: white;">
+                                <i class="fas fa-save"></i> Update Promo Code
+                            </button>
+                            <a href="{% url 'promo_codes_list' %}" class="btn btn-secondary ml-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-12">
+                <div class="dashboard-card">
+                    <h5><i class="fas fa-chart-line text-info"></i> Usage Statistics</h5>
+                    <hr>
+                    <div class="mb-3">
+                        <small class="text-muted">Current Usage</small>
+                        <h4>{{ promo_code.current_uses }} / {{ promo_code.max_uses }}</h4>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Status</small>
+                        <br>
+                        {% if promo_code.is_active %}
+                        {% if promo_code.is_valid %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-warning">Expired</span>
+                        {% endif %}
+                        {% else %}
+                        <span class="badge badge-secondary">Inactive</span>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Created</small>
+                        <br>{{ promo_code.created_at|date:"M j, Y g:i A" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .dashboard-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid #f1f3f4;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const discountType = document.getElementById('{{ form.discount_type.id_for_label }}');
+        const discountSymbol = document.getElementById('discount-symbol');
+        const discountHelp = document.getElementById('discount-help');
+
+        function updateDiscountUI() {
+            const symbolSpan = discountSymbol.querySelector('span');
+            if (discountType.value === 'percentage') {
+                symbolSpan.textContent = '%';
+                discountHelp.textContent = 'Enter percentage (1-100)';
+            } else {
+                symbolSpan.textContent = '$';
+                discountHelp.textContent = 'Enter dollar amount';
+            }
+        }
+
+        discountType.addEventListener('change', updateDiscountUI);
+        updateDiscountUI(); // Initialize
+    });
+</script>
+{% endblock %}

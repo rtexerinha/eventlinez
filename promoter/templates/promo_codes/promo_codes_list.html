@@ -1,0 +1,131 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% block title %}Promo Codes - Panel Admin{% endblock %}
+
+{% block content %}
+<main>
+    <div class="container-fluid">
+        <div class="d-flex pt-5 pb-2">
+            <i style="font-size: 1.5rem;" class="fas fa-tags title-color mt-1"></i>
+            <h1 class="title-dast pl-2 title-color">Promo Codes</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="dashboard-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">Manage Promo Codes</h4>
+                        <a href="{% url 'promo_code_create' %}" class="btn"
+                            style="background-color: #d90075; color: white;">
+                            <i class="fas fa-plus"></i> Create New Promo Code
+                        </a>
+                    </div>
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div
+                        class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if promo_codes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead style="background-color: #f8f9fa;">
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Event</th>
+                                    <th>Discount</th>
+                                    <th>Usage</th>
+                                    <th>Valid Until</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for promo in promo_codes %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ promo.code }}</strong>
+                                        {% if promo.description %}
+                                        <br><small class="text-muted">{{ promo.description|truncatechars:50 }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ promo.event.name }}</td>
+                                    <td>
+                                        <span class="badge badge-info">{{ promo.get_discount_display }}</span>
+                                    </td>
+                                    <td>
+                                        {{ promo.current_uses }} / {{ promo.max_uses }}
+                                        {% if promo.current_uses >= promo.max_uses %}
+                                        <span class="badge badge-warning ml-1">Exhausted</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ promo.valid_until|date:"M j, Y g:i A" }}</td>
+                                    <td>
+                                        {% if promo.is_active %}
+                                        {% if promo.is_valid %}
+                                        <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                        <span class="badge badge-warning">Expired</span>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="badge badge-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'promo_code_update' promo.id %}"
+                                                class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'promo_code_toggle' promo.id %}"
+                                                class="btn btn-sm btn-outline-{% if promo.is_active %}warning{% else %}success{% endif %}"
+                                                title="{% if promo.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                                <i
+                                                    class="fas fa-{% if promo.is_active %}pause{% else %}play{% endif %}"></i>
+                                            </a>
+                                            <a href="{% url 'promo_code_delete' promo.id %}"
+                                                class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No promo codes created yet</h5>
+                        <p class="text-muted">Create your first promo code to offer discounts to your customers.</p>
+                        <a href="{% url 'promo_code_create' %}" class="btn"
+                            style="background-color: #d90075; color: white;">
+                            <i class="fas fa-plus"></i> Create Your First Promo Code
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .dashboard-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid #f1f3f4;
+    }
+</style>
+{% endblock %}

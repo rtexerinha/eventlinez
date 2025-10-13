@@ -8,9 +8,10 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 
 from event.models import Ticket
-from promoter.models import Vendor
+from promoter.models import Vendor, PromoCode, PromoCodeUsage
 from .models import Cart, CartItem
 from .utils import track_cart_abandonment, mark_cart_converted
 from django.conf import settings
@@ -27,76 +28,159 @@ def _cart_id(request):
     return cart
 
 
+def track_promo_usage(promo_code, customer_email, order_id, discount_amount):
+    """
+    Track promo code usage and update usage count
+    """
+    try:
+        with transaction.atomic():
+            # Get the promo code
+            promo = PromoCode.objects.select_for_update().get(code=promo_code)
+            
+            # Create usage record
+            PromoCodeUsage.objects.create(
+                promo_code=promo,
+                customer_email=customer_email,
+                order_id=order_id,
+                discount_amount=discount_amount
+            )
+            
+            # Increment usage count
+            promo.current_uses += 1
+            promo.save()
+            
+            logger.info(f"Promo code usage tracked: {promo_code} used by {customer_email}")
+            
+    except PromoCode.DoesNotExist:
+        logger.error(f"Promo code not found for usage tracking: {promo_code}")
+    except Exception as e:
+        logger.error(f"Error tracking promo code usage: {e}")
+
+
 @csrf_exempt
 def cart_add(request):
     """
     Adiciona cria o carrinho e adiciona os tickets ao carrinho.
     """
+    if request.method != 'POST':
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    
     try:
-        cart = Cart.objects.get(cart_id=_cart_id(request))
-    except Cart.DoesNotExist:
-        cart = Cart.objects.create(cart_id=_cart_id(request))
-        cart.save()
+        # Ensure we have a session
+        if not request.session.session_key:
+            request.session.create()
+        
+        cart_id = _cart_id(request)
+        cart, created = Cart.objects.get_or_create(cart_id=cart_id)
+        
+        if created:
+            cart.save()
+            logger.info(f"Created new cart with ID: {cart_id}")
 
-    data = json.loads(request.body)
-    promocode = data.get("promo_code")
-    vendor_code = data.get("vendor_code")
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        
+        promocode = data.get("promo_code")
+        vendor_code = data.get("vendor_code")
+        tickets_data = data.get("tickets", [])
 
-    vendor = None
-    if vendor_code:
-        vendor = Vendor.objects.get(code=vendor_code)
+        if not tickets_data:
+            return JsonResponse({"error": "No tickets provided"}, status=400)
 
-    for tkt in data['tickets']:
-        ticket = Ticket.objects.get(pk=tkt['id'])
-        quantity = tkt['quantity']
-        qtd_available = ticket.qty_available()
+        vendor = None
+        if vendor_code:
+            try:
+                vendor = Vendor.objects.get(code=vendor_code)
+            except Vendor.DoesNotExist:
+                return JsonResponse({"error": "Invalid vendor code"}, status=400)
 
-        if tkt['quantity'] == 0:
-            continue
-        if tkt['quantity'] > qtd_available:
-            return JsonResponse({"message": 'Quantity cannot be greater than %s' % qtd_available}, status=400)
-        if tkt['quantity'] < 0:
-            return JsonResponse({"message": 'Quantity cannot be less than 0'}, status=400)
-        item = cart.cartitem_set.filter(ticket=ticket).first()
-        if item is not None and item.quantity != 0:
-            item.quantity = item.quantity + quantity
-            item.save()
-        else:
-            CartItem.objects.create(ticket=ticket,
-                                    cart=cart,
-                                    quantity=quantity,
-                                    promo_code=promocode,
-                                    vendor=vendor)
-    return JsonResponse({"status": "ok"}, status=201)
+        items_added = 0
+        for tkt in tickets_data:
+            try:
+                ticket = Ticket.objects.get(pk=tkt['id'])
+            except Ticket.DoesNotExist:
+                return JsonResponse({"error": f"Ticket with ID {tkt['id']} not found"}, status=400)
+            except KeyError:
+                return JsonResponse({"error": "Ticket ID is required"}, status=400)
+            
+            try:
+                quantity = int(tkt['quantity'])
+            except (KeyError, ValueError, TypeError):
+                return JsonResponse({"error": "Valid quantity is required"}, status=400)
+
+            if quantity == 0:
+                continue
+            if quantity < 0:
+                return JsonResponse({"error": "Quantity cannot be negative"}, status=400)
+            
+            qtd_available = ticket.qty_available()
+            if quantity > qtd_available:
+                return JsonResponse({
+                    "error": f"Quantity cannot be greater than {qtd_available} for ticket '{ticket.name}'"
+                }, status=400)
+
+            # Check if item already exists in cart
+            existing_item = cart.cartitem_set.filter(ticket=ticket).first()
+            if existing_item and existing_item.quantity > 0:
+                new_quantity = existing_item.quantity + quantity
+                if new_quantity > qtd_available:
+                    return JsonResponse({
+                        "error": f"Total quantity would exceed available tickets ({qtd_available}) for '{ticket.name}'"
+                    }, status=400)
+                existing_item.quantity = new_quantity
+                existing_item.save()
+                logger.info(f"Updated existing cart item: ticket {ticket.id}, new quantity: {new_quantity}")
+            else:
+                CartItem.objects.create(
+                    ticket=ticket,
+                    cart=cart,
+                    quantity=quantity,
+                    promo_code=promocode,
+                    vendor=vendor
+                )
+                logger.info(f"Created new cart item: ticket {ticket.id}, quantity: {quantity}")
+            
+            items_added += 1
+
+        if items_added == 0:
+            return JsonResponse({"error": "No valid tickets were added to cart"}, status=400)
+
+        return JsonResponse({
+            "status": "success", 
+            "message": f"Added {items_added} item{'s' if items_added != 1 else ''} to cart",
+            "cart_id": cart.id
+        }, status=201)
+
+    except Exception as e:
+        logger.error(f"Error adding items to cart: {e}")
+        return JsonResponse({"error": "An error occurred while adding items to cart"}, status=500)
 
 
 @login_required()
 def change_quantity(request, item_id, operation):
     """
-    Altera (incrementa ou decrementa) a quantidade de um item no carrinho.
+    Altera a quantidade de um item no carrinho
     :param request
-    :param item_id: Id da linha
-    :param operation: Operaçãoque será realizada. Os valores possíveis são "increment" ou "decrement"
+    :param item_id: Id do item que terá a quantidade alterada
+    :param operation: Operação que será realizada
     :return:
     """
-    cart = Cart.objects.get(cart_id=_cart_id(request))
-    item = CartItem.objects.get(pk=item_id, cart=cart, active=True)
+    item = get_object_or_404(CartItem, id=item_id)
 
-    if operation == "increment":
-        item.quantity = item.quantity + 1
-    elif operation == "decrement" and item.quantity == 1:
-        total = cart.amount()
-        items = cart.cartitem_set.all()
-        return render(request, 'cart.html', dict(total=total, cart_items=items, PROD=settings.PROD))
-    elif operation == "decrement":
-        item.quantity = item.quantity - 1
-    else:
-        return HttpResponse("Invalid cart iperation", status=400)
+    if operation == 'increment':
+        if item.quantity < item.ticket.qty_available():
+            item.quantity += 1
+
+    if operation == 'decrement':
+        if item.quantity > 1:
+            item.quantity -= 1
+
     item.save()
     return redirect('cart:detail')
 
 
-@login_required
 def cart_detail(request, cart_items=None):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
@@ -111,13 +195,18 @@ def cart_detail(request, cart_items=None):
         cart_items = all_items.exclude(ticket__sold_out=True)
 
         promo_code = cart_items.first().promo_code if cart_items.exists() else None
-        total = sum(item.price_total() for item in cart_items)
+        subtotal = sum(item.price_total() for item in cart_items)
+        
+        # Calculate total with promo discount
+        total = cart.total_with_promo() if cart.promo_discount > 0 else subtotal
 
     except Cart.DoesNotExist:
         logger.error("The cart does not exist.")
         cart_items = []
         promo_code = None
+        subtotal = 0
         total = 0
+        cart = None
 
     # Track cart abandonment if user has items in cart
     if cart_items and request.user.is_authenticated:
@@ -134,7 +223,14 @@ def cart_detail(request, cart_items=None):
         except Exception as e:
             logger.warning(f"Failed to track cart abandonment: {e}")
 
-    return render(request, 'cart.html', dict(total=total, cart_items=cart_items, promo_code=promo_code, PROD=settings.PROD))
+    return render(request, 'cart.html', dict(
+        total=total, 
+        subtotal=subtotal,
+        cart_items=cart_items, 
+        promo_code=promo_code, 
+        cart=cart,
+        PROD=settings.PROD
+    ))
 
 
 def remove_item(request, item_id):
@@ -147,6 +243,128 @@ def remove_item(request, item_id):
     item = get_object_or_404(CartItem, id=item_id)
     item.delete()
     return redirect('cart:detail')
+
+
+@csrf_exempt
+def apply_promo_code(request):
+    """
+    Apply a promo code to the cart
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        promo_code = data.get('promo_code', '').upper().strip()
+        
+        if not promo_code:
+            return JsonResponse({'error': 'Please enter a promo code'}, status=400)
+        
+        # Get cart
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_items = CartItem.objects.filter(cart=cart, active=True)
+        
+        if not cart_items.exists():
+            return JsonResponse({'error': 'Your cart is empty'}, status=400)
+        
+        # Find promo code - it should be for one of the events in the cart
+        event_ids = cart_items.values_list('ticket__event_id', flat=True).distinct()
+        event_names = list(cart_items.values_list('ticket__event__name', flat=True).distinct())
+        
+        logger.info(f"Cart has events: {event_names}")
+        logger.info(f"Looking for promo code '{promo_code}' for event IDs: {list(event_ids)}")
+        
+        try:
+            promo = PromoCode.objects.get(code=promo_code, event_id__in=event_ids)
+        except PromoCode.DoesNotExist:
+            # Check if promo code exists for other events
+            existing_promo = PromoCode.objects.filter(code=promo_code).first()
+            if existing_promo:
+                return JsonResponse({
+                    'error': f'Promo code "{promo_code}" is valid for "{existing_promo.event.name}" but your cart contains tickets for: {", ".join(event_names)}'
+                }, status=400)
+            else:
+                return JsonResponse({'error': f'Promo code "{promo_code}" not found'}, status=400)
+        
+        # Validate promo code
+        customer_email = ''
+        if request.user.is_authenticated:
+            customer_email = getattr(request.user, 'email', '')
+            if not customer_email and hasattr(request.user, 'customer'):
+                customer_email = request.user.customer.email
+        else:
+            # For unauthenticated users, use session-based email or session ID
+            customer_email = request.session.session_key
+            
+        can_use, message = promo.can_be_used_by_customer(customer_email)
+        if not can_use:
+            return JsonResponse({'error': message}, status=400)
+        
+        # Calculate discount
+        subtotal = cart.subtotal()
+        discount_amount = promo.calculate_discount(subtotal)
+        
+        # Apply promo code to cart
+        cart.applied_promo_code = promo_code
+        cart.promo_discount = discount_amount
+        cart.save()
+        
+        # Update all cart items with the promo code
+        cart_items.update(promo_code=promo_code)
+        
+        new_total = cart.total_with_promo()
+        
+        logger.info(f"Applied promo code '{promo_code}' to cart {cart.cart_id}: discount ${discount_amount}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Promo code "{promo_code}" applied successfully!',
+            'discount_amount': float(discount_amount),
+            'discount_display': promo.get_discount_display(),
+            'new_total': float(new_total),
+            'subtotal': float(subtotal)
+        })
+        
+    except Cart.DoesNotExist:
+        return JsonResponse({'error': 'Cart not found'}, status=400)
+    except Exception as e:
+        logger.error(f"Error applying promo code: {e}")
+        return JsonResponse({'error': 'An error occurred while applying the promo code'}, status=500)
+
+
+@csrf_exempt
+def remove_promo_code(request):
+    """
+    Remove promo code from cart
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        
+        # Remove promo code from cart
+        cart.applied_promo_code = None
+        cart.promo_discount = 0
+        cart.save()
+        
+        # Remove promo code from cart items
+        CartItem.objects.filter(cart=cart, active=True).update(promo_code=None)
+        
+        subtotal = cart.subtotal()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Promo code removed successfully!',
+            'new_total': float(subtotal),
+            'subtotal': float(subtotal)
+        })
+        
+    except Cart.DoesNotExist:
+        return JsonResponse({'error': 'Cart not found'}, status=400)
+    except Exception as e:
+        logger.error(f"Error removing promo code: {e}")
+        return JsonResponse({'error': 'An error occurred while removing the promo code'}, status=500)
 
 
 @login_required
@@ -172,22 +390,32 @@ def checkout(request):
     
     stripe.api_key = settings.STRIPE_SECRET_KEY
     line_items = []
-
     # https://stripe.com/docs/billing/subscriptions/decimal-amounts
     cents = 100
 
     try:
-        for item in items:
-            product = stripe.Product.create(name=str(item.ticket))
+        # Use cart total with promo discount
+        total_amount = cart.total_with_promo()
+        
+        # Create a single line item for the entire cart
+        if total_amount > 0:
             line_item = {
                 'price_data': {
-                    'product': product.id,
-                    'unit_amount_decimal': item.price_total() * cents,
+                    'product_data': {
+                        'name': f'Event Tickets ({len(items)} item{"s" if len(items) != 1 else ""})',
+                        'description': f'Cart total with {len(items)} ticket{"s" if len(items) != 1 else ""}'
+                    },
+                    'unit_amount': int(total_amount * cents),
                     'currency': 'usd'
                 },
                 'quantity': 1,
             }
             line_items.append(line_item)
+        else:
+            return JsonResponse({
+                'error': 'Cart total cannot be zero or negative'
+            }, status=400)
+            
     except stripe.error.StripeError as e:
         logger.error(f"Stripe error: {e}")
         return JsonResponse({
@@ -200,33 +428,30 @@ def checkout(request):
         
         first_item = items.first()
         if first_item:
-            event_name = first_item.ticket.event.name
-            tier_name = first_item.ticket.name
-            description = build_stripe_description(event_name, tier_name, cart_id=cart.id)
+            description = build_stripe_description(first_item.ticket.event.name, len(items))
+            metadata = build_stripe_metadata_from_cart(cart, items)
         else:
-            description = f"Event Tickets (Cart #{cart.id})"
-        
-        # Build comprehensive metadata
-        metadata = build_stripe_metadata_from_cart(
-            cart=cart,
-            customer_email=request.user.username
-        )
-        
-        server = request.get_raw_uri().replace(request.get_full_path(), "")
+            description = f"Event Tickets - {len(items)} items"
+            metadata = {}
+
+        # Add promo code info to metadata if applied
+        if cart.applied_promo_code:
+            metadata['promo_code'] = cart.applied_promo_code
+            metadata['promo_discount'] = str(cart.promo_discount)
+
         session = stripe.checkout.Session.create(
-            payment_intent_data={
-                'setup_future_usage': 'off_session',
-                'description': description,
-                'metadata': metadata,
-            },
-            mode='payment',
             payment_method_types=['card'],
-            success_url=server + '/order/success/?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=server + '/cart/',
             line_items=line_items,
-            customer_email=request.user.username,
+            mode='payment',
+            success_url=request.build_absolute_uri('/order/thanks/') + '{CHECKOUT_SESSION_ID}/',
+            cancel_url=request.build_absolute_uri('/cart/'),
+            metadata=metadata,
+            payment_intent_data={
+                'description': description,
+                'metadata': metadata
+            },
             client_reference_id=cart.id,
-            allow_promotion_codes=True
+            allow_promotion_codes=False  # We handle our own promo codes
         )
     except stripe.error.StripeError as e:
         logger.error(f"Stripe session creation error: {e}")

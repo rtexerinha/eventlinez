@@ -1,4 +1,3 @@
-
 from decimal import Decimal
 from datetime import timedelta
 
@@ -17,6 +16,8 @@ EVENTLINEZ_FEE = getattr(settings, "EVENTLINEZ_FEE", 0.12)
 class Cart(models.Model):
 	cart_id = models.CharField(max_length=250, blank=True)
 	date_added = models.DateField(auto_now_add=True)
+	applied_promo_code = models.CharField(max_length=20, null=True, blank=True)
+	promo_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 	class Meta:
 		ordering = ['date_added']
@@ -26,6 +27,18 @@ class Cart(models.Model):
 		for item in self.cartitem_set.all():
 			total += item.price_total()
 		return total
+
+	def subtotal(self):
+		"""Calculate subtotal before promo discount"""
+		total = 0
+		for item in self.cartitem_set.all():
+			total += item.price_total()
+		return total
+	
+	def total_with_promo(self):
+		"""Calculate total after applying promo discount"""
+		subtotal = self.subtotal()
+		return max(0, subtotal - self.promo_discount)
 
 	def __str__(self):
 		return self.cart_id
