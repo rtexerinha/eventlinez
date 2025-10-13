@@ -1,5 +1,5 @@
 import json
-import pytest
+# Removed pytest import - using Django TestCase instead
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -267,17 +267,19 @@ class CartDebugTestCase(TestCase):
         
         # Test creating cart item without cart
         try:
-            cart_item = CartItem.objects.create(
-                ticket=self.ticket1,
-                quantity=1
-            )
+            from django.db import transaction
+            with transaction.atomic():
+                cart_item = CartItem.objects.create(
+                    ticket=self.ticket1,
+                    quantity=1
+                )
             print("ERROR: Created cart item without cart!")
         except Exception as e:
             print(f"Good: Cannot create cart item without cart: {e}")
         
         # Test creating cart item with cart
-        cart = Cart.objects.create(cart_id='test-cart-123')
         try:
+            cart = Cart.objects.create(cart_id='test-cart-123')
             cart_item = CartItem.objects.create(
                 ticket=self.ticket1,
                 cart=cart,
