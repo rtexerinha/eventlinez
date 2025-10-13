@@ -10,8 +10,8 @@ from django.http import StreamingHttpResponse
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
-from promoter.forms import BankAccountForm
-from promoter.models import Payment, Vendor, SalesByVendor, BankAccount, get_balance
+from promoter.forms import BankAccountForm, PromoCodeForm
+from promoter.models import Payment, Vendor, SalesByVendor, BankAccount, get_balance, PromoCode
 
 from django.http import HttpResponse
 from io import BytesIO
@@ -398,3 +398,93 @@ def bank_remove(request, bank_id):
     bank = get_object_or_404(BankAccount, id=bank_id)
     bank.delete()
     return redirect('bank_information')
+
+
+# Promo Code Management Views
+@login_required(login_url='/promoter/account/login/')
+def promo_codes_list(request):
+    """List all promo codes for the current promoter"""
+    promoter = request.user.promoter
+    promo_codes = PromoCode.objects.filter(promoter=promoter).order_by('-created_at')
+    
+    return render(request, 'promo_codes/promo_codes_list.html', {
+        'promo_codes': promo_codes,
+        'promoter': promoter
+    })
+
+
+@login_required(login_url='/promoter/account/login/')
+def promo_code_create(request):
+    """Create a new promo code"""
+    promoter = request.user.promoter
+    
+    if request.method == 'POST':
+        form = PromoCodeForm(request.POST, promoter=promoter)
+        if form.is_valid():
+            promo_code = form.save(commit=False)
+            promo_code.promoter = promoter
+            promo_code.save()
+            messages.success(request, f'Promo code "{promo_code.code}" created successfully!')
+            return redirect('promo_codes_list')
+    else:
+        form = PromoCodeForm(promoter=promoter)
+    
+    return render(request, 'promo_codes/promo_code_create.html', {
+        'form': form,
+        'promoter': promoter
+    })
+
+
+@login_required(login_url='/promoter/account/login/')
+def promo_code_update(request, promo_code_id):
+    """Update an existing promo code"""
+    promoter = request.user.promoter
+    promo_code = get_object_or_404(PromoCode, id=promo_code_id, promoter=promoter)
+    
+    if request.method == 'POST':
+        form = PromoCodeForm(request.POST, instance=promo_code, promoter=promoter)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Promo code "{promo_code.code}" updated successfully!')
+            return redirect('promo_codes_list')
+    else:
+        form = PromoCodeForm(instance=promo_code, promoter=promoter)
+    
+    return render(request, 'promo_codes/promo_code_update.html', {
+        'form': form,
+        'promo_code': promo_code,
+        'promoter': promoter
+    })
+
+
+@login_required(login_url='/promoter/account/login/')
+def promo_code_delete(request, promo_code_id):
+    """Delete a promo code"""
+    promoter = request.user.promoter
+    promo_code = get_object_or_404(PromoCode, id=promo_code_id, promoter=promoter)
+    
+    if request.method == 'POST':
+        code_name = promo_code.code
+        promo_code.delete()
+        messages.success(request, f'Promo code "{code_name}" deleted successfully!')
+        return redirect('promo_codes_list')
+    
+    return render(request, 'promo_codes/promo_code_delete.html', {
+        'promo_code': promo_code,
+        'promoter': promoter
+    })
+
+
+@login_required(login_url='/promoter/account/login/')
+def promo_code_toggle_status(request, promo_code_id):
+    """Toggle promo code active status"""
+    promoter = request.user.promoter
+    promo_code = get_object_or_404(PromoCode, id=promo_code_id, promoter=promoter)
+    
+    promo_code.is_active = not promo_code.is_active
+    promo_code.save()
+    
+    status = "activated" if promo_code.is_active else "deactivated"
+    messages.success(request, f'Promo code "{promo_code.code}" {status} successfully!')
+    
+    return redirect('promo_codes_list')

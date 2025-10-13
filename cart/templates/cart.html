@@ -213,19 +213,70 @@ This is the shopping cart page. Proceed to review your items and place the order
 
         <article class="col-12 mt-lg-0 mt-4">
             <div class="row">
-                <!-- Promocode -->
+                <!-- Promo Code Section -->
                 <div class="col-lg-6 col-12">
-                    <div class="col-lg-7 col-12 pt-4 pb-4 pb-lg-0">
-                        {% comment %}
-                        <label for="promo_code" class="h6-home">Promo code</label>
-                        <input id="promo_code" type="text" name="promo_code" placeholder="Insert code"
-                            style="border: 1px solid #E9E9E9;border-radius: 6px;" class="col-12 input-subcribe"
-                            value="{{ promo_code }}">
-                        {% endcomment %}
+                    <div class="col-lg-10 col-12 pt-4 pb-4 pb-lg-0">
+                        <div class="promo-code-section">
+                            <h6 class="h6-home mb-3">Have a promo code?</h6>
+
+                            {% if cart.applied_promo_code %}
+                            <!-- Applied Promo Code Display -->
+                            <div class="applied-promo-code bg-success text-white p-3 rounded mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-tags mr-2"></i>
+                                        <strong>{{ cart.applied_promo_code }}</strong> applied!
+                                        <br>
+                                        <small>You saved ${{ cart.promo_discount|floatformat:2 }}</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-light"
+                                        onclick="removePromoCode()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% else %}
+                            <!-- Promo Code Input -->
+                            <div class="promo-code-input">
+                                <div class="input-group">
+                                    <input type="text" id="promo_code_input" class="form-control"
+                                        placeholder="Enter promo code"
+                                        style="border: 1px solid #E9E9E9; border-radius: 6px 0 0 6px;">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn"
+                                            style="background-color: #d90075; color: white; border-radius: 0 6px 6px 0;"
+                                            onclick="applyPromoCode()">
+                                            Apply
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="promo-message" class="mt-2" style="display: none;"></div>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-lg-6 col-12 pt-4 pb-5">
+                    <!-- Subtotal and Discount Display -->
+                    {% if cart.applied_promo_code %}
+                    <div class="col-lg-12 mb-2 p-0">
+                        <div class="d-flex justify-content-end">
+                            <span class="col-6 h6-home pt-1">Subtotal:</span>
+                            <span class="col-6 h6-home d-flex justify-content-end p-0">${{ subtotal|floatformat:2
+                                }}</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 mb-2 p-0">
+                        <div class="d-flex justify-content-end text-success">
+                            <span class="col-6 h6-home pt-1">Promo discount:</span>
+                            <span class="col-6 h6-home d-flex justify-content-end p-0">-${{
+                                cart.promo_discount|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <hr>
+                    {% endif %}
+
                     <!-- Total -->
                     <div class="col-lg-12 mb-3 p-0">
                         <div class="d-flex justify-content-end">
@@ -270,6 +321,107 @@ This is the shopping cart page. Proceed to review your items and place the order
         }
     });
 </script>
+
+<!-- Promo Code Functions -->
+<script>
+    function applyPromoCode() {
+        const promoInput = document.getElementById('promo_code_input');
+        const promoCode = promoInput.value.trim();
+        const messageDiv = document.getElementById('promo-message');
+
+        if (!promoCode) {
+            showPromoMessage('Please enter a promo code', 'error');
+            return;
+        }
+
+        // Show loading state
+        const applyBtn = promoInput.nextElementSibling.querySelector('button');
+        const originalText = applyBtn.innerHTML;
+        applyBtn.innerHTML = 'Applying...';
+        applyBtn.disabled = true;
+
+        fetch('{% url "cart:apply-promo" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({
+                promo_code: promoCode
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload the page to show updated cart with discount
+                    location.reload();
+                } else {
+                    showPromoMessage(data.error || 'Invalid promo code', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showPromoMessage('An error occurred while applying the promo code', 'error');
+            })
+            .finally(() => {
+                // Reset button state
+                applyBtn.innerHTML = originalText;
+                applyBtn.disabled = false;
+            });
+    }
+
+    function removePromoCode() {
+        if (!confirm('Are you sure you want to remove the promo code?')) {
+            return;
+        }
+
+        fetch('{% url "cart:remove-promo" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload the page to show updated cart without discount
+                    location.reload();
+                } else {
+                    alert(data.error || 'An error occurred while removing the promo code');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while removing the promo code');
+            });
+    }
+
+    function showPromoMessage(message, type) {
+        const messageDiv = document.getElementById('promo-message');
+        messageDiv.className = `mt-2 ${type === 'error' ? 'text-danger' : 'text-success'}`;
+        messageDiv.textContent = message;
+        messageDiv.style.display = 'block';
+
+        // Hide message after 5 seconds
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // Allow pressing Enter to apply promo code
+    document.addEventListener('DOMContentLoaded', function () {
+        const promoInput = document.getElementById('promo_code_input');
+        if (promoInput) {
+            promoInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    applyPromoCode();
+                }
+            });
+        }
+    });
+</script>
+
 <script>
     // Enhanced doCheckout function with better error handling
     function doCheckout() {
