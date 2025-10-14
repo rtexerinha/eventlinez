@@ -212,6 +212,26 @@ REST_FRAMEWORK = {
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 EVENTLINEZ_FEE = float(os.getenv("EVENTLINEZ_FEE", "0.12"))
 
+# Cache configuration for rate limiting
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'OPTIONS': {
+            'MAX_ENTRIES': 10000,
+        }
+    }
+}
+
+# Cart Rate Limiting Configuration
+CART_RATE_LIMITS = {
+    'cart_add': {'requests': 30, 'window': 300},      # 30 requests per 5 minutes
+    'cart_checkout': {'requests': 5, 'window': 300},   # 5 checkouts per 5 minutes  
+    'promo_apply': {'requests': 10, 'window': 300},    # 10 promo attempts per 5 minutes
+    'quantity_change': {'requests': 50, 'window': 300}, # 50 quantity changes per 5 minutes
+    'item_remove': {'requests': 20, 'window': 300},    # 20 item removals per 5 minutes
+}
+
 # Google reCAPTCHA settings (optional - for contact form spam protection)
 # Using standard reCAPTCHA v2 keys
 RECAPTCHA_PUBLIC_KEY = "6Ldz6-ErAAAAACsnGmRffP5TA4MyzT23kA-IGejK"
