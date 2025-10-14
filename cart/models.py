@@ -12,7 +12,6 @@ from django.conf import settings
 EVENTLINEZ_FEE = getattr(settings, "EVENTLINEZ_FEE", 0.12)
 
 
-
 class Cart(models.Model):
 	cart_id = models.CharField(max_length=250, blank=True)
 	date_added = models.DateField(auto_now_add=True)

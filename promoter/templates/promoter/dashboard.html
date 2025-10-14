@@ -1,0 +1,1156 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% block title %}Promoter Dashboard - Eventlinez{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #d90075;
+        --secondary-color: #ff6b9d;
+        --success-color: #28a745;
+        --info-color: #17a2b8;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --dark-color: #2c3e50;
+        --light-color: #f8f9fa;
+        --border-color: #e9ecef;
+        --text-muted: #6c757d;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 4px 15px rgba(0, 0, 0, 0.15);
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    /* Fixed Sidebar Layout Overrides */
+    body.sb-nav-fixed {
+        padding-top: 56px;
+    }
+
+    /* Top Navigation Styling */
+    .sb-topnav {
+        background: linear-gradient(135deg, #3C215C, #d90075) !important;
+        height: 56px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1039;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sb-topnav .navbar-brand {
+        color: #ffffff !important;
+        font-weight: 800;
+        font-size: 1.5rem;
+    }
+
+    .sb-topnav #sidebarToggle {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.2rem;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .sb-topnav #sidebarToggle:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Sidebar Fixed Layout */
+    #layoutSidenav {
+        display: flex;
+        height: calc(100vh - 56px);
+    }
+
+    #layoutSidenav_nav {
+        width: 250px;
+        min-width: 250px;
+        max-width: 250px;
+        background: #ffffff;
+        border-right: 1px solid #e9ecef;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        height: calc(100vh - 56px);
+        z-index: 1038;
+        overflow-y: auto;
+        overflow-x: hidden;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #layoutSidenav_content {
+        margin-left: 250px;
+        width: calc(100% - 250px);
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: calc(100vh - 56px);
+        overflow-y: auto;
+        position: relative;
+    }
+
+    /* Sidebar Styling */
+    .sb-sidenav {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: #ffffff !important;
+    }
+
+    .sb-sidenav .sb-sidenav-menu {
+        flex-grow: 1;
+        padding: 0;
+        overflow-y: auto;
+    }
+
+    .sb-sidenav .sb-sidenav-menu .nav {
+        flex-direction: column;
+        padding: 0;
+    }
+
+    .sb-sidenav .sb-sidenav-menu .sb-sidenav-menu-heading {
+        padding: 1.5rem 1.5rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #adb5bd;
+        font-family: 'Nunito', sans-serif;
+        letter-spacing: 0.5px;
+    }
+
+    .sb-sidenav .sb-sidenav-menu .nav-link {
+        font-family: 'Nunito', sans-serif;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #495057 !important;
+        padding: 1rem 1.5rem;
+        border: none;
+        transition: all 0.2s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: clip;
+    }
+
+    .sb-sidenav .sb-sidenav-menu .nav-link:hover {
+        background-color: rgba(217, 0, 117, 0.08) !important;
+        color: var(--primary-color) !important;
+        padding-left: 2rem;
+    }
+
+    .sb-sidenav .sb-sidenav-menu .nav-link.active {
+        background-color: rgba(217, 0, 117, 0.12) !important;
+        color: var(--primary-color) !important;
+        border-right: 3px solid var(--primary-color);
+        font-weight: 600;
+    }
+
+    .sb-sidenav .sb-sidenav-menu .nav-link .sb-nav-link-icon {
+        margin-right: 0.75rem;
+        font-size: 1rem;
+        width: 20px;
+        text-align: center;
+        color: #6c757d;
+        flex-shrink: 0;
+    }
+
+    .sb-sidenav .sb-sidenav-menu .nav-link:hover .sb-nav-link-icon,
+    .sb-sidenav .sb-sidenav-menu .nav-link.active .sb-nav-link-icon {
+        color: var(--primary-color);
+    }
+
+    /* Collapse arrow styling */
+    .sb-sidenav-collapse-arrow {
+        margin-left: auto;
+        color: #6c757d;
+        transition: transform 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .nav-link[aria-expanded="true"] .sb-sidenav-collapse-arrow {
+        transform: rotate(180deg);
+    }
+
+    .nav-link:hover .sb-sidenav-collapse-arrow {
+        color: var(--primary-color);
+    }
+
+    /* Nested menu styling */
+    .sb-sidenav-menu-nested {
+        background: rgba(248, 249, 250, 0.5);
+        padding: 0.5rem 0;
+    }
+
+    .sb-sidenav-menu-nested .nav-link {
+        padding: 0.75rem 1.5rem 0.75rem 3rem;
+        font-size: 0.9rem;
+        color: #6c757d !important;
+    }
+
+    .sb-sidenav-menu-nested .nav-link:hover {
+        background-color: rgba(217, 0, 117, 0.05) !important;
+        color: var(--primary-color) !important;
+        padding-left: 3.5rem;
+    }
+
+    .sb-sidenav-menu-nested .nav-link.active {
+        background-color: rgba(217, 0, 117, 0.08) !important;
+        color: var(--primary-color) !important;
+        border-right: 2px solid var(--primary-color);
+        font-weight: 600;
+    }
+
+    .sb-sidenav-menu-nested .nav-link .sb-nav-link-icon {
+        font-size: 0.85rem;
+        width: 16px;
+        margin-right: 0.5rem;
+    }
+
+    /* Sidebar Footer */
+    .sb-sidenav-footer {
+        background-color: #f8f9fa !important;
+        border-top: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+
+    .sb-sidenav-footer strong {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    /* Dashboard Content Container */
+    .dashboard-container {
+        padding: 2rem;
+        width: 100%;
+        max-width: none;
+        min-height: calc(100vh - 56px);
+    }
+
+    /* Header Section */
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        border-radius: var(--border-radius);
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50%, -50%);
+    }
+
+    .dashboard-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .welcome-message {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        backdrop-filter: blur(10px);
+        font-size: 0.95rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Metrics Cards */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.8rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--primary-color);
+    }
+
+    .metric-card.success::before {
+        background: var(--success-color);
+    }
+
+    .metric-card.info::before {
+        background: var(--info-color);
+    }
+
+    .metric-card.warning::before {
+        background: var(--warning-color);
+    }
+
+    .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .metric-icon {
+        width: 55px;
+        height: 55px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: white;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .metric-icon.success {
+        background: linear-gradient(135deg, var(--success-color), #20c997);
+    }
+
+    .metric-icon.info {
+        background: linear-gradient(135deg, var(--info-color), #20c997);
+    }
+
+    .metric-icon.warning {
+        background: linear-gradient(135deg, var(--warning-color), #fd7e14);
+    }
+
+    .metric-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        line-height: 1;
+        margin-bottom: 0.3rem;
+    }
+
+    .metric-label {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .metric-change {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        font-weight: 500;
+    }
+
+    .metric-change.positive {
+        background: rgba(40, 167, 69, 0.1);
+        color: var(--success-color);
+    }
+
+    .metric-change.neutral {
+        background: rgba(108, 117, 125, 0.1);
+        color: var(--text-muted);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+
+    .action-card {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        text-decoration: none;
+        color: inherit;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+        border-color: var(--primary-color);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .action-icon {
+        font-size: 1.8rem;
+        margin-bottom: 0.8rem;
+        color: var(--primary-color);
+    }
+
+    .action-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: var(--dark-color);
+    }
+
+    .action-description {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    /* Activity Section */
+    .activity-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .activity-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        height: fit-content;
+    }
+
+    .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid var(--border-color);
+        transition: var(--transition);
+    }
+
+    .activity-item:hover {
+        background: var(--light-color);
+        margin: 0 -1rem;
+        padding: 0.8rem 1rem;
+        border-radius: 6px;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 0.8rem;
+        color: white;
+        background: var(--primary-color);
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.2rem;
+        font-size: 0.9rem;
+    }
+
+    .activity-meta {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .activity-value {
+        font-weight: 600;
+        color: var(--success-color);
+        font-size: 0.85rem;
+    }
+
+    /* Status Alerts */
+    .status-alerts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .alert-card {
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border-left: 4px solid;
+        box-shadow: var(--shadow);
+        background: white;
+    }
+
+    .alert-card.warning {
+        border-left-color: var(--warning-color);
+        background: rgba(255, 193, 7, 0.05);
+    }
+
+    .alert-card.info {
+        border-left-color: var(--info-color);
+        background: rgba(23, 162, 184, 0.05);
+    }
+
+    .alert-card.success {
+        border-left-color: var(--success-color);
+        background: rgba(40, 167, 69, 0.05);
+    }
+
+    .alert-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .alert-message {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+
+    .alert-action {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .alert-action:hover {
+        background: var(--secondary-color);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Chart Section */
+    .chart-section {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .chart-container {
+        height: 300px;
+        margin-top: 1rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    /* Button Styling */
+    .btn-create-event {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        transition: var(--transition);
+    }
+
+    .btn-create-event:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    /* Animation */
+    .metric-card {
+        animation: fadeInUp 0.6s ease-out forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .metric-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .metric-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .metric-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .metric-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .activity-section {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .status-alerts {
+            grid-template-columns: 1fr;
+        }
+
+        .chart-container {
+            height: 250px;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        body.sb-nav-fixed {
+            padding-top: 56px;
+        }
+
+        #layoutSidenav_nav {
+            transform: translateX(-250px);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #layoutSidenav_content {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .sb-sidenav-toggled #layoutSidenav_nav {
+            transform: translateX(0);
+        }
+
+        .sb-sidenav-toggled #layoutSidenav_content::before {
+            content: "";
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 56px);
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1037;
+        }
+
+        .dashboard-container {
+            padding: 1rem;
+        }
+
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.8rem;
+        }
+
+        .metrics-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-container {
+            padding: 0.75rem;
+        }
+
+        .dashboard-header {
+            padding: 1.25rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.6rem;
+        }
+
+        .metric-card {
+            padding: 1.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-tachometer-alt me-3"></i>
+                    Welcome back, {{ promoter.user.first_name|default:"Promoter" }}!
+                </h1>
+                <p class="dashboard-subtitle">
+                    Here's an overview of your events and business performance
+                </p>
+                {% if dashboard_data.total_events > 0 %}
+                <div class="welcome-message">
+                    <i class="fas fa-chart-line me-2"></i>
+                    You have <strong>{{ dashboard_data.active_events_count }}</strong> active events
+                    and have sold <strong>{{ dashboard_data.total_tickets_sold }}</strong> tickets total.
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'new_events' %}" class="btn btn-create-event">
+                    <i class="fas fa-plus me-2"></i>Create Event
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if dashboard_data.total_events > 0 %}
+    <!-- Key Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-header">
+                <div>
+                    <div class="metric-value">{{ dashboard_data.total_events }}</div>
+                    <div class="metric-label">Total Events</div>
+                    <div class="metric-change neutral">
+                        <i class="fas fa-calendar me-1"></i>All time
+                    </div>
+                </div>
+                <div class="metric-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="metric-card success">
+            <div class="metric-header">
+                <div>
+                    <div class="metric-value">{{ dashboard_data.active_events_count }}</div>
+                    <div class="metric-label">Active Events</div>
+                    <div class="metric-change positive">
+                        <i class="fas fa-arrow-up me-1"></i>Currently selling
+                    </div>
+                </div>
+                <div class="metric-icon success">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="metric-card info">
+            <div class="metric-header">
+                <div>
+                    <div class="metric-value">{{ dashboard_data.total_tickets_sold }}</div>
+                    <div class="metric-label">Tickets Sold</div>
+                    <div class="metric-change positive">
+                        <i class="fas fa-chart-line me-1"></i>{{ dashboard_data.tickets_sold_percentage }}% of total
+                    </div>
+                </div>
+                <div class="metric-icon info">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="metric-card warning">
+            <div class="metric-header">
+                <div>
+                    <div class="metric-value">${{ dashboard_data.total_revenue|floatformat:0 }}</div>
+                    <div class="metric-label">Total Revenue</div>
+                    <div class="metric-change positive">
+                        <i class="fas fa-dollar-sign me-1"></i>Lifetime earnings
+                    </div>
+                </div>
+                <div class="metric-icon warning">
+                    <i class="fas fa-coins"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Alerts -->
+    <div class="status-alerts">
+        {% if not dashboard_data.has_bank_account %}
+        <div class="alert-card warning">
+            <div class="alert-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                Bank Account Required
+            </div>
+            <div class="alert-message">
+                Add your bank account information to receive payments from ticket sales.
+            </div>
+            <a href="{% url 'bank_create' %}" class="alert-action">
+                Add Bank Account
+            </a>
+        </div>
+        {% endif %}
+
+        {% if dashboard_data.current_balance > 0 %}
+        <div class="alert-card success">
+            <div class="alert-title">
+                <i class="fas fa-wallet"></i>
+                Payment Available
+            </div>
+            <div class="alert-message">
+                You have ${{ dashboard_data.current_balance|floatformat:2 }} available for payout.
+            </div>
+            <a href="{% url 'payment_list' %}" class="alert-action">
+                View Payments
+            </a>
+        </div>
+        {% endif %}
+
+        {% if dashboard_data.active_events_count == 0 and dashboard_data.total_events > 0 %}
+        <div class="alert-card info">
+            <div class="alert-title">
+                <i class="fas fa-info-circle"></i>
+                No Active Events
+            </div>
+            <div class="alert-message">
+                All your events have ended. Create a new event to start selling tickets again.
+            </div>
+            <a href="{% url 'new_events' %}" class="alert-action">
+                Create Event
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2 class="section-title">
+            <i class="fas fa-bolt"></i>
+            Quick Actions
+        </h2>
+        <div class="actions-grid">
+            {% for action in quick_actions %}
+            <a href="{% url action.url %}" class="action-card {{ action.color }}">
+                <div class="action-icon">
+                    <i class="{{ action.icon }}"></i>
+                </div>
+                <div class="action-title">{{ action.title }}</div>
+                <div class="action-description">{{ action.description }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-section">
+        <!-- Recent Events -->
+        <div class="activity-card">
+            <h3 class="section-title">
+                <i class="fas fa-clock"></i>
+                Recent Events
+            </h3>
+            {% if recent_events %}
+            <ul class="activity-list">
+                {% for event in recent_events %}
+                <li class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">
+                            <a href="{% url 'update_event' event.id %}" style="color: inherit; text-decoration: none;">
+                                {{ event.name|truncatechars:25 }}
+                            </a>
+                        </div>
+                        <div class="activity-meta">
+                            {{ event.event_date|date:'M d, Y' }} • {{ event.city.name }}
+                        </div>
+                    </div>
+                    <div class="activity-value">
+                        ${{ event.get_amount|floatformat:0 }}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="text-center mt-3">
+                <a href="{% url 'events_promoter' %}" class="btn btn-outline-primary btn-sm">
+                    View All Events
+                </a>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-plus"></i>
+                <p>No events created yet</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="activity-card">
+            <h3 class="section-title">
+                <i class="fas fa-calendar-day"></i>
+                Upcoming Events
+            </h3>
+            {% if upcoming_events %}
+            <ul class="activity-list">
+                {% for event in upcoming_events %}
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: var(--success-color);">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">
+                            <a href="{% url 'update_event' event.id %}" style="color: inherit; text-decoration: none;">
+                                {{ event.name|truncatechars:25 }}
+                            </a>
+                        </div>
+                        <div class="activity-meta">
+                            {{ event.event_date|date:'M d, Y H:i' }}
+                        </div>
+                    </div>
+                    <div class="activity-value">
+                        {{ event.qty_sould }}/{{ event.quantity }}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="text-center mt-3">
+                <a href="{% url 'events_promoter' %}" class="btn btn-outline-success btn-sm">
+                    Manage Events
+                </a>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <p>No upcoming events</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Performance Chart -->
+    {% if monthly_stats %}
+    <div class="chart-section">
+        <h3 class="section-title">
+            <i class="fas fa-chart-area"></i>
+            Performance Overview (Last 6 Months)
+        </h3>
+        <div class="chart-container">
+            <canvas id="performanceChart"></canvas>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty State for New Users -->
+    <div class="text-center py-5">
+        <div class="empty-state">
+            <i class="fas fa-rocket" style="font-size: 5rem; color: var(--primary-color); margin-bottom: 2rem;"></i>
+            <h2 style="color: var(--dark-color); margin-bottom: 1rem;">Welcome to Eventlinez!</h2>
+            <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem;">
+                Ready to start selling tickets? Create your first event and begin your journey.
+            </p>
+            <a href="{% url 'new_events' %}" class="btn btn-primary btn-lg px-4 py-2">
+                <i class="fas fa-plus me-2"></i>Create Your First Event
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Chart.js for performance visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize performance chart
+        {% if monthly_stats %}
+        const ctx = document.getElementById('performanceChart');
+        if (ctx) {
+            const monthlyData = {{ monthly_stats| safe
+        }
+    };
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthlyData.map(item => item.month),
+            datasets: [{
+                label: 'Revenue ($)',
+                data: monthlyData.map(item => item.revenue),
+                borderColor: '#d90075',
+                backgroundColor: 'rgba(217, 0, 117, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Tickets Sold',
+                data: monthlyData.map(item => item.tickets),
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Revenue ($)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Tickets Sold'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            }
+        }
+    });
+    }
+    {% endif %}
+
+    // Add loading animation to action cards
+    const actionCards = document.querySelectorAll('.action-card');
+    actionCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Add hover effects to metric cards
+    const metricCards = document.querySelectorAll('.metric-card');
+    metricCards.forEach(card => {
+        card.addEventListener('mouseenter', function () {
+            this.style.transform = 'translateY(-4px) scale(1.02)';
+        });
+
+        card.addEventListener('mouseleave', function () {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Activity item hover effects
+    const activityItems = document.querySelectorAll('.activity-item');
+    activityItems.forEach(item => {
+        item.addEventListener('mouseenter', function () {
+            this.style.transform = 'translateX(8px)';
+        });
+
+        item.addEventListener('mouseleave', function () {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+</script>
+{% endblock content %}

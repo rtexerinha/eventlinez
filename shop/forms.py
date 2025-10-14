@@ -24,7 +24,7 @@ class BulkEventGalleryUploadForm(forms.Form):
             'class': 'form-control',
             'id': 'bulk-photos-input'
         }),
-        help_text='Select multiple images (JPEG, PNG, GIF, WebP). Maximum 10MB per image.',
+        help_text='Select multiple images (JPEG, PNG, GIF, WebP). Maximum 20MB per image.',
         required=False  # We'll validate in clean method
     )
     
@@ -71,9 +71,9 @@ class BulkEventGalleryUploadForm(forms.Form):
             raise ValidationError('You can upload maximum 50 images at once.')
         
         for file in files:
-            # Check file size (10MB limit)
-            if file.size > 10 * 1024 * 1024:
-                raise ValidationError(f'File "{file.name}" is too large. Maximum size is 10MB.')
+            # Check file size (20MB limit)
+            if file.size > 20 * 1024 * 1024:
+                raise ValidationError(f'File "{file.name}" is too large. Maximum size is 20MB.')
             
             # Check file extension
             ext = os.path.splitext(file.name)[1].lower()
@@ -114,9 +114,9 @@ class EventGalleryForm(forms.ModelForm):
         photo = self.cleaned_data.get('photo')
         
         if photo:
-            # Check file size (10MB limit)
-            if photo.size > 10 * 1024 * 1024:
-                raise ValidationError('Image file is too large. Maximum size is 10MB.')
+            # Check file size (20MB limit)
+            if photo.size > 20 * 1024 * 1024:
+                raise ValidationError('Image file is too large. Maximum size is 20MB.')
             
             # Check if it's actually an image
             try:

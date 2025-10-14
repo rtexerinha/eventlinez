@@ -208,6 +208,10 @@ REST_FRAMEWORK = {
     ],
 }
 
+# File upload settings for 20MB max file size
+FILE_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024  # 20MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024  # 20MB
+
 # Feature flags / misc
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 EVENTLINEZ_FEE = float(os.getenv("EVENTLINEZ_FEE", "0.12"))
