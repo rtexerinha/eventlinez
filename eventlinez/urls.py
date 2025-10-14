@@ -26,7 +26,7 @@ urlpatterns += [
     path('', index, name='index'),
     path('accounts/login/', signin_view, name='signin'),
     path('customer/', include('customer.urls')),
-    path('promoter/', include('promoter.urls')),
+    path('promoter/', include('promoter.urls', namespace='promoter')),
     path('cart/', include('cart.urls')),
     path('order/', include('order.urls')),
     path('shop/', include('shop.urls')),
