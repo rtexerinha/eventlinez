@@ -35,6 +35,10 @@ def handle_bulk_upload(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method'}, status=405)
     
+    # Check authentication manually to return JSON error instead of redirect
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'error': 'Authentication required. Please login as staff.'}, status=401)
+    
     # Get form data
     event_id = request.POST.get('event_id')
     title_prefix = request.POST.get('title_prefix', '')
@@ -45,7 +49,7 @@ def handle_bulk_upload(request):
     # Validate event
     try:
         event = Event.objects.get(id=event_id)
-    except Event.DoesNotExist:
+    except (Event.DoesNotExist, ValueError, TypeError):
         return JsonResponse({'error': 'Invalid event selected'}, status=400)
     
     # Get uploaded files
