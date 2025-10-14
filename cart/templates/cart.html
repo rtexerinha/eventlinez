@@ -332,13 +332,13 @@ This is the shopping cart page. Proceed to review your items and place the order
     function getCSRFToken() {
         // Try multiple methods to get CSRF token
         let token = null;
-        
+
         // Method 1: Try to get from meta tag
         const metaTag = document.querySelector('meta[name="csrf-token"]');
         if (metaTag) {
             token = metaTag.getAttribute('content');
         }
-        
+
         // Method 2: Try to get from hidden input
         if (!token) {
             const hiddenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
@@ -346,7 +346,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 token = hiddenInput.value;
             }
         }
-        
+
         // Method 3: Try to get from cookie
         if (!token) {
             const cookies = document.cookie.split(';');
@@ -358,7 +358,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 }
             }
         }
-        
+
         return token;
     }
 
@@ -395,7 +395,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                         const resetTime = data.reset_time || Date.now() / 1000 + 300;
                         const waitTime = Math.ceil(resetTime - Date.now() / 1000);
                         const minutes = Math.ceil(waitTime / 60);
-                        
+
                         showPromoMessage(`Too many attempts. Please wait ${minutes} minute(s) before trying again.`, 'error');
                         throw new Error('Rate limited');
                     });
@@ -442,7 +442,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                         const resetTime = data.reset_time || Date.now() / 1000 + 300;
                         const waitTime = Math.ceil(resetTime - Date.now() / 1000);
                         const minutes = Math.ceil(waitTime / 60);
-                        
+
                         alert(`Too many attempts. Please wait ${minutes} minute(s) before trying again.`);
                         throw new Error('Rate limited');
                     });

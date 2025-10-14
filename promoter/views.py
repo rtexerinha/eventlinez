@@ -6,6 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 import xlsxwriter
 from django.http import StreamingHttpResponse
+from django.utils import timezone
+from django.db.models import Sum, Count, Q
+from datetime import datetime, timedelta
 
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
@@ -88,7 +91,7 @@ def signin_view_promoter(request):
             promoter = authenticate(username=username, password=password)
             if promoter is not None:
                 login(request, promoter)
-                return redirect('events_promoter')
+                return redirect('promoter_dashboard')  # Redirect to new dashboard
             else:
                 return redirect('signup_promoter')
     else:
@@ -488,3 +491,133 @@ def promo_code_toggle_status(request, promo_code_id):
     messages.success(request, f'Promo code "{promo_code.code}" {status} successfully!')
     
     return redirect('promo_codes_list')
+
+
+@login_required(login_url='/promoter/account/login/')
+def promoter_dashboard(request):
+    """
+    Comprehensive promoter dashboard with business overview and quick actions
+    """
+    promoter = request.user.promoter
+    now = timezone.now()
+    
+    # Get events with optimized queries
+    all_events = Event.objects.filter(promoter=promoter).select_related('city').prefetch_related('tickets')
+    active_events = all_events.filter(event_date__gte=now).order_by('event_date')
+    past_events = all_events.filter(event_date__lt=now).order_by('-event_date')
+    
+    # Dashboard metrics
+    total_events = all_events.count()
+    active_events_count = active_events.count()
+    past_events_count = past_events.count()
+    
+    # Revenue calculations
+    total_revenue = sum(event.get_amount() for event in all_events)
+    monthly_revenue = sum(event.get_amount() for event in all_events.filter(
+        created__gte=now - timedelta(days=30)
+    ))
+    
+    # Ticket statistics
+    total_tickets_sold = sum(event.qty_sould() for event in all_events)
+    total_tickets_available = sum(event.quantity() for event in all_events)
+    tickets_sold_percentage = (total_tickets_sold / total_tickets_available * 100) if total_tickets_available > 0 else 0
+    
+    # Recent activities
+    recent_events = all_events.order_by('-created')[:5]
+    upcoming_events = active_events[:3]
+    
+    # Performance data for charts
+    last_6_months = []
+    monthly_stats = []
+    
+    for i in range(6):
+        month_start = now.replace(day=1) - timedelta(days=i*30)
+        month_end = month_start + timedelta(days=30)
+        
+        month_events = all_events.filter(
+            created__gte=month_start,
+            created__lt=month_end
+        )
+        
+        month_revenue = sum(event.get_amount() for event in month_events)
+        month_tickets = sum(event.qty_sould() for event in month_events)
+        
+        last_6_months.insert(0, {
+            'month': month_start.strftime('%b %Y'),
+            'revenue': month_revenue,
+            'tickets': month_tickets,
+            'events': month_events.count()
+        })
+    
+    # Payment and balance info
+    current_balance = get_balance(promoter)
+    recent_payments = Payment.objects.filter(promoter=promoter).order_by('-created')[:5]
+    
+    # Bank account status
+    has_bank_account = BankAccount.objects.filter(promoter=promoter).exists()
+    
+    # Promo codes summary
+    active_promo_codes = PromoCode.objects.filter(
+        promoter=promoter, 
+        is_active=True,
+        valid_until__gte=now
+    ).count()
+    
+    # Top performing events
+    top_events = all_events.annotate(
+        revenue=Sum('tickets__price')
+    ).order_by('-revenue')[:3]
+    
+    context = {
+        'promoter': promoter,
+        'dashboard_data': {
+            'total_events': total_events,
+            'active_events_count': active_events_count,
+            'past_events_count': past_events_count,
+            'total_revenue': total_revenue,
+            'monthly_revenue': monthly_revenue,
+            'total_tickets_sold': total_tickets_sold,
+            'total_tickets_available': total_tickets_available,
+            'tickets_sold_percentage': round(tickets_sold_percentage, 1),
+            'current_balance': current_balance,
+            'has_bank_account': has_bank_account,
+            'active_promo_codes': active_promo_codes,
+        },
+        'recent_events': recent_events,
+        'upcoming_events': upcoming_events,
+        'recent_payments': recent_payments,
+        'top_events': top_events,
+        'monthly_stats': last_6_months,
+        'quick_actions': [
+            {
+                'title': 'Create New Event',
+                'url': 'new_events',
+                'icon': 'fas fa-plus-circle',
+                'color': 'primary',
+                'description': 'Set up a new event and start selling tickets'
+            },
+            {
+                'title': 'Manage Events',
+                'url': 'events_promoter',
+                'icon': 'fas fa-calendar-alt',
+                'color': 'info',
+                'description': 'View and edit your existing events'
+            },
+            {
+                'title': 'View Payments',
+                'url': 'payment_list',
+                'icon': 'fas fa-credit-card',
+                'color': 'success',
+                'description': 'Check your payment history and balance'
+            },
+            {
+                'title': 'Promo Codes',
+                'url': 'promo_codes_list',
+                'icon': 'fas fa-tags',
+                'color': 'warning',
+                'description': 'Create and manage discount codes'
+            },
+        ]
+    }
+    
+    return render(request, 'promoter/dashboard.html', context)

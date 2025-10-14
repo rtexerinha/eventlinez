@@ -4,7 +4,7 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
     vendor_update_per_event, vendors_reports, vendor_export_excel, \
     payment_list, payment_pdf_view, bank_account_list, bank_create, \
     bank_account_update, bank_remove, promo_codes_list, promo_code_create, \
-    promo_code_update, promo_code_delete, promo_code_toggle_status
+    promo_code_update, promo_code_delete, promo_code_toggle_status, promoter_dashboard
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
@@ -14,6 +14,10 @@ from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, Categor
     EventCreateAPIView, TicketSoldOutUpdateAPIView
 
 urlpatterns = [
+    # Dashboard - Main promoter landing page
+    path('dashboard/', promoter_dashboard, name='promoter_dashboard'),
+    
+    # Account management
     path('account/create/', signup_view_promoter, name='signup_promoter'),
     path('account/login/', signin_view_promoter, name='signin_promoter'),
     path('account/logout/', signout_view_promoter, name='signout_promoter'),

@@ -67,8 +67,8 @@ def handle_bulk_upload(request):
                 error_count += 1
                 continue
             
-            if uploaded_file.size > 10 * 1024 * 1024:  # 10MB limit
-                errors.append(f'File "{uploaded_file.name}" is too large (max 10MB)')
+            if uploaded_file.size > 20 * 1024 * 1024:  # 20MB limit
+                errors.append(f'File "{uploaded_file.name}" is too large (max 20MB)')
                 error_count += 1
                 continue
             

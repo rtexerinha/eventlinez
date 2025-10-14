@@ -191,13 +191,12 @@ def get_item_identifier(request, *args, **kwargs):
 
 
 def get_ticket_identifier(request, *args, **kwargs):
-    """Extract ticket ID from request data"""
+    """Extract ticket ID from request data without consuming the request body"""
     try:
-        import json
-        data = json.loads(request.body)
-        tickets = data.get('tickets', [])
-        if tickets and len(tickets) > 0:
-            return str(tickets[0].get('id', ''))
+        # For rate limiting, we don't need to parse the full request body
+        # Just use the session key as identifier for ticket-related operations
+        from .views import _cart_id
+        return _cart_id(request)
     except:
-        pass
-    return None
+        # Fallback to session key if available
+        return getattr(request.session, 'session_key', 'anonymous')

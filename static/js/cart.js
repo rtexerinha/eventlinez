@@ -78,13 +78,13 @@ function getCookie(name) {
 function getCSRFToken() {
   // Try multiple methods to get CSRF token
   let token = null;
-  
+
   // Method 1: Try to get from meta tag
   const metaTag = document.querySelector('meta[name="csrf-token"]');
   if (metaTag) {
     token = metaTag.getAttribute('content');
   }
-  
+
   // Method 2: Try to get from hidden input
   if (!token) {
     const hiddenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
@@ -92,12 +92,12 @@ function getCSRFToken() {
       token = hiddenInput.value;
     }
   }
-  
+
   // Method 3: Try to get from cookie
   if (!token) {
     token = getCookie('csrftoken');
   }
-  
+
   return token;
 }
 
@@ -166,19 +166,19 @@ function addToCard() {
   })
     .then(response => {
       console.log('Response status:', response.status);
-      
+
       // Handle rate limiting
       if (response.status === 429) {
         return response.json().then(data => {
           const resetTime = data.reset_time || Date.now() / 1000 + 300; // Default 5 min
           const waitTime = Math.ceil(resetTime - Date.now() / 1000);
           const minutes = Math.ceil(waitTime / 60);
-          
+
           alert(`Too many requests. Please wait ${minutes} minute(s) before trying again.`);
           throw new Error('Rate limited');
         });
       }
-      
+
       if (!response.ok) {
         return response.json().then(err => Promise.reject(err));
       }
@@ -224,19 +224,19 @@ function doCheckout() {
   })
     .then(result => {
       console.log('Checkout response status:', result.status);
-      
+
       // Handle rate limiting
       if (result.status === 429) {
         return result.json().then(data => {
           const resetTime = data.reset_time || Date.now() / 1000 + 300;
           const waitTime = Math.ceil(resetTime - Date.now() / 1000);
           const minutes = Math.ceil(waitTime / 60);
-          
+
           alert(`Too many checkout attempts. Please wait ${minutes} minute(s) before trying again.`);
           throw new Error('Rate limited');
         });
       }
-      
+
       if (!result.ok) {
         return result.json().then(err => Promise.reject(err));
       }
