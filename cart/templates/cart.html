@@ -12,7 +12,11 @@ This is the shopping cart page. Proceed to review your items and place the order
 {% endif %}
 
 {% block content %}
-{% csrf_token %}
+<!-- Add CSRF token as meta tag for JavaScript access -->
+<meta name="csrf-token" content="{{ csrf_token }}">
+<!-- Also include as hidden input for form compatibility -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
 {% if not cart_items %}
 <section class="container mt-4 mb-5" style="min-height: 70vh">
     <div class="text-center">
@@ -324,6 +328,40 @@ This is the shopping cart page. Proceed to review your items and place the order
 
 <!-- Promo Code Functions -->
 <script>
+    // Use the improved CSRF token function
+    function getCSRFToken() {
+        // Try multiple methods to get CSRF token
+        let token = null;
+        
+        // Method 1: Try to get from meta tag
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag) {
+            token = metaTag.getAttribute('content');
+        }
+        
+        // Method 2: Try to get from hidden input
+        if (!token) {
+            const hiddenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            if (hiddenInput) {
+                token = hiddenInput.value;
+            }
+        }
+        
+        // Method 3: Try to get from cookie
+        if (!token) {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith('csrftoken=')) {
+                    token = cookie.substring('csrftoken='.length);
+                    break;
+                }
+            }
+        }
+        
+        return token;
+    }
+
     function applyPromoCode() {
         const promoInput = document.getElementById('promo_code_input');
         const promoCode = promoInput.value.trim();
@@ -344,13 +382,26 @@ This is the shopping cart page. Proceed to review your items and place the order
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': getCSRFToken(),
             },
             body: JSON.stringify({
                 promo_code: promoCode
             })
         })
-            .then(response => response.json())
+            .then(response => {
+                // Handle rate limiting
+                if (response.status === 429) {
+                    return response.json().then(data => {
+                        const resetTime = data.reset_time || Date.now() / 1000 + 300;
+                        const waitTime = Math.ceil(resetTime - Date.now() / 1000);
+                        const minutes = Math.ceil(waitTime / 60);
+                        
+                        showPromoMessage(`Too many attempts. Please wait ${minutes} minute(s) before trying again.`, 'error');
+                        throw new Error('Rate limited');
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Reload the page to show updated cart with discount
@@ -361,7 +412,9 @@ This is the shopping cart page. Proceed to review your items and place the order
             })
             .catch(error => {
                 console.error('Error:', error);
-                showPromoMessage('An error occurred while applying the promo code', 'error');
+                if (error.message !== 'Rate limited') {
+                    showPromoMessage('An error occurred while applying the promo code', 'error');
+                }
             })
             .finally(() => {
                 // Reset button state
@@ -379,10 +432,23 @@ This is the shopping cart page. Proceed to review your items and place the order
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': getCSRFToken(),
             }
         })
-            .then(response => response.json())
+            .then(response => {
+                // Handle rate limiting
+                if (response.status === 429) {
+                    return response.json().then(data => {
+                        const resetTime = data.reset_time || Date.now() / 1000 + 300;
+                        const waitTime = Math.ceil(resetTime - Date.now() / 1000);
+                        const minutes = Math.ceil(waitTime / 60);
+                        
+                        alert(`Too many attempts. Please wait ${minutes} minute(s) before trying again.`);
+                        throw new Error('Rate limited');
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Reload the page to show updated cart without discount
@@ -393,7 +459,9 @@ This is the shopping cart page. Proceed to review your items and place the order
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while removing the promo code');
+                if (error.message !== 'Rate limited') {
+                    alert('An error occurred while removing the promo code');
+                }
             });
     }
 
@@ -436,7 +504,7 @@ This is the shopping cart page. Proceed to review your items and place the order
         fetch("/cart/checkout/", {
             method: "POST",
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': getCSRFToken(),
                 'Content-Type': 'application/json',
             },
         })

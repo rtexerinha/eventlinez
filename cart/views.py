@@ -17,15 +17,15 @@ from .utils import track_cart_abandonment, mark_cart_converted
 from django.conf import settings
 
 from django.contrib import messages 
+from .rate_limiting import rate_limit, get_cart_identifier, get_item_identifier, get_ticket_identifier
 
 logger = logging.getLogger(__name__)
 
 
 def _cart_id(request):
-    cart = request.session.session_key
-    if not cart:
-        cart = request.session.create()
-    return cart
+    if not request.session.session_key:
+        request.session.create()
+    return request.session.session_key
 
 
 def track_promo_usage(promo_code, customer_email, order_id, discount_amount):
@@ -58,6 +58,7 @@ def track_promo_usage(promo_code, customer_email, order_id, discount_amount):
 
 
 @csrf_exempt
+@rate_limit('cart_add', identifier_func=get_ticket_identifier)
 def cart_add(request):
     """
     Adiciona cria o carrinho e adiciona os tickets ao carrinho.
@@ -159,6 +160,7 @@ def cart_add(request):
 
 
 @login_required()
+@rate_limit('quantity_change', identifier_func=get_item_identifier)
 def change_quantity(request, item_id, operation):
     """
     Altera a quantidade de um item no carrinho
@@ -233,6 +235,7 @@ def cart_detail(request, cart_items=None):
     ))
 
 
+@rate_limit('item_remove', identifier_func=get_item_identifier)
 def remove_item(request, item_id):
     """
     Remove um item do carrinho
@@ -246,6 +249,7 @@ def remove_item(request, item_id):
 
 
 @csrf_exempt
+@rate_limit('promo_apply', identifier_func=get_cart_identifier)
 def apply_promo_code(request):
     """
     Apply a promo code to the cart
@@ -333,6 +337,7 @@ def apply_promo_code(request):
 
 
 @csrf_exempt
+@rate_limit('promo_apply', identifier_func=get_cart_identifier)
 def remove_promo_code(request):
     """
     Remove promo code from cart
@@ -369,6 +374,7 @@ def remove_promo_code(request):
 
 @login_required
 @csrf_exempt
+@rate_limit('cart_checkout', identifier_func=get_cart_identifier)
 def checkout(request):
     """
     Faz o redirecionamento do carrinho para processo de checkout no Stripe
