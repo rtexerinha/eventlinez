@@ -138,24 +138,24 @@ jobs:
         BRANCH_NAME: ${{ steps.deploy_info.outputs.branch_name }}
         DEPLOY_TIMESTAMP: ${{ steps.deploy_info.outputs.timestamp }}
       run: |
-        sshpass -p "$TEST_SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $TEST_SERVER_USER@$TEST_SERVER_HOST << 'EOF'
+        sshpass -p "$TEST_SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $TEST_SERVER_USER@$TEST_SERVER_HOST << 'DEPLOY_EOF'
           set -e
           
           echo "🚀 Starting deployment to test server..."
           echo "📋 Deployment Info:"
-          echo "   - Commit: ${{ steps.deploy_info.outputs.commit_short }}"
-          echo "   - Branch: ${{ steps.deploy_info.outputs.branch_name }}"
-          echo "   - Message: ${{ steps.deploy_info.outputs.commit_message }}"
-          echo "   - Time: ${{ steps.deploy_info.outputs.timestamp }}"
+          echo "   - Commit: ${COMMIT_SHORT}"
+          echo "   - Branch: ${BRANCH_NAME}"
+          echo "   - Message: ${COMMIT_MESSAGE}"
+          echo "   - Time: ${DEPLOY_TIMESTAMP}"
           
           # Navigate to application directory
-          cd ${{ secrets.DEPLOY_PATH }}/eventlinez
+          cd ${DEPLOY_PATH}/eventlinez
           
           # Record current version before deployment
           echo "📝 Recording deployment info..."
           current_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
           echo "Current server commit: $current_commit"
-          echo "Deploying commit: ${{ steps.deploy_info.outputs.commit_sha }}"
+          echo "Deploying commit: ${COMMIT_SHA}"
           
           # Stop application services first
           echo "⏹️ Stopping services..."
@@ -165,14 +165,14 @@ jobs:
           # Create deployment log
           echo "📄 Creating deployment log..."
           mkdir -p ../deployment_logs
-          cat > ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log << EOL
-Deployment Started: ${{ steps.deploy_info.outputs.timestamp }}
-Branch: ${{ steps.deploy_info.outputs.branch_name }}
-Commit SHA: ${{ steps.deploy_info.outputs.commit_sha }}
-Commit Short: ${{ steps.deploy_info.outputs.commit_short }}
-Commit Message: ${{ steps.deploy_info.outputs.commit_message }}
+          cat > ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log << LOG_EOF
+Deployment Started: ${DEPLOY_TIMESTAMP}
+Branch: ${BRANCH_NAME}
+Commit SHA: ${COMMIT_SHA}
+Commit Short: ${COMMIT_SHORT}
+Commit Message: ${COMMIT_MESSAGE}
 Previous Commit: $current_commit
-EOL
+LOG_EOF
           
           # Backup current version with version info
           echo "💾 Creating versioned backup..."
@@ -193,8 +193,8 @@ EOL
           # Verify we have the correct commit
           deployed_commit=$(git rev-parse HEAD)
           echo "✅ Deployed commit: $deployed_commit"
-          if [ "$deployed_commit" != "${{ steps.deploy_info.outputs.commit_sha }}" ]; then
-            echo "⚠️ WARNING: Deployed commit ($deployed_commit) doesn't match expected commit (${{ steps.deploy_info.outputs.commit_sha }})"
+          if [ "$deployed_commit" != "${COMMIT_SHA}" ]; then
+            echo "⚠️ WARNING: Deployed commit ($deployed_commit) doesn't match expected commit (${COMMIT_SHA})"
             echo "This might indicate a git synchronization issue."
           else
             echo "✅ Commit verification successful"
@@ -341,16 +341,16 @@ EOL
           echo "🔍 Final deployment verification..."
           
           # Create version info file for verification
-          cat > version_info.json << EOL
+          cat > version_info.json << VERSION_EOF
 {
-  "deployment_time": "${{ steps.deploy_info.outputs.timestamp }}",
-  "commit_sha": "${{ steps.deploy_info.outputs.commit_sha }}",
-  "commit_short": "${{ steps.deploy_info.outputs.commit_short }}",
-  "branch": "${{ steps.deploy_info.outputs.branch_name }}",
-  "commit_message": "${{ steps.deploy_info.outputs.commit_message }}",
+  "deployment_time": "${DEPLOY_TIMESTAMP}",
+  "commit_sha": "${COMMIT_SHA}",
+  "commit_short": "${COMMIT_SHORT}",
+  "branch": "${BRANCH_NAME}",
+  "commit_message": "${COMMIT_MESSAGE}",
   "deployment_method": "$DEPLOYMENT_METHOD"
 }
-EOL
+VERSION_EOF
           
           # Make version info accessible via web
           cp version_info.json staticfiles/ 2>/dev/null || echo "Could not copy version info to static files"
@@ -380,19 +380,19 @@ EOL
           echo "🔍 Final commit verification: $final_commit"
           
           # Update deployment log
-          cat >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log << EOL
+          cat >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log << FINAL_LOG_EOF
 Deployment Method: $DEPLOYMENT_METHOD
 Final Commit: $final_commit
 Deployment Completed: $(date)
 Status: SUCCESS
-EOL
+FINAL_LOG_EOF
           
           echo "✅ Deployment completed successfully!"
           echo "📋 Deployment Summary:"
           echo "   - Method: $DEPLOYMENT_METHOD"
           echo "   - Commit: $final_commit"
           echo "   - Time: $(date)"
-        EOF
+        DEPLOY_EOF
     
     - name: Verify Deployment
       if: steps.check_ssh.outputs.deployment_enabled == 'true'
