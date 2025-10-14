@@ -4,161 +4,161 @@
 
 {% block stylesheets %}
 <style>
-.dashboard-card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    padding: 25px;
-    margin-bottom: 25px;
-    border: 1px solid #f1f3f4;
-}
+    .dashboard-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid #f1f3f4;
+    }
 
-.stat-card {
-    background: linear-gradient(135deg, #d90075, #ff6b9d);
-    color: white;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
+    .stat-card {
+        background: linear-gradient(135deg, #d90075, #ff6b9d);
+        color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
 
-.stat-card.secondary {
-    background: linear-gradient(135deg, #6c757d, #adb5bd);
-}
+    .stat-card.secondary {
+        background: linear-gradient(135deg, #6c757d, #adb5bd);
+    }
 
-.stat-card.success {
-    background: linear-gradient(135deg, #28a745, #20c997);
-}
+    .stat-card.success {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
 
-.stat-card.info {
-    background: linear-gradient(135deg, #17a2b8, #20c997);
-}
+    .stat-card.info {
+        background: linear-gradient(135deg, #17a2b8, #20c997);
+    }
 
-.progress-container {
-    background-color: #e9ecef;
-    border-radius: 10px;
-    height: 8px;
-    overflow: hidden;
-    margin: 5px 0;
-}
+    .progress-container {
+        background-color: #e9ecef;
+        border-radius: 10px;
+        height: 8px;
+        overflow: hidden;
+        margin: 5px 0;
+    }
 
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #d90075, #ff6b9d);
-    border-radius: 10px;
-    transition: width 0.3s ease;
-}
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #d90075, #ff6b9d);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
 
-.table {
-    background-color: white;
-    margin-bottom: 0;
-}
+    .table {
+        background-color: white;
+        margin-bottom: 0;
+    }
 
-.table th {
-    border-top: none;
-    font-weight: 600;
-    color: #495057;
-    font-size: 14px;
-    padding: 15px 12px;
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-}
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+        padding: 15px 12px;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
 
-.table td {
-    padding: 15px 12px;
-    vertical-align: middle;
-    background-color: white;
-    border-bottom: 1px solid #f1f3f4;
-}
+    .table td {
+        padding: 15px 12px;
+        vertical-align: middle;
+        background-color: white;
+        border-bottom: 1px solid #f1f3f4;
+    }
 
-.table-hover tbody tr:hover {
-    background-color: #f8f9fa !important;
-}
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa !important;
+    }
 
-.table-hover tbody tr:hover td {
-    background-color: #f8f9fa !important;
-}
+    .table-hover tbody tr:hover td {
+        background-color: #f8f9fa !important;
+    }
 
-.action-btn {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 12px;
-    transition: all 0.2s ease;
-    min-width: 32px;
-    text-align: center;
-}
+    .action-btn {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        min-width: 32px;
+        text-align: center;
+    }
 
-.action-btn.primary {
-    background-color: #d90075;
-    color: white;
-}
+    .action-btn.primary {
+        background-color: #d90075;
+        color: white;
+    }
 
-.action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    color: white;
-    text-decoration: none;
-}
+    .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        color: white;
+        text-decoration: none;
+    }
 
-.create-ticket-btn {
-    background: linear-gradient(135deg, #d90075, #ff6b9d);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.2s ease;
-}
+    .create-ticket-btn {
+        background: linear-gradient(135deg, #d90075, #ff6b9d);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.2s ease;
+    }
 
-.create-ticket-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(217,0,117,0.3);
-    color: white;
-    text-decoration: none;
-}
+    .create-ticket-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(217, 0, 117, 0.3);
+        color: white;
+        text-decoration: none;
+    }
 
-.ticket-status-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
+    .ticket-status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
 
-.status-available {
-    background-color: #d4edda;
-    color: #155724;
-}
+    .status-available {
+        background-color: #d4edda;
+        color: #155724;
+    }
 
-.status-low {
-    background-color: #fff3cd;
-    color: #856404;
-}
+    .status-low {
+        background-color: #fff3cd;
+        color: #856404;
+    }
 
-.status-sold-out {
-    background-color: #f8d7da;
-    color: #721c24;
-}
+    .status-sold-out {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
 
-.back-btn {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
+    .back-btn {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
 
-.back-btn:hover {
-    background: #5a6268;
-    color: white;
-    text-decoration: none;
-}
+    .back-btn:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+    }
 </style>
 {% endblock stylesheets %}
 
@@ -272,7 +272,8 @@
                                 <div>
                                     <strong>{{ data.ticket.name }}</strong>
                                     {% if data.ticket.sold_out %}
-                                        <br><small class="text-danger"><i class="fas fa-ban me-1"></i>Marked as Sold Out</small>
+                                    <br><small class="text-danger"><i class="fas fa-ban me-1"></i>Marked as Sold
+                                        Out</small>
                                     {% endif %}
                                 </div>
                             </td>
@@ -301,16 +302,16 @@
                             </td>
                             <td>
                                 {% if data.available == 0 or data.ticket.sold_out %}
-                                    <span class="ticket-status-badge status-sold-out">Sold Out</span>
-                                {% elif data.available <= 10 %}
-                                    <span class="ticket-status-badge status-low">Low Stock</span>
-                                {% else %}
+                                <span class="ticket-status-badge status-sold-out">Sold Out</span>
+                                {% elif data.available <= 10 %} <span class="ticket-status-badge status-low">Low
+                                    Stock</span>
+                                    {% else %}
                                     <span class="ticket-status-badge status-available">Available</span>
-                                {% endif %}
+                                    {% endif %}
                             </td>
                             <td>
-                                <a href="{% url 'ticket_update' data.ticket.id %}" 
-                                   class="action-btn primary" title="Edit Ticket Type">
+                                <a href="{% url 'ticket_update' data.ticket.id %}" class="action-btn primary"
+                                    title="Edit Ticket Type">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </td>
