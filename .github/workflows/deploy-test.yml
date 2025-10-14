@@ -30,6 +30,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch full history for proper version tracking
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -83,6 +85,17 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch full history for proper version tracking
+    
+    - name: Get deployment info
+      id: deploy_info
+      run: |
+        echo "commit_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        echo "commit_message=$(git log -1 --pretty=%B | head -n1)" >> $GITHUB_OUTPUT
+        echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+        echo "timestamp=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
     
     - name: Check SSH Configuration
       id: check_ssh
@@ -119,382 +132,306 @@ jobs:
         TEST_SERVER_USER: ${{ secrets.TEST_SERVER_USER }}
         TEST_SERVER_PASSWORD: ${{ secrets.TEST_SERVER_PASSWORD }}
         DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        COMMIT_SHA: ${{ steps.deploy_info.outputs.commit_sha }}
+        COMMIT_SHORT: ${{ steps.deploy_info.outputs.commit_short }}
+        COMMIT_MESSAGE: ${{ steps.deploy_info.outputs.commit_message }}
+        BRANCH_NAME: ${{ steps.deploy_info.outputs.branch_name }}
+        DEPLOY_TIMESTAMP: ${{ steps.deploy_info.outputs.timestamp }}
       run: |
         sshpass -p "$TEST_SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $TEST_SERVER_USER@$TEST_SERVER_HOST << 'EOF'
           set -e
           
           echo "🚀 Starting deployment to test server..."
+          echo "📋 Deployment Info:"
+          echo "   - Commit: ${{ steps.deploy_info.outputs.commit_short }}"
+          echo "   - Branch: ${{ steps.deploy_info.outputs.branch_name }}"
+          echo "   - Message: ${{ steps.deploy_info.outputs.commit_message }}"
+          echo "   - Time: ${{ steps.deploy_info.outputs.timestamp }}"
           
           # Navigate to application directory
           cd ${{ secrets.DEPLOY_PATH }}/eventlinez
           
-          # Stop application services
+          # Record current version before deployment
+          echo "📝 Recording deployment info..."
+          current_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+          echo "Current server commit: $current_commit"
+          echo "Deploying commit: ${{ steps.deploy_info.outputs.commit_sha }}"
+          
+          # Stop application services first
           echo "⏹️ Stopping services..."
           systemctl --user stop eventlinez 2>/dev/null || echo "Service not running or not user service"
-          docker-compose down 2>/dev/null || echo "Docker compose not running"
+          docker-compose down --timeout 30 2>/dev/null || echo "Docker compose not running"
           
-          # Backup current version
-          echo "💾 Creating backup..."
+          # Create deployment log
+          echo "📄 Creating deployment log..."
+          mkdir -p ../deployment_logs
+          cat > ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log << EOL
+Deployment Started: ${{ steps.deploy_info.outputs.timestamp }}
+Branch: ${{ steps.deploy_info.outputs.branch_name }}
+Commit SHA: ${{ steps.deploy_info.outputs.commit_sha }}
+Commit Short: ${{ steps.deploy_info.outputs.commit_short }}
+Commit Message: ${{ steps.deploy_info.outputs.commit_message }}
+Previous Commit: $current_commit
+EOL
+          
+          # Backup current version with version info
+          echo "💾 Creating versioned backup..."
           timestamp=$(date +%Y%m%d_%H%M%S)
+          backup_dir="../backups/eventlinez_backup_${timestamp}_${current_commit:0:7}"
           mkdir -p ../backups
-          cp -r . ../backups/eventlinez_backup_$timestamp || echo "Backup failed, continuing..."
+          cp -r . "$backup_dir" || echo "Backup failed, continuing..."
           
-          # Pull latest changes
-          echo "📥 Pulling latest changes..."
-          git fetch origin
+          # Force clean git state and pull latest changes
+          echo "🔄 Cleaning git state and pulling latest changes..."
+          git fetch --all --prune
+          git reset --hard HEAD
+          git clean -fd
+          git checkout develop
           git reset --hard origin/develop
           git clean -fd
           
-          # Clean caches after code update
-          echo "🧹 Cleaning caches after code update..."
+          # Verify we have the correct commit
+          deployed_commit=$(git rev-parse HEAD)
+          echo "✅ Deployed commit: $deployed_commit"
+          if [ "$deployed_commit" != "${{ steps.deploy_info.outputs.commit_sha }}" ]; then
+            echo "⚠️ WARNING: Deployed commit ($deployed_commit) doesn't match expected commit (${{ steps.deploy_info.outputs.commit_sha }})"
+            echo "This might indicate a git synchronization issue."
+          else
+            echo "✅ Commit verification successful"
+          fi
+          
+          # Record successful pull in deployment log
+          echo "Git Pull Completed: $(date)" >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log
+          echo "Actual Deployed Commit: $deployed_commit" >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log
+          
+          # Comprehensive cache cleaning
+          echo "🧹 Comprehensive cache cleaning..."
+          
+          # Python caches
           find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
           find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
-          rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
+          find . -name "*.pyo" -delete 2>/dev/null || echo "Could not delete .pyo files"
           
-          # Clear Django cache
-          echo "🧹 Clearing Django cache..."
+          # Django caches
           python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" 2>/dev/null || echo "Could not clear Django cache"
           
-          # Clear any compiled Python files
-          echo "🧹 Clearing compiled Python files..."
-          find . -name "*.pyo" -delete 2>/dev/null || echo "Could not delete .pyo files"
-          find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
-          
-          # Clear any cached templates
-          echo "🧹 Clearing template cache..."
+          # Template caches
           find . -name "*.pyc" -path "*/templates/*" -delete 2>/dev/null || echo "Could not clear template cache"
           
-          echo "✅ Caches cleaned"
+          # Static files cache
+          rm -rf staticfiles/* 2>/dev/null || echo "Could not clear static files"
           
-          # Create directories for static files and media (Docker bind mounts)
-          echo "📁 Creating directories for static files..."
-          mkdir -p staticfiles media
-          
-          # Set permissions safely (ignore failures due to existing ownership)
-          echo "🔐 Setting directory permissions..."
-          chmod 755 staticfiles 2>/dev/null || echo "⚠️ Could not change staticfiles permissions (may be owned by docker)"
-          chmod 755 media 2>/dev/null || echo "⚠️ Could not change media permissions (may be owned by docker)"
-          
-          # Ensure current user can write to these directories if possible
-          sudo chown -R $(whoami):$(whoami) staticfiles 2>/dev/null || echo "⚠️ Could not change staticfiles ownership"
-          sudo chown -R $(whoami):$(whoami) media 2>/dev/null || echo "⚠️ Could not change media ownership"
-          
-          # Install system dependencies for Python packages
-          echo "📦 Checking system dependencies..."
-          # Try to install PostgreSQL development headers and other build tools
-          # If sudo fails, try alternative approaches or skip (packages might already be installed)
-          if command -v apt-get >/dev/null 2>&1; then
-            echo "🔧 Attempting to install PostgreSQL development packages..."
-            sudo apt-get update 2>/dev/null || echo "⚠️ Could not update package list (might not have sudo access)"
-            sudo apt-get install -y postgresql-server-dev-all python3-dev build-essential libpq-dev 2>/dev/null || echo "⚠️ Could not install system packages (might already be installed or no sudo access)"
-          elif command -v yum >/dev/null 2>&1; then
-            echo "🔧 Attempting to install PostgreSQL development packages (CentOS/RHEL)..."
-            sudo yum update -y 2>/dev/null || echo "⚠️ Could not update package list (might not have sudo access)"
-            sudo yum install -y postgresql-devel python3-devel gcc gcc-c++ 2>/dev/null || echo "⚠️ Could not install system packages (might already be installed or no sudo access)"
-          else
-            echo "⚠️ Package manager not recognized, skipping system package installation"
-          fi
-          
-          # Check if pg_config is available (required for psycopg2 compilation)
-          if command -v pg_config >/dev/null 2>&1; then
-            echo "✅ PostgreSQL development tools are available"
-          else
-            echo "⚠️ PostgreSQL development tools not found - using pre-compiled binaries"
-          fi
-          
-          # Update dependencies
-          echo "📦 Updating Python dependencies..."
-          
-          # Detect Python version and choose appropriate requirements file
-          PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-          echo "🐍 Detected Python version: $PYTHON_VERSION"
-          
-          if [ "$PYTHON_VERSION" = "3.6" ]; then
-            REQUIREMENTS_FILE="requirements_py36.txt"
-            echo "📋 Using Python 3.6 compatible requirements"
-          else
-            REQUIREMENTS_FILE="requirements.txt"
-            echo "📋 Using standard requirements"
-          fi
-          
-          # Check if we're in a virtual environment
-          if [ -n "$VIRTUAL_ENV" ]; then
-            pip install --upgrade pip
-            pip install -r $REQUIREMENTS_FILE
-          else
-            # If not in virtual environment, try to activate one or install globally
-            if [ -d "venv" ]; then
-              source venv/bin/activate
-              pip install --upgrade pip
-              pip install -r $REQUIREMENTS_FILE
-            else
-              # Create virtual environment if it doesn't exist
-              python3 -m venv venv
-              source venv/bin/activate
-              pip install --upgrade pip
-              pip install -r $REQUIREMENTS_FILE
-            fi
-          fi
-          
-          # Restart services using Docker Compose
-          echo "🔄 Managing Docker Compose services..."
-          if [ -f docker-compose.yml ]; then
-            echo "🐳 Using Docker Compose for deployment..."
-            
-            # Check if Docker is installed and running
-            echo "🔍 Checking Docker availability..."
-            if ! command -v docker >/dev/null 2>&1; then
-              echo "❌ Docker is not installed or not in PATH"
-              echo "📦 Using traditional deployment..."
-              systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
-              echo "✅ Deployment completed with traditional method"
-              exit 0
-            fi
-            
-            # Check if Docker daemon is running
-            if ! docker info >/dev/null 2>&1; then
-              echo "⚠️ Docker daemon is not running, attempting to start..."
-              sudo systemctl start docker 2>/dev/null || echo "Could not start Docker daemon with systemctl"
-              sudo service docker start 2>/dev/null || echo "Could not start Docker daemon with service"
-              
-              # Wait a moment for Docker to start
-              sleep 5
-              
-              # Check again
-              if ! docker info >/dev/null 2>&1; then
-                echo "❌ Docker daemon failed to start, falling back to traditional deployment"
-                systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
-                echo "✅ Deployment completed with traditional method"
-                exit 0
-              fi
-            fi
-            
-            echo "✅ Docker is available and running"
-            
-            # Check if user can run docker commands (docker group membership)
-            if ! docker version >/dev/null 2>&1; then
-              echo "⚠️ Current user cannot run Docker commands, trying with sudo..."
-              # If user can't run docker directly, we'll need to use sudo for all docker commands
-              DOCKER_CMD="sudo docker"
-              DOCKER_COMPOSE_CMD="sudo docker-compose"
-            else
-              DOCKER_CMD="docker"
-              DOCKER_COMPOSE_CMD="docker-compose"
-            fi
-            
-            # Stop existing containers gracefully
-            echo "⏹️ Stopping existing containers..."
-            $DOCKER_COMPOSE_CMD down --timeout 30 || echo "No containers to stop"
-            
-            # Clean up any orphaned containers and networks
-            echo "🧹 Cleaning up Docker resources..."
-            $DOCKER_CMD system prune -f --volumes || echo "Docker cleanup completed"
-            
-            # Clean application caches
-            echo "🧹 Cleaning application caches..."
-            find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
-            find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
-            find . -name "*.pyo" -delete 2>/dev/null || echo "Could not delete .pyo files"
-            rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
-            
-            # Clear Django cache
-            echo "🧹 Clearing Django cache..."
-            python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" 2>/dev/null || echo "Could not clear Django cache"
-            
-            echo "✅ Application caches cleaned"
-            
-            # Build and start new containers
-            echo "🏗️ Building and starting containers..."
-            $DOCKER_COMPOSE_CMD build --no-cache --pull
-            $DOCKER_COMPOSE_CMD up -d --force-recreate
-            
-            # Wait for services to be ready
-            echo "⏳ Waiting for services to start..."
-            sleep 15
-            
-            # Check if containers are running
-            echo "🔍 Checking container status..."
-            $DOCKER_COMPOSE_CMD ps
-            
-            # Wait for database to be ready (if using PostgreSQL)
-            echo "🗄️ Waiting for database to be ready..."
-            max_attempts=30
-            attempt=1
-            while [ $attempt -le $max_attempts ]; do
-              if $DOCKER_COMPOSE_CMD exec -T web python -c "import django; import os; os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eventlinez.settings'); django.setup(); from django.db import connection; connection.ensure_connection(); print('Database is ready!')" 2>/dev/null; then
-                echo "✅ Database connection successful"
-                break
-              else
-                echo "⏳ Database not ready yet (attempt $attempt/$max_attempts)..."
-                sleep 2
-                attempt=$((attempt + 1))
-              fi
-            done
-            
-            if [ $attempt -gt $max_attempts ]; then
-              echo "⚠️ Database readiness check timed out, but continuing..."
-            fi
-            
-            # Wait for container initialization to complete (includes auto-seeding)
-            echo "⏳ Waiting for container initialization to complete..."
-            sleep 20
-            
-            # Check if container is running and accessible
-            echo "🔍 Verifying container is ready..."
-            max_attempts=15
-            attempt=1
-            while [ $attempt -le $max_attempts ]; do
-              if $DOCKER_COMPOSE_CMD exec -T web python --version >/dev/null 2>&1; then
-                echo "✅ Container is ready and accessible"
-                break
-              else
-                echo "⏳ Container not ready yet (attempt $attempt/$max_attempts)..."
-                sleep 3
-                attempt=$((attempt + 1))
-              fi
-            done
-            
-            # Optional: Force re-seed if needed (manual trigger)
-            if [ "$FORCE_RESEED" = "true" ]; then
-              echo "🔄 Force re-seeding database..."
-              $DOCKER_COMPOSE_CMD exec -T web python manage.py flush --noinput || echo "⚠️ Flush failed"
-              $DOCKER_COMPOSE_CMD exec -T web python manage.py seed_data --force || echo "⚠️ Re-seeding failed"
-            fi
-            
-            # Check Django application status
-            echo "🔍 Checking Django application status..."
-            $DOCKER_COMPOSE_CMD logs --tail=20 web
-            
-            # Clean caches in Docker containers after deployment
-            echo "🧹 Cleaning caches in Docker containers..."
-            $DOCKER_COMPOSE_CMD exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || echo "Could not clear Django cache in container"
-            $DOCKER_COMPOSE_CMD exec -T web find /app -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache in container"
-            $DOCKER_COMPOSE_CMD exec -T web find /app -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files in container"
-            echo "✅ Docker container caches cleaned"
-            
-            echo "✅ Docker services started and ready"
-          else
-            echo "📦 Using traditional deployment..."
-            
-            # Reset database and run seeders for test environment (traditional deployment)
-            echo "🗑️ Resetting database for fresh test data..."
-            python manage.py flush --noinput || echo "⚠️ Database flush failed, continuing..."
-            
-            echo "🗄️ Running migrations..."
-            python manage.py migrate --noinput
-            
-            echo "📊 Creating database views..."
-            python manage.py create_sales_view --force || echo "⚠️ View creation failed, continuing..."
-            
-            echo "🌱 Seeding database with test data..."
-            python manage.py seed_data --force
-            
-            echo "📁 Collecting static files..."
-            python manage.py collectstatic --noinput
-            
-          # Clean caches after deployment
-          echo "🧹 Cleaning caches after deployment..."
-          python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || echo "Could not clear Django cache"
-          find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
-          find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
-          find . -name "*.pyo" -delete 2>/dev/null || echo "Could not delete .pyo files"
-          pip cache purge 2>/dev/null || echo "Could not clear pip cache"
+          # Temporary files
           rm -rf /tmp/eventlinez_* 2>/dev/null || echo "Could not clear temp files"
           rm -rf /tmp/django_* 2>/dev/null || echo "Could not clear Django temp files"
           
-          # Clear static files cache
-          echo "📁 Clearing static files cache..."
-          rm -rf staticfiles/* 2>/dev/null || echo "Could not clear static files"
-          python manage.py collectstatic --noinput --clear 2>/dev/null || echo "Could not collect static files"
+          # Pip caches
+          pip cache purge 2>/dev/null || echo "Could not clear pip cache"
           
-          # Clear media cache
-          echo "🖼️ Clearing media cache..."
-          find media/ -name "*.tmp" -delete 2>/dev/null || echo "Could not clear media temp files"
+          echo "✅ Comprehensive cache cleaning completed"
           
-          # Clear system cache
-          echo "💾 Clearing system cache..."
-          sync 2>/dev/null || echo "Could not sync"
-          echo 3 > /proc/sys/vm/drop_caches 2>/dev/null || echo "Could not clear system cache"
-          
-          # Clear nginx cache
-          echo "🌐 Clearing nginx cache..."
-          rm -rf /var/cache/nginx/* 2>/dev/null || echo "Could not clear nginx cache"
-          nginx -s reload 2>/dev/null || echo "Could not reload nginx"
-          
-          echo "✅ Caches cleaned after deployment"
+          # Detect deployment method and proceed accordingly
+          if [ -f docker-compose.yml ]; then
+            echo "🐳 Using Docker Compose deployment..."
             
-            systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
-            # Try to reload nginx if available
-            systemctl reload nginx 2>/dev/null || echo "Nginx not available or no permission"
-          fi
-          
-          # Fix nginx static file configuration
-          echo "🌐 Fixing nginx static files configuration..."
-          echo "📋 Nginx configuration will be applied during automatic fix if needed"
-          
-          # Check if static files exist and are accessible
-          echo "🔍 Checking static files..."
-          if [ -d "/app/eventlinez/staticfiles" ]; then
-            echo "✅ Static files directory exists"
-            ls -la /app/eventlinez/staticfiles/ | head -10
-          else
-            echo "❌ Static files directory missing"
-          fi
-          
-          # Test direct file access
-          if [ -f "/app/eventlinez/staticfiles/css/bootstrap.min.css" ]; then
-            echo "✅ Bootstrap CSS file exists"
-          else
-            echo "❌ Bootstrap CSS file missing"
-            echo "📋 Contents of staticfiles/css/:"
-            ls -la /app/eventlinez/staticfiles/css/ 2>/dev/null || echo "CSS directory not found"
-          fi
-          
-          # Health check
-          echo "🏥 Performing health check..."
-          sleep 10
-          curl -f http://localhost:8000/admin/ || echo "⚠️ Health check failed"
-          
-          # Test static files and fix nginx if needed
-          echo "🧪 Testing static file serving..."
-          if curl -I https://test.eventlinez.com/static/css/bootstrap.min.css | grep -q "404"; then
-            echo "❌ Static files not working - applying nginx fix..."
-            
-            # Download and run the nginx fix script from the repository
-            if [ -f "./fix-nginx-complete.sh" ]; then
-              echo "🔧 Running nginx fix script..."
-              chmod +x ./fix-nginx-complete.sh
-              sudo ./fix-nginx-complete.sh || echo "⚠️ Nginx fix script failed, continuing..."
-              
-              # Test static files again after fix
-              echo "🔄 Re-testing static files after nginx fix..."
-              sleep 5
-              if curl -I https://test.eventlinez.com/static/css/bootstrap.min.css | grep -q "200\|304"; then
-                echo "✅ Static files now working!"
-              else
-                echo "⚠️ Static files still not working - manual intervention may be needed"
-                echo "📋 Debug info:"
-                echo "  - Check /etc/nginx/sites-available/eventlinez"
-                echo "  - Check /app/eventlinez/staticfiles/ directory"
-                echo "  - Run: sudo nginx -t && sudo systemctl reload nginx"
-              fi
+            # Verify Docker is available
+            if ! command -v docker >/dev/null 2>&1; then
+              echo "❌ Docker not available, falling back to traditional deployment"
+              USE_DOCKER=false
+            elif ! docker info >/dev/null 2>&1; then
+              echo "❌ Docker daemon not running, falling back to traditional deployment"
+              USE_DOCKER=false
             else
-              echo "⚠️ Nginx fix script not found - manual intervention needed"
+              USE_DOCKER=true
+            fi
+            
+            if [ "$USE_DOCKER" = "true" ]; then
+              # Docker deployment
+              DOCKER_CMD="docker"
+              DOCKER_COMPOSE_CMD="docker-compose"
+              
+              # Test Docker permissions
+              if ! docker version >/dev/null 2>&1; then
+                DOCKER_CMD="sudo docker"
+                DOCKER_COMPOSE_CMD="sudo docker-compose"
+              fi
+              
+              # Force rebuild containers with no cache
+              echo "🏗️ Force rebuilding containers..."
+              $DOCKER_COMPOSE_CMD down --volumes --remove-orphans
+              $DOCKER_CMD system prune -af --volumes
+              $DOCKER_COMPOSE_CMD build --no-cache --pull
+              
+              # Start containers
+              echo "🚀 Starting fresh containers..."
+              $DOCKER_COMPOSE_CMD up -d --force-recreate
+              
+              # Wait for services
+              echo "⏳ Waiting for services to be ready..."
+              sleep 30
+              
+              # Verify containers are running
+              echo "🔍 Verifying container status..."
+              $DOCKER_COMPOSE_CMD ps
+              
+              # Health check
+              max_attempts=20
+              attempt=1
+              while [ $attempt -le $max_attempts ]; do
+                if $DOCKER_COMPOSE_CMD exec -T web python --version >/dev/null 2>&1; then
+                  echo "✅ Container health check passed"
+                  break
+                else
+                  echo "⏳ Container not ready yet (attempt $attempt/$max_attempts)..."
+                  sleep 5
+                  attempt=$((attempt + 1))
+                fi
+              done
+              
+              # Clean caches inside container
+              echo "🧹 Cleaning caches inside container..."
+              $DOCKER_COMPOSE_CMD exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || echo "Could not clear Django cache in container"
+              
+              DEPLOYMENT_METHOD="Docker"
+            else
+              USE_DOCKER=false
             fi
           else
-            echo "✅ Static files are working correctly"
+            USE_DOCKER=false
           fi
           
+          if [ "$USE_DOCKER" = "false" ]; then
+            echo "📦 Using traditional deployment..."
+            
+            # Update dependencies
+            echo "📦 Updating dependencies..."
+            PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+            
+            if [ "$PYTHON_VERSION" = "3.6" ]; then
+              REQUIREMENTS_FILE="requirements_py36.txt"
+            else
+              REQUIREMENTS_FILE="requirements.txt"
+            fi
+            
+            # Virtual environment handling
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r $REQUIREMENTS_FILE
+            
+            # Database operations
+            echo "🗄️ Running database operations..."
+            python manage.py migrate --noinput
+            python manage.py create_sales_view --force || echo "View creation failed"
+            
+            # Static files
+            echo "📁 Collecting static files..."
+            python manage.py collectstatic --noinput --clear
+            
+            # Start service
+            echo "🚀 Starting application service..."
+            systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
+            
+            DEPLOYMENT_METHOD="Traditional"
+          fi
+          
+          # Final verification
+          echo "🔍 Final deployment verification..."
+          
+          # Create version info file for verification
+          cat > version_info.json << EOL
+{
+  "deployment_time": "${{ steps.deploy_info.outputs.timestamp }}",
+  "commit_sha": "${{ steps.deploy_info.outputs.commit_sha }}",
+  "commit_short": "${{ steps.deploy_info.outputs.commit_short }}",
+  "branch": "${{ steps.deploy_info.outputs.branch_name }}",
+  "commit_message": "${{ steps.deploy_info.outputs.commit_message }}",
+  "deployment_method": "$DEPLOYMENT_METHOD"
+}
+EOL
+          
+          # Make version info accessible via web
+          cp version_info.json staticfiles/ 2>/dev/null || echo "Could not copy version info to static files"
+          
+          # Test application
+          echo "🏥 Testing application..."
+          sleep 15
+          
+          # Test local access
+          if curl -f http://localhost:8000/ >/dev/null 2>&1; then
+            echo "✅ Local application test passed"
+          else
+            echo "⚠️ Local application test failed"
+          fi
+          
+          # Test static files
+          echo "🧪 Testing static files..."
+          if [ -f "staticfiles/css/bootstrap.min.css" ]; then
+            echo "✅ Static files are present"
+          else
+            echo "❌ Static files missing - running collection again..."
+            python manage.py collectstatic --noinput --clear
+          fi
+          
+          # Final git verification
+          final_commit=$(git rev-parse HEAD)
+          echo "🔍 Final commit verification: $final_commit"
+          
+          # Update deployment log
+          cat >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log << EOL
+Deployment Method: $DEPLOYMENT_METHOD
+Final Commit: $final_commit
+Deployment Completed: $(date)
+Status: SUCCESS
+EOL
+          
           echo "✅ Deployment completed successfully!"
+          echo "📋 Deployment Summary:"
+          echo "   - Method: $DEPLOYMENT_METHOD"
+          echo "   - Commit: $final_commit"
+          echo "   - Time: $(date)"
         EOF
+    
+    - name: Verify Deployment
+      if: steps.check_ssh.outputs.deployment_enabled == 'true'
+      env:
+        TEST_SERVER_HOST: ${{ secrets.TEST_SERVER_HOST }}
+        TEST_SERVER_USER: ${{ secrets.TEST_SERVER_USER }}
+        TEST_SERVER_PASSWORD: ${{ secrets.TEST_SERVER_PASSWORD }}
+      run: |
+        echo "🔍 Verifying deployment..."
+        
+        # Wait a moment for services to stabilize
+        sleep 30
+        
+        # Test public access
+        if curl -f https://test.eventlinez.com/ >/dev/null 2>&1; then
+          echo "✅ Public site is accessible"
+        else
+          echo "⚠️ Public site test failed"
+        fi
+        
+        # Test version endpoint if available
+        if curl -f https://test.eventlinez.com/static/version_info.json >/dev/null 2>&1; then
+          echo "✅ Version info is accessible"
+          curl -s https://test.eventlinez.com/static/version_info.json
+        else
+          echo "⚠️ Version info not accessible"
+        fi
     
     - name: Notify Deployment Status
       if: always() && steps.check_ssh.outputs.deployment_enabled == 'true'
       run: |
         if [ "${{ job.status }}" == "success" ]; then
           echo "✅ Deployment to test.eventlinez.com completed successfully!"
+          echo "🌐 Site: https://test.eventlinez.com/"
+          echo "📊 Commit: ${{ steps.deploy_info.outputs.commit_short }}"
+          echo "⏰ Time: ${{ steps.deploy_info.outputs.timestamp }}"
         else
           echo "❌ Deployment failed!"
+          echo "📋 Check the deployment logs for details"
         fi
 
   security-scan:
