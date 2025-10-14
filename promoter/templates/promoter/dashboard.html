@@ -947,7 +947,7 @@
                     </div>
                     <div class="activity-content">
                         <div class="activity-title">
-                            <a href="{% url 'update_event' event.id %}" style="color: inherit; text-decoration: none;">
+                            <a href="{% url 'promoter:update_event' event.id %}" style="color: inherit; text-decoration: none;">
                                 {{ event.name|truncatechars:25 }}
                             </a>
                         </div>
@@ -962,7 +962,7 @@
                 {% endfor %}
             </ul>
             <div class="text-center mt-3">
-                <a href="{% url 'events_promoter' %}" class="btn btn-outline-primary btn-sm">
+                <a href="{% url 'promoter:events_promoter' %}" class="btn btn-outline-primary btn-sm">
                     View All Events
                 </a>
             </div>
@@ -989,7 +989,7 @@
                     </div>
                     <div class="activity-content">
                         <div class="activity-title">
-                            <a href="{% url 'update_event' event.id %}" style="color: inherit; text-decoration: none;">
+                            <a href="{% url 'promoter:update_event' event.id %}" style="color: inherit; text-decoration: none;">
                                 {{ event.name|truncatechars:25 }}
                             </a>
                         </div>
@@ -1004,7 +1004,7 @@
                 {% endfor %}
             </ul>
             <div class="text-center mt-3">
-                <a href="{% url 'events_promoter' %}" class="btn btn-outline-success btn-sm">
+                <a href="{% url 'promoter:events_promoter' %}" class="btn btn-outline-success btn-sm">
                     Manage Events
                 </a>
             </div>

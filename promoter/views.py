@@ -91,9 +91,9 @@ def signin_view_promoter(request):
             promoter = authenticate(username=username, password=password)
             if promoter is not None:
                 login(request, promoter)
-                return redirect('promoter_dashboard')  # Redirect to new dashboard
+                return redirect('promoter:promoter_dashboard')  # Use namespaced URL
             else:
-                return redirect('signup_promoter')
+                return redirect('promoter:signup_promoter')
     else:
         form = SignInPromoterForm()
     return render(request, 'promoter/signin_promoter_new.html', {'form': form})

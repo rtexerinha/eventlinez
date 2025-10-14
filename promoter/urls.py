@@ -13,6 +13,8 @@ from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, Categor
     EventCreateAPIView, PartnerCreateAPIView, PartnerUpdateAPIView, PartnerListView, \
     EventCreateAPIView, TicketSoldOutUpdateAPIView
 
+app_name = 'promoter'
+
 urlpatterns = [
     # Dashboard - Main promoter landing page
     path('dashboard/', promoter_dashboard, name='promoter_dashboard'),

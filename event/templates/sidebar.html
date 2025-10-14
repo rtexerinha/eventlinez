@@ -19,13 +19,13 @@
                     id="dashboardSubmenu" data-parent="#sidenavAccordion">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link {% if 'promoter_dashboard' in request.resolver_match.url_name %} active {% endif %}"
-                            href="{% url 'promoter_dashboard' %}">
+                            href="{% url 'promoter:promoter_dashboard' %}">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-chart-line"></i>
                             </div>
                             Overview
                         </a>
-                        <a class="nav-link" href="{% url 'promoter_dashboard' %}#analytics">
+                        <a class="nav-link" href="{% url 'promoter:promoter_dashboard' %}#analytics">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-analytics"></i>
                             </div>
@@ -49,14 +49,14 @@
                     id="eventsSubmenu" data-parent="#sidenavAccordion">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link {% if 'events_promoter' in request.resolver_match.url_name %} active {% endif %}"
-                            href="{% url 'events_promoter' %}">
+                            href="{% url 'promoter:events_promoter' %}">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-list"></i>
                             </div>
                             All Events
                         </a>
                         <a class="nav-link {% if 'new_events' in request.resolver_match.url_name %} active {% endif %}"
-                            href="{% url 'new_events' %}">
+                            href="{% url 'promoter:new_events' %}">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-plus"></i>
                             </div>
@@ -69,7 +69,7 @@
                 <div class="sb-sidenav-menu-heading">Tickets</div>
 
                 <a class="nav-link {% if 'ticket_list' in request.resolver_match.url_name %} active {% endif %}"
-                    href="{% url 'ticket_list' %}">
+                    href="{% url 'promoter:ticket_list' %}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-ticket-alt"></i>
                     </div>
@@ -77,7 +77,7 @@
                 </a>
 
                 <a class="nav-link {% if 'tickets_validate' in request.resolver_match.url_name %} active {% endif %}"
-                    href="{% url 'tickets_validate' %}">
+                    href="{% url 'promoter:tickets_validate' %}">
                     <div class="sb-nav-link-icon">
                         <i class="fa fa-list-alt"></i>
                     </div>
@@ -88,7 +88,7 @@
                 <div class="sb-sidenav-menu-heading">Management</div>
 
                 <a class="nav-link {% if 'promo_codes' in request.resolver_match.url_name %} active {% endif %}"
-                    href="{% url 'promo_codes_list' %}">
+                    href="{% url 'promoter:promo_codes_list' %}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-tags"></i>
                     </div>
@@ -96,7 +96,7 @@
                 </a>
 
                 <a class="nav-link {% if 'vendors' in request.resolver_match.url_name %} active {% endif %}"
-                    href="{% url 'vendors_list' %}">
+                    href="{% url 'promoter:vendors_list' %}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-users"></i>
                     </div>
@@ -118,7 +118,7 @@
                     id="reportsSubmenu" data-parent="#sidenavAccordion">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link {% if 'vendors_reports' in request.resolver_match.url_name %} active {% endif %}"
-                            href="{% url 'vendors_reports' %}">
+                            href="{% url 'promoter:vendors_reports' %}">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-chart-pie"></i>
                             </div>
@@ -137,7 +137,7 @@
                 <div class="sb-sidenav-menu-heading">Financial</div>
 
                 <a class="nav-link {% if 'payment' in request.resolver_match.url_name %} active {% endif %}"
-                    href="{% url 'payment_list' %}">
+                    href="{% url 'promoter:payment_list' %}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-dollar-sign"></i>
                     </div>
