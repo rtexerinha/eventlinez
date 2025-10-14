@@ -53,7 +53,7 @@
 
                 {% if request.user.promoter %}
                     <li class="nav-item mt-lg-2 mt-xl-2">
-                        <a class="nav-link"  href="{% url 'events_promoter' %}">
+                        <a class="nav-link"  href="{% url 'promoter:events_promoter' %}">
 {#                             <i class="fas fa-ticket-alt" style="margin-right: 5px"></i>#}
                             <h6 class="weight-height h6-home">Panel Admin</h6>
                         </a>
@@ -182,7 +182,7 @@
 
 
             <a class="buttons-primary mr-lg-5 my-2 my-sm-0 buttons-primary"
-               style="padding: 13px; text-decoration: none;" href="{% url 'events_promoter' %}">
+               style="padding: 13px; text-decoration: none;" href="{% url 'promoter:events_promoter' %}">
                 Organize your event
             </a>
 
