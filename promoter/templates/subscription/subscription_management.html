@@ -1,0 +1,429 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% block title %}Subscription Management - Eventlinez{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #d90075;
+        --secondary-color: #ff6b9d;
+        --success-color: #28a745;
+        --info-color: #17a2b8;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --dark-color: #2c3e50;
+        --light-color: #f8f9fa;
+        --border-color: #e9ecef;
+        --text-muted: #6c757d;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 4px 15px rgba(0, 0, 0, 0.15);
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    .subscription-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .subscription-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        box-shadow: var(--shadow);
+    }
+
+    .subscription-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .status-active {
+        background: rgba(40, 167, 69, 0.1);
+        color: var(--success-color);
+        border: 1px solid var(--success-color);
+    }
+
+    .status-cancelled {
+        background: rgba(220, 53, 69, 0.1);
+        color: var(--danger-color);
+        border: 1px solid var(--danger-color);
+    }
+
+    .subscription-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-item {
+        background: var(--light-color);
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .detail-label {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--dark-color);
+    }
+
+    .cancel-section {
+        background: rgba(220, 53, 69, 0.05);
+        border: 1px solid rgba(220, 53, 69, 0.2);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .cancel-warning {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid var(--warning-color);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-cancel-subscription {
+        background: var(--danger-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-cancel-subscription:hover {
+        background: #c82333;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .btn-reactivate {
+        background: var(--success-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .btn-reactivate:hover {
+        background: #218838;
+        transform: translateY(-1px);
+    }
+
+    .features-list {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+    }
+
+    .features-list li {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .features-list li i {
+        color: var(--success-color);
+        margin-right: 0.75rem;
+        width: 20px;
+    }
+
+    .cancelled-features-list li i {
+        color: var(--text-muted);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modal-content {
+        border-radius: var(--border-radius);
+        border: none;
+        box-shadow: var(--shadow-hover);
+    }
+
+    .modal-header {
+        background: var(--danger-color);
+        color: white;
+        border-bottom: none;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 768px) {
+        .subscription-container {
+            padding: 1rem;
+        }
+
+        .subscription-header {
+            padding: 1.5rem;
+        }
+
+        .subscription-details {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="subscription-container">
+    <!-- Subscription Header -->
+    <div class="subscription-header">
+        <h1><i class="fas fa-credit-card me-3"></i>Subscription Management</h1>
+        <p class="mb-0">Manage your Eventlinez promoter subscription</p>
+    </div>
+
+    <!-- Current Subscription Status -->
+    <div class="subscription-card">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Current Subscription
+            </h2>
+            {% if subscription.is_active %}
+                <span class="status-badge status-active">
+                    <i class="fas fa-check-circle me-1"></i>Active
+                </span>
+            {% else %}
+                <span class="status-badge status-cancelled">
+                    <i class="fas fa-times-circle me-1"></i>Cancelled
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="subscription-details">
+            <div class="detail-item">
+                <div class="detail-label">Plan</div>
+                <div class="detail-value">{{ subscription.plan_name|default:"Promoter Pro" }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Monthly Fee</div>
+                <div class="detail-value">${{ subscription.monthly_fee|default:"29.99" }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Next Billing Date</div>
+                <div class="detail-value">
+                    {% if subscription.is_active %}
+                        {{ subscription.next_billing_date|date:"M d, Y"|default:"Jan 15, 2025" }}
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Member Since</div>
+                <div class="detail-value">{{ subscription.created_date|date:"M d, Y"|default:"Dec 15, 2024" }}</div>
+            </div>
+        </div>
+
+        <!-- Plan Features -->
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Plan Features</h4>
+                <ul class="features-list {% if not subscription.is_active %}cancelled-features-list{% endif %}">
+                    <li><i class="fas fa-check"></i>Unlimited event creation</li>
+                    <li><i class="fas fa-check"></i>Advanced analytics dashboard</li>
+                    <li><i class="fas fa-check"></i>Promo code management</li>
+                    <li><i class="fas fa-check"></i>Vendor management system</li>
+                    <li><i class="fas fa-check"></i>Priority customer support</li>
+                    <li><i class="fas fa-check"></i>Custom branding options</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h4>Billing Information</h4>
+                <p><strong>Payment Method:</strong> {{ subscription.payment_method|default:"•••• •••• •••• 4242" }}</p>
+                <p><strong>Billing Email:</strong> {{ promoter.email }}</p>
+                {% if subscription.is_active %}
+                    <p><strong>Auto-renewal:</strong> <span class="text-success">Enabled</span></p>
+                {% else %}
+                    <p><strong>Auto-renewal:</strong> <span class="text-danger">Disabled</span></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if subscription.is_active %}
+        <!-- Cancel Subscription Section -->
+        <div class="cancel-section">
+            <h3 class="section-title text-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Cancel Subscription
+            </h3>
+            
+            <div class="cancel-warning">
+                <h5><i class="fas fa-warning me-2"></i>Important Information</h5>
+                <ul class="mb-0">
+                    <li>Your subscription will remain active until the end of your current billing period</li>
+                    <li>You'll continue to have access to all features until {{ subscription.next_billing_date|date:"M d, Y"|default:"Jan 15, 2025" }}</li>
+                    <li>After cancellation, you can reactivate anytime before your access expires</li>
+                    <li>All your event data and settings will be preserved</li>
+                </ul>
+            </div>
+
+            <div class="d-flex gap-3">
+                <button type="button" class="btn-cancel-subscription" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                    <i class="fas fa-times me-2"></i>Cancel Subscription
+                </button>
+                <a href="{% url 'promoter:promoter_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <!-- Reactivate Subscription Section -->
+        <div class="subscription-card">
+            <h3 class="section-title text-success">
+                <i class="fas fa-refresh"></i>
+                Reactivate Subscription
+            </h3>
+            <p class="text-muted mb-3">
+                Your subscription was cancelled but you can reactivate it anytime to regain access to all premium features.
+            </p>
+            <div class="d-flex gap-3">
+                <form method="post" action="{% url 'promoter:reactivate_subscription' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-reactivate">
+                        <i class="fas fa-play me-2"></i>Reactivate Subscription
+                    </button>
+                </form>
+                <a href="{% url 'promoter:promoter_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Subscription Cancellation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-sad-tear text-muted" style="font-size: 3rem;"></i>
+                </div>
+                <h5 class="text-center mb-3">We're sorry to see you go!</h5>
+                <p class="text-muted text-center mb-4">
+                    Are you sure you want to cancel your subscription? You'll lose access to premium features after your current billing period ends.
+                </p>
+                
+                <!-- Cancellation Reason (Optional) -->
+                <div class="mb-3">
+                    <label for="cancellationReason" class="form-label">
+                        <strong>Help us improve - Why are you cancelling?</strong> (Optional)
+                    </label>
+                    <select class="form-select" id="cancellationReason" name="cancellation_reason">
+                        <option value="">Select a reason...</option>
+                        <option value="too_expensive">Too expensive</option>
+                        <option value="not_using_features">Not using enough features</option>
+                        <option value="found_alternative">Found a better alternative</option>
+                        <option value="technical_issues">Technical issues</option>
+                        <option value="business_closure">Closing business</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>What happens next?</h6>
+                    <ul class="mb-0 small">
+                        <li>Your subscription will remain active until {{ subscription.next_billing_date|date:"M d, Y"|default:"Jan 15, 2025" }}</li>
+                        <li>No further charges will be made</li>
+                        <li>You can reactivate anytime before access expires</li>
+                        <li>All your data will be safely preserved</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Keep Subscription
+                </button>
+                <form method="post" action="{% url 'promoter:cancel_subscription' %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="cancellation_reason" id="hiddenReason" value="">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-check me-2"></i>Yes, Cancel Subscription
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update hidden reason field when modal reason changes
+    const reasonSelect = document.getElementById('cancellationReason');
+    const hiddenReason = document.getElementById('hiddenReason');
+    
+    reasonSelect.addEventListener('change', function() {
+        hiddenReason.value = this.value;
+    });
+    
+    // Add confirmation animation
+    const cancelBtn = document.querySelector('.btn-cancel-subscription');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        });
+    }
+});
+</script>
+{% endblock content %}

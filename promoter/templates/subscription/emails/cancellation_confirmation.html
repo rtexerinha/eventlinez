@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Cancelled - Eventlinez</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #d90075;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #d90075;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #2c3e50;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        .content {
+            margin-bottom: 25px;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #d90075;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .info-box h4 {
+            margin-top: 0;
+            color: #d90075;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #d90075;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 10px 5px;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎫 Eventlinez</div>
+            <h1 class="title">Subscription Cancelled</h1>
+        </div>
+
+        <div class="content">
+            <p>Hi {{ promoter.user.first_name|default:"there" }},</p>
+            
+            <p>We've processed your subscription cancellation request. While we're sad to see you go, we want to make sure you have all the important details.</p>
+
+            <div class="info-box">
+                <h4>📋 Cancellation Details</h4>
+                <ul>
+                    <li><strong>Cancelled on:</strong> {{ subscription.cancelled_date|date:"F d, Y" }}</li>
+                    <li><strong>Access continues until:</strong> {{ subscription.expires_date|date:"F d, Y" }}</li>
+                    <li><strong>Plan:</strong> {{ subscription.get_plan_display }}</li>
+                    {% if subscription.cancellation_reason %}
+                    <li><strong>Reason:</strong> {{ subscription.get_cancellation_reason_display }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="highlight">
+                <strong>🔔 Important:</strong> Your subscription will remain active until {{ subscription.expires_date|date:"F d, Y" }}. You can continue using all premium features until then, and you can reactivate anytime before your access expires.
+            </div>
+
+            <h3>What happens next?</h3>
+            <ul>
+                <li>✅ No further charges will be made to your payment method</li>
+                <li>✅ You'll keep access to all features until {{ subscription.expires_date|date:"F d, Y" }}</li>
+                <li>✅ All your event data and settings are safely preserved</li>
+                <li>✅ You can reactivate anytime before your access expires</li>
+            </ul>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{% url 'promoter:subscription_management' %}" class="btn">Reactivate Subscription</a>
+                <a href="{% url 'promoter:promoter_dashboard' %}" class="btn btn-secondary">Go to Dashboard</a>
+            </div>
+
+            <p>If you have any questions or if there's anything we could have done better, please don't hesitate to reach out to our support team. We'd love to hear your feedback!</p>
+
+            <p>Thank you for being part of the Eventlinez community. We hope to welcome you back soon! 🎉</p>
+        </div>
+
+        <div class="footer">
+            <p>Best regards,<br>The Eventlinez Team</p>
+            <p>
+                <a href="mailto:support@eventlinez.com">support@eventlinez.com</a> | 
+                <a href="https://eventlinez.com">eventlinez.com</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -14,7 +14,7 @@ from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
 from promoter.forms import BankAccountForm, PromoCodeForm
-from promoter.models import Payment, Vendor, SalesByVendor, BankAccount, get_balance, PromoCode
+from promoter.models import Payment, Vendor, SalesByVendor, BankAccount, get_balance, PromoCode, Subscription
 
 from django.http import HttpResponse
 from io import BytesIO
@@ -782,6 +782,13 @@ def promoter_dashboard(request):
                     'color': 'warning',
                     'description': 'Create and manage discount codes'
                 },
+                {
+                    'title': 'Subscription',
+                    'url': 'promoter:subscription_management',
+                    'icon': 'fas fa-user-cog',
+                    'color': 'secondary',
+                    'description': 'Manage your subscription and billing'
+                },
             ]
         }
         
@@ -791,3 +798,154 @@ def promoter_dashboard(request):
         logger.error(f"Unexpected error in promoter_dashboard: {e}")
         messages.error(request, "An error occurred while loading the dashboard.")
         return redirect('promoter:signup_promoter')
+
+
+@login_required(login_url='/promoter/account/login/')
+def subscription_management(request):
+    """
+    Subscription management page for promoters
+    """
+    try:
+        # Check if user has promoter profile first
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            logger.error(f"User {request.user.username} does not have promoter profile")
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+            
+        promoter = request.user.promoter
+        
+        # Get or create subscription
+        subscription, created = Subscription.objects.get_or_create(
+            promoter=promoter,
+            defaults={
+                'plan': 'pro',
+                'status': 'active',
+                'next_billing_date': timezone.now() + timedelta(days=30),
+            }
+        )
+        
+        context = {
+            'promoter': promoter,
+            'subscription': subscription,
+        }
+        
+        return render(request, 'subscription/subscription_management.html', context)
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in subscription_management: {e}")
+        messages.error(request, "An error occurred while loading subscription information.")
+        return redirect('promoter:promoter_dashboard')
+
+
+@login_required(login_url='/promoter/account/login/')
+def cancel_subscription(request):
+    """
+    Cancel promoter subscription
+    """
+    try:
+        # Check if user has promoter profile first
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            logger.error(f"User {request.user.username} does not have promoter profile")
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+            
+        if request.method == 'POST':
+            promoter = request.user.promoter
+            
+            try:
+                subscription = Subscription.objects.get(promoter=promoter)
+                
+                # Get cancellation reason from form
+                cancellation_reason = request.POST.get('cancellation_reason', '')
+                
+                # Cancel the subscription
+                subscription.cancel(reason=cancellation_reason if cancellation_reason else None)
+                
+                # Send cancellation confirmation email
+                try:
+                    from django.core.mail import EmailMessage
+                    from django.template.loader import render_to_string
+                    
+                    subject = "Subscription Cancelled - Eventlinez"
+                    message = render_to_string('subscription/emails/cancellation_confirmation.html', {
+                        'promoter': promoter,
+                        'subscription': subscription,
+                    })
+                    
+                    email = EmailMessage(
+                        subject=subject,
+                        body=message,
+                        from_email="noreply@eventlinez.com",
+                        to=[promoter.user.email],
+                    )
+                    email.content_subtype = "html"
+                    email.send()
+                    
+                    logger.info(f"Cancellation confirmation email sent to {promoter.user.email}")
+                except Exception as e:
+                    logger.error(f"Failed to send cancellation email to {promoter.user.email}: {e}")
+                
+                # Log the cancellation
+                logger.info(f"Subscription cancelled for promoter {promoter.user.email}. Reason: {cancellation_reason}")
+                
+                messages.success(
+                    request, 
+                    f'Your subscription has been cancelled successfully. '
+                    f'You will continue to have access until {subscription.expires_date.strftime("%B %d, %Y")} '
+                    f'and can reactivate anytime before then. A confirmation email has been sent to you.'
+                )
+                
+                return redirect('promoter:subscription_management')
+                
+            except Subscription.DoesNotExist:
+                messages.error(request, "No active subscription found.")
+                return redirect('promoter:subscription_management')
+        else:
+            return redirect('promoter:subscription_management')
+            
+    except Exception as e:
+        logger.error(f"Unexpected error in cancel_subscription: {e}")
+        messages.error(request, "An error occurred while cancelling your subscription.")
+        return redirect('promoter:subscription_management')
+
+
+@login_required(login_url='/promoter/account/login/')
+def reactivate_subscription(request):
+    """
+    Reactivate a cancelled subscription
+    """
+    try:
+        # Check if user has promoter profile first
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            logger.error(f"User {request.user.username} does not have promoter profile")
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+            
+        if request.method == 'POST':
+            promoter = request.user.promoter
+            
+            try:
+                subscription = Subscription.objects.get(promoter=promoter)
+                
+                if subscription.reactivate():
+                    logger.info(f"Subscription reactivated for promoter {promoter.user.email}")
+                    messages.success(
+                        request, 
+                        'Your subscription has been reactivated successfully! '
+                        f'Your next billing date is {subscription.next_billing_date.strftime("%B %d, %Y")}.'
+                    )
+                else:
+                    messages.error(request, "Unable to reactivate subscription. Please contact support.")
+                
+                return redirect('promoter:subscription_management')
+                
+            except Subscription.DoesNotExist:
+                messages.error(request, "No subscription found.")
+                return redirect('promoter:subscription_management')
+        else:
+            return redirect('promoter:subscription_management')
+            
+    except Exception as e:
+        logger.error(f"Unexpected error in reactivate_subscription: {e}")
+        messages.error(request, "An error occurred while reactivating your subscription.")
+        return redirect('promoter:subscription_management')

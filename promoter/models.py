@@ -241,3 +241,106 @@ class PromoCodeUsage(models.Model):
     def __str__(self):
         return f"{self.promo_code.code} used by {self.customer_email}"
 
+
+class Subscription(models.Model):
+    """Promoter subscription management"""
+    PLAN_CHOICES = [
+        ('basic', 'Basic Plan'),
+        ('pro', 'Promoter Pro'),
+        ('enterprise', 'Enterprise'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('cancelled', 'Cancelled'),
+        ('expired', 'Expired'),
+        ('suspended', 'Suspended'),
+    ]
+    
+    CANCELLATION_REASONS = [
+        ('too_expensive', 'Too expensive'),
+        ('not_using_features', 'Not using enough features'),
+        ('found_alternative', 'Found a better alternative'),
+        ('technical_issues', 'Technical issues'),
+        ('business_closure', 'Closing business'),
+        ('other', 'Other'),
+    ]
+    
+    promoter = models.OneToOneField(Promoter, on_delete=models.CASCADE, related_name='subscription')
+    plan = models.CharField(max_length=20, choices=PLAN_CHOICES, default='pro')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    
+    # Billing information
+    monthly_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('29.99'))
+    next_billing_date = models.DateTimeField()
+    last_billing_date = models.DateTimeField(null=True, blank=True)
+    
+    # Subscription lifecycle
+    created_date = models.DateTimeField(auto_now_add=True)
+    cancelled_date = models.DateTimeField(null=True, blank=True)
+    expires_date = models.DateTimeField(null=True, blank=True)
+    
+    # Cancellation details
+    cancellation_reason = models.CharField(
+        max_length=50, 
+        choices=CANCELLATION_REASONS, 
+        null=True, 
+        blank=True
+    )
+    cancellation_feedback = models.TextField(blank=True, null=True)
+    
+    # Payment details
+    payment_method = models.CharField(max_length=100, default='•••• •••• •••• 4242')
+    stripe_subscription_id = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        verbose_name = 'Subscription'
+        verbose_name_plural = 'Subscriptions'
+        ordering = ['-created_date']
+    
+    def __str__(self):
+        return f"{self.promoter.user.email} - {self.get_plan_display()} ({self.get_status_display()})"
+    
+    @property
+    def is_active(self):
+        """Check if subscription is currently active"""
+        return self.status == 'active'
+    
+    @property
+    def plan_name(self):
+        """Get human-readable plan name"""
+        return self.get_plan_display()
+    
+    def cancel(self, reason=None, feedback=None):
+        """Cancel the subscription"""
+        from django.utils import timezone
+        
+        self.status = 'cancelled'
+        self.cancelled_date = timezone.now()
+        self.expires_date = self.next_billing_date  # Access until next billing date
+        
+        if reason:
+            self.cancellation_reason = reason
+        if feedback:
+            self.cancellation_feedback = feedback
+            
+        self.save()
+    
+    def reactivate(self):
+        """Reactivate a cancelled subscription"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        if self.status == 'cancelled':
+            self.status = 'active'
+            self.cancelled_date = None
+            self.expires_date = None
+            self.cancellation_reason = None
+            self.cancellation_feedback = None
+            
+            # Set next billing date to 30 days from now
+            self.next_billing_date = timezone.now() + timedelta(days=30)
+            self.save()
+            return True
+        return False
+

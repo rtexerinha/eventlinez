@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from promoter.models import Vendor, BankAccount, Payment, Partner, PromoCode, PromoCodeUsage
+from promoter.models import Vendor, BankAccount, Payment, Partner, PromoCode, PromoCodeUsage, Subscription
 from promoter.forms import PaymentForm
 
 
@@ -58,4 +58,35 @@ class PromoCodeUsageAdmin(admin.ModelAdmin):
     list_filter = ['promo_code__event', 'promo_code__promoter', 'used_at']
     search_fields = ['promo_code__code', 'customer_email', 'order_id']
     readonly_fields = ['used_at']
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ['promoter', 'plan', 'status', 'monthly_fee', 'next_billing_date', 'created_date']
+    list_filter = ['plan', 'status', 'created_date', 'cancelled_date']
+    search_fields = ['promoter__user__email', 'promoter__user__first_name', 'promoter__user__last_name']
+    readonly_fields = ['created_date', 'cancelled_date', 'expires_date']
+    
+    fieldsets = (
+        ('Subscription Details', {
+            'fields': ('promoter', 'plan', 'status', 'monthly_fee')
+        }),
+        ('Billing Information', {
+            'fields': ('next_billing_date', 'last_billing_date', 'payment_method', 'stripe_subscription_id')
+        }),
+        ('Cancellation Details', {
+            'fields': ('cancellation_reason', 'cancellation_feedback'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_date', 'cancelled_date', 'expires_date'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_readonly_fields(self, request, obj=None):
+        readonly = list(self.readonly_fields)
+        if obj and obj.status == 'cancelled':
+            readonly.extend(['plan', 'monthly_fee', 'stripe_subscription_id'])
+        return readonly
 

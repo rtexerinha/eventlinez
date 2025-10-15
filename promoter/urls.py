@@ -4,7 +4,8 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
     vendor_update_per_event, vendors_reports, vendor_export_excel, \
     payment_list, payment_pdf_view, bank_account_list, bank_create, \
     bank_account_update, bank_remove, promo_codes_list, promo_code_create, \
-    promo_code_update, promo_code_delete, promo_code_toggle_status, promoter_dashboard
+    promo_code_update, promo_code_delete, promo_code_toggle_status, promoter_dashboard, \
+    subscription_management, cancel_subscription, reactivate_subscription
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from event.views import event_list, event_create, event_remove, event_update
@@ -82,6 +83,11 @@ urlpatterns = [
     path('promo-codes/<int:promo_code_id>/edit/', promo_code_update, name='promo_code_update'),
     path('promo-codes/<int:promo_code_id>/delete/', promo_code_delete, name='promo_code_delete'),
     path('promo-codes/<int:promo_code_id>/toggle/', promo_code_toggle_status, name='promo_code_toggle_status'),
+
+    # Subscription Management
+    path('subscription/', subscription_management, name='subscription_management'),
+    path('subscription/cancel/', cancel_subscription, name='cancel_subscription'),
+    path('subscription/reactivate/', reactivate_subscription, name='reactivate_subscription'),
 
     # auth
     path('api-token-auth/', CustomAuthToken.as_view()),

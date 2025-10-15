@@ -144,6 +144,14 @@
                     Payments
                 </a>
 
+                <a class="nav-link {% if 'subscription' in request.resolver_match.url_name %} active {% endif %}"
+                    href="{% url 'promoter:subscription_management' %}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    Subscription
+                </a>
+
             </div>
         </div>
         <div class="sb-sidenav-footer">
