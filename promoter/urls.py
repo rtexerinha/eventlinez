@@ -81,7 +81,7 @@ urlpatterns = [
     path('promo-codes/new/', promo_code_create, name='promo_code_create'),
     path('promo-codes/<int:promo_code_id>/edit/', promo_code_update, name='promo_code_update'),
     path('promo-codes/<int:promo_code_id>/delete/', promo_code_delete, name='promo_code_delete'),
-    path('promo-codes/<int:promo_code_id>/toggle/', promo_code_toggle_status, name='promo_code_toggle'),
+    path('promo-codes/<int:promo_code_id>/toggle/', promo_code_toggle_status, name='promo_code_toggle_status'),
 
     # auth
     path('api-token-auth/', CustomAuthToken.as_view()),

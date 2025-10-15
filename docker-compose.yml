@@ -52,9 +52,10 @@ services:
       - EMAIL_HOST_PASSWORD=${SENDGRID_API_KEY}
       - DEFAULT_FROM_EMAIL=noreply@eventlinez.com
 
-      # Stripe Configuration (Test Keys - Replace with your real test keys)
-      - STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
-      - STRIPE_SECRET_KEY=sk_test_placeholder
+      # Stripe Configuration (Replace with your actual Stripe test keys)
+      # Get your keys from: https://dashboard.stripe.com/test/apikeys
+      - STRIPE_PUBLISHABLE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
+      - STRIPE_SECRET_KEY=sk_test_YOUR_SECRET_KEY_HERE
     ports:
       - "8000:8000"
     volumes:

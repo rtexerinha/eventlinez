@@ -792,8 +792,9 @@
                 {% endif %}
             </div>
             <div class="col-md-4 text-end">
-                <a href="{% url 'new_events' %}" class="btn btn-create-event">
-                    <i class="fas fa-plus me-2"></i>Create Event
+                <a href="{% url 'promoter:new_events' %}" class="btn btn-create-event">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Create New Event
                 </a>
             </div>
         </div>
@@ -874,7 +875,7 @@
             <div class="alert-message">
                 Add your bank account information to receive payments from ticket sales.
             </div>
-            <a href="{% url 'bank_create' %}" class="alert-action">
+            <a href="{% url 'promoter:bank_create' %}" class="alert-action">
                 Add Bank Account
             </a>
         </div>
@@ -889,7 +890,7 @@
             <div class="alert-message">
                 You have ${{ dashboard_data.current_balance|floatformat:2 }} available for payout.
             </div>
-            <a href="{% url 'payment_list' %}" class="alert-action">
+            <a href="{% url 'promoter:payment_list' %}" class="alert-action">
                 View Payments
             </a>
         </div>
@@ -904,7 +905,7 @@
             <div class="alert-message">
                 All your events have ended. Create a new event to start selling tickets again.
             </div>
-            <a href="{% url 'new_events' %}" class="alert-action">
+            <a href="{% url 'promoter:new_events' %}" class="alert-action">
                 Create Event
             </a>
         </div>
@@ -1041,7 +1042,7 @@
             <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem;">
                 Ready to start selling tickets? Create your first event and begin your journey.
             </p>
-            <a href="{% url 'new_events' %}" class="btn btn-primary btn-lg px-4 py-2">
+            <a href="{% url 'promoter:new_events' %}" class="btn btn-primary btn-lg px-4 py-2">
                 <i class="fas fa-plus me-2"></i>Create Your First Event
             </a>
         </div>

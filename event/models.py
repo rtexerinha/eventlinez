@@ -94,30 +94,42 @@ class Event(models.Model):
         super(Event, self).save(*args, **kwargs)
 
     def qty_available(self):
-        qty = 0
-        for ticket in self.tickets.all():
-            qty = qty + ticket.qty_available()
-        return qty
+        try:
+            qty = 0
+            for ticket in self.tickets.all():
+                qty = qty + ticket.qty_available()
+            return qty
+        except Exception:
+            return 0
 
     def qty_sould(self):
-        qty = 0
-        for ticket in self.tickets.all():
-            qty = qty + ticket.qty_sold()
-        return qty
+        try:
+            qty = 0
+            for ticket in self.tickets.all():
+                qty = qty + ticket.qty_sold()
+            return qty
+        except Exception:
+            return 0
 
     def quantity(self):
-        qty = 0
-        for ticket in self.tickets.all():
-            qty = qty + ticket.quantity
-        return qty
+        try:
+            qty = 0
+            for ticket in self.tickets.all():
+                qty = qty + ticket.quantity
+            return qty
+        except Exception:
+            return 0
 
     def get_amount(self):
-        from ticket.models import Ticket as TicketSould
-        result = TicketSould.objects.filter(event_ticket__event=self).aggregate(Sum('price'))
-        _amount = result['price__sum']
-        if not _amount:
+        try:
+            from ticket.models import Ticket as TicketSould
+            result = TicketSould.objects.filter(event_ticket__event=self).aggregate(Sum('price'))
+            _amount = result['price__sum']
+            if not _amount:
+                return 0
+            return _amount
+        except Exception:
             return 0
-        return _amount
 
     @property
     def code_promo(self):
@@ -142,10 +154,13 @@ class Event(models.Model):
 
     def sales_percentage(self):
         """Calculate percentage of tickets sold"""
-        total_qty = self.quantity()
-        if total_qty == 0:
+        try:
+            total_qty = self.quantity()
+            if total_qty == 0:
+                return 0
+            return round((self.qty_sould() / total_qty) * 100, 1)
+        except Exception:
             return 0
-        return round((self.qty_sould() / total_qty) * 100, 1)
 
     def revenue_data(self):
         """Get revenue data for charts - simplified for now"""
@@ -206,12 +221,18 @@ class Ticket(models.Model):
     sold_out = models.BooleanField(default=False)
 
     def qty_available(self):
-        qty_sold = self.qty_sold()
-        return self.quantity - qty_sold
+        try:
+            qty_sold = self.qty_sold()
+            return max(0, self.quantity - qty_sold)
+        except Exception:
+            return 0
 
     def qty_sold(self):
-        _qty_sold = self.ticket_set.count()
-        return _qty_sold
+        try:
+            _qty_sold = self.ticket_set.count()
+            return _qty_sold
+        except Exception:
+            return 0
 
     def __str__(self):
         return "%s/%s" % (self.event.name, self.name)

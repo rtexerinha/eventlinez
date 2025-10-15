@@ -12,93 +12,201 @@ def event_list(request):
     from django.utils import timezone
     from django.db.models import Sum, Count, Q
     from django.core.paginator import Paginator
+    import logging
 
-    promoter = request.user.promoter.id
-    now = timezone.now()
+    logger = logging.getLogger(__name__)
     
-    # Optimize queries with select_related and prefetch_related
-    events_list = Event.objects.filter(promoter=promoter).select_related('city').prefetch_related('tickets').order_by('-created')
+    try:
+        promoter = request.user.promoter.id
+        now = timezone.now()
+        
+        # Optimize queries with select_related and prefetch_related
+        events_list = Event.objects.filter(promoter=promoter).select_related('city').prefetch_related('tickets').order_by('-created')
 
-    # Separate active and past events with optimized queries
-    active_events = events_list.filter(event_date__gte=now)
-    past_events = events_list.filter(event_date__lt=now)
+        # Separate active and past events with optimized queries
+        active_events = events_list.filter(event_date__gte=now)
+        past_events = events_list.filter(event_date__lt=now)
 
-    # Calculate dashboard stats efficiently
-    total_events = events_list.count()
-    total_active = active_events.count()
-    total_past = past_events.count()
+        # Calculate dashboard stats efficiently
+        total_events = events_list.count()
+        total_active = active_events.count()
+        total_past = past_events.count()
 
-    # Optimize revenue and ticket calculations using database aggregation
-    # Note: These calculations depend on the Event model methods
-    # If these methods are expensive, consider adding database fields for caching
-    total_revenue = sum(event.get_amount() for event in events_list)
-    total_tickets_sold = sum(event.qty_sould() for event in events_list)
-    total_tickets_available = sum(event.quantity() for event in events_list)
+        # Optimize revenue and ticket calculations with error handling
+        try:
+            total_revenue = sum(event.get_amount() for event in events_list)
+        except Exception as e:
+            logger.error(f"Error calculating total revenue: {e}")
+            total_revenue = 0
+            
+        try:
+            total_tickets_sold = sum(event.qty_sould() for event in events_list)
+        except Exception as e:
+            logger.error(f"Error calculating total tickets sold: {e}")
+            total_tickets_sold = 0
+            
+        try:
+            total_tickets_available = sum(event.quantity() for event in events_list)
+        except Exception as e:
+            logger.error(f"Error calculating total tickets available: {e}")
+            total_tickets_available = 0
 
-    # Add pagination - 15 events per page for better performance
-    paginator = Paginator(events_list, 15)
-    page_number = request.GET.get('page')
-    events = paginator.get_page(page_number)
+        # Add pagination - 15 events per page for better performance
+        paginator = Paginator(events_list, 15)
+        page_number = request.GET.get('page')
+        events = paginator.get_page(page_number)
 
-    # Get top 5 active events for performance cards with limited data
-    active_events_for_cards = active_events[:5]
+        # Get top 5 active events for performance cards with limited data
+        active_events_for_cards = active_events[:5]
 
-    return render(request, 'event/events_list.html', {
-        'events': events,
-        'events_count': total_events,
-        'active_events_count': total_active,
-        'past_events_count': total_past,
-        'total_revenue': total_revenue,
-        'total_tickets_sold': total_tickets_sold,
-        'total_tickets_available': total_tickets_available,
-        'active_events': active_events_for_cards,
-    })
+        return render(request, 'event/events_list.html', {
+            'events': events,
+            'events_count': total_events,
+            'active_events_count': total_active,
+            'past_events_count': total_past,
+            'total_revenue': total_revenue,
+            'total_tickets_sold': total_tickets_sold,
+            'total_tickets_available': total_tickets_available,
+            'active_events': active_events_for_cards,
+        })
+        
+    except AttributeError as e:
+        logger.error(f"User does not have promoter profile: {e}")
+        from django.contrib import messages
+        messages.error(request, "You need to have a promoter profile to access this page.")
+        return redirect('promoter:signup_promoter')
+        
+    except Exception as e:
+        logger.error(f"Error in event_list view: {e}")
+        from django.contrib import messages
+        messages.error(request, "An error occurred while loading your events.")
+        return render(request, 'event/events_list.html', {
+            'events': [],
+            'events_count': 0,
+            'active_events_count': 0,
+            'past_events_count': 0,
+            'total_revenue': 0,
+            'total_tickets_sold': 0,
+            'total_tickets_available': 0,
+            'active_events': [],
+        })
 
 
 @login_required(login_url='/promoter/account/login/')
 def event_create(request):
-    if request.method == 'POST':
-        form = EventForm(request.POST, request.FILES)
-        if form.is_valid():
-            event = Event(**form.cleaned_data)
-            event.promoter = request.user.promoter
-            event.save()
-            tickets = Ticket.objects.filter(event=event.pk)
-            return render(request, 'ticket_type/ticket_type_list.html', {'tickets': tickets, 'event_id': event.pk})
-    else:
-        form = EventForm()
-    return render(request, 'event/event_create.html', {'form': form})
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Check if user has promoter profile first
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            logger.error(f"User {request.user.username} does not have promoter profile")
+            from django.contrib import messages
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+            
+        if request.method == 'POST':
+            form = EventForm(request.POST, request.FILES)
+            if form.is_valid():
+                event = Event(**form.cleaned_data)
+                event.promoter = request.user.promoter
+                event.save()
+                tickets = Ticket.objects.filter(event=event.pk)
+                return render(request, 'ticket_type/ticket_type_list.html', {'tickets': tickets, 'event_id': event.pk})
+        else:
+            form = EventForm()
+        return render(request, 'event/event_create.html', {'form': form})
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in event_create: {e}")
+        from django.contrib import messages
+        messages.error(request, "An error occurred while creating the event.")
+        return redirect('promoter:signup_promoter')
 
 
 @login_required(login_url='/promoter/account/login/')
 def event_update(request, event_id):
-    form = None
-    form_vendor = None
-    vendors = Vendor.objects.filter(promoter=request.user.promoter.id, event=event_id)
-    vendors_without_event = Vendor.objects.filter(promoter=request.user.promoter.id).exclude(event=event_id)
-    tickets = Ticket.objects.filter(event=event_id)
-    event = get_object_or_404(Event, id=event_id)
-    if request.method == 'GET':
-        form = EventForm(instance=event)
-        form_vendor = VendorForm()
-    if request.method == 'POST':
-        form = EventForm(request.POST, request.FILES, instance=event)
-        if form.is_valid():
-            form.save()
-            return redirect('events_promoter')
-    return render(request, 'event/event_update.html',
-                  {'form': form, 'tickets': tickets,
-                   'vendors': vendors,
-                   'event': event,
-                   'form_vendor': form_vendor,
-                   'vendors_without_event': vendors_without_event})
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Check if user has promoter profile first
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            logger.error(f"User {request.user.username} does not have promoter profile")
+            from django.contrib import messages
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+        
+        # Get the event and verify ownership
+        event = get_object_or_404(Event, id=event_id, promoter=request.user.promoter)
+        
+        form = None
+        form_vendor = None
+        
+        # Get related data with error handling
+        try:
+            vendors = Vendor.objects.filter(promoter=request.user.promoter.id, event=event_id)
+            vendors_without_event = Vendor.objects.filter(promoter=request.user.promoter.id).exclude(event=event_id)
+            tickets = Ticket.objects.filter(event=event_id)
+        except Exception as e:
+            logger.error(f"Error fetching related data for event {event_id}: {e}")
+            vendors = []
+            vendors_without_event = []
+            tickets = []
+        
+        if request.method == 'GET':
+            try:
+                form = EventForm(instance=event)
+                form_vendor = VendorForm()
+            except Exception as e:
+                logger.error(f"Error creating forms for event {event_id}: {e}")
+                from django.contrib import messages
+                messages.error(request, "Error loading event form.")
+                return redirect('promoter:events_promoter')
+                
+        if request.method == 'POST':
+            try:
+                form = EventForm(request.POST, request.FILES, instance=event)
+                if form.is_valid():
+                    form.save()
+                    from django.contrib import messages
+                    messages.success(request, "Event updated successfully!")
+                    return redirect('promoter:events_promoter')
+                else:
+                    logger.error(f"Form validation errors for event {event_id}: {form.errors}")
+            except Exception as e:
+                logger.error(f"Error processing POST for event {event_id}: {e}")
+                from django.contrib import messages
+                messages.error(request, f"Error updating event: {str(e)}")
+                return redirect('promoter:events_promoter')
+        
+        return render(request, 'event/event_update.html', {
+            'form': form, 
+            'tickets': tickets,
+            'vendors': vendors,
+            'event': event,
+            'form_vendor': form_vendor,
+            'vendors_without_event': vendors_without_event
+        })
+        
+    except Event.DoesNotExist:
+        logger.error(f"Event {event_id} not found or not owned by user {request.user.username}")
+        from django.contrib import messages
+        messages.error(request, "Event not found or you don't have permission to edit it.")
+        return redirect('promoter:events_promoter')
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in event_update for event {event_id}: {e}")
+        from django.contrib import messages
+        messages.error(request, "An unexpected error occurred while loading the event.")
+        return redirect('promoter:events_promoter')
 
 
 @login_required(login_url='/promoter/account/login/')
 def event_remove(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     event.delete()
-    return redirect('events_promoter')
+    return redirect('promoter:events_promoter')
 
 
 @login_required(login_url='/promoter/account/login/')
@@ -177,7 +285,7 @@ def ticket_type_create(request, event_id):
                     ticket.save()
                     print(f"Ticket saved successfully: {ticket}")
                     # Redirect back to ticket list for this event
-                    return redirect('ticket_type_list_per_event', event_id=event_id)
+                    return redirect('promoter:ticket_type_list_per_event', event_id=event_id)
                 except Exception as save_error:
                     print(f"Error saving ticket: {save_error}")
                     form.add_error(None, f"Error saving ticket: {save_error}")
@@ -233,7 +341,7 @@ def ticket_type_update(request, ticket_id):
                 try:
                     form.save()
                     print(f"Ticket updated successfully: {instance}")
-                    return redirect('ticket_type_list_per_event', event_id=instance.event_id)
+                    return redirect('promoter:ticket_type_list_per_event', event_id=instance.event_id)
                 except Exception as save_error:
                     print(f"Error saving updated ticket: {save_error}")
                     form.add_error(None, f"Error saving ticket: {save_error}")

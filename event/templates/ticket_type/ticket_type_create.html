@@ -641,7 +641,7 @@
                 </div>
 
                 <div class="btn-group">
-                    <a href="{% if event_id %}{% url 'ticket_type_list_per_event' event_id %}{% else %}{% url 'promoter:events_promoter' %}{% endif %}"
+                    <a href="{% if event_id %}{% url 'promoter:ticket_type_list_per_event' event_id %}{% else %}{% url 'promoter:events_promoter' %}{% endif %}"
                         class="btn-cancel">
                         <i class="fas fa-times"></i>
                         Cancel

@@ -16,7 +16,7 @@
                 <div class="dashboard-card">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h4 class="mb-0">Edit "{{ promo_code.code }}"</h4>
-                        <a href="{% url 'promo_codes_list' %}" class="btn btn-outline-secondary">
+                        <a href="{% url 'promoter:promo_codes_list' %}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Back to List
                         </a>
                     </div>
@@ -136,7 +136,7 @@
                             <button type="submit" class="btn" style="background-color: #d90075; color: white;">
                                 <i class="fas fa-save"></i> Update Promo Code
                             </button>
-                            <a href="{% url 'promo_codes_list' %}" class="btn btn-secondary ml-2">Cancel</a>
+                            <a href="{% url 'promoter:promo_codes_list' %}" class="btn btn-secondary ml-2">Cancel</a>
                         </div>
                     </form>
                 </div>

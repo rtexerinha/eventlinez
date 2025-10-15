@@ -4,160 +4,155 @@
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-    <main>
-        <div class="container-fluid">
-            <h1 class="mt-4 title-dast">Vendors</h1>
-            {% if vendors %}
-                <section>
-                    <header class="col-lg-12" style="display:flex;">
-                        <div class="col-lg-10 col-md-5"></div>
-                        <div class="col-lg-2 col-md-7 div-adm-newevent" style="justify-content: flex-end;">
-                            <a href="{% url 'vendor_create' %}"
-                               id="button-adm" class="btn btn-secondary" style="margin-top: 10px;">
-                                New vendor
-                            </a>
-                        </div>
-                    </header>
+<main>
+    <div class="container-fluid">
+        <h1 class="mt-4 title-dast">Vendors</h1>
+        {% if vendors %}
+        <section>
+            <header class="col-lg-12" style="display:flex;">
+                <div class="col-lg-10 col-md-5"></div>
+                <div class="col-lg-2 col-md-7 div-adm-newevent" style="justify-content: flex-end;">
+                    <a href="{% url 'promoter:vendor_create' %}" class="btn btn-primary btn-sm pull-right"
+                        style="margin-bottom: 10px;">
+                        <i class="fas fa-plus"></i> Add Vendor
+                    </a>
+                </div>
+            </header>
 
-                    <main class="card-checkin d-lg-none d-flex">
-                        {% for vendor in vendors %}
-                            <article class="card m-lg-2 m-0 mb-4"
-                                     style="min-width: 20rem;max-width: 20rem; border-radius: 10px;">
+            <main class="card-checkin d-lg-none d-flex">
+                {% for vendor in vendors %}
+                <article class="card m-lg-2 m-0 mb-4" style="min-width: 20rem;max-width: 20rem; border-radius: 10px;">
 
-                                <section class="card-body" style="padding-left: 0px; padding-bottom: 0">
-                                    <div style="display: block; padding-right: 0; padding-left: 20px" >
-                                        <div style="display: flex; justify-content: flex-start;; flex-direction: row">
-                                            <i class="fas fa-user-circle mt-1"></i>
-                                            <h5 class="h6-promoter ml-2">{{vendor.first_name}}</h5>
-                                        </div>
+                    <section class="card-body" style="padding-left: 0px; padding-bottom: 0">
+                        <div style="display: block; padding-right: 0; padding-left: 20px">
+                            <div style="display: flex; justify-content: flex-start;; flex-direction: row">
+                                <i class="fas fa-user-circle mt-1"></i>
+                                <h5 class="h6-promoter ml-2">{{vendor.first_name}}</h5>
+                            </div>
 
-                                        <p class="p-promoter" style="color: #7B7B7B;">
-                                            <b style="color: #383838;">Email: </b>{{vendor.email}}
-                                        </p>
+                            <p class="p-promoter" style="color: #7B7B7B;">
+                                <b style="color: #383838;">Email: </b>{{vendor.email}}
+                            </p>
 
-                                        <p class="p-promoter" style="color: #7B7B7B;">
-                                            <b style="color: #383838;">Phone: </b>{{vendor.phone}}
-                                        </p>
+                            <p class="p-promoter" style="color: #7B7B7B;">
+                                <b style="color: #383838;">Phone: </b>{{vendor.phone}}
+                            </p>
 
-                                        <div class="div-button-table pb-2" style="justify-content: flex-end">
-                                            <button class="button-link">
-                                                <a href="{% url 'vendor_update' vendor.id %}">
-                                                    <i style="color: #d90075" class="far fa-edit icon_remove"></i>
-                                                </a>
-                                            </button>
+                            <div class="div-button-table pb-2" style="justify-content: flex-end">
+                                <button class="button-link">
+                                    <a href="{% url 'promoter:vendor_update' vendor.id %}">
+                                        <i style="color: #d90075" class="far fa-edit icon_remove"></i>
+                                    </a>
+                                </button>
 
-                                            {% if vendor.ticket_set.filter.exists %}
-                                                <button class="button-link" data-toggle="modal"
-                                                        data-target="#vendorModal">
-                                                    <i style="color: #d90075" class="fas fa-trash-alt icon_remove"></i>
-                                                </button>
+                                {% if vendor.ticket_set.filter.exists %}
+                                <button class="button-link" data-toggle="modal" data-target="#vendorModal">
+                                    <i style="color: #d90075" class="fas fa-trash-alt icon_remove"></i>
+                                </button>
 
-                                            {% else %}
-                                                <button class="button-link">
-                                                    <a href="{% url 'vendor_remove' vendor.id%}">
-                                                        <i style=" color: #d90075"
-                                                           class="fas fa-trash-alt icon_remove"></i>
-                                                    </a>
-                                                </button>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </section>
-                            </article>
-                        {% endfor %}
-                    </main>
-
-                    <!-- TABLE VENDOR - COMPUTER -->
-                    <main class="d-lg-flex d-none">
-                        <aside class="table-responsive">
-                            <table class="table table-bordered" id="dataTable" style="width: 99%">
-                                <thead>
-                                <tr style="background-color:#F4F4F4;">
-                                    <th class="text-table text-bold">Vendor</th>
-                                    <th class="text-table text-bold">Email</th>
-                                    <th class="text-table text-bold">Phone</th>
-                                    <th class="text-table text-bold"></th>
-                                </tr>
-                                </thead>
-
-                                <tbody>
-                                {% for vendor in vendors %}
-                                    <tr>
-                                        <td class="text-table">
-                                            <a href="{% url  'vendor_update' vendor.id %}"
-                                               style="color: #d90075; font-size: 12px">{{ vendor.full_name }}
-                                            </a>
-                                        </td>
-
-                                        <td class="text-table">{{ vendor.email }}</td>
-                                        <td class="text-table">{{ vendor.phone }}</td>
-                                        <td>
-                                            <div class="div-button-table" style="justify-content: flex-end">
-                                                <button class="button-link">
-                                                    <a href="{% url 'vendor_update' vendor.id %}" class="icon_remove_a">
-                                                        <i style="color: #d90075" class="far fa-edit icon_remove"></i>
-                                                    </a>
-                                                </button>
-
-                                                {% if vendor.ticket_set.filter.exists %}
-                                                    <button class="button-link" data-toggle="modal"
-                                                            data-target="#vendorModal">
-                                                        <i style="color: #d90075"
-                                                           class="fas fa-trash-alt icon_remove"></i>
-                                                    </button>
-                                                {% else %}
-                                                    <button class="button-link">
-                                                        <a href="{% url 'vendor_remove' vendor.id%}" class="icon_remove_a">
-                                                            <i style=" color: #d90075"
-                                                               class="fas fa-trash-alt icon_remove"></i>
-                                                        </a>
-                                                    </button>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </aside>
-                    </main>
-
-                    <!-- MODAL DELETE VENDOR-->
-                    <aside class="modal fade" id="vendorModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                           aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Error</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-
-                                <div class="modal-body">
-                                    <p>You cannot delete this vendor because it already have tickets sold</p>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                </div>
+                                {% else %}
+                                <button class="button-link">
+                                    <a href="{% url 'promoter:vendor_remove' vendor.id%}">
+                                        <i style=" color: #d90075" class="fas fa-trash-alt icon_remove"></i>
+                                    </a>
+                                </button>
+                                {% endif %}
                             </div>
                         </div>
-                    </aside>
-                </section>
+                    </section>
+                </article>
+                {% endfor %}
+            </main>
 
-            {% else %}
-                <div style="width: 100%; margin: auto">
-                    <article id="event-div">
-                        <i class="fas fa-user-circle fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
-                        <br>
+            <!-- TABLE VENDOR - COMPUTER -->
+            <main class="d-lg-flex d-none">
+                <aside class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" style="width: 99%">
+                        <thead>
+                            <tr style="background-color:#F4F4F4;">
+                                <th class="text-table text-bold">Vendor</th>
+                                <th class="text-table text-bold">Email</th>
+                                <th class="text-table text-bold">Phone</th>
+                                <th class="text-table text-bold"></th>
+                            </tr>
+                        </thead>
 
-                        <h4 class="text-default centralized" style="font-size: 1rem">Create Vendor</h4>
-                        <a href="{% url 'vendor_create' %}" id="button-adm"
-                           class="btn btn-secondary" style="margin-top: 10px;">New vendor</a>
-                    </article>
+                        <tbody>
+                            {% for vendor in vendors %}
+                            <tr>
+                                <td class="text-table">
+                                    <a href="{% url  'promoter:vendor_update' vendor.id %}"
+                                        style="color: #d90075; font-size: 12px">{{ vendor.full_name }}
+                                    </a>
+                                </td>
+
+                                <td class="text-table">{{ vendor.email }}</td>
+                                <td class="text-table">{{ vendor.phone }}</td>
+                                <td>
+                                    <div class="div-button-table" style="justify-content: flex-end">
+                                        <button class="button-link">
+                                            <a href="{% url 'promoter:vendor_update' vendor.id %}"
+                                                class="icon_remove_a">
+                                                <i style="color: #d90075" class="far fa-edit icon_remove"></i>
+                                            </a>
+                                        </button>
+
+                                        {% if vendor.ticket_set.filter.exists %}
+                                        <button class="button-link" data-toggle="modal" data-target="#vendorModal">
+                                            <i style="color: #d90075" class="fas fa-trash-alt icon_remove"></i>
+                                        </button>
+                                        {% else %}
+                                        <button class="button-link">
+                                            <a href="{% url 'promoter:vendor_remove' vendor.id%}" class="icon_remove_a">
+                                                <i style=" color: #d90075" class="fas fa-trash-alt icon_remove"></i>
+                                            </a>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </aside>
+            </main>
+
+            <!-- MODAL DELETE VENDOR-->
+            <aside class="modal fade" id="vendorModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Error</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <p>You cannot delete this vendor because it already have tickets sold</p>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
                 </div>
-            {% endif %}
+            </aside>
+        </section>
+
+        {% else %}
+        <div style="width: 100%; margin: auto">
+            <article id="event-div">
+                <i class="fas fa-user-circle fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
+                <br>
+
+                <h4 class="text-default centralized" style="font-size: 1rem">Create Vendor</h4>
+                <a href="{% url 'promoter:vendor_create' %}" id="button-adm" class="btn btn-secondary"
+                    style="margin-top: 10px;">New vendor</a>
+            </article>
         </div>
-    </main>
+        {% endif %}
+    </div>
+</main>
 {% endblock content %}
