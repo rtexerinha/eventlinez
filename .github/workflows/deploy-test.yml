@@ -7,7 +7,7 @@ on:
     branches: [ develop ]
 
 env:
-  PYTHON_VERSION: 3.9
+  PYTHON_VERSION: 3.9.24
   NODE_VERSION: 16
 
 jobs:
@@ -204,11 +204,52 @@ jobs:
         else
           echo "📦 Using traditional deployment..."
           
+          # Detect OS for proper Python path
+          if [ -f /etc/redhat-release ]; then
+            echo "🖥️ Detected CentOS/RHEL system"
+            # Check for pyenv installation first (sunset user's pyenv)
+            if [ -f /app/.pyenv/versions/3.9.24/bin/python ]; then
+              PYTHON_CMD="/app/.pyenv/versions/3.9.24/bin/python"  
+              PIP_CMD="/app/.pyenv/versions/3.9.24/bin/pip"
+              echo "✅ Using pyenv Python 3.9.24"
+            elif [ -f /usr/local/bin/python3.9 ]; then
+              PYTHON_CMD="/usr/local/bin/python3.9"
+              PIP_CMD="/usr/local/bin/pip3.9"
+              echo "✅ Using system Python 3.9"
+            else
+              PYTHON_CMD="python3"
+              PIP_CMD="pip3"
+              echo "⚠️ Falling back to system Python 3"
+            fi
+            # Ensure proper PATH for CentOS with pyenv
+            export PATH="/usr/local/bin:/app/.pyenv/versions/3.9.24/bin:$PATH"
+            export PYENV_ROOT="/app/.pyenv"
+          else
+            echo "🖥️ Detected Debian/Ubuntu system"
+            PYTHON_CMD="python3.9"
+            PIP_CMD="pip3.9"
+          fi
+          
+          # Ensure Python 3.9 is available
+          echo "🐍 Verifying Python 3.9..."
+          if $PYTHON_CMD --version 2>/dev/null | grep -q "3.9"; then
+            echo "✅ Python 3.9 found at $PYTHON_CMD"
+            $PYTHON_CMD --version
+          else
+            echo "⚠️ Python 3.9 not found, using available Python 3"
+            PYTHON_CMD="python3"
+            PIP_CMD="pip3"
+          fi
+          
           # Virtual environment
           if [ ! -d "venv" ]; then
-            python3 -m venv venv
+            $PYTHON_CMD -m venv venv
           fi
           source venv/bin/activate
+          
+          # Verify Python version in virtual environment
+          echo "🐍 Using Python version: $(python --version)"
+          
           pip install --upgrade pip
           pip install -r requirements.txt
           
@@ -217,8 +258,14 @@ jobs:
           python manage.py create_sales_view --force || echo "View creation failed"
           python manage.py collectstatic --noinput --clear
           
-          # Start service
-          systemctl --user start eventlinez 2>/dev/null || echo "Could not start service"
+          # Start service (CentOS 7 uses systemctl)
+          if command -v systemctl >/dev/null 2>&1; then
+            sudo systemctl start eventlinez 2>/dev/null || echo "Could not start systemd service"
+          else
+            # Fallback for systems without systemd
+            systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
+          fi
+          
           DEPLOYMENT_METHOD="Traditional"
         fi
         
