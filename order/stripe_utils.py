@@ -48,7 +48,8 @@ def build_stripe_description(
 
 def build_stripe_metadata_from_cart(
     cart,
-    customer_email: str,
+    items,
+    customer_email: Optional[str] = None,
     order_id: Optional[int] = None
 ) -> Dict[str, str]:
     """
@@ -56,7 +57,8 @@ def build_stripe_metadata_from_cart(
     
     Args:
         cart: Cart object containing items
-        customer_email: Customer email address
+        items: QuerySet of CartItem objects
+        customer_email: Customer email address (optional)
         order_id: Order ID (optional, if order already created)
     
     Returns:
@@ -66,16 +68,15 @@ def build_stripe_metadata_from_cart(
         Stripe has limits: max 50 key-value pairs, each value max 500 characters
         We include up to 5 items to stay within limits
     """
-    from cart.models import CartItem
-    
-    items = CartItem.objects.filter(cart=cart, active=True)
     first_item = items.first()
     
     metadata = {
         'cart_id': str(cart.id),
-        'customer_email': customer_email,
         'items_count': str(items.count()),
     }
+    
+    if customer_email:
+        metadata['customer_email'] = customer_email
     
     if order_id:
         metadata['order_id'] = str(order_id)

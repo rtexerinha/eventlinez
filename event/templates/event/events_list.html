@@ -456,7 +456,7 @@
                 <h1 class="mt-4 mb-0" style="color: #2c3e50;">Events Dashboard</h1>
                 <p class="text-muted">Manage your events and track performance</p>
             </div>
-            <a href="{% url 'new_events' %}" class="create-event-btn">
+            <a href="{% url 'promoter:new_events' %}" class="create-event-btn">
                 <i class="fas fa-plus me-2"></i>Create New Event
             </a>
         </div>
@@ -552,12 +552,12 @@
                                 <i class="fas fa-calendar me-1"></i>{{ event.event_date|date:'M d, Y' }}
                             </small>
                             <div class="performance-actions">
-                                <a href="{% url 'update_event' event.id %}" class="btn btn-sm btn-outline-primary"
-                                    title="Edit">
+                                <a href="{% url 'promoter:update_event' event.id %}"
+                                    class="btn btn-sm btn-outline-primary" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{% url 'ticket_type_list_per_event' event.id %}" class="btn btn-sm btn-primary"
-                                    title="Tickets">
+                                <a href="{% url 'promoter:ticket_type_list_per_event' event.id %}"
+                                    class="btn btn-sm btn-primary" title="Tickets">
                                     <i class="fas fa-ticket-alt"></i>
                                 </a>
                             </div>
@@ -611,7 +611,7 @@
                         <tr {% if not event.is_active %}class="table-secondary" {% endif %}>
                             <td>
                                 <div>
-                                    <a href="{% url 'update_event' event.id %}"
+                                    <a href="{% url 'promoter:update_event' event.id %}"
                                         style="color: #d90075; font-weight: 500; text-decoration: none;">
                                         {{ event.name|truncatechars:40 }}
                                     </a>
@@ -651,16 +651,16 @@
                             </td>
                             <td>
                                 <div class="event-actions">
-                                    <a href="{% url 'ticket_type_list_per_event' event.id %}" class="action-btn primary"
-                                        title="Manage Tickets">
+                                    <a href="{% url 'promoter:ticket_type_list_per_event' event.id %}"
+                                        class="action-btn primary" title="Manage Tickets">
                                         <i class="fas fa-ticket-alt"></i>
                                     </a>
-                                    <a href="{% url 'update_event' event.id %}" class="action-btn secondary"
+                                    <a href="{% url 'promoter:update_event' event.id %}" class="action-btn secondary"
                                         title="Edit Event">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     {% if event.qty_sould == 0 %}
-                                    <a href="{% url 'remove_event' event.id %}" class="action-btn"
+                                    <a href="{% url 'promoter:remove_event' event.id %}" class="action-btn"
                                         style="background:#dc3545;color:white;" title="Delete Event"
                                         onclick="return confirm('Are you sure you want to delete this event?')">
                                         <i class="fas fa-trash"></i>
@@ -717,7 +717,7 @@
             <h4 class="mb-3">Create your first event</h4>
             <p class="text-muted mb-4">You don't have any events created yet. Start by creating your first event to
                 begin selling tickets.</p>
-            <a href="{% url 'new_events' %}" class="create-event-btn">
+            <a href="{% url 'promoter:new_events' %}" class="create-event-btn">
                 <i class="fas fa-plus me-2"></i>Create New Event
             </a>
         </div>

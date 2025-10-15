@@ -434,7 +434,12 @@ def checkout(request):
         
         first_item = items.first()
         if first_item:
-            description = build_stripe_description(first_item.ticket.event.name, len(items))
+            # Pass event name and tier name as separate parameters
+            description = build_stripe_description(
+                first_item.ticket.event.name, 
+                first_item.ticket.name, 
+                cart_id=cart.id
+            )
             metadata = build_stripe_metadata_from_cart(cart, items)
         else:
             description = f"Event Tickets - {len(items)} items"

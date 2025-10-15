@@ -15,7 +15,7 @@
                 <div class="dashboard-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="mb-0">Manage Promo Codes</h4>
-                        <a href="{% url 'promo_code_create' %}" class="btn"
+                        <a href="{% url 'promoter:promo_code_create' %}" class="btn"
                             style="background-color: #d90075; color: white;">
                             <i class="fas fa-plus"></i> Create New Promo Code
                         </a>
@@ -80,17 +80,17 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="{% url 'promo_code_update' promo.id %}"
+                                            <a href="{% url 'promoter:promo_code_update' promo.id %}"
                                                 class="btn btn-sm btn-outline-primary" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="{% url 'promo_code_toggle' promo.id %}"
+                                            <a href="{% url 'promoter:promo_code_toggle_status' promo.id %}"
                                                 class="btn btn-sm btn-outline-{% if promo.is_active %}warning{% else %}success{% endif %}"
                                                 title="{% if promo.is_active %}Deactivate{% else %}Activate{% endif %}">
                                                 <i
                                                     class="fas fa-{% if promo.is_active %}pause{% else %}play{% endif %}"></i>
                                             </a>
-                                            <a href="{% url 'promo_code_delete' promo.id %}"
+                                            <a href="{% url 'promoter:promo_code_delete' promo.id %}"
                                                 class="btn btn-sm btn-outline-danger" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
@@ -106,7 +106,7 @@
                         <i class="fas fa-tags fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">No promo codes created yet</h5>
                         <p class="text-muted">Create your first promo code to offer discounts to your customers.</p>
-                        <a href="{% url 'promo_code_create' %}" class="btn"
+                        <a href="{% url 'promoter:promo_code_create' %}" class="btn"
                             style="background-color: #d90075; color: white;">
                             <i class="fas fa-plus"></i> Create Your First Promo Code
                         </a>
