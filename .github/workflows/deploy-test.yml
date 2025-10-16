@@ -338,6 +338,34 @@ jobs:
         echo "🔍 Verifying deployment..."
         sleep 30
         
+        # Verify git changes were applied on the test server
+        echo "🔄 Verifying git repository state on test server..."
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
+          cd ${{ secrets.DEPLOY_PATH }}/eventlinez
+          echo '📥 Fetching latest changes...'
+          git fetch origin develop
+          echo '⬇️ Pulling from develop branch...'
+          git pull origin develop
+          echo '✅ Git repository updated'
+          
+          current_commit=\$(git rev-parse HEAD)
+          echo \"Current commit on server: \$current_commit\"
+          echo \"Expected commit: ${{ steps.deploy_info.outputs.commit_sha }}\"
+          
+          if [ \"\$current_commit\" = \"${{ steps.deploy_info.outputs.commit_sha }}\" ]; then
+            echo \"✅ Git commit verification successful\"
+          else
+            echo \"⚠️ WARNING: Git commit mismatch detected!\"
+            echo \"Expected: ${{ steps.deploy_info.outputs.commit_sha }}\"
+            echo \"Actual: \$current_commit\"
+          fi
+          
+          echo \"📋 Latest commit info:\"
+          git log -1 --oneline
+          echo \"📂 Current branch: \$(git branch --show-current)\"
+          echo \"🔗 Remote tracking: \$(git rev-parse --abbrev-ref HEAD@{upstream} 2>/dev/null || echo 'Not set')\"
+        "
+        
         if curl -f https://test.eventlinez.com/ >/dev/null 2>&1; then
           echo "✅ Public site is accessible"
         else

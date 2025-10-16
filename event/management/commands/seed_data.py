@@ -82,6 +82,17 @@ class Command(BaseCommand):
         else:
             self.stdout.write('✓ Admin user already exists')
 
+        # Txadmin superuser
+        if not User.objects.filter(username='txadmin').exists():
+            txadmin_user = User.objects.create_superuser(
+                username='txadmin',
+                email='txadmin@eventlinez.com',
+                password='123456'
+            )
+            self.stdout.write(f'✓ Created txadmin user: {txadmin_user.username}')
+        else:
+            self.stdout.write('✓ Txadmin user already exists')
+
         # Customer users
         customer_users = [
             ('john_doe', 'john@example.com', 'John', 'Doe'),
