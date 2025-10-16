@@ -123,12 +123,10 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(
-            to bottom,
-            rgba(0, 0, 0, 0) 0%,
-            rgba(0, 0, 0, 0.1) 50%,
-            rgba(0, 0, 0, 0.7) 100%
-        );
+        background: linear-gradient(to bottom,
+                rgba(0, 0, 0, 0) 0%,
+                rgba(0, 0, 0, 0.1) 50%,
+                rgba(0, 0, 0, 0.7) 100%);
         opacity: 0;
         transition: opacity 0.3s ease;
         display: flex;
@@ -423,34 +421,34 @@
     }
 
     /* Responsive Design Breakpoints */
-    
+
     /* Small phones (iPhone SE, etc.) */
     @media (max-width: 375px) {
         .event-header {
             padding: 25px 0;
         }
-        
+
         .event-header h1 {
             padding: 0 50px;
         }
-        
+
         .gallery-grid {
             grid-template-columns: 1fr;
             gap: 15px;
             padding: 0 15px;
         }
-        
+
         .gallery-image {
             height: 160px;
         }
-        
+
         .lightbox-info {
             left: 10px;
             right: 10px;
             bottom: 10px;
             max-width: none;
         }
-        
+
         .lightbox-counter {
             position: relative;
             margin-top: 10px;
@@ -464,7 +462,7 @@
             grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
             gap: 18px;
         }
-        
+
         .gallery-image {
             height: 180px;
         }
@@ -475,12 +473,12 @@
         .event-header {
             padding: 45px 0;
         }
-        
+
         .gallery-grid {
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 22px;
         }
-        
+
         .gallery-image {
             height: 200px;
         }
@@ -498,28 +496,27 @@
     @media (hover: none) and (pointer: coarse) {
         .gallery-overlay {
             opacity: 0.8;
-            background: linear-gradient(
-                to bottom,
-                rgba(0, 0, 0, 0) 0%,
-                rgba(0, 0, 0, 0.6) 100%
-            );
+            background: linear-gradient(to bottom,
+                    rgba(0, 0, 0, 0) 0%,
+                    rgba(0, 0, 0, 0.6) 100%);
         }
-        
+
         .gallery-actions {
             opacity: 1;
         }
-        
+
         .gallery-item:hover {
             transform: none;
         }
-        
+
         .gallery-item:active {
             transform: scale(0.98);
         }
     }
 
     /* High DPI displays */
-    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    @media (-webkit-min-device-pixel-ratio: 2),
+    (min-resolution: 192dpi) {
         .gallery-image {
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
@@ -531,15 +528,15 @@
         .event-header {
             padding: 15px 0;
         }
-        
+
         .event-header h1 {
             font-size: 1.5rem;
         }
-        
+
         .event-info {
             padding: 10px 15px;
         }
-        
+
         .lightbox-info,
         .lightbox-counter {
             font-size: 0.8rem;
@@ -549,6 +546,7 @@
 
     /* Accessibility improvements */
     @media (prefers-reduced-motion: reduce) {
+
         .gallery-item,
         .gallery-image,
         .gallery-overlay,
@@ -559,7 +557,7 @@
         .back-btn {
             transition: none;
         }
-        
+
         .gallery-item:hover .gallery-image {
             transform: none;
         }
@@ -588,10 +586,7 @@
 {% block content %}
 <div class="event-header">
     <div class="container">
-        <a href="{% url 'shop:gallery_home' %}" 
-           class="back-btn" 
-           title="Back to Gallery"
-           aria-label="Back to Gallery">
+        <a href="{% url 'shop:gallery_home' %}" class="back-btn" title="Back to Gallery" aria-label="Back to Gallery">
             <i class="fas fa-arrow-left"></i>
         </a>
 
@@ -609,7 +604,8 @@
     {% if user.is_authenticated %}
     <div class="download-info">
         <h4><i class="fas fa-info-circle me-2"></i>Download Information</h4>
-        <p>You can download photos if you have purchased tickets for this event. Click the download button on any photo to get started.</p>
+        <p>You can download photos if you have purchased tickets for this event. Click the download button on any photo
+            to get started.</p>
     </div>
     {% else %}
     <div class="download-info">
@@ -621,25 +617,17 @@
     {% if gallery_photos %}
     <div class="gallery-grid">
         {% for photo in gallery_photos %}
-        <div class="gallery-item" 
-             onclick="openPhotoLightbox({{ forloop.counter0 }})"
-             tabindex="0"
-             role="button"
-             aria-label="View photo {{ forloop.counter }} of {{ gallery_photos|length }}"
-             onkeydown="handlePhotoKeydown(event, {{ forloop.counter0 }})">
+        <div class="gallery-item" onclick="openPhotoLightbox({{ forloop.counter0 }})" tabindex="0" role="button"
+            aria-label="View photo {{ forloop.counter }} of {{ gallery_photos|length }}"
+            onkeydown="handlePhotoKeydown(event, {{ forloop.counter0 }})">
             <img src="{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}"
-                alt="{{ photo.title|default:photo.event.name }}" 
-                class="gallery-image"
-                loading="lazy">
+                alt="{{ photo.title|default:photo.event.name }}" class="gallery-image" loading="lazy">
 
             <div class="gallery-overlay">
                 <div class="gallery-actions">
                     {% if user.is_authenticated %}
-                    <a href="{% url 'shop:download_photo' photo.id %}" 
-                       class="download-btn" 
-                       title="Download Photo"
-                       aria-label="Download photo"
-                       onclick="event.stopPropagation()">
+                    <a href="{% url 'shop:download_photo' photo.id %}" class="download-btn" title="Download Photo"
+                        aria-label="Download photo" onclick="event.stopPropagation()">
                         <i class="fas fa-download"></i>
                     </a>
                     {% endif %}
@@ -662,28 +650,18 @@
     <!-- Lightbox Modal -->
     <div class="lightbox-modal" id="photoLightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
         <div class="lightbox-content">
-            <button class="lightbox-close" 
-                    onclick="closePhotoLightbox()"
-                    aria-label="Close lightbox">
+            <button class="lightbox-close" onclick="closePhotoLightbox()" aria-label="Close lightbox">
                 <i class="fas fa-times"></i>
             </button>
 
-            <button class="lightbox-nav lightbox-prev" 
-                    onclick="previousGalleryPhoto()"
-                    aria-label="Previous photo">
+            <button class="lightbox-nav lightbox-prev" onclick="previousGalleryPhoto()" aria-label="Previous photo">
                 <i class="fas fa-chevron-left"></i>
             </button>
 
-            <img class="lightbox-image" 
-                 id="galleryLightboxImage" 
-                 src="" 
-                 alt=""
-                 onload="this.style.opacity='1'"
-                 onerror="this.style.opacity='0.5'">
+            <img class="lightbox-image" id="galleryLightboxImage" src="" alt="" onload="this.style.opacity='1'"
+                onerror="this.style.opacity='0.5'">
 
-            <button class="lightbox-nav lightbox-next" 
-                    onclick="nextGalleryPhoto()"
-                    aria-label="Next photo">
+            <button class="lightbox-nav lightbox-next" onclick="nextGalleryPhoto()" aria-label="Next photo">
                 <i class="fas fa-chevron-right"></i>
             </button>
 
@@ -715,15 +693,15 @@
     // Gallery photos data for lightbox
     const galleryPhotos = [
         {% for photo in gallery_photos %}
-        {
-            id: {{ photo.id }},
-            thumbnail: "{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}",
+    {
+        id: { { photo.id } },
+        thumbnail: "{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}",
             fullsize: "{{ photo.photo.url }}",
-            title: "{{ photo.title|default:'Event Photo'|escapejs }}",
-            date: "{{ photo.uploaded_at|date:'F d, Y' }}",
-            downloadUrl: "{% url 'shop:download_photo' photo.id %}"
-        }{% if not forloop.last %},{% endif %}
-        {% endfor %}
+                title: "{{ photo.title|default:'Event Photo'|escapejs }}",
+                    date: "{{ photo.uploaded_at|date:'F d, Y' }}",
+                        downloadUrl: "{% url 'shop:download_photo' photo.id %}"
+    } {% if not forloop.last %}, {% endif %}
+    {% endfor %}
     ];
 
     let currentPhotoIndex = 0;
@@ -778,7 +756,7 @@
 
         // Fade out image during transition
         imgEl.style.opacity = '0';
-        
+
         // Update content
         setTimeout(() => {
             imgEl.src = photo.fullsize;
@@ -826,7 +804,7 @@
     function handleSwipeGesture() {
         const swipeThreshold = 50;
         const swipeDistance = touchEndX - touchStartX;
-        
+
         if (Math.abs(swipeDistance) > swipeThreshold) {
             if (swipeDistance > 0) {
                 // Swipe right - previous photo
@@ -878,11 +856,11 @@
         // Enhanced gallery item interactions
         document.querySelectorAll('.gallery-item').forEach(function (item) {
             // Focus management
-            item.addEventListener('focus', function() {
+            item.addEventListener('focus', function () {
                 this.style.transform = 'translateY(-5px)';
             });
-            
-            item.addEventListener('blur', function() {
+
+            item.addEventListener('blur', function () {
                 this.style.transform = '';
             });
         });

@@ -31,7 +31,8 @@
         grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
         gap: clamp(15px, 3vw, 30px);
         padding: 0 clamp(10px, 3vw, 20px);
-        margin-bottom: clamp(60px, 8vw, 100px); /* Added more bottom margin */
+        margin-bottom: clamp(60px, 8vw, 100px);
+        /* Added more bottom margin */
     }
 
     .gallery-item {
@@ -77,12 +78,10 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(
-            to top,
-            rgba(0, 0, 0, 0.8) 0%,
-            rgba(0, 0, 0, 0.4) 70%,
-            rgba(0, 0, 0, 0) 100%
-        );
+        background: linear-gradient(to top,
+                rgba(0, 0, 0, 0.8) 0%,
+                rgba(0, 0, 0, 0.4) 70%,
+                rgba(0, 0, 0, 0) 100%);
         color: white;
         padding: clamp(15px, 4vw, 20px);
         /* Always visible, no opacity transition */
@@ -121,7 +120,8 @@
         text-align: center;
         padding: clamp(40px, 10vw, 80px) 20px;
         color: #6c757d;
-        margin-bottom: clamp(40px, 8vw, 60px); /* Added bottom margin */
+        margin-bottom: clamp(40px, 8vw, 60px);
+        /* Added bottom margin */
     }
 
     .empty-gallery i {
@@ -141,7 +141,8 @@
 
     .pagination-container {
         margin-top: 30px;
-        margin-bottom: clamp(40px, 6vw, 60px); /* Added bottom margin */
+        margin-bottom: clamp(40px, 6vw, 60px);
+        /* Added bottom margin */
         display: flex;
         justify-content: center;
         padding: 0 20px;
@@ -360,31 +361,31 @@
     }
 
     /* Responsive Design Breakpoints */
-    
+
     /* Small phones (iPhone SE, etc.) */
     @media (max-width: 375px) {
         .gallery-header {
             padding: 30px 0;
         }
-        
+
         .gallery-grid {
             grid-template-columns: 1fr;
             gap: 15px;
             padding: 0 15px;
             margin-bottom: 50px;
         }
-        
+
         .gallery-image {
             height: 180px;
         }
-        
+
         .lightbox-info {
             left: 10px;
             right: 10px;
             bottom: 10px;
             max-width: none;
         }
-        
+
         .lightbox-counter {
             position: relative;
             margin-top: 10px;
@@ -399,7 +400,7 @@
             gap: 20px;
             margin-bottom: 60px;
         }
-        
+
         .gallery-image {
             height: 200px;
         }
@@ -410,13 +411,13 @@
         .gallery-header {
             padding: 50px 0;
         }
-        
+
         .gallery-grid {
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 25px;
             margin-bottom: 80px;
         }
-        
+
         .gallery-image {
             height: 220px;
         }
@@ -436,18 +437,19 @@
             /* Always visible on touch devices */
             opacity: 1;
         }
-        
+
         .gallery-item:hover {
             transform: none;
         }
-        
+
         .gallery-item:active {
             transform: scale(0.98);
         }
     }
 
     /* High DPI displays */
-    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    @media (-webkit-min-device-pixel-ratio: 2),
+    (min-resolution: 192dpi) {
         .gallery-image {
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
@@ -459,11 +461,11 @@
         .gallery-header {
             padding: 20px 0;
         }
-        
+
         .gallery-header h1 {
             font-size: 1.8rem;
         }
-        
+
         .lightbox-info,
         .lightbox-counter {
             font-size: 0.8rem;
@@ -473,6 +475,7 @@
 
     /* Accessibility improvements */
     @media (prefers-reduced-motion: reduce) {
+
         .gallery-item,
         .gallery-image,
         .gallery-overlay,
@@ -482,7 +485,7 @@
         .lightbox-download-btn {
             transition: none;
         }
-        
+
         .gallery-item:hover .gallery-image {
             transform: none;
         }
@@ -514,17 +517,12 @@
     {% if albums %}
     <div class="gallery-grid">
         {% for album in albums %}
-        <div class="gallery-item" 
-             data-event-slug="{{ album.event.slug }}" 
-             tabindex="0"
-             role="button"
-             aria-label="View {{ album.event.name }} gallery with {{ album.photo_count }} photo{{ album.photo_count|pluralize }}"
-             onclick="openAlbumLightbox('{{ album.event.slug }}')"
-             onkeydown="handleGalleryKeydown(event, '{{ album.event.slug }}')">
+        <div class="gallery-item" data-event-slug="{{ album.event.slug }}" tabindex="0" role="button"
+            aria-label="View {{ album.event.name }} gallery with {{ album.photo_count }} photo{{ album.photo_count|pluralize }}"
+            onclick="openAlbumLightbox('{{ album.event.slug }}')"
+            onkeydown="handleGalleryKeydown(event, '{{ album.event.slug }}')">
             <img src="{% if album.cover_photo.thumbnail %}{{ album.cover_photo.thumbnail.url }}{% else %}{{ album.cover_photo.photo.url }}{% endif %}"
-                alt="{{ album.event.name }}" 
-                class="gallery-image"
-                loading="lazy">
+                alt="{{ album.event.name }}" class="gallery-image" loading="lazy">
 
             <div class="gallery-overlay">
                 <div class="gallery-info">
@@ -546,12 +544,14 @@
                     <a class="page-link" href="?page=1" aria-label="First page">&laquo; First</a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ albums_page.previous_page_number }}" aria-label="Previous page">Previous</a>
+                    <a class="page-link" href="?page={{ albums_page.previous_page_number }}"
+                        aria-label="Previous page">Previous</a>
                 </li>
                 {% endif %}
 
                 <li class="page-item active">
-                    <span class="page-link" aria-current="page">{{ albums_page.number }} of {{ albums_page.paginator.num_pages }}</span>
+                    <span class="page-link" aria-current="page">{{ albums_page.number }} of {{
+                        albums_page.paginator.num_pages }}</span>
                 </li>
 
                 {% if albums_page.has_next %}
@@ -559,7 +559,8 @@
                     <a class="page-link" href="?page={{ albums_page.next_page_number }}" aria-label="Next page">Next</a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ albums_page.paginator.num_pages }}" aria-label="Last page">Last &raquo;</a>
+                    <a class="page-link" href="?page={{ albums_page.paginator.num_pages }}" aria-label="Last page">Last
+                        &raquo;</a>
                 </li>
                 {% endif %}
             </ul>
@@ -578,32 +579,22 @@
 <!-- Lightbox Modal -->
 <div class="lightbox-modal" id="albumLightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
     <div class="lightbox-content">
-        <button class="lightbox-close" 
-                onclick="closeAlbumLightbox()" 
-                aria-label="Close lightbox">
+        <button class="lightbox-close" onclick="closeAlbumLightbox()" aria-label="Close lightbox">
             <i class="fas fa-times"></i>
         </button>
 
-        <button class="lightbox-nav lightbox-prev" 
-                onclick="previousAlbumPhoto()" 
-                aria-label="Previous photo">
+        <button class="lightbox-nav lightbox-prev" onclick="previousAlbumPhoto()" aria-label="Previous photo">
             <i class="fas fa-chevron-left"></i>
         </button>
 
-        <img class="lightbox-image" 
-             id="albumLightboxImage" 
-             src="" 
-             alt=""
-             onload="this.style.opacity='1'"
-             onerror="this.style.opacity='0.5'">
-             
+        <img class="lightbox-image" id="albumLightboxImage" src="" alt="" onload="this.style.opacity='1'"
+            onerror="this.style.opacity='0.5'">
+
         <div class="lightbox-loading" id="lightboxLoading" style="display: none;">
             <i class="fas fa-spinner fa-spin"></i> Loading...
         </div>
 
-        <button class="lightbox-nav lightbox-next" 
-                onclick="nextAlbumPhoto()" 
-                aria-label="Next photo">
+        <button class="lightbox-nav lightbox-next" onclick="nextAlbumPhoto()" aria-label="Next photo">
             <i class="fas fa-chevron-right"></i>
         </button>
 
@@ -640,12 +631,12 @@
         currentAlbumSlug = eventSlug;
         const modal = document.getElementById('albumLightbox');
         const loading = document.getElementById('lightboxLoading');
-        
+
         // Show modal immediately with loading state
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         loading.style.display = 'block';
-        
+
         try {
             const resp = await fetch(`/shop/gallery/${eventSlug}/photos.json`);
             if (!resp.ok) throw new Error('Failed to load photos');
@@ -693,7 +684,7 @@
 
         // Fade out image during transition
         imgEl.style.opacity = '0';
-        
+
         // Update content
         setTimeout(() => {
             imgEl.src = photo.fullsize;
@@ -701,7 +692,7 @@
             titleEl.textContent = photo.title || 'Event Photo';
             dateEl.textContent = photo.uploaded_at ? new Date(photo.uploaded_at).toLocaleDateString() : '';
             counterEl.textContent = `${currentAlbumIndex + 1} / ${albumPhotos.length}`;
-            
+
             if (downloadEl && photo.download_url) {
                 downloadEl.href = photo.download_url;
             }
@@ -714,13 +705,13 @@
     function updateNavButtons() {
         const prevBtn = document.querySelector('.lightbox-prev');
         const nextBtn = document.querySelector('.lightbox-next');
-        
+
         if (prevBtn) {
             prevBtn.style.opacity = currentAlbumIndex === 0 ? '0.5' : '1';
             prevBtn.disabled = currentAlbumIndex === 0;
             prevBtn.setAttribute('aria-disabled', currentAlbumIndex === 0);
         }
-        
+
         if (nextBtn) {
             nextBtn.style.opacity = currentAlbumIndex === albumPhotos.length - 1 ? '0.5' : '1';
             nextBtn.disabled = currentAlbumIndex === albumPhotos.length - 1;
@@ -741,7 +732,7 @@
     function handleSwipeGesture() {
         const swipeThreshold = 50;
         const swipeDistance = touchEndX - touchStartX;
-        
+
         if (Math.abs(swipeDistance) > swipeThreshold) {
             if (swipeDistance > 0) {
                 // Swipe right - previous photo
@@ -758,17 +749,17 @@
         const modal = document.getElementById('albumLightbox');
         if (modal && modal.classList.contains('active')) {
             switch (e.key) {
-                case 'ArrowLeft': 
-                    e.preventDefault(); 
-                    previousAlbumPhoto(); 
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    previousAlbumPhoto();
                     break;
-                case 'ArrowRight': 
-                    e.preventDefault(); 
-                    nextAlbumPhoto(); 
+                case 'ArrowRight':
+                    e.preventDefault();
+                    nextAlbumPhoto();
                     break;
-                case 'Escape': 
-                    e.preventDefault(); 
-                    closeAlbumLightbox(); 
+                case 'Escape':
+                    e.preventDefault();
+                    closeAlbumLightbox();
                     break;
             }
         }
@@ -793,11 +784,11 @@
         // Enhanced gallery item interactions
         document.querySelectorAll('.gallery-item').forEach(function (card) {
             // Focus management
-            card.addEventListener('focus', function() {
+            card.addEventListener('focus', function () {
                 this.style.transform = 'translateY(-5px)';
             });
-            
-            card.addEventListener('blur', function() {
+
+            card.addEventListener('blur', function () {
                 this.style.transform = '';
             });
         });

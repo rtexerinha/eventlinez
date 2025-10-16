@@ -49,7 +49,8 @@
             box-sizing: border-box;
         }
 
-        .container, .container-fluid {
+        .container,
+        .container-fluid {
             max-width: 100%;
             overflow-x: hidden;
         }
@@ -61,7 +62,8 @@
         }
 
         /* Fix any potential wide elements */
-        pre, code {
+        pre,
+        code {
             overflow-x: auto;
             max-width: 100%;
         }
@@ -79,20 +81,21 @@
             body {
                 -webkit-overflow-scrolling: touch;
             }
-            
+
             /* Ensure no element can cause horizontal scroll */
             * {
                 max-width: 100vw;
             }
-            
+
             /* Fix any Bootstrap grid overflows */
             .row {
                 margin-left: 0;
                 margin-right: 0;
                 max-width: 100%;
             }
-            
-            .col, [class*="col-"] {
+
+            .col,
+            [class*="col-"] {
                 padding-left: 15px;
                 padding-right: 15px;
                 max-width: 100%;
@@ -166,6 +169,7 @@
 
         /* Additional mobile touch improvements */
         @media (hover: none) and (pointer: coarse) {
+
             /* Prevent zoom on input focus */
             input[type="text"],
             input[type="email"],
@@ -178,7 +182,9 @@
 
         /* Prevent horizontal bounce on iOS */
         @media (max-width: 768px) {
-            html, body {
+
+            html,
+            body {
                 position: relative;
                 overflow-x: hidden;
                 width: 100%;
