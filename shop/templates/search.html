@@ -6,31 +6,518 @@ We have a variety of stunning and Caps and Tshirts. Look for the one that suits 
 {% block title %}
 Search - Eventlinez
 {% endblock %}
-{% block content %}
-<main class="container" style="min-height: 80vh;">
-    {# <div class="col-lg-12 ml-0 mt-4 pl-0">#}
-        {# <h2 class="h3-home">You have searched for:#}
-            {# <span class="h3-home p-date">{{ query }}</span>#}
-            {# </h2>#}
-        {# </div>#}
 
+{% block custom_css %}
+<style>
+    /* Modern Category Dropdown Styles */
+    .search-filters-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, white 100%);
+        padding: 30px 0;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 30px;
+    }
+
+    .category-dropdown-container {
+        position: relative;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .category-dropdown-toggle {
+        width: 100%;
+        padding: 15px 20px;
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #495057;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .category-dropdown-toggle:hover {
+        border-color: #d90075;
+        box-shadow: 0 4px 16px rgba(217, 0, 117, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .category-dropdown-toggle.active {
+        border-color: #d90075;
+        box-shadow: 0 0 0 3px rgba(217, 0, 117, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .category-selected-text {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .category-icon {
+        color: #d90075;
+        font-size: 1.1rem;
+    }
+
+    .dropdown-arrow {
+        transition: transform 0.3s ease;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .category-dropdown-toggle.active .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+
+    .category-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 5px);
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .category-dropdown-menu.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .category-search {
+        padding: 15px;
+        border-bottom: 1px solid #f1f3f4;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+    }
+
+    .category-search-input {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+
+    .category-search-input:focus {
+        border-color: #d90075;
+        box-shadow: 0 0 0 2px rgba(217, 0, 117, 0.1);
+    }
+
+    .category-list {
+        padding: 10px 0;
+    }
+
+    .category-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #495057;
+        text-decoration: none;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        font-size: 0.95rem;
+    }
+
+    .category-item:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #d90075;
+        text-decoration: none;
+        padding-left: 25px;
+    }
+
+    .category-item.active {
+        background: linear-gradient(135deg, rgba(217, 0, 117, 0.1) 0%, rgba(255, 107, 157, 0.05) 100%);
+        color: #d90075;
+        font-weight: 600;
+        border-left: 3px solid #d90075;
+    }
+
+    .category-item-icon {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .category-item.active .category-item-icon {
+        color: #d90075;
+    }
+
+    .category-item-count {
+        margin-left: auto;
+        background: #f8f9fa;
+        color: #6c757d;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .category-item.active .category-item-count {
+        background: rgba(217, 0, 117, 0.1);
+        color: #d90075;
+    }
+
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+        .search-filters-container {
+            padding: 20px 15px;
+        }
+
+        .category-dropdown-container {
+            max-width: 100%;
+        }
+
+        .category-dropdown-toggle {
+            padding: 12px 16px;
+            font-size: 0.95rem;
+        }
+
+        .category-dropdown-menu {
+            max-height: 300px;
+        }
+
+        .category-search {
+            padding: 12px;
+        }
+
+        .category-item {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+        }
+
+        .category-item:hover {
+            padding-left: 20px;
+        }
+    }
+
+    /* Custom Scrollbar for Category Menu */
+    .category-dropdown-menu::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .category-dropdown-menu::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .category-dropdown-menu::-webkit-scrollbar-thumb {
+        background: #d90075;
+        border-radius: 3px;
+    }
+
+    .category-dropdown-menu::-webkit-scrollbar-thumb:hover {
+        background: #ff6b9d;
+    }
+
+    /* Accessibility improvements */
+    .category-dropdown-toggle:focus {
+        outline: 2px solid #d90075;
+        outline-offset: 2px;
+    }
+
+    .category-item:focus {
+        outline: 2px solid #d90075;
+        outline-offset: -2px;
+    }
+
+    /* Animation for category changes */
+    .category-changing {
+        opacity: 0.7;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Search results improvements */
+    .search-results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .results-count {
+        color: #6c757d;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .clear-filters-btn {
+        background: transparent;
+        color: #6c757d;
+        border: 1px solid #e9ecef;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .clear-filters-btn:hover {
+        background: #f8f9fa;
+        border-color: #d90075;
+        color: #d90075;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Enhanced Search Filters -->
+<div class="search-filters-container">
+    <div class="container">
+        <div class="category-dropdown-container">
+            <div class="category-dropdown-toggle" id="categoryDropdownToggle" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
+                <span class="category-selected-text">
+                    <i class="category-icon fas fa-filter"></i>
+                    <span id="selectedCategoryText">Category</span>
+                </span>
+                <i class="dropdown-arrow fas fa-chevron-down"></i>
+            </div>
+            
+            <div class="category-dropdown-menu" id="categoryDropdownMenu" role="menu">
+                <div class="category-search">
+                    <input type="text" class="category-search-input" id="categorySearchInput" 
+                           placeholder="Search categories..." aria-label="Search categories">
+                </div>
+                
+                <div class="category-list">
+                    <!-- All Events Option -->
+                    <button class="category-item active" role="menuitem" data-category="" data-name="All Events">
+                        <i class="category-item-icon fas fa-globe"></i>
+                        <span>All Events</span>
+                        <span class="category-item-count" id="all-events-count">0</span>
+                    </button>
+                    
+                    <!-- Music Categories -->
+                    <button class="category-item" role="menuitem" data-category="alternative" data-name="Alternative">
+                        <i class="category-item-icon fas fa-guitar"></i>
+                        <span>Alternative</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="arts-culture" data-name="Arts & Culture">
+                        <i class="category-item-icon fas fa-palette"></i>
+                        <span>Arts & Culture</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="blues" data-name="Blues">
+                        <i class="category-item-icon fas fa-music"></i>
+                        <span>Blues</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="bossa-nova" data-name="Bossa Nova">
+                        <i class="category-item-icon fas fa-music"></i>
+                        <span>Bossa Nova</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="business" data-name="Business">
+                        <i class="category-item-icon fas fa-briefcase"></i>
+                        <span>Business</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="classical" data-name="Classical">
+                        <i class="category-item-icon fas fa-violin"></i>
+                        <span>Classical</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="comedy" data-name="Comedy">
+                        <i class="category-item-icon fas fa-laugh"></i>
+                        <span>Comedy</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="country" data-name="Country">
+                        <i class="category-item-icon fas fa-hat-cowboy"></i>
+                        <span>Country</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="disco" data-name="Disco">
+                        <i class="category-item-icon fas fa-compact-disc"></i>
+                        <span>Disco</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="electronic" data-name="Electronic">
+                        <i class="category-item-icon fas fa-headphones"></i>
+                        <span>Electronic</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="fashion" data-name="Fashion">
+                        <i class="category-item-icon fas fa-tshirt"></i>
+                        <span>Fashion</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="folk" data-name="Folk">
+                        <i class="category-item-icon fas fa-leaf"></i>
+                        <span>Folk</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="food-drink" data-name="Food & Drink">
+                        <i class="category-item-icon fas fa-utensils"></i>
+                        <span>Food & Drink</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="funk" data-name="Funk">
+                        <i class="category-item-icon fas fa-record-vinyl"></i>
+                        <span>Funk</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="hip-hop" data-name="Hip-Hop">
+                        <i class="category-item-icon fas fa-microphone"></i>
+                        <span>Hip-Hop</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="house" data-name="House">
+                        <i class="category-item-icon fas fa-volume-up"></i>
+                        <span>House</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="indie" data-name="Indie">
+                        <i class="category-item-icon fas fa-indie-hackers"></i>
+                        <span>Indie</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="jazz" data-name="Jazz">
+                        <i class="category-item-icon fas fa-saxophone"></i>
+                        <span>Jazz</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="latin" data-name="Latin">
+                        <i class="category-item-icon fas fa-drum"></i>
+                        <span>Latin</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="metal" data-name="Metal">
+                        <i class="category-item-icon fas fa-bolt"></i>
+                        <span>Metal</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="pop" data-name="Pop">
+                        <i class="category-item-icon fas fa-star"></i>
+                        <span>Pop</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="punk" data-name="Punk">
+                        <i class="category-item-icon fas fa-fist-raised"></i>
+                        <span>Punk</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="rb" data-name="R&B">
+                        <i class="category-item-icon fas fa-heart"></i>
+                        <span>R&B</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="reggae" data-name="Reggae">
+                        <i class="category-item-icon fas fa-cannabis"></i>
+                        <span>Reggae</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="rock" data-name="Rock">
+                        <i class="category-item-icon fas fa-fire"></i>
+                        <span>Rock</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="sports" data-name="Sports">
+                        <i class="category-item-icon fas fa-football-ball"></i>
+                        <span>Sports</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                    
+                    <button class="category-item" role="menuitem" data-category="techno" data-name="Techno">
+                        <i class="category-item-icon fas fa-satellite-dish"></i>
+                        <span>Techno</span>
+                        <span class="category-item-count">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<main class="container" style="min-height: 80vh;">
     {% if events %}
     <section class="slider">
-
-        <div class="col-12 d-flex p-0 mt-5 mb-4">
-            <div class="col-lg-8 ml-0 pl-0">
-                <h2 class="h3-home">You have searched for:
-                    <span class="h3-home p-date">{{ query }}</span>
+        <div class="search-results-header">
+            <div>
+                <h2 class="h3-home">
+                    {% if query %}
+                        You have searched for: <span class="h3-home p-date">{{ query }}</span>
+                    {% else %}
+                        Events
+                    {% endif %}
                 </h2>
+                <div class="results-count" id="resultsCount">
+                    {{ events|length }} event{{ events|length|pluralize }} found
+                </div>
             </div>
-
-            <div class="col-lg-4 ml-0 pl-0 d-none d-lg-flex">
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-button-next"></div>
+            
+            <div class="d-flex align-items-center gap-3">
+                {% if query %}
+                <a href="{% url 'shop:search' %}" class="clear-filters-btn">
+                    <i class="fas fa-times"></i> Clear Search
+                </a>
+                {% endif %}
+                
+                <div class="d-none d-lg-flex">
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
             </div>
         </div>
 
-        <article class="m-slider swiper-container slider-card">
+        <article class="m-slider swiper-container slider-card" id="eventsContainer">
             <div class="swiper-wrapper">
 
                 {% for event in events %}
@@ -67,10 +554,176 @@ Search - Eventlinez
     </section><!-- .slider // -->
 
     {% else %}
-    <div class="col-12">
+    <div class="col-12 text-center py-5">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
         <h4 class="h4-home">No events found</h4>
+        {% if query %}
+            <p>Try searching with different keywords or browse all events.</p>
+            <a href="{% url 'shop:search' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-globe me-2"></i>Browse All Events
+            </a>
+        {% else %}
+            <p>No events are currently available. Check back soon!</p>
+        {% endif %}
     </div>
-
     {% endif %}
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Category Dropdown Functionality
+    const dropdownToggle = document.getElementById('categoryDropdownToggle');
+    const dropdownMenu = document.getElementById('categoryDropdownMenu');
+    const selectedCategoryText = document.getElementById('selectedCategoryText');
+    const categorySearchInput = document.getElementById('categorySearchInput');
+    const categoryItems = document.querySelectorAll('.category-item');
+    
+    let isDropdownOpen = false;
+    let selectedCategory = '';
+    
+    // Toggle dropdown
+    function toggleDropdown() {
+        isDropdownOpen = !isDropdownOpen;
+        dropdownToggle.classList.toggle('active', isDropdownOpen);
+        dropdownMenu.classList.toggle('show', isDropdownOpen);
+        dropdownToggle.setAttribute('aria-expanded', isDropdownOpen);
+        
+        if (isDropdownOpen) {
+            categorySearchInput.focus();
+        }
+    }
+    
+    // Close dropdown
+    function closeDropdown() {
+        isDropdownOpen = false;
+        dropdownToggle.classList.remove('active');
+        dropdownMenu.classList.remove('show');
+        dropdownToggle.setAttribute('aria-expanded', 'false');
+        categorySearchInput.value = '';
+        filterCategories('');
+    }
+    
+    // Filter categories based on search
+    function filterCategories(searchTerm) {
+        categoryItems.forEach(item => {
+            const categoryName = item.querySelector('span').textContent.toLowerCase();
+            const matches = categoryName.includes(searchTerm.toLowerCase());
+            item.style.display = matches ? 'flex' : 'none';
+        });
+    }
+    
+    // Select category
+    function selectCategory(categoryData, categoryName) {
+        // Update active state
+        categoryItems.forEach(item => item.classList.remove('active'));
+        event.target.closest('.category-item').classList.add('active');
+        
+        // Update selected text
+        selectedCategory = categoryData;
+        selectedCategoryText.textContent = categoryName;
+        
+        // Close dropdown
+        closeDropdown();
+        
+        // Filter events (you would implement this based on your backend)
+        filterEvents(categoryData);
+    }
+    
+    // Filter events (placeholder - implement based on your needs)
+    function filterEvents(category) {
+        // Add loading state
+        const container = document.getElementById('eventsContainer');
+        if (container) {
+            container.classList.add('category-changing');
+        }
+        
+        // Here you would make an AJAX call or redirect to filtered results
+        const currentUrl = new URL(window.location);
+        if (category) {
+            currentUrl.searchParams.set('category', category);
+        } else {
+            currentUrl.searchParams.delete('category');
+        }
+        
+        // For now, just update the URL and reload
+        // In a full implementation, you'd use AJAX for seamless filtering
+        setTimeout(() => {
+            window.location.href = currentUrl.toString();
+        }, 300);
+    }
+    
+    // Event listeners
+    dropdownToggle.addEventListener('click', toggleDropdown);
+    dropdownToggle.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleDropdown();
+        } else if (e.key === 'Escape' && isDropdownOpen) {
+            closeDropdown();
+        }
+    });
+    
+    categorySearchInput.addEventListener('input', function() {
+        filterCategories(this.value);
+    });
+    
+    categoryItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const categoryData = this.getAttribute('data-category');
+            const categoryName = this.getAttribute('data-name');
+            selectCategory(categoryData, categoryName);
+        });
+        
+        item.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            closeDropdown();
+        }
+    });
+    
+    // Initialize category counts (you would get this from backend)
+    function updateCategoryCounts() {
+        // This would be populated from your Django backend
+        const counts = {
+            '': 25, // All events
+            'alternative': 3,
+            'arts-culture': 7,
+            'blues': 2,
+            // ... add more as needed
+        };
+        
+        categoryItems.forEach(item => {
+            const category = item.getAttribute('data-category');
+            const countElement = item.querySelector('.category-item-count');
+            if (countElement && counts.hasOwnProperty(category)) {
+                countElement.textContent = counts[category];
+            }
+        });
+    }
+    
+    // Set initial category if URL has category parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCategory = urlParams.get('category');
+    if (urlCategory) {
+        const matchingItem = document.querySelector(`[data-category="${urlCategory}"]`);
+        if (matchingItem) {
+            categoryItems.forEach(item => item.classList.remove('active'));
+            matchingItem.classList.add('active');
+            selectedCategoryText.textContent = matchingItem.getAttribute('data-name');
+            selectedCategory = urlCategory;
+        }
+    }
+    
+    updateCategoryCounts();
+});
+</script>
 {% endblock %}

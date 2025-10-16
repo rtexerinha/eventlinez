@@ -52,10 +52,9 @@ services:
       - EMAIL_HOST_PASSWORD=${SENDGRID_API_KEY}
       - DEFAULT_FROM_EMAIL=noreply@eventlinez.com
 
-      # Stripe Configuration (Replace with your actual Stripe test keys)
-      # Get your keys from: https://dashboard.stripe.com/test/apikeys
-      - STRIPE_PUBLISHABLE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
-      - STRIPE_SECRET_KEY=sk_test_YOUR_SECRET_KEY_HERE
+      # Stripe Configuration - Using test keys from .env.docker
+      - STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
+      - STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
     ports:
       - "8000:8000"
     volumes:
@@ -78,5 +77,3 @@ services:
 
 volumes:
   pg_data:
-
-    # docker-compose.yml

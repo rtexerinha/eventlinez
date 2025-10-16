@@ -208,9 +208,17 @@ REST_FRAMEWORK = {
     ],
 }
 
-# File upload settings for 20MB max file size
-FILE_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024  # 20MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024  # 20MB
+# File upload settings for larger photo album uploads (200MB max)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 200 * 1024 * 1024  # 200MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 200 * 1024 * 1024  # 200MB
+
+# Additional upload settings for better handling of large files
+FILE_UPLOAD_TEMP_DIR = os.path.join(BASE_DIR, 'tmp', 'uploads')
+FILE_UPLOAD_PERMISSIONS = 0o644
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
+
+# Ensure temp upload directory exists
+os.makedirs(FILE_UPLOAD_TEMP_DIR, exist_ok=True)
 
 # Feature flags / misc
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")

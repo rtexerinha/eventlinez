@@ -8,60 +8,113 @@
     .event-header {
         background: linear-gradient(135deg, #d90075, #ff6b9d);
         color: white;
-        padding: 60px 0;
+        padding: 40px 0;
         text-align: center;
-        margin-bottom: 50px;
+        margin-bottom: 30px;
+        position: relative;
     }
 
     .event-header h1 {
-        font-size: 2.5rem;
+        font-size: clamp(1.8rem, 4.5vw, 2.5rem);
         font-weight: 700;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
+        line-height: 1.2;
+        padding: 0 60px;
     }
 
     .event-header p {
-        font-size: 1.1rem;
+        font-size: clamp(0.9rem, 2.8vw, 1.1rem);
         opacity: 0.9;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
 
     .event-info {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
-        padding: 20px;
+        padding: clamp(15px, 4vw, 20px);
         display: inline-block;
+        backdrop-filter: blur(10px);
+        font-size: clamp(0.85rem, 2.5vw, 1rem);
+    }
+
+    .event-info div {
+        margin: 5px 0;
+    }
+
+    .back-btn {
+        position: absolute;
+        top: clamp(15px, 4vw, 20px);
+        left: clamp(15px, 4vw, 20px);
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: clamp(40px, 10vw, 45px);
+        height: clamp(40px, 10vw, 45px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: clamp(16px, 4vw, 20px);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .back-btn:hover,
+    .back-btn:focus {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: scale(1.1);
+        outline: none;
+    }
+
+    .back-btn:active {
+        transform: scale(0.95);
     }
 
     .gallery-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 25px;
-        padding: 0 20px;
+        grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+        gap: clamp(15px, 3vw, 25px);
+        padding: 0 clamp(10px, 3vw, 20px);
+        margin-bottom: 40px;
     }
 
     .gallery-item {
         position: relative;
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: white;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    .gallery-item:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    .gallery-item:hover,
+    .gallery-item:focus {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        outline: none;
+    }
+
+    .gallery-item:active {
+        transform: translateY(-2px);
+        transition: all 0.1s;
     }
 
     .gallery-image {
         width: 100%;
-        height: 220px;
+        height: clamp(180px, 22vw, 220px);
         object-fit: cover;
         transition: transform 0.3s ease;
+        display: block;
     }
 
     .gallery-item:hover .gallery-image {
-        transform: scale(1.05);
+        transform: scale(1.03);
     }
 
     .gallery-overlay {
@@ -70,16 +123,22 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.1) 50%,
+            rgba(0, 0, 0, 0.7) 100%
+        );
         opacity: 0;
         transition: opacity 0.3s ease;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        padding: 15px;
+        padding: clamp(12px, 3vw, 15px);
     }
 
-    .gallery-item:hover .gallery-overlay {
+    .gallery-item:hover .gallery-overlay,
+    .gallery-item:focus .gallery-overlay {
         opacity: 1;
     }
 
@@ -89,28 +148,30 @@
     }
 
     .gallery-title {
-        font-size: 1rem;
+        font-size: clamp(0.9rem, 2.8vw, 1rem);
         font-weight: 600;
         margin-bottom: 5px;
+        line-height: 1.3;
     }
 
     .gallery-stats {
         display: flex;
         justify-content: space-between;
-        font-size: 0.8rem;
+        font-size: clamp(0.7rem, 2vw, 0.8rem);
         opacity: 0.8;
-        margin-top: 10px;
+        margin-top: 8px;
     }
 
     .gallery-actions {
         position: absolute;
-        top: 15px;
-        right: 15px;
+        top: clamp(10px, 3vw, 15px);
+        right: clamp(10px, 3vw, 15px);
         opacity: 0;
         transition: opacity 0.3s ease;
     }
 
-    .gallery-item:hover .gallery-actions {
+    .gallery-item:hover .gallery-actions,
+    .gallery-item:focus .gallery-actions {
         opacity: 1;
     }
 
@@ -119,61 +180,34 @@
         color: #d90075;
         border: none;
         border-radius: 50%;
-        width: 35px;
-        height: 35px;
+        width: clamp(30px, 8vw, 35px);
+        height: clamp(30px, 8vw, 35px);
         display: flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
         transition: all 0.3s ease;
-        font-size: 0.9rem;
+        font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    .download-btn:hover {
+    .download-btn:hover,
+    .download-btn:focus {
         background: white;
         color: #d90075;
         transform: scale(1.1);
+        outline: none;
     }
 
-    .back-btn {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 45px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
-
-    .back-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-        color: white;
-        transform: scale(1.1);
-    }
-
-    .empty-gallery {
-        text-align: center;
-        padding: 80px 20px;
-        color: #6c757d;
-    }
-
-    .empty-gallery i {
-        font-size: 4rem;
-        margin-bottom: 20px;
-        color: #d90075;
+    .download-btn:active {
+        transform: scale(0.95);
     }
 
     .download-info {
         background: #f8f9fa;
         border-radius: 10px;
-        padding: 20px;
+        padding: clamp(15px, 4vw, 20px);
         margin-bottom: 30px;
         text-align: center;
     }
@@ -181,14 +215,38 @@
     .download-info h4 {
         color: #d90075;
         margin-bottom: 10px;
+        font-size: clamp(1.1rem, 3.5vw, 1.3rem);
     }
 
     .download-info p {
         color: #6c757d;
         margin-bottom: 0;
+        font-size: clamp(0.85rem, 2.5vw, 1rem);
+        line-height: 1.4;
     }
 
-    /* Lightbox Modal Styles */
+    .empty-gallery {
+        text-align: center;
+        padding: clamp(40px, 10vw, 80px) 20px;
+        color: #6c757d;
+    }
+
+    .empty-gallery i {
+        font-size: clamp(3rem, 8vw, 4rem);
+        margin-bottom: 20px;
+        color: #d90075;
+    }
+
+    .empty-gallery h3 {
+        font-size: clamp(1.2rem, 4vw, 1.5rem);
+        margin-bottom: 10px;
+    }
+
+    .empty-gallery p {
+        font-size: clamp(0.9rem, 3vw, 1rem);
+    }
+
+    /* Enhanced Lightbox Modal Styles */
     .lightbox-modal {
         display: none;
         position: fixed;
@@ -200,6 +258,7 @@
         z-index: 9999;
         opacity: 0;
         transition: opacity 0.3s ease;
+        overflow: hidden;
     }
 
     .lightbox-modal.active {
@@ -214,91 +273,111 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: clamp(10px, 3vw, 20px);
+        touch-action: pan-x pan-y;
     }
 
     .lightbox-image {
-        max-width: 85%;
-        max-height: 85%;
+        max-width: 90%;
+        max-height: 90%;
         object-fit: contain;
         border-radius: 8px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        transition: opacity 0.3s ease;
     }
 
     .lightbox-nav {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        width: 50px;
-        height: 50px;
+        width: clamp(40px, 10vw, 50px);
+        height: clamp(40px, 10vw, 50px);
         background: rgba(255, 255, 255, 0.9);
         border: none;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: clamp(16px, 4vw, 20px);
         color: #333;
         cursor: pointer;
         transition: all 0.3s ease;
         z-index: 10;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    .lightbox-nav:hover {
+    .lightbox-nav:hover,
+    .lightbox-nav:focus {
         background: white;
         transform: translateY(-50%) scale(1.1);
+        outline: none;
+    }
+
+    .lightbox-nav:active {
+        transform: translateY(-50%) scale(0.95);
     }
 
     .lightbox-prev {
-        left: 30px;
+        left: clamp(15px, 4vw, 30px);
     }
 
     .lightbox-next {
-        right: 30px;
+        right: clamp(15px, 4vw, 30px);
     }
 
     .lightbox-close {
         position: absolute;
-        top: 30px;
-        right: 30px;
-        width: 40px;
-        height: 40px;
+        top: clamp(15px, 4vw, 30px);
+        right: clamp(15px, 4vw, 30px);
+        width: clamp(35px, 8vw, 40px);
+        height: clamp(35px, 8vw, 40px);
         background: rgba(255, 255, 255, 0.9);
         border: none;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: clamp(14px, 4vw, 18px);
         color: #333;
         cursor: pointer;
         transition: all 0.3s ease;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    .lightbox-close:hover {
+    .lightbox-close:hover,
+    .lightbox-close:focus {
         background: white;
         transform: scale(1.1);
+        outline: none;
+    }
+
+    .lightbox-close:active {
+        transform: scale(0.95);
     }
 
     .lightbox-info {
         position: absolute;
-        bottom: 30px;
-        left: 30px;
+        bottom: clamp(15px, 4vw, 30px);
+        left: clamp(15px, 4vw, 30px);
         background: rgba(255, 255, 255, 0.95);
-        padding: 15px 20px;
+        padding: clamp(12px, 3vw, 15px) clamp(16px, 4vw, 20px);
         border-radius: 10px;
         color: #333;
-        max-width: 300px;
+        max-width: clamp(260px, 55vw, 300px);
+        backdrop-filter: blur(10px);
     }
 
     .lightbox-info h4 {
         margin: 0 0 5px 0;
-        font-size: 1.1rem;
+        font-size: clamp(1rem, 3vw, 1.1rem);
+        line-height: 1.3;
     }
 
     .lightbox-info p {
         margin: 0 0 10px 0;
-        font-size: 0.9rem;
+        font-size: clamp(0.8rem, 2.5vw, 0.9rem);
         color: #666;
     }
 
@@ -306,88 +385,202 @@
         background: #d90075;
         color: white;
         text-decoration: none;
-        padding: 8px 16px;
+        padding: clamp(6px, 2vw, 8px) clamp(12px, 3vw, 16px);
         border-radius: 20px;
-        font-size: 0.85rem;
+        font-size: clamp(0.75rem, 2vw, 0.85rem);
         transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    .lightbox-download-btn:hover {
+    .lightbox-download-btn:hover,
+    .lightbox-download-btn:focus {
         background: #ff6b9d;
         color: white;
         text-decoration: none;
         transform: translateY(-2px);
+        outline: none;
+    }
+
+    .lightbox-download-btn:active {
+        transform: translateY(0);
     }
 
     .lightbox-counter {
         position: absolute;
-        bottom: 30px;
-        right: 30px;
+        bottom: clamp(15px, 4vw, 30px);
+        right: clamp(15px, 4vw, 30px);
         background: rgba(255, 255, 255, 0.9);
-        padding: 8px 16px;
+        padding: clamp(6px, 2vw, 8px) clamp(12px, 3vw, 16px);
         border-radius: 20px;
-        font-size: 14px;
+        font-size: clamp(12px, 3vw, 14px);
         color: #333;
         font-weight: 500;
+        backdrop-filter: blur(10px);
     }
 
-    @media (max-width: 768px) {
-        .gallery-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+    /* Responsive Design Breakpoints */
+    
+    /* Small phones (iPhone SE, etc.) */
+    @media (max-width: 375px) {
+        .event-header {
+            padding: 25px 0;
         }
+        
+        .event-header h1 {
+            padding: 0 50px;
+        }
+        
+        .gallery-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+            padding: 0 15px;
+        }
+        
+        .gallery-image {
+            height: 160px;
+        }
+        
+        .lightbox-info {
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            max-width: none;
+        }
+        
+        .lightbox-counter {
+            position: relative;
+            margin-top: 10px;
+            align-self: flex-end;
+        }
+    }
 
+    /* Medium phones and small tablets */
+    @media (min-width: 376px) and (max-width: 768px) {
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 18px;
+        }
+        
+        .gallery-image {
+            height: 180px;
+        }
+    }
+
+    /* Tablets and small laptops */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .event-header {
+            padding: 45px 0;
+        }
+        
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 22px;
+        }
+        
         .gallery-image {
             height: 200px;
         }
+    }
 
+    /* Large screens */
+    @media (min-width: 1025px) {
+        .gallery-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+    }
+
+    /* Touch device optimizations */
+    @media (hover: none) and (pointer: coarse) {
+        .gallery-overlay {
+            opacity: 0.8;
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0) 0%,
+                rgba(0, 0, 0, 0.6) 100%
+            );
+        }
+        
+        .gallery-actions {
+            opacity: 1;
+        }
+        
+        .gallery-item:hover {
+            transform: none;
+        }
+        
+        .gallery-item:active {
+            transform: scale(0.98);
+        }
+    }
+
+    /* High DPI displays */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .gallery-image {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+    }
+
+    /* Landscape phone orientation */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .event-header {
+            padding: 15px 0;
+        }
+        
         .event-header h1 {
-            font-size: 2rem;
+            font-size: 1.5rem;
         }
-
-        .back-btn {
-            top: 10px;
-            left: 10px;
-            width: 40px;
-            height: 40px;
+        
+        .event-info {
+            padding: 10px 15px;
         }
-
-        .lightbox-nav {
-            width: 45px;
-            height: 45px;
-            font-size: 18px;
-        }
-
-        .lightbox-prev {
-            left: 20px;
-        }
-
-        .lightbox-next {
-            right: 20px;
-        }
-
-        .lightbox-close {
-            top: 20px;
-            right: 20px;
-            width: 35px;
-            height: 35px;
-            font-size: 16px;
-        }
-
-        .lightbox-info {
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            max-width: none;
-        }
-
+        
+        .lightbox-info,
         .lightbox-counter {
-            bottom: 20px;
-            right: 20px;
+            font-size: 0.8rem;
+            padding: 8px 12px;
         }
+    }
+
+    /* Accessibility improvements */
+    @media (prefers-reduced-motion: reduce) {
+        .gallery-item,
+        .gallery-image,
+        .gallery-overlay,
+        .lightbox-modal,
+        .lightbox-nav,
+        .lightbox-close,
+        .lightbox-download-btn,
+        .back-btn {
+            transition: none;
+        }
+        
+        .gallery-item:hover .gallery-image {
+            transform: none;
+        }
+    }
+
+    /* Focus indicators for keyboard navigation */
+    .gallery-item:focus-visible {
+        outline: 3px solid #d90075;
+        outline-offset: 2px;
+    }
+
+    .lightbox-nav:focus-visible,
+    .lightbox-close:focus-visible,
+    .back-btn:focus-visible {
+        outline: 2px solid #d90075;
+        outline-offset: 2px;
+    }
+
+    .download-btn:focus-visible {
+        outline: 2px solid white;
+        outline-offset: 2px;
     }
 </style>
 {% endblock %}
@@ -395,7 +588,10 @@
 {% block content %}
 <div class="event-header">
     <div class="container">
-        <a href="{% url 'shop:gallery_home' %}" class="back-btn" title="Back to Gallery">
+        <a href="{% url 'shop:gallery_home' %}" 
+           class="back-btn" 
+           title="Back to Gallery"
+           aria-label="Back to Gallery">
             <i class="fas fa-arrow-left"></i>
         </a>
 
@@ -413,8 +609,7 @@
     {% if user.is_authenticated %}
     <div class="download-info">
         <h4><i class="fas fa-info-circle me-2"></i>Download Information</h4>
-        <p>You can download photos if you have purchased tickets for this event. Click the download button on any photo
-            to get started.</p>
+        <p>You can download photos if you have purchased tickets for this event. Click the download button on any photo to get started.</p>
     </div>
     {% else %}
     <div class="download-info">
@@ -426,15 +621,25 @@
     {% if gallery_photos %}
     <div class="gallery-grid">
         {% for photo in gallery_photos %}
-        <div class="gallery-item" onclick="openPhotoLightbox({{ forloop.counter0 }})">
+        <div class="gallery-item" 
+             onclick="openPhotoLightbox({{ forloop.counter0 }})"
+             tabindex="0"
+             role="button"
+             aria-label="View photo {{ forloop.counter }} of {{ gallery_photos|length }}"
+             onkeydown="handlePhotoKeydown(event, {{ forloop.counter0 }})">
             <img src="{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}"
-                alt="{{ photo.title|default:photo.event.name }}" class="gallery-image">
+                alt="{{ photo.title|default:photo.event.name }}" 
+                class="gallery-image"
+                loading="lazy">
 
             <div class="gallery-overlay">
                 <div class="gallery-actions">
                     {% if user.is_authenticated %}
-                    <a href="{% url 'shop:download_photo' photo.id %}" class="download-btn" title="Download Photo"
-                        onclick="event.stopPropagation()">
+                    <a href="{% url 'shop:download_photo' photo.id %}" 
+                       class="download-btn" 
+                       title="Download Photo"
+                       aria-label="Download photo"
+                       onclick="event.stopPropagation()">
                         <i class="fas fa-download"></i>
                     </a>
                     {% endif %}
@@ -455,19 +660,30 @@
     </div>
 
     <!-- Lightbox Modal -->
-    <div class="lightbox-modal" id="photoLightbox">
+    <div class="lightbox-modal" id="photoLightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
         <div class="lightbox-content">
-            <button class="lightbox-close" onclick="closePhotoLightbox()">
+            <button class="lightbox-close" 
+                    onclick="closePhotoLightbox()"
+                    aria-label="Close lightbox">
                 <i class="fas fa-times"></i>
             </button>
 
-            <button class="lightbox-nav lightbox-prev" onclick="previousGalleryPhoto()">
+            <button class="lightbox-nav lightbox-prev" 
+                    onclick="previousGalleryPhoto()"
+                    aria-label="Previous photo">
                 <i class="fas fa-chevron-left"></i>
             </button>
 
-            <img class="lightbox-image" id="galleryLightboxImage" src="" alt="">
+            <img class="lightbox-image" 
+                 id="galleryLightboxImage" 
+                 src="" 
+                 alt=""
+                 onload="this.style.opacity='1'"
+                 onerror="this.style.opacity='0.5'">
 
-            <button class="lightbox-nav lightbox-next" onclick="nextGalleryPhoto()">
+            <button class="lightbox-nav lightbox-next" 
+                    onclick="nextGalleryPhoto()"
+                    aria-label="Next photo">
                 <i class="fas fa-chevron-right"></i>
             </button>
 
@@ -499,18 +715,28 @@
     // Gallery photos data for lightbox
     const galleryPhotos = [
         {% for photo in gallery_photos %}
-    {
-        id: { { photo.id } },
-        thumbnail: "{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}",
+        {
+            id: {{ photo.id }},
+            thumbnail: "{% if photo.thumbnail %}{{ photo.thumbnail.url }}{% else %}{{ photo.photo.url }}{% endif %}",
             fullsize: "{{ photo.photo.url }}",
-                title: "{{ photo.title|default:'Event Photo'|escapejs }}",
-                    date: "{{ photo.uploaded_at|date:'F d, Y' }}",
-                        downloadUrl: "{% url 'shop:download_photo' photo.id %}"
-    } {% if not forloop.last %}, {% endif %}
-    {% endfor %}
-];
+            title: "{{ photo.title|default:'Event Photo'|escapejs }}",
+            date: "{{ photo.uploaded_at|date:'F d, Y' }}",
+            downloadUrl: "{% url 'shop:download_photo' photo.id %}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
 
     let currentPhotoIndex = 0;
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // Handle keyboard navigation for photo items
+    function handlePhotoKeydown(event, index) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openPhotoLightbox(index);
+        }
+    }
 
     function openPhotoLightbox(index) {
         currentPhotoIndex = index;
@@ -544,28 +770,71 @@
         if (galleryPhotos.length === 0) return;
 
         const photo = galleryPhotos[currentPhotoIndex];
-        document.getElementById('galleryLightboxImage').src = photo.fullsize;
-        document.getElementById('lightboxPhotoTitle').textContent = photo.title;
-        document.getElementById('lightboxPhotoDate').textContent = photo.date;
-        document.getElementById('galleryLightboxCounter').textContent = `${currentPhotoIndex + 1} / ${galleryPhotos.length}`;
-
+        const imgEl = document.getElementById('galleryLightboxImage');
+        const titleEl = document.getElementById('lightboxPhotoTitle');
+        const dateEl = document.getElementById('lightboxPhotoDate');
+        const counterEl = document.getElementById('galleryLightboxCounter');
         const downloadBtn = document.getElementById('lightboxDownloadBtn');
-        if (downloadBtn) {
-            downloadBtn.href = photo.downloadUrl;
-        }
+
+        // Fade out image during transition
+        imgEl.style.opacity = '0';
+        
+        // Update content
+        setTimeout(() => {
+            imgEl.src = photo.fullsize;
+            imgEl.alt = photo.title;
+            titleEl.textContent = photo.title;
+            dateEl.textContent = photo.date;
+            counterEl.textContent = `${currentPhotoIndex + 1} / ${galleryPhotos.length}`;
+
+            if (downloadBtn) {
+                downloadBtn.href = photo.downloadUrl;
+            }
+        }, 150);
 
         // Update navigation button states
+        updateNavButtons();
+    }
+
+    function updateNavButtons() {
         const prevBtn = document.querySelector('.lightbox-prev');
         const nextBtn = document.querySelector('.lightbox-next');
 
         if (prevBtn) {
             prevBtn.style.opacity = currentPhotoIndex === 0 ? '0.5' : '1';
-            prevBtn.style.cursor = currentPhotoIndex === 0 ? 'not-allowed' : 'pointer';
+            prevBtn.disabled = currentPhotoIndex === 0;
+            prevBtn.setAttribute('aria-disabled', currentPhotoIndex === 0);
         }
 
         if (nextBtn) {
             nextBtn.style.opacity = currentPhotoIndex === galleryPhotos.length - 1 ? '0.5' : '1';
-            nextBtn.style.cursor = currentPhotoIndex === galleryPhotos.length - 1 ? 'not-allowed' : 'pointer';
+            nextBtn.disabled = currentPhotoIndex === galleryPhotos.length - 1;
+            nextBtn.setAttribute('aria-disabled', currentPhotoIndex === galleryPhotos.length - 1);
+        }
+    }
+
+    // Touch gesture handling
+    function handleTouchStart(e) {
+        touchStartX = e.changedTouches[0].screenX;
+    }
+
+    function handleTouchEnd(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+    }
+
+    function handleSwipeGesture() {
+        const swipeThreshold = 50;
+        const swipeDistance = touchEndX - touchStartX;
+        
+        if (Math.abs(swipeDistance) > swipeThreshold) {
+            if (swipeDistance > 0) {
+                // Swipe right - previous photo
+                previousGalleryPhoto();
+            } else {
+                // Swipe left - next photo
+                nextGalleryPhoto();
+            }
         }
     }
 
@@ -598,12 +867,36 @@
         }
     });
 
-    // Prevent gallery item clicks from bubbling to lightbox close
-    document.querySelectorAll('.gallery-item').forEach(item => {
-        item.addEventListener('click', function (e) {
-            e.stopPropagation();
+    // Initialize touch gestures and accessibility
+    document.addEventListener('DOMContentLoaded', function () {
+        const lightboxContent = document.querySelector('.lightbox-content');
+        if (lightboxContent) {
+            lightboxContent.addEventListener('touchstart', handleTouchStart, { passive: true });
+            lightboxContent.addEventListener('touchend', handleTouchEnd, { passive: true });
+        }
+
+        // Enhanced gallery item interactions
+        document.querySelectorAll('.gallery-item').forEach(function (item) {
+            // Focus management
+            item.addEventListener('focus', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            item.addEventListener('blur', function() {
+                this.style.transform = '';
+            });
         });
     });
+
+    // Prevent zoom on double tap
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
 </script>
 
 {% endblock %}
