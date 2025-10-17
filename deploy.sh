@@ -127,6 +127,8 @@ STATIC_ROOT=/home/sunset/eventlinez/staticfiles
 MEDIA_ROOT=/home/sunset/eventlinez/media
 APP_HOST=https://test.eventlinez.com
 PROD=True
+STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
 EOF
     success "Environment file created"
 else

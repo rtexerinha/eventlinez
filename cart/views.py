@@ -389,7 +389,12 @@ def checkout(request):
         return redirect('cart:cart_detail') 
 
     # Check if Stripe is properly configured with real keys
-    if not settings.STRIPE_SECRET_KEY or settings.STRIPE_SECRET_KEY in ['sk_test_51234567890abcdef', 'sk_live_51H1234567890abcdef']:
+    if not settings.STRIPE_SECRET_KEY or settings.STRIPE_SECRET_KEY in [
+        'sk_test_51234567890abcdef', 
+        'sk_live_51H1234567890abcdef',
+        'sk_test_placeholder',  # Add this placeholder check
+        'sk_live_placeholder'   # Add this placeholder check
+    ]:
         return JsonResponse({
             'error': 'Payment processing is not available. Please contact administrator for checkout assistance.'
         }, status=500)
