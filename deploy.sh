@@ -20,10 +20,23 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging function
+# Branch configuration
+BRANCH_NAME="develop"
+
+# Logging functions
 log() {
     echo -e "${BLUE}[$(date +'%Y-%m-%d %H:%M:%S')]${NC} $1"
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" >> $LOG_FILE
+}
+
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+    echo "[INFO] $1" >> $LOG_FILE
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo "[SUCCESS] $1" >> $LOG_FILE
 }
 
 error() {
@@ -76,9 +89,13 @@ cd $DEPLOY_PATH || {
 }
 
 # Step 4: Pull latest changes
-log "📥 Pulling latest changes from develop branch..."
-git fetch origin
-git reset --hard origin/develop
+log "📥 Pulling latest changes from $BRANCH_NAME branch..."
+# Switch to target branch and pull latest changes
+log_info "Switching to branch: $BRANCH_NAME"
+git checkout "$BRANCH_NAME"
+git reset --hard "origin/$BRANCH_NAME"
+git pull origin "$BRANCH_NAME"
+log_success "Updated to latest $BRANCH_NAME"
 git clean -fd
 success "Code updated successfully"
 
