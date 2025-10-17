@@ -3,6 +3,9 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import logging
 
 from cart.models import Cart
 from cart.views import _cart_id
@@ -12,6 +15,43 @@ from .models import Order
 from .models import OrderItem
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.headers.get('Stripe-Signature')
+    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        logger.error(f"Invalid payload: {e}")
+        return JsonResponse({'error': 'Invalid payload'}, status=400)
+    except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Invalid signature: {e}")
+        return JsonResponse({'error': 'Invalid signature'}, status=400)
+
+    # Handle the event
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        logger.info(f"Checkout session completed: {session}")
+        # Add your logic here (e.g., update order status, send email)
+
+    elif event['type'] == 'checkout.session.async_payment_succeeded':
+        session = event['data']['object']
+        logger.info(f"Async payment succeeded: {session}")
+        # Add your logic here
+
+    elif event['type'] == 'checkout.session.async_payment_failed':
+        session = event['data']['object']
+        logger.warning(f"Async payment failed: {session}")
+        # Add your logic here
+
+    return JsonResponse({'status': 'success'})
 
 
 @login_required()

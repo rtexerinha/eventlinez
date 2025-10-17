@@ -25,6 +25,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")  # for dev, "*" is fi
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "sk_test_placeholder")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "pk_test_placeholder")
+STRIPE_WEBHOOK_SECRET = "whsec_UncYtClVKoVzrioZyCT3vouPDASAztau"
 
 # App Host URL for QR codes and external links
 APP_HOST = os.getenv("APP_HOST", "http://localhost:8000")
