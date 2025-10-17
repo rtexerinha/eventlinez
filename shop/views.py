@@ -178,9 +178,18 @@ def contact(request):
     # Only validate reCAPTCHA if keys are configured and requests library is available
     if settings.RECAPTCHA_PUBLIC_KEY and settings.RECAPTCHA_PRIVATE_KEY and REQUESTS_AVAILABLE:
         recaptcha_verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+        
+        # Get client IP address
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        
         recaptcha_data = {
             'secret': settings.RECAPTCHA_PRIVATE_KEY,
-            'response': recaptcha_response
+            'response': recaptcha_response,
+            'remoteip': ip
         }
         
         try:
@@ -189,23 +198,15 @@ def contact(request):
             
             # Check if reCAPTCHA validation passed
             if not recaptcha_json.get('success', False):
+                error_codes = recaptcha_json.get('error-codes', [])
+                logger.warning(f"reCAPTCHA validation failed. Error codes: {error_codes}")
                 messages.error(request, 'reCAPTCHA validation failed. Please try again.')
                 return render(request, 'pages/contactus.html', {
                     'form': form,
                     'PROD': settings.PROD,
                     'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
                 })
-            
-            # For reCAPTCHA v3, check the score
-            score = recaptcha_json.get('score', 0)
-            if score < settings.RECAPTCHA_REQUIRED_SCORE:
-                logger.warning(f"reCAPTCHA score too low: {score}")
-                messages.error(request, 'Security validation failed. Please try again.')
-                return render(request, 'pages/contactus.html', {
-                    'form': form,
-                    'PROD': settings.PROD,
-                    'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
-                })
+                
         except Exception as e:
             logger.error(f"reCAPTCHA verification error: {e}")
             messages.error(request, 'Security validation error. Please try again later.')

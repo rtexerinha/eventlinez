@@ -1,64 +1,370 @@
 {% extends "base-new.html" %}
 {% load static %}
 {% block title %}
-	Order History - Eventlinez
+Order History - Eventlinez
+{% endblock %}
+
+{% block custom_css %}
+<style>
+    /* Mobile-first responsive design for order history */
+    .order-history-container {
+        padding: 20px 15px;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 16px;
+        padding: 20px;
+        border: 1px solid #e8e8e8;
+        transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .order-number {
+        font-weight: 600;
+        font-size: 18px;
+        color: #333;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .order-number:hover {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #d4edda;
+        color: #155724;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .order-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .order-detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        color: #666;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        font-size: 16px;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .order-actions {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .view-details-btn {
+        background: #007bff;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.3s ease;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .view-details-btn:hover {
+        background: #0056b3;
+        color: white;
+        text-decoration: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+
+    .empty-state-title {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+
+    .empty-state-message {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }
+
+    .continue-shopping-btn {
+        background: #28a745;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 500;
+        transition: background 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .continue-shopping-btn:hover {
+        background: #218838;
+        color: white;
+        text-decoration: none;
+    }
+
+    .page-header {
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .page-title {
+        font-size: 28px;
+        color: #333;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    /* Tablet adjustments */
+    @media (min-width: 768px) {
+        .order-history-container {
+            padding: 30px 20px;
+        }
+
+        .order-details {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .order-header {
+            flex-wrap: nowrap;
+        }
+
+        .empty-state {
+            padding: 80px 40px;
+        }
+    }
+
+    /* Desktop adjustments */
+    @media (min-width: 1024px) {
+        .order-history-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .order-card {
+            padding: 24px;
+        }
+    }
+
+    /* iPhone specific optimizations */
+    @media (max-width: 414px) {
+        .order-history-container {
+            padding: 16px 12px;
+        }
+
+        .order-card {
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .order-number {
+            font-size: 16px;
+        }
+
+        .order-details {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .detail-value {
+            font-size: 15px;
+        }
+
+        .view-details-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .page-title {
+            font-size: 24px;
+        }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .order-card {
+            background: #1a1a1a;
+            border-color: #333;
+            color: #fff;
+        }
+
+        .order-number {
+            color: #fff;
+        }
+
+        .detail-value {
+            color: #fff;
+        }
+
+        .detail-label {
+            color: #aaa;
+        }
+
+        .empty-state {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .empty-state-title {
+            color: #fff;
+        }
+    }
+
+    /* Touch-friendly interactions */
+    @media (hover: none) and (pointer: coarse) {
+        .order-card {
+            transform: none;
+        }
+
+        .order-card:hover {
+            transform: none;
+        }
+
+        .view-details-btn,
+        .continue-shopping-btn {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-	<section class="container mb-5" style="min-height: 70vh;">
-        <h2 class="h2-home p-dark mt-5 mb-4">Order History</h2>
+<div class="order-history-container">
+    <div class="page-header">
+        <h1 class="page-title">Order History</h1>
+    </div>
 
-        {% if orders %}
-			<table class="table table-striped col-12" style="width: 100%; margin: auto">
-				<thead>
-					<tr>
-						<th class="h6-home p-dark text-center">Order Number</th>
-						<th class="h6-home p-dark text-center">Order Date</th>
-						<th class="h6-home p-dark text-center">Total Amount</th>
-                        <th class="h6-home p-dark text-center">Tickets Qty</th>
-						<th class="h6-home p-dark">Status</th>
-					</tr>
-				</thead>
-
-				<tbody>
-                {% for orders in orders %}
-					<tr>
-						<td class="p-home text-center">
-                            <a class="link-order" href="{% url 'order:order_detail' orders.id %}">
-                                #{{ orders.id }}
-                            </a>
-                        </td>
-						<td class="p-home text-center">
-                            {{ orders.created|date:"d M Y" }}
-                        </td>
-						<td class="p-home text-center">
-                            {{ orders.total }}
-                        </td>
-
-                        <td class="p-home text-center">
-                            {{ orders.ticket_qty }}
-                        </td>
-						<td class="p-home">
-                            <i class="fas fa-check" style="color: #1e7e34"></i>&nbsp
-                            Complete
-                        </td>
-					</tr>
-                {% endfor %}
-				</tbody>
-			</table>
-        {% else %}
-            <div class="col-lg-6 col-12 m-auto">
-                <p class="h4-home buttons-reset mb-4">
-                    You have not placed any orders yet.
-                </p>
-
-                <button class="buttons-primary buttons-reset">
-                    <a href="{% url 'shop:index' %}" class="h6-home height-17 p-light">
-                        Continue shopping
-                    </a>
-                </button>
+    {% if orders %}
+    {% for order in orders %}
+    <div class="order-card">
+        <div class="order-header">
+            <a href="{% url 'order:order_detail' order.id %}" class="order-number">
+                <i class="fas fa-receipt"></i>
+                Order #{{ order.id }}
+            </a>
+            <div class="order-status">
+                <i class="fas fa-check-circle"></i>
+                Complete
             </div>
-        {% endif %}
+        </div>
 
-    </section>
+        <div class="order-details">
+            <div class="order-detail-item">
+                <span class="detail-label">Date</span>
+                <span class="detail-value">{{ order.created|date:"M d, Y" }}</span>
+            </div>
+            <div class="order-detail-item">
+                <span class="detail-label">Total</span>
+                <span class="detail-value">${{ order.total }}</span>
+            </div>
+            <div class="order-detail-item">
+                <span class="detail-label">Tickets</span>
+                <span class="detail-value">{{ order.ticket_qty }} ticket{{ order.ticket_qty|pluralize }}</span>
+            </div>
+            <div class="order-detail-item">
+                <span class="detail-label">Payment</span>
+                <span class="detail-value">{{ order.created|date:"g:i A" }}</span>
+            </div>
+        </div>
+
+        <div class="order-actions">
+            <a href="{% url 'order:order_detail' order.id %}" class="view-details-btn">
+                <i class="fas fa-eye"></i>
+                View Details
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-shopping-bag"></i>
+        </div>
+        <h2 class="empty-state-title">No Orders Yet</h2>
+        <p class="empty-state-message">
+            You haven't placed any orders yet. Start exploring our events and get your tickets!
+        </p>
+        <a href="{% url 'shop:index' %}" class="continue-shopping-btn">
+            <i class="fas fa-plus"></i>
+            Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
