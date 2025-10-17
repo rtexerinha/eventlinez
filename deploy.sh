@@ -89,12 +89,9 @@ cd $DEPLOY_PATH || {
 }
 
 # Step 4: Pull latest changes
-log "📥 Pulling latest changes from $BRANCH_NAME branch..."
-# Switch to target branch and pull latest changes
-log_info "Switching to branch: $BRANCH_NAME"
-git checkout "$BRANCH_NAME"
-git reset --hard "origin/$BRANCH_NAME"
-git pull origin "$BRANCH_NAME"
+log "📥 Pulling latest changes from develop branch..."
+git fetch origin
+git reset --hard origin/develop
 log_success "Updated to latest $BRANCH_NAME"
 git clean -fd
 success "Code updated successfully"
