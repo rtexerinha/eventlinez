@@ -1014,7 +1014,7 @@ Eventlinez
         font-size: 20px;
         color: #333;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.5s ease;
         z-index: 10;
     }
 
@@ -1249,26 +1249,30 @@ Eventlinez
         {% for detach in detachs %}
         {% for special_events in detach.event.all %}
         {% if forloop.first %}
-        <h1 class="hero-title">{{ special_events.name }}</h1>
-        <p class="hero-subtitle">
-            {{ special_events.event_date|date:"l, F d, Y \a\t g:i A" }} • {{ special_events.city }}
-        </p>
-        <a href="{{ special_events.get_url }}" class="hero-cta">
-            <i class="fas fa-ticket-alt"></i>
-            Get Tickets Now
-        </a>
+        <div>
+            <h1 class="hero-title">{{ special_events.name }}</h1>
+            <p class="hero-subtitle">
+                {{ special_events.event_date|date:"l, F d, Y \a\t g:i A" }} • {{ special_events.city }}
+            </p>
+            <a href="{{ special_events.get_url }}" class="hero-cta">
+                <i class="fas fa-ticket-alt"></i>
+                Get Tickets Now
+            </a>
+        </div>
         {% endif %}
         {% endfor %}
         {% endfor %}
         {% else %}
-        <h1 class="hero-title">It's more than a ticket, it's an Experience!</h1>
-        <p class="hero-subtitle">
-            Discover amazing events, connect with your community, and create unforgettable memories.
-        </p>
-        <a href="{% url 'about' %}" class="hero-cta">
-            <i class="fas fa-info-circle"></i>
-            Learn More
-        </a>
+        <div>
+            <h1 class="hero-title">It's more than a ticket, it's an Experience!</h1>
+            <p class="hero-subtitle">
+                Discover amazing events, connect with your community, and create unforgettable memories.
+            </p>
+            <a href="{% url 'about' %}" class="hero-cta">
+                <i class="fas fa-info-circle"></i>
+                Learn More
+            </a>
+        </div>
         {% endif %}
     </div>
 </section>
@@ -1900,6 +1904,28 @@ Eventlinez
         if (modal && e.target === modal) {
             closeLightbox();
         }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const heroContent = document.querySelector('.hero-content');
+        const slides = heroContent.querySelectorAll('div');
+
+        let currentIndex = 0;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.style.display = i === index ? 'block' : 'none';
+            });
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % slides.length;
+            showSlide(currentIndex);
+        }
+
+        showSlide(currentIndex);
+        setInterval(nextSlide, 3000); // Change slide every 3 seconds
     });
 </script>
 {% endblock %}
