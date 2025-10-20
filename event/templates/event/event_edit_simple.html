@@ -1,0 +1,522 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+
+{% block title %}Edit Event - {{ event.name }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .edit-event-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px 0;
+        margin-bottom: 30px;
+        border-radius: 8px;
+    }
+
+    .edit-event-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+
+    .form-section-title {
+        color: #2c3e50;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f1f3f4;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #d90075, #ff6b9d);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(217, 0, 117, 0.4);
+        color: white;
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #5a6268;
+        color: white;
+    }
+
+    .event-preview {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .preview-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .form-control:focus {
+        border-color: #d90075;
+        box-shadow: 0 0 0 0.2rem rgba(217, 0, 117, 0.25);
+    }
+
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #d90075;
+        border-color: #dee2e6 #dee2e6 #fff;
+        font-weight: 600;
+    }
+
+    .action-buttons {
+        position: sticky;
+        bottom: 20px;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+    }
+
+    /* Form Styling */
+    .form-group label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control,
+    select,
+    textarea,
+    input[type="text"],
+    input[type="datetime-local"] {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus,
+    select:focus,
+    textarea:focus,
+    input:focus {
+        border-color: #d90075;
+        box-shadow: 0 0 0 0.2rem rgba(217, 0, 117, 0.25);
+        outline: none;
+    }
+
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-check input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+
+    .text-danger {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 5px;
+    }
+
+    /* DateTime Picker Styling */
+    #datetimepicker {
+        background-color: white;
+        cursor: pointer;
+    }
+
+    #datetimepicker:focus {
+        background-color: white;
+    }
+
+    /* jQuery UI Customization */
+    .ui-datepicker {
+        z-index: 10000 !important;
+    }
+
+    .ui-timepicker-div {
+        padding: 10px;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<main>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="edit-event-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="mb-2">
+                            <i class="fas fa-edit me-2"></i>Edit Event
+                        </h1>
+                        <p class="mb-0 opacity-75">{{ event.name }}</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{% url 'promoter:events_promoter' %}" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs mb-4" id="editEventTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="event-details-tab" data-toggle="tab"
+                        data-target="#event-details" type="button" role="tab">
+                        <i class="fas fa-info-circle me-2"></i>Event Details
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tickets-tab" data-toggle="tab" data-target="#tickets" type="button"
+                        role="tab">
+                        <i class="fas fa-ticket-alt me-2"></i>Tickets ({{ tickets.count }})
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="vendors-tab" data-toggle="tab" data-target="#vendors" type="button"
+                        role="tab">
+                        <i class="fas fa-users me-2"></i>Vendors ({{ vendors.count }})
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="editEventTabsContent">
+                <!-- Event Details Tab -->
+                <div class="tab-pane fade show active" id="event-details" role="tabpanel">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="edit-event-card">
+                            <h3 class="form-section-title">Basic Information</h3>
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group mb-3">
+                                        <label for="{{ form.name.id_for_label }}">Event Name *</label>
+                                        {{ form.name }}
+                                        {% if form.name.errors %}
+                                        <div class="text-danger">{{ form.name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="{{ form.description.id_for_label }}">Description *</label>
+                                        {{ form.description }}
+                                        {% if form.description.errors %}
+                                        <div class="text-danger">{{ form.description.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    {% if event.image %}
+                                    <div class="event-preview">
+                                        <label>Current Image</label>
+                                        <img src="{{ event.image.url }}" class="preview-image" alt="{{ event.name }}">
+                                    </div>
+                                    {% endif %}
+                                    <div class="form-group mb-3">
+                                        <label for="{{ form.image.id_for_label }}">Event Image</label>
+                                        {{ form.image }}
+                                        {% if form.image.errors %}
+                                        <div class="text-danger">{{ form.image.errors }}</div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Recommended: 1600x838px</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="edit-event-card">
+                            <h3 class="form-section-title">Date & Location</h3>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        <label for="id_event_date">Event Date & Time *</label>
+                                        <input type="text" name="event_date" id="datetimepicker" class="form-control"
+                                            value="{{ event.event_date|date:'d/m/Y H:i' }}" required>
+                                        {% if form.event_date.errors %}
+                                        <div class="text-danger">{{ form.event_date.errors }}</div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Format: DD/MM/YYYY HH:MM (e.g., 07/11/2025
+                                            17:29)</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="{{ form.address.id_for_label }}">Address *</label>
+                                        {{ form.address }}
+                                        {% if form.address.errors %}
+                                        <div class="text-danger">{{ form.address.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="{{ form.city.id_for_label }}">City *</label>
+                                        {{ form.city }}
+                                        {% if form.city.errors %}
+                                        <div class="text-danger">{{ form.city.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="edit-event-card">
+                            <h3 class="form-section-title">Event Settings</h3>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        <label for="{{ form.category.id_for_label }}">Category *</label>
+                                        {{ form.category }}
+                                        {% if form.category.errors %}
+                                        <div class="text-danger">{{ form.category.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="{{ form.available.id_for_label }}">Event Availability</label>
+                                        <div class="form-check">
+                                            {{ form.available }}
+                                            <label class="form-check-label" for="{{ form.available.id_for_label }}">
+                                                Make this event available for ticket sales
+                                            </label>
+                                        </div>
+                                        {% if form.available.errors %}
+                                        <div class="text-danger">{{ form.available.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="{{ form.is_free_event.id_for_label }}">Free Event</label>
+                                        <div class="form-check">
+                                            {{ form.is_free_event }}
+                                            <label class="form-check-label" for="{{ form.is_free_event.id_for_label }}">
+                                                Mark this as a free event (will display "Free" badge on event card)
+                                            </label>
+                                        </div>
+                                        {% if form.is_free_event.errors %}
+                                        <div class="text-danger">{{ form.is_free_event.errors }}</div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">
+                                            When checked, the event card will show a "Free" badge instead of pricing
+                                            information.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <a href="{% url 'promoter:events_promoter' %}" class="btn btn-cancel btn-lg">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <button type="submit" class="btn btn-save btn-lg">
+                                        <i class="fas fa-save me-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tickets Tab -->
+                <div class="tab-pane fade" id="tickets" role="tabpanel">
+                    <div class="edit-event-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="form-section-title mb-0">Ticket Types</h3>
+                            <a href="{% url 'promoter:ticket_type_list_per_event' event.id %}" class="btn btn-save">
+                                <i class="fas fa-plus me-2"></i>Manage Tickets
+                            </a>
+                        </div>
+
+                        {% if tickets %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Ticket Name</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Sold</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ticket in tickets %}
+                                    <tr>
+                                        <td><strong>{{ ticket.name }}</strong></td>
+                                        <td>${{ ticket.price }}</td>
+                                        <td>{{ ticket.quantity }}</td>
+                                        <td><span class="badge bg-success">{{ ticket.sold }}</span></td>
+                                        <td><span class="badge bg-info">{{ ticket.status }}</span></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No tickets created yet. Click "Manage Tickets" to add ticket types.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Vendors Tab -->
+                <div class="tab-pane fade" id="vendors" role="tabpanel">
+                    <div class="edit-event-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="form-section-title mb-0">Event Vendors</h3>
+                            <button type="button" class="btn btn-save" data-toggle="modal"
+                                data-target="#addVendorModal">
+                                <i class="fas fa-plus me-2"></i>Add Vendor
+                            </button>
+                        </div>
+
+                        {% if vendors %}
+                        <div class="row">
+                            {% for vendor in vendors %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ vendor.name }}</h5>
+                                        <p class="card-text text-muted">{{ vendor.email }}</p>
+                                        <p class="card-text"><strong>Commission:</strong> {{ vendor.commission }}%</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No vendors assigned to this event yet.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Initialize DateTime Picker with correct format
+    $(document).ready(function () {
+        $('#datetimepicker').datetimepicker({
+            dateFormat: 'dd/mm/yy',
+            timeFormat: 'HH:mm',
+            showSecond: false,
+            stepMinute: 5,
+            controlType: 'select',
+            oneLine: true
+        }).attr("autocomplete", "off");
+    });
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields');
+        }
+    });
+
+    // Image preview
+    const pictureInput = document.querySelector('input[type="file"]');
+    if (pictureInput) {
+        pictureInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.querySelector('.preview-image');
+                    if (preview) {
+                        preview.src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+</script>
+{% endblock content %}

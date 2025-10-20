@@ -1325,7 +1325,9 @@ Eventlinez
                     </div>
 
                     <div class="event-footer">
+                        {% if event.is_free_event %}
                         <span class="event-price">Free</span>
+                        {% endif %}
                         <i class="fas fa-arrow-right event-arrow"></i>
                     </div>
                 </div>

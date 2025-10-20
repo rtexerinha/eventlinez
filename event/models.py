@@ -68,6 +68,7 @@ class Event(models.Model):
     city = models.ForeignKey(City, on_delete=models.PROTECT)
     promoter = models.ForeignKey(Promoter, on_delete=models.PROTECT)
     available = models.BooleanField(default=False)
+    is_free_event = models.BooleanField(default=False, help_text='Mark this event as free')
     image = models.ImageField(upload_to='event', blank=False, null=False,
                               validators=[validate_image],
                               help_text='The recommended dimensions is 1600 x 838. '

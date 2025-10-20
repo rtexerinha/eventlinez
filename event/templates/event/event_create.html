@@ -138,8 +138,12 @@
                 {{ form.image | as_crispy_field }}
               </div>
 
-              <div class="form-group col-md-12 mb-0">
+              <div class="form-group col-md-6 mb-0">
                 {{ form.available | as_crispy_field }}
+              </div>
+              
+              <div class="form-group col-md-6 mb-0">
+                {{ form.is_free_event | as_crispy_field }}
               </div>
             </div>
 

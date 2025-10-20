@@ -101,6 +101,8 @@
         gap: 5px;
         align-items: center;
         justify-content: center;
+        position: relative;
+        z-index: 10;
     }
 
     .action-btn {
@@ -112,6 +114,11 @@
         transition: all 0.2s ease;
         min-width: 32px;
         text-align: center;
+        display: inline-block;
+        cursor: pointer;
+        pointer-events: auto;
+        position: relative;
+        z-index: 10;
     }
 
     .table {
@@ -138,20 +145,36 @@
 
     .table-hover tbody tr:hover {
         background-color: #f8f9fa !important;
+        transform: none !important;
     }
 
     .table-hover tbody tr:hover td {
         background-color: #f8f9fa !important;
     }
 
+    /* Ensure action buttons are always clickable */
+    .event-actions a {
+        pointer-events: auto !important;
+        z-index: 100 !important;
+    }
+
+    /* Ensure icons don't block clicks */
+    .event-actions a i {
+        pointer-events: none;
+    }
+
     .table-responsive {
         border-radius: 8px;
-        overflow: hidden;
+        overflow-x: auto;
+        /* Allow horizontal scroll but not hide buttons */
+        overflow-y: visible;
+        /* Don't clip vertically */
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .table tbody tr {
-        transition: all 0.2s ease;
+        transition: background-color 0.2s ease;
+        /* Removed transform transition to prevent click interference */
     }
 
     /* Remove the gray background from past events and use subtle styling instead */
@@ -176,11 +199,15 @@
     .action-btn.primary {
         background-color: #d90075;
         color: white;
+        pointer-events: auto !important;
+        cursor: pointer !important;
     }
 
     .action-btn.secondary {
         background-color: #6c757d;
         color: white;
+        pointer-events: auto !important;
+        cursor: pointer !important;
     }
 
     .action-btn:hover {
@@ -311,7 +338,8 @@
     /* Enhanced Table Styles */
     .events-table-container {
         border-radius: 8px;
-        overflow: hidden;
+        overflow: visible;
+        /* Changed from hidden to allow button clicks */
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
@@ -425,12 +453,21 @@
         right: 0;
         bottom: 0;
         background: rgba(255, 255, 255, 0.9);
-        display: flex;
+        display: none;
+        /* Hidden by default */
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 1000;
         border-radius: 8px;
+        pointer-events: none;
+        /* Never block clicks */
+    }
+
+    .loading-overlay[style*="display: flex"] {
+        display: flex !important;
+        pointer-events: auto;
+        /* Only intercept when visible */
     }
 
     .loading-overlay span {
@@ -441,6 +478,8 @@
 
     .events-table-container {
         position: relative;
+        overflow: visible;
+        /* Ensure buttons aren't clipped */
     }
 </style>
 
@@ -553,12 +592,14 @@
                             </small>
                             <div class="performance-actions">
                                 <a href="{% url 'promoter:update_event' event.id %}"
-                                    class="btn btn-sm btn-outline-primary" title="Edit">
-                                    <i class="fas fa-edit"></i>
+                                    class="btn btn-sm btn-outline-primary" title="Edit Event"
+                                    style="z-index: 20; position: relative; pointer-events: auto; cursor: pointer;">
+                                    <i class="fas fa-edit" style="pointer-events: none;"></i>
                                 </a>
                                 <a href="{% url 'promoter:ticket_type_list_per_event' event.id %}"
-                                    class="btn btn-sm btn-primary" title="Tickets">
-                                    <i class="fas fa-ticket-alt"></i>
+                                    class="btn btn-sm btn-primary" title="Manage Tickets"
+                                    style="z-index: 20; position: relative; pointer-events: auto; cursor: pointer;">
+                                    <i class="fas fa-ticket-alt" style="pointer-events: none;"></i>
                                 </a>
                             </div>
                         </div>
@@ -652,12 +693,14 @@
                             <td>
                                 <div class="event-actions">
                                     <a href="{% url 'promoter:ticket_type_list_per_event' event.id %}"
-                                        class="action-btn primary" title="Manage Tickets">
-                                        <i class="fas fa-ticket-alt"></i>
+                                        class="action-btn primary" title="Manage Tickets"
+                                        style="pointer-events: auto; cursor: pointer; position: relative; z-index: 100;">
+                                        <i class="fas fa-ticket-alt" style="pointer-events: none;"></i>
                                     </a>
                                     <a href="{% url 'promoter:update_event' event.id %}" class="action-btn secondary"
-                                        title="Edit Event">
-                                        <i class="fas fa-edit"></i>
+                                        title="Edit Event"
+                                        style="pointer-events: auto; cursor: pointer; position: relative; z-index: 100;">
+                                        <i class="fas fa-edit" style="pointer-events: none;"></i>
                                     </a>
                                     {% if event.qty_sould == 0 %}
                                     <a href="{% url 'promoter:remove_event' event.id %}" class="action-btn"
@@ -806,29 +849,10 @@
                 });
             }
 
-            // Add hover effects to table rows
-            const tableRows = document.querySelectorAll('.events-table tbody tr');
-            tableRows.forEach(row => {
-                row.addEventListener('mouseenter', function () {
-                    this.style.transform = 'scale(1.01)';
-                });
+            // Let action buttons work naturally - no JavaScript needed
+            console.log('Events dashboard loaded');
 
-                row.addEventListener('mouseleave', function () {
-                    this.style.transform = 'scale(1)';
-                });
-            });
-
-            // Performance cards hover effects
-            const performanceCards = document.querySelectorAll('.performance-card');
-            performanceCards.forEach(card => {
-                card.addEventListener('mouseenter', function () {
-                    this.style.transform = 'translateY(-4px) scale(1.02)';
-                });
-
-                card.addEventListener('mouseleave', function () {
-                    this.style.transform = 'translateY(0) scale(1)';
-                });
-            });
+            // Performance cards hover effects - use CSS only to avoid click interference
 
             // Initialize tooltips for action buttons
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

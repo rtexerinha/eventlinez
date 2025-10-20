@@ -70,15 +70,18 @@ class CategoryForm(ModelForm):
 
 class EventForm(ModelForm):
     event_date = forms.DateTimeField(
-        input_formats=["%d/%m/%Y %H:%M"],
-        widget=forms.DateTimeInput(
-            attrs={"type": "datetime-local", "id": "datetimepicker"},
+        input_formats=["%d/%m/%Y %H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M"],
+        widget=forms.TextInput(
+            attrs={"id": "datetimepicker", "class": "form-control"},
         ),
     )
 
     class Meta:
         model = Event
         exclude = ("slug", "created", "updated", "promoter", "vendors")
+        widgets = {
+            'is_free_event': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
         
     def clean_event_date(self):
         """Ensure event_date is timezone-aware"""
