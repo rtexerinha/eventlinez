@@ -1,0 +1,45 @@
+YOUR FREE TICKET FOR {{ event.name|upper }}
+
+Hello {{ guest_name }},
+
+Great news! You've been added to the guest list for {{ event.name }}.
+
+===================================
+EVENT DETAILS
+===================================
+
+Event: {{ event.name }}
+Type: {{ ticket_type_display }}
+
+Date: {{ event.event_date|date:"F d, Y" }}
+Time: {{ event.event_date|date:"g:i A" }}
+Location: {{ event.address }}, {{ event.city.name }}
+
+===================================
+IMPORTANT
+===================================
+
+Your ticket is attached to this email as a PDF. Please save it or have it ready on your device when you arrive at the event.
+
+HOW TO USE YOUR TICKET:
+
+1. Open the attached PDF file
+2. Present the QR code at the entrance
+3. Our staff will scan it for quick check-in
+
+You can also access your ticket online at:
+{{ ticket.qr_code_url }}
+
+===================================
+NEED HELP?
+===================================
+
+If you have any questions, please contact the event organizer or reply to this email.
+
+---
+
+This is a complimentary ticket for {{ event.name }}
+This ticket is non-transferable
+
+© {% now "Y" %} Eventlinez. All rights reserved.
+

@@ -7,6 +7,12 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
     promo_code_update, promo_code_delete, promo_code_toggle_status, promoter_dashboard
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
+from ticket.views_complimentary import (
+    guest_list, create_complimentary_ticket, bulk_create_complimentary_tickets,
+    view_complimentary_ticket, download_complimentary_ticket_pdf,
+    send_complimentary_ticket_email_view, cancel_complimentary_ticket,
+    complimentary_ticket_checkin
+)
 from event.views import event_list, event_create, event_remove, event_update
 from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, CategoryListAPIView, TicketTypeAPIView, \
     EventUpdateAPIView, TicketTypeUpdateAPIView, EventDetailsAPIView, sales_report, TicketTypeListView, \
@@ -44,6 +50,16 @@ urlpatterns = [
     path('ticket/checkin/<uuid:checkin>/',
          ticket_checkin, name='ticket_checkin'),
     path('ticket/checkin/validate/', tickets_validate, name='tickets_validate'),
+    
+    # Complimentary Tickets / Guest List
+    path('event/<int:event_id>/guest-list/', guest_list, name='guest_list'),
+    path('event/<int:event_id>/guest-list/create/', create_complimentary_ticket, name='create_complimentary_ticket'),
+    path('event/<int:event_id>/guest-list/bulk/', bulk_create_complimentary_tickets, name='bulk_create_complimentary_tickets'),
+    path('complimentary-ticket/<int:ticket_id>/', view_complimentary_ticket, name='view_complimentary_ticket'),
+    path('complimentary-ticket/<int:ticket_id>/pdf/', download_complimentary_ticket_pdf, name='download_complimentary_ticket_pdf'),
+    path('complimentary-ticket/<int:ticket_id>/send/', send_complimentary_ticket_email_view, name='send_complimentary_ticket'),
+    path('complimentary-ticket/<int:ticket_id>/cancel/', cancel_complimentary_ticket, name='cancel_complimentary_ticket'),
+    path('ticket/complimentary/checkin/<uuid:uuid>/', complimentary_ticket_checkin, name='complimentary_ticket_checkin'),
 
     # events
     path('events/new/', event_create, name='new_events'),

@@ -157,12 +157,6 @@ def event_update(request, event_id):
         if request.method == 'GET':
             try:
                 form = EventForm(instance=event)
-                # Add Bootstrap classes to form fields
-                for field_name, field in form.fields.items():
-                    if field.widget.__class__.__name__ == 'CheckboxInput':
-                        field.widget.attrs['class'] = 'form-check-input'
-                    else:
-                        field.widget.attrs['class'] = 'form-control'
                 form_vendor = VendorForm()
             except Exception as e:
                 logger.error(f"Error creating forms for event {event_id}: {e}")
