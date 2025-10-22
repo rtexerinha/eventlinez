@@ -1,0 +1,202 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+
+{% block title %}Create Free Ticket - {{ event.name }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .page-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px 12px 0 0;
+        text-align: center;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-container {
+        background: white;
+        padding: 2rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 0.75rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .form-check {
+        padding-left: 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .form-check-input {
+        margin-top: 0.3rem;
+    }
+
+    .form-check-label {
+        color: #495057;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        border-radius: 6px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+    }
+
+    .alert {
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+    }
+
+    .required:after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-ticket-alt me-2"></i>
+            Create Free Ticket
+        </h1>
+        <p class="mb-0">{{ event.name }}</p>
+    </div>
+
+    <div class="form-container">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Guest Name -->
+            <div class="form-group">
+                <label for="{{ form.guest_name.id_for_label }}" class="required">Guest Name</label>
+                {{ form.guest_name }}
+                {% if form.guest_name.errors %}
+                <div class="text-danger mt-1">{{ form.guest_name.errors }}</div>
+                {% endif %}
+                <small class="help-text">Full name of the guest</small>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="{{ form.guest_email.id_for_label }}" class="required">Email Address</label>
+                {{ form.guest_email }}
+                {% if form.guest_email.errors %}
+                <div class="text-danger mt-1">{{ form.guest_email.errors }}</div>
+                {% endif %}
+                <small class="help-text">{{ form.guest_email.help_text }}</small>
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+                <label for="{{ form.guest_phone.id_for_label }}">Phone Number</label>
+                {{ form.guest_phone }}
+                {% if form.guest_phone.errors %}
+                <div class="text-danger mt-1">{{ form.guest_phone.errors }}</div>
+                {% endif %}
+                <small class="help-text">Optional - for WhatsApp/SMS delivery</small>
+            </div>
+
+            <!-- Ticket Type -->
+            <div class="form-group">
+                <label for="{{ form.ticket_type.id_for_label }}">Ticket Type</label>
+                {{ form.ticket_type }}
+                {% if form.ticket_type.errors %}
+                <div class="text-danger mt-1">{{ form.ticket_type.errors }}</div>
+                {% endif %}
+                <small class="help-text">{{ form.ticket_type.help_text }}</small>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group">
+                <label for="{{ form.notes.id_for_label }}">Internal Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                <div class="text-danger mt-1">{{ form.notes.errors }}</div>
+                {% endif %}
+                <small class="help-text">{{ form.notes.help_text }}</small>
+            </div>
+
+            <!-- Send Email Checkbox -->
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="send_email" id="send_email" checked>
+                    <label class="form-check-label" for="send_email">
+                        <strong>Send ticket via email now</strong>
+                        <br>
+                        <small class="text-muted">Guest will receive the ticket immediately</small>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="fas fa-ticket-alt me-2"></i>
+                    Create Ticket
+                </button>
+                <a href="{% url 'promoter:guest_list' event.id %}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

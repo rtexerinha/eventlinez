@@ -9,6 +9,8 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.db.models import Q
 from django.conf import settings
+from io import BytesIO
+import urllib.parse
 
 from event.models import Event
 from .models_complimentary import ComplimentaryTicket
@@ -261,6 +263,176 @@ def complimentary_ticket_checkin(request, uuid):
         'ticket': ticket,
     }
     return render(request, 'ticket/complimentary_checkin.html', context)
+
+
+@login_required(login_url='/promoter/account/login/')
+def download_complimentary_ticket_qr(request, ticket_id):
+    """
+    Download QR code as PNG image
+    """
+    ticket = get_object_or_404(
+        ComplimentaryTicket,
+        id=ticket_id,
+        event__promoter=request.user.promoter
+    )
+    
+    import qrcode
+    from PIL import Image, ImageDraw, ImageFont
+    
+    # Generate QR code
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(ticket.qr_code_url)
+    qr.make(fit=True)
+    
+    # Create QR code image
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Create a larger image with text
+    img_width = 400
+    img_height = 500
+    img = Image.new('RGB', (img_width, img_height), 'white')
+    
+    # Paste QR code
+    qr_img = qr_img.resize((300, 300))
+    img.paste(qr_img, (50, 50))
+    
+    # Add text
+    draw = ImageDraw.Draw(img)
+    
+    # Try to use a font, fallback to default
+    try:
+        font_large = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 20)
+        font_medium = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 16)
+        font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12)
+    except:
+        font_large = ImageFont.load_default()
+        font_medium = ImageFont.load_default()
+        font_small = ImageFont.load_default()
+    
+    # Add guest name
+    text = ticket.guest_name
+    bbox = draw.textbbox((0, 0), text, font=font_large)
+    text_width = bbox[2] - bbox[0]
+    draw.text(((img_width - text_width) // 2, 370), text, fill='black', font=font_large)
+    
+    # Add event name
+    text = ticket.event.name[:30]
+    bbox = draw.textbbox((0, 0), text, font=font_medium)
+    text_width = bbox[2] - bbox[0]
+    draw.text(((img_width - text_width) // 2, 400), text, fill='black', font=font_medium)
+    
+    # Add ticket type
+    text = ticket.get_ticket_type_display()
+    bbox = draw.textbbox((0, 0), text, font=font_small)
+    text_width = bbox[2] - bbox[0]
+    draw.text(((img_width - text_width) // 2, 430), text, fill='gray', font=font_small)
+    
+    # Save to buffer
+    buffer = BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    
+    response = HttpResponse(buffer, content_type='image/png')
+    response['Content-Disposition'] = f'attachment; filename="ticket_qr_{ticket.uuid}.png"'
+    
+    return response
+
+
+@login_required(login_url='/promoter/account/login/')
+def get_whatsapp_share_link(request, ticket_id):
+    """
+    Get WhatsApp share link for ticket
+    """
+    ticket = get_object_or_404(
+        ComplimentaryTicket,
+        id=ticket_id,
+        event__promoter=request.user.promoter
+    )
+    
+    # Create message
+    message = f"""🎉 Your FREE Ticket for {ticket.event.name}
+
+👤 Guest: {ticket.guest_name}
+🎫 Type: {ticket.get_ticket_type_display()}
+📅 Date: {ticket.event.event_date.strftime('%B %d, %Y at %I:%M %p')}
+📍 Location: {ticket.event.address}, {ticket.event.city.name}
+
+🔗 Your ticket: {ticket.qr_code_url}
+
+Show this QR code at the entrance!"""
+    
+    # URL encode the message
+    encoded_message = urllib.parse.quote(message)
+    
+    # WhatsApp link
+    if ticket.guest_phone:
+        # Remove any non-digit characters from phone
+        phone = ''.join(filter(str.isdigit, ticket.guest_phone))
+        whatsapp_url = f"https://wa.me/{phone}?text={encoded_message}"
+    else:
+        # General WhatsApp share
+        whatsapp_url = f"https://wa.me/?text={encoded_message}"
+    
+    return JsonResponse({
+        'success': True,
+        'whatsapp_url': whatsapp_url,
+        'message': message
+    })
+
+
+@login_required(login_url='/promoter/account/login/')
+def get_sms_link(request, ticket_id):
+    """
+    Get SMS link for ticket
+    """
+    ticket = get_object_or_404(
+        ComplimentaryTicket,
+        id=ticket_id,
+        event__promoter=request.user.promoter
+    )
+    
+    # Create SMS message
+    message = f"Your FREE ticket for {ticket.event.name}. Show this at entrance: {ticket.qr_code_url}"
+    
+    # URL encode
+    encoded_message = urllib.parse.quote(message)
+    
+    # SMS link (works on most mobile devices)
+    if ticket.guest_phone:
+        phone = ''.join(filter(str.isdigit, ticket.guest_phone))
+        sms_url = f"sms:{phone}?body={encoded_message}"
+    else:
+        sms_url = f"sms:?body={encoded_message}"
+    
+    return JsonResponse({
+        'success': True,
+        'sms_url': sms_url,
+        'message': message,
+        'phone': ticket.guest_phone
+    })
+
+
+@login_required(login_url='/promoter/account/login/')
+def share_ticket_options(request, ticket_id):
+    """
+    Show all share options for a ticket
+    """
+    ticket = get_object_or_404(
+        ComplimentaryTicket,
+        id=ticket_id,
+        event__promoter=request.user.promoter
+    )
+    
+    context = {
+        'ticket': ticket,
+    }
+    
+    return render(request, 'ticket/share_complimentary_ticket.html', context)
 
 
 def send_complimentary_ticket_email(ticket):

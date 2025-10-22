@@ -782,6 +782,13 @@ def promoter_dashboard(request):
                     'color': 'warning',
                     'description': 'Create and manage discount codes'
                 },
+                {
+                    'title': 'Guest Lists',
+                    'url': 'promoter:events_promoter',
+                    'icon': 'fas fa-list-ul',
+                    'color': 'success',
+                    'description': 'Manage complimentary tickets and VIP guest lists'
+                },
             ]
         }
         

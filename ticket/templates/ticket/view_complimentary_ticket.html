@@ -1,0 +1,270 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+
+{% block title %}View Ticket - {{ ticket.guest_name }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .page-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px 12px 0 0;
+        text-align: center;
+    }
+
+    .ticket-details {
+        background: white;
+        padding: 2rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .detail-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-row {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .detail-value {
+        color: #2c3e50;
+    }
+
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .qr-code-section {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .qr-code-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        display: inline-block;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>
+            <i class="fas fa-ticket-alt me-2"></i>
+            Complimentary Ticket
+        </h1>
+        <p class="mb-0">{{ ticket.event.name }}</p>
+    </div>
+
+    <div class="ticket-details">
+        <!-- Guest Information -->
+        <div class="detail-section">
+            <div class="section-title">
+                <i class="fas fa-user"></i>
+                Guest Information
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Name:</div>
+                <div class="detail-value"><strong>{{ ticket.guest_name }}</strong></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Email:</div>
+                <div class="detail-value">{{ ticket.guest_email }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Phone:</div>
+                <div class="detail-value">{{ ticket.guest_phone|default:"Not provided" }}</div>
+            </div>
+        </div>
+
+        <!-- Ticket Information -->
+        <div class="detail-section">
+            <div class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Ticket Information
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Type:</div>
+                <div class="detail-value">
+                    <span class="badge badge-info">{{ ticket.get_ticket_type_display }}</span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status:</div>
+                <div class="detail-value">
+                    <span class="badge badge-{{ ticket.status|lower }}">{{ ticket.get_status_display }}</span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Ticket ID:</div>
+                <div class="detail-value"><code>{{ ticket.uuid }}</code></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Created:</div>
+                <div class="detail-value">{{ ticket.created_at|date:"F d, Y at g:i A" }}</div>
+            </div>
+            {% if ticket.sent_at %}
+            <div class="detail-row">
+                <div class="detail-label">Sent:</div>
+                <div class="detail-value">{{ ticket.sent_at|date:"F d, Y at g:i A" }}</div>
+            </div>
+            {% endif %}
+            {% if ticket.checkin_date %}
+            <div class="detail-row">
+                <div class="detail-label">Checked In:</div>
+                <div class="detail-value">{{ ticket.checkin_date|date:"F d, Y at g:i A" }}</div>
+            </div>
+            {% endif %}
+            <div class="detail-row">
+                <div class="detail-label">Issued By:</div>
+                <div class="detail-value">{{ ticket.issued_by.user.get_full_name|default:ticket.issued_by.user.username
+                    }}</div>
+            </div>
+        </div>
+
+        <!-- Event Information -->
+        <div class="detail-section">
+            <div class="section-title">
+                <i class="fas fa-calendar-alt"></i>
+                Event Information
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Event:</div>
+                <div class="detail-value"><strong>{{ ticket.event.name }}</strong></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Date & Time:</div>
+                <div class="detail-value">{{ ticket.event.event_date|date:"F d, Y at g:i A" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Location:</div>
+                <div class="detail-value">{{ ticket.event.address }}, {{ ticket.event.city.name }}</div>
+            </div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="detail-section">
+            <div class="section-title">
+                <i class="fas fa-qrcode"></i>
+                QR Code for Check-In
+            </div>
+            <div class="qr-code-section">
+                <div class="qr-code-container">
+                    {{ ticket.as_qrcode|safe }}
+                </div>
+                <p class="text-muted mb-0">Scan this code at the event entrance</p>
+                <p class="text-muted small">
+                    <a href="{{ ticket.qr_code_url }}" target="_blank">{{ ticket.qr_code_url }}</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        {% if ticket.notes %}
+        <div class="detail-section">
+            <div class="section-title">
+                <i class="fas fa-sticky-note"></i>
+                Internal Notes
+            </div>
+            <div class="alert alert-secondary mb-0">
+                {{ ticket.notes }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="{% url 'promoter:share_ticket_options' ticket.id %}" class="btn btn-primary">
+                <i class="fas fa-share-alt"></i> Share Ticket
+            </a>
+            <a href="{% url 'promoter:download_complimentary_ticket_pdf' ticket.id %}" class="btn btn-danger">
+                <i class="fas fa-file-pdf"></i> Download PDF
+            </a>
+            <a href="{% url 'promoter:download_complimentary_ticket_qr' ticket.id %}" class="btn btn-success">
+                <i class="fas fa-qrcode"></i> Download QR
+            </a>
+            {% if ticket.status != 'CHECKED_IN' %}
+            <a href="{% url 'promoter:send_complimentary_ticket' ticket.id %}" class="btn btn-info"
+                onclick="return confirm('Send ticket to {{ ticket.guest_email }}?');">
+                <i class="fas fa-envelope"></i> Send Email
+            </a>
+            {% endif %}
+            {% if ticket.status != 'CHECKED_IN' %}
+            <a href="{% url 'promoter:cancel_complimentary_ticket' ticket.id %}" class="btn btn-warning"
+                onclick="return confirm('Cancel this ticket?');">
+                <i class="fas fa-ban"></i> Cancel Ticket
+            </a>
+            {% endif %}
+            <a href="{% url 'promoter:guest_list' ticket.event.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

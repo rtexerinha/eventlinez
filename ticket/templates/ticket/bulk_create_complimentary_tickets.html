@@ -1,0 +1,226 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+
+{% block title %}Bulk Import Guest List - {{ event.name }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .page-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px 12px 0 0;
+        text-align: center;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-container {
+        background: white;
+        padding: 2rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .instructions {
+        background: #e7f3ff;
+        border-left: 4px solid #007bff;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-radius: 4px;
+    }
+
+    .instructions h5 {
+        color: #0056b3;
+        margin-bottom: 1rem;
+    }
+
+    .instructions ul {
+        margin-bottom: 0;
+    }
+
+    .instructions code {
+        background: #fff;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        color: #e83e8c;
+    }
+
+    .example-box {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 1rem;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        white-space: pre-wrap;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 0.75rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    textarea.form-control {
+        min-height: 200px;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .form-check {
+        padding-left: 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        border-radius: 6px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+    }
+
+    .alert {
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-file-upload me-2"></i>
+            Bulk Import Guest List
+        </h1>
+        <p class="mb-0">{{ event.name }}</p>
+    </div>
+
+    <div class="form-container">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <h5><i class="fas fa-info-circle me-2"></i>How to Import</h5>
+            <ul>
+                <li>Enter <strong>one guest per line</strong></li>
+                <li>Format: <code>Name, Email, Phone</code> (phone is optional)</li>
+                <li>Separate fields with commas</li>
+                <li>You can paste from Excel/CSV</li>
+            </ul>
+            <div class="example-box">John Doe, john@example.com, +1-555-1234
+                Jane Smith, jane@example.com, +1-555-5678
+                Bob Wilson, bob@example.com</div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Guest List Textarea -->
+            <div class="form-group">
+                <label for="{{ form.guest_list.id_for_label }}">Guest List</label>
+                {{ form.guest_list }}
+                {% if form.guest_list.errors %}
+                <div class="text-danger mt-1">{{ form.guest_list.errors.0 }}</div>
+                {% endif %}
+                <small class="help-text">{{ form.guest_list.help_text }}</small>
+            </div>
+
+            <!-- Ticket Type -->
+            <div class="form-group">
+                <label for="{{ form.ticket_type.id_for_label }}">Ticket Type for All Guests</label>
+                {{ form.ticket_type }}
+                {% if form.ticket_type.errors %}
+                <div class="text-danger mt-1">{{ form.ticket_type.errors }}</div>
+                {% endif %}
+                <small class="help-text">This will be applied to all imported guests</small>
+            </div>
+
+            <!-- Send Immediately Checkbox -->
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="send_immediately" id="send_immediately"
+                        checked>
+                    <label class="form-check-label" for="send_immediately">
+                        <strong>Send tickets immediately</strong>
+                        <br>
+                        <small class="text-muted">All guests will receive their tickets via email right away</small>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success flex-grow-1">
+                    <i class="fas fa-file-upload me-2"></i>
+                    Import Guest List
+                </button>
+                <a href="{% url 'promoter:guest_list' event.id %}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+
+        <!-- Additional Help -->
+        <div class="mt-4 p-3 bg-light rounded">
+            <h6><i class="fas fa-lightbulb me-2"></i>Tips</h6>
+            <ul class="mb-0 small">
+                <li>Phone numbers can include country codes and dashes</li>
+                <li>Empty lines will be ignored</li>
+                <li>Duplicate emails will be skipped automatically</li>
+                <li>Invalid entries will be reported after submission</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

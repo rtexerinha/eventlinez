@@ -601,6 +601,11 @@
                                     style="z-index: 20; position: relative; pointer-events: auto; cursor: pointer;">
                                     <i class="fas fa-ticket-alt" style="pointer-events: none;"></i>
                                 </a>
+                                <a href="{% url 'promoter:guest_list' event.id %}" class="btn btn-sm btn-success"
+                                    title="Guest List"
+                                    style="z-index: 20; position: relative; pointer-events: auto; cursor: pointer;">
+                                    <i class="fas fa-list-ul" style="pointer-events: none;"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -696,6 +701,11 @@
                                         class="action-btn primary" title="Manage Tickets"
                                         style="pointer-events: auto; cursor: pointer; position: relative; z-index: 100;">
                                         <i class="fas fa-ticket-alt" style="pointer-events: none;"></i>
+                                    </a>
+                                    <a href="{% url 'promoter:guest_list' event.id %}" class="action-btn"
+                                        title="Guest List / Free Tickets"
+                                        style="background:#28a745;color:white;pointer-events: auto; cursor: pointer; position: relative; z-index: 100;">
+                                        <i class="fas fa-list-ul" style="pointer-events: none;"></i>
                                     </a>
                                     <a href="{% url 'promoter:update_event' event.id %}" class="action-btn secondary"
                                         title="Edit Event"

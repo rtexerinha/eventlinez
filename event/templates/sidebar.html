@@ -84,6 +84,30 @@
                     Validated Tickets
                 </a>
 
+                <!-- Guest Lists with submenu -->
+                <a class="nav-link collapsed {% if 'guest_list' in request.resolver_match.url_name or 'complimentary' in request.resolver_match.url_name %} active {% endif %}"
+                    href="#guestListSubmenu" data-toggle="collapse" aria-expanded="false">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-list-ul"></i>
+                    </div>
+                    Guest Lists
+                    <div class="sb-sidenav-collapse-arrow">
+                        <i class="fas fa-angle-down"></i>
+                    </div>
+                </a>
+                <div class="collapse {% if 'guest_list' in request.resolver_match.url_name or 'complimentary' in request.resolver_match.url_name %} show {% endif %}"
+                    id="guestListSubmenu" data-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+                        <a class="nav-link {% if 'events_promoter' in request.resolver_match.url_name %} active {% endif %}"
+                            href="{% url 'promoter:events_promoter' %}">
+                            <div class="sb-nav-link-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            Select Event
+                        </a>
+                    </nav>
+                </div>
+
                 <!-- Management Section -->
                 <div class="sb-sidenav-menu-heading">Management</div>
 

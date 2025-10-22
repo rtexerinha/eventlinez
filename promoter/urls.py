@@ -11,7 +11,8 @@ from ticket.views_complimentary import (
     guest_list, create_complimentary_ticket, bulk_create_complimentary_tickets,
     view_complimentary_ticket, download_complimentary_ticket_pdf,
     send_complimentary_ticket_email_view, cancel_complimentary_ticket,
-    complimentary_ticket_checkin
+    complimentary_ticket_checkin, download_complimentary_ticket_qr,
+    get_whatsapp_share_link, get_sms_link, share_ticket_options
 )
 from event.views import event_list, event_create, event_remove, event_update
 from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, CategoryListAPIView, TicketTypeAPIView, \
@@ -57,7 +58,11 @@ urlpatterns = [
     path('event/<int:event_id>/guest-list/bulk/', bulk_create_complimentary_tickets, name='bulk_create_complimentary_tickets'),
     path('complimentary-ticket/<int:ticket_id>/', view_complimentary_ticket, name='view_complimentary_ticket'),
     path('complimentary-ticket/<int:ticket_id>/pdf/', download_complimentary_ticket_pdf, name='download_complimentary_ticket_pdf'),
+    path('complimentary-ticket/<int:ticket_id>/qr/', download_complimentary_ticket_qr, name='download_complimentary_ticket_qr'),
     path('complimentary-ticket/<int:ticket_id>/send/', send_complimentary_ticket_email_view, name='send_complimentary_ticket'),
+    path('complimentary-ticket/<int:ticket_id>/whatsapp/', get_whatsapp_share_link, name='get_whatsapp_share_link'),
+    path('complimentary-ticket/<int:ticket_id>/sms/', get_sms_link, name='get_sms_link'),
+    path('complimentary-ticket/<int:ticket_id>/share/', share_ticket_options, name='share_ticket_options'),
     path('complimentary-ticket/<int:ticket_id>/cancel/', cancel_complimentary_ticket, name='cancel_complimentary_ticket'),
     path('ticket/complimentary/checkin/<uuid:uuid>/', complimentary_ticket_checkin, name='complimentary_ticket_checkin'),
 
