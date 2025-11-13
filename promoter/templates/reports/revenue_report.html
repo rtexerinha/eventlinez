@@ -1,0 +1,327 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% block title %}Revenue Report - Financial Details{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .dashboard-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid #f1f3f4;
+    }
+
+    .revenue-header {
+        background: linear-gradient(135deg, #d90075, #ff6b9d);
+        color: white;
+        padding: 30px;
+        border-radius: 8px 8px 0 0;
+        margin: -25px -25px 25px -25px;
+    }
+
+    .revenue-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+    }
+
+    .revenue-table th {
+        background: #f8f9fa;
+        padding: 15px 10px;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    .revenue-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+        font-size: 0.85rem;
+    }
+
+    .revenue-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .revenue-positive {
+        color: #27ae60;
+        font-weight: 600;
+    }
+
+    .revenue-negative {
+        color: #e74c3c;
+        font-weight: 600;
+    }
+
+    .total-row {
+        background: #f8f9fa !important;
+        border-top: 3px solid #d90075;
+        font-weight: 700;
+    }
+
+    .total-row td {
+        font-size: 1rem;
+        padding: 15px 10px;
+    }
+
+    .summary-totals {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .total-card {
+        background: white;
+        border-radius: 6px;
+        padding: 15px;
+        text-align: center;
+        border-left: 4px solid #d90075;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .total-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .total-label {
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .export-btn {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #d90075;
+        margin-bottom: 20px;
+    }
+
+    .customer-info {
+        font-weight: 500;
+    }
+
+    .customer-email {
+        font-size: 0.75rem;
+        color: #666;
+        margin-top: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main>
+    <div class="container-fluid">
+        <div class="d-flex pt-5 pb-2 align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <i style="font-size: 1.5rem;" class="fas fa-chart-line title-color mt-1"></i>
+                <h1 class="title-dast pl-2 title-color mb-0">Revenue Report</h1>
+            </div>
+            {% if selected_event %}
+            <a href="{% url 'promoter:revenue_report_export' selected_event.id %}" class="export-btn">
+                <i class="fas fa-file-excel"></i>
+                Export Excel
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Event Selection -->
+        <div class="dashboard-card">
+            <div class="revenue-header">
+                <h3 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Select Event for Financial Report</h3>
+                <p class="mb-0 mt-2 opacity-75">Choose an event to view sales details and revenue breakdown</p>
+            </div>
+
+            <form method="POST" class="row align-items-end">
+                {% csrf_token %}
+                <div class="col-md-9">
+                    <label for="eventsChoice" class="form-label fw-bold">Event</label>
+                    <select id="eventsChoice" class="form-control" name="events_choice" required>
+                        <option value="">-- Select an Event --</option>
+                        {% for event in events %}
+                        <option value="{{ event.id }}" {% if selected_event and selected_event.id==event.id %}selected{%
+                            endif %}>
+                            {{ event.name }} - {{ event.event_date|date:"M d, Y" }}
+                            {% if event.event_date < today %}(Past Event){% endif %} </option>
+                                {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>
+                        View Report
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if selected_event and revenue_data %}
+        <!-- Financial Summary -->
+        <div class="dashboard-card">
+            <h4 class="mb-3">
+                <i class="fas fa-money-bill-wave me-2"></i>
+                {{ selected_event.name }} - Financial Summary
+            </h4>
+
+            <div class="summary-totals">
+                <div class="total-card">
+                    <div class="total-value revenue-positive">${{ revenue_data.gross_revenue|floatformat:2 }}</div>
+                    <div class="total-label">Gross Revenue</div>
+                </div>
+                <div class="total-card">
+                    <div class="total-value revenue-negative">-${{ revenue_data.total_promo_discount|floatformat:2 }}
+                    </div>
+                    <div class="total-label">Promo Discounts</div>
+                </div>
+                <div class="total-card">
+                    <div class="total-value revenue-positive">${{ revenue_data.net_revenue|floatformat:2 }}</div>
+                    <div class="total-label">Net Revenue</div>
+                </div>
+                <div class="total-card">
+                    <div class="total-value">{{ revenue_data.total_tickets_sold }}</div>
+                    <div class="total-label">Tickets Sold</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Details Table -->
+        <div class="dashboard-card">
+            <h4 class="mb-3">
+                <i class="fas fa-table me-2"></i>
+                Sales Details ({{ revenue_data.total_tickets_sold }} tickets)
+            </h4>
+
+            <div class="table-responsive">
+                <table class="table revenue-table">
+                    <thead>
+                        <tr>
+                            <th width="25%">Customer Name</th>
+                            <th width="20%">Ticket Type</th>
+                            <th width="12%">Ticket Value</th>
+                            <th width="12%">Promo Code</th>
+                            <th width="12%">Discount</th>
+                            <th width="12%">Final Price</th>
+                            <th width="7%">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in revenue_data.ticket_details %}
+                        <tr>
+                            <td>
+                                <div class="customer-info">{{ ticket.customer_name }}</div>
+                                {% if ticket.customer_email %}
+                                <div class="customer-email">{{ ticket.customer_email }}</div>
+                                {% endif %}
+                            </td>
+                            <td>{{ ticket.ticket_type }}</td>
+                            <td class="text-end">${{ ticket.original_price|floatformat:2 }}</td>
+                            <td class="text-center">
+                                {% if ticket.promo_code %}
+                                <span class="badge bg-warning text-dark">{{ ticket.promo_code }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if ticket.discount_amount > 0 %}
+                                <span class="revenue-negative">-${{ ticket.discount_amount|floatformat:2 }}</span>
+                                {% else %}
+                                <span class="text-muted">$0.00</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <strong class="revenue-positive">${{ ticket.final_price|floatformat:2 }}</strong>
+                            </td>
+                            <td class="text-center text-muted">{{ ticket.purchase_date|date:"m/d" }}</td>
+                        </tr>
+                        {% endfor %}
+
+                        <!-- Total Row -->
+                        <tr class="total-row">
+                            <td colspan="2"><strong>TOTAL REVENUE</strong></td>
+                            <td class="text-end"><strong>${{ revenue_data.gross_revenue|floatformat:2 }}</strong></td>
+                            <td class="text-center">-</td>
+                            <td class="text-end"><strong class="revenue-negative">-${{
+                                    revenue_data.total_promo_discount|floatformat:2 }}</strong></td>
+                            <td class="text-end"><strong class="revenue-positive">${{
+                                    revenue_data.net_revenue|floatformat:2 }}</strong></td>
+                            <td class="text-center"><strong>{{ revenue_data.total_tickets_sold }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% elif selected_event %}
+        <!-- No Data State -->
+        <div class="dashboard-card">
+            <div class="empty-state">
+                <i class="fas fa-ticket-alt"></i>
+                <h4>No Sales Data</h4>
+                <p>No tickets have been sold for "{{ selected_event.name }}" yet.</p>
+            </div>
+        </div>
+        {% else %}
+        <!-- Initial State -->
+        <div class="dashboard-card">
+            <div class="empty-state">
+                <i class="fas fa-calendar-check"></i>
+                <h4>Select an Event</h4>
+                <p>Choose an event from the dropdown above to view its financial report with sales details.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Auto-submit when event is selected
+        const eventSelect = document.getElementById('eventsChoice');
+        if (eventSelect) {
+            eventSelect.addEventListener('change', function () {
+                if (this.value) {
+                    this.closest('form').submit();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

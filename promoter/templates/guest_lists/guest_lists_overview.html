@@ -1,0 +1,709 @@
+{% extends 'base_promoter.html' %}
+{% load static %}
+
+{% block title %}Guest Lists - Eventlinez{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #d90075 0%, #7b2cbf 100%);
+        --secondary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --dark-gradient: linear-gradient(135deg, #434343 0%, #000000 100%);
+    }
+
+    .main-content {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 2rem;
+    }
+
+    .page-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 2rem;
+        margin: -2rem -2rem 2rem;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 10px 30px rgba(217, 0, 117, 0.3);
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .event-selection-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .event-selection-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--primary-gradient);
+    }
+
+    .event-selection-card .card-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--secondary-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .event-selection-card .card-icon i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .event-selection-card h3 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .custom-select {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        width: 100%;
+    }
+
+    .custom-select:focus {
+        border-color: #d90075;
+        box-shadow: 0 0 0 0.2rem rgba(217, 0, 117, 0.25);
+        transform: translateY(-2px);
+        outline: none;
+    }
+
+    .btn-view-list {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 15px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(217, 0, 117, 0.3);
+        width: 100%;
+    }
+
+    .btn-view-list:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(217, 0, 117, 0.4);
+        color: white;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+
+    .stat-card.total::before {
+        background: var(--primary-gradient);
+    }
+
+    .stat-card.pending::before {
+        background: var(--warning-gradient);
+    }
+
+    .stat-card.sent::before {
+        background: var(--info-gradient);
+    }
+
+    .stat-card.checked-in::before {
+        background: var(--success-gradient);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-card.pending .stat-number {
+        background: var(--warning-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-card.sent .stat-number {
+        background: var(--info-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-card.checked-in .stat-number {
+        background: var(--success-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+    .stat-icon {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+        opacity: 0.7;
+    }
+
+    .main-content-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .card-header-custom {
+        background: var(--secondary-gradient);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .card-header-custom h5 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.3rem;
+    }
+
+    .guest-item {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #f1f3f4;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .guest-item:hover {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f8ff 100%);
+        transform: translateX(5px);
+    }
+
+    .guest-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--primary-gradient);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .guest-item:hover::before {
+        transform: scaleY(1);
+    }
+
+    .guest-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+        font-size: 1.1rem;
+    }
+
+    .guest-email {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .badge-custom {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border: 2px solid transparent;
+    }
+
+    .badge-pending {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+        border-color: #ffeaa7;
+    }
+
+    .badge-sent {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+        border-color: #bee5eb;
+    }
+
+    .badge-checked-in {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+        border-color: #c3e6cb;
+    }
+
+    .badge-cancelled {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+
+    .action-dropdown {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .action-dropdown:hover {
+        border-color: #d90075;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        color: #495057;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-primary-custom {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 15px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(217, 0, 117, 0.3);
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(217, 0, 117, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .quick-actions-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .quick-actions-header {
+        background: var(--success-gradient);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .quick-action-btn {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border: 2px solid transparent;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateX(5px);
+        text-decoration: none;
+    }
+
+    .quick-action-btn.btn-success-custom {
+        background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+        color: white;
+    }
+
+    .quick-action-btn.btn-info-custom {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .quick-action-btn.btn-primary-custom {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .no-events-alert {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border: 2px solid #2196f3;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        color: #1565c0;
+    }
+
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(217, 0, 117, 0.4);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(217, 0, 117, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(217, 0, 117, 0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .event-selection-card {
+            padding: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="fas fa-list-ul"></i> Guest Lists Management</h1>
+                <p>Manage complimentary tickets and VIP guest lists for your events</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="d-flex align-items-center justify-content-end">
+                    <i class="fas fa-users fa-3x" style="opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Selection Card -->
+    <div class="event-selection-card">
+        <div class="card-icon">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+        <h3>Select an Event to Manage Guest Lists</h3>
+
+        <form method="POST" class="row align-items-end">
+            {% csrf_token %}
+            <div class="col-lg-8 mb-3 mb-lg-0">
+                <select name="events_choice" id="events_choice" class="custom-select" required>
+                    <option value="">Choose an event to view its guest list...</option>
+                    {% for event in events %}
+                    <option value="{{ event.id }}" {% if selected_event and event.id==selected_event.id %}selected{%
+                        endif %}>
+                        {{ event.name }} - {{ event.event_date|date:"M d, Y" }}
+                        {% if event.event_date < today %}(Past Event){% endif %} </option>
+                            {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-4">
+                <button type="submit" class="btn btn-view-list pulse-animation">
+                    <i class="fas fa-search"></i> View Guest List
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if selected_event %}
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card total">
+                <div class="stat-number">{{ guest_list_data.total_guests|default:0 }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-users stat-icon"></i>Total Guests
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card pending">
+                <div class="stat-number">{{ guest_list_data.pending_tickets|default:0 }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-clock stat-icon"></i>Pending
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card sent">
+                <div class="stat-number">{{ guest_list_data.sent_tickets|default:0 }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-envelope stat-icon"></i>Sent
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card checked-in">
+                <div class="stat-number">{{ guest_list_data.checked_in_tickets|default:0 }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-check-circle stat-icon"></i>Checked In
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Info & Actions -->
+    <div class="main-content-card mb-4">
+        <div class="card-header-custom">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-0">{{ selected_event.name }}</h5>
+                    <small style="opacity: 0.75;">
+                        <i class="fas fa-calendar"></i> {{ selected_event.event_date|date:"F d, Y \a\t g:i A" }}
+                        <span class="mx-3"><i class="fas fa-map-marker-alt"></i> {{ selected_event.address }}, {{
+                            selected_event.city.name }}</span>
+                    </small>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{% url 'promoter:guest_list' selected_event.id %}" class="btn btn-light me-2">
+                        <i class="fas fa-list"></i> Full List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Recent Guests -->
+        <div class="col-lg-8">
+            <div class="main-content-card">
+                <div class="card-header-custom">
+                    <h5><i class="fas fa-users"></i> Recent Guests</h5>
+                </div>
+                <div style="padding: 0;">
+                    {% if guest_list_data.recent_guests %}
+                    {% for guest in guest_list_data.recent_guests %}
+                    <div class="guest-item">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <div class="guest-name">{{ guest.guest_name }}</div>
+                                <div class="guest-email">{{ guest.guest_email }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge badge-custom" style="background: #17a2b8; color: white;">
+                                    {{ guest.get_ticket_type_display }}
+                                </span>
+                            </div>
+                            <div class="col-md-3">
+                                {% if guest.status == 'PENDING' %}
+                                <span class="badge badge-custom badge-pending">Pending</span>
+                                {% elif guest.status == 'SENT' %}
+                                <span class="badge badge-custom badge-sent">Sent</span>
+                                {% elif guest.status == 'CHECKED_IN' %}
+                                <span class="badge badge-custom badge-checked-in">Checked In</span>
+                                {% elif guest.status == 'CANCELLED' %}
+                                <span class="badge badge-custom badge-cancelled">Cancelled</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <div class="dropdown">
+                                    <button class="btn action-dropdown dropdown-toggle" type="button"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item"
+                                            href="{% url 'promoter:view_complimentary_ticket' guest.id %}">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        {% if guest.status != 'CHECKED_IN' %}
+                                        <a class="dropdown-item"
+                                            href="{% url 'promoter:send_complimentary_ticket' guest.id %}">
+                                            <i class="fas fa-envelope"></i> Send Email
+                                        </a>
+                                        {% endif %}
+                                        <a class="dropdown-item"
+                                            href="{% url 'promoter:download_complimentary_ticket_pdf' guest.id %}">
+                                            <i class="fas fa-download"></i> Download PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="text-center p-3">
+                        <a href="{% url 'promoter:guest_list' selected_event.id %}" class="btn btn-primary-custom">
+                            <i class="fas fa-list"></i> View All {{ guest_list_data.total_guests }} Guests
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h4>No guests yet</h4>
+                        <p>Start building your guest list by adding your first guest.</p>
+                        <a href="{% url 'promoter:create_complimentary_ticket' selected_event.id %}"
+                            class="btn btn-primary-custom">
+                            <i class="fas fa-plus"></i> Add First Guest
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="quick-actions-card">
+                <div class="quick-actions-header">
+                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div style="padding: 1rem;">
+                    <a href="{% url 'promoter:create_complimentary_ticket' selected_event.id %}"
+                        class="quick-action-btn btn-success-custom">
+                        <i class="fas fa-plus"></i> Add Single Guest
+                    </a>
+                    <a href="{% url 'promoter:bulk_create_complimentary_tickets' selected_event.id %}"
+                        class="quick-action-btn btn-info-custom">
+                        <i class="fas fa-upload"></i> Bulk Import Guests
+                    </a>
+                    <a href="{% url 'promoter:guest_list' selected_event.id %}"
+                        class="quick-action-btn btn-primary-custom">
+                        <i class="fas fa-list"></i> Manage All Guests
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- No Event Selected State -->
+    <div class="empty-state" style="min-height: 50vh; display: flex; flex-direction: column; justify-content: center;">
+        <div class="empty-state-icon">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+        <h4>Select an Event to Get Started</h4>
+        <p>Choose an event from the dropdown above to view and manage its guest list, complimentary tickets, and VIP
+            access.</p>
+
+        {% if not events %}
+        <div class="no-events-alert">
+            <h5><i class="fas fa-info-circle"></i> No Events Found</h5>
+            <p style="margin-bottom: 1rem;">You need to create an event first before you can manage guest lists.</p>
+            <a href="{% url 'promoter:new_events' %}" class="btn btn-primary-custom">
+                <i class="fas fa-plus"></i> Create Your First Event
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</main>
+
+<script>
+    // Auto-submit form when event is selected
+    document.getElementById('events_choice').addEventListener('change', function () {
+        if (this.value) {
+            // Add loading state
+            const button = document.querySelector('.btn-view-list');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            button.disabled = true;
+
+            this.closest('form').submit();
+        }
+    });
+
+    // Add loading animation to quick action buttons
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            const icon = this.querySelector('i');
+            const originalClass = icon.className;
+            icon.className = 'fas fa-spinner fa-spin';
+
+            setTimeout(() => {
+                icon.className = originalClass;
+            }, 1000);
+        });
+    });
+</script>
+{% endblock %}

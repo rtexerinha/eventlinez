@@ -4,7 +4,8 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
     vendor_update_per_event, vendors_reports, vendor_export_excel, \
     payment_list, payment_pdf_view, bank_account_list, bank_create, \
     bank_account_update, bank_remove, promo_codes_list, promo_code_create, \
-    promo_code_update, promo_code_delete, promo_code_toggle_status, promoter_dashboard
+    promo_code_update, promo_code_delete, promo_code_toggle_status, promoter_dashboard, \
+    revenue_report, revenue_report_export, guest_lists_overview
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from ticket.views_complimentary import (
@@ -51,6 +52,9 @@ urlpatterns = [
     path('ticket/checkin/<uuid:checkin>/',
          ticket_checkin, name='ticket_checkin'),
     path('ticket/checkin/validate/', tickets_validate, name='tickets_validate'),
+    
+    # Guest Lists Overview
+    path('guest-lists/', guest_lists_overview, name='guest_lists_overview'),
     
     # Complimentary Tickets / Guest List
     path('event/<int:event_id>/guest-list/', guest_list, name='guest_list'),
@@ -103,6 +107,10 @@ urlpatterns = [
     path('promo-codes/<int:promo_code_id>/edit/', promo_code_update, name='promo_code_update'),
     path('promo-codes/<int:promo_code_id>/delete/', promo_code_delete, name='promo_code_delete'),
     path('promo-codes/<int:promo_code_id>/toggle/', promo_code_toggle_status, name='promo_code_toggle_status'),
+
+    # Reports
+    path('reports/revenue/', revenue_report, name='revenue_report'),
+    path('reports/revenue/export/<int:event_id>/', revenue_report_export, name='revenue_report_export'),
 
     # auth
     path('api-token-auth/', CustomAuthToken.as_view()),

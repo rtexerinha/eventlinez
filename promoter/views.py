@@ -7,8 +7,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 import xlsxwriter
 from django.http import StreamingHttpResponse
 from django.utils import timezone
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count, Q, F, Case, When, DecimalField
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 from customer.forms import SignUpFormPromoter, SignInPromoterForm
 from event.forms import PromoterForm, ResetPasswordForm, VendorForm
@@ -784,7 +785,7 @@ def promoter_dashboard(request):
                 },
                 {
                     'title': 'Guest Lists',
-                    'url': 'promoter:events_promoter',
+                    'url': 'promoter:guest_lists_overview',
                     'icon': 'fas fa-list-ul',
                     'color': 'success',
                     'description': 'Manage complimentary tickets and VIP guest lists'
@@ -798,3 +799,364 @@ def promoter_dashboard(request):
         logger.error(f"Unexpected error in promoter_dashboard: {e}")
         messages.error(request, "An error occurred while loading the dashboard.")
         return redirect('promoter:signup_promoter')
+
+
+@login_required(login_url='/promoter/account/login/')
+def revenue_report(request):
+    """
+    Revenue Report showing financial sales details by event
+    """
+    try:
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+            
+        from ticket.models import Ticket as TicketSold
+        from order.models import OrderItem
+        
+        promoter = request.user.promoter
+        selected_event = None
+        revenue_data = {}
+        
+        # Get all events for the dropdown
+        events = Event.objects.filter(promoter=promoter).order_by('-created')
+        
+        # Handle both POST and GET requests for event selection
+        event_id = request.POST.get('events_choice') or request.GET.get('event_id')
+            
+        if event_id:
+            try:
+                selected_event = Event.objects.get(pk=event_id, promoter=promoter)
+                
+                # Get all tickets sold for this event
+                tickets_sold = TicketSold.objects.filter(
+                    event_ticket__event=selected_event
+                ).select_related('order_item', 'event_ticket', 'customer').order_by('-created_at')
+                
+                # Calculate totals
+                gross_revenue = Decimal('0.00')
+                total_promo_discount = Decimal('0.00')
+                
+                # Build detailed ticket information
+                ticket_details = []
+                for ticket in tickets_sold:
+                    # Get basic ticket info
+                    ticket_price = ticket.price or Decimal('0.00')
+                    gross_revenue += ticket_price
+                    
+                    # Get promo code and discount info
+                    promo_code_used = ''
+                    discount_amount = Decimal('0.00')
+                    
+                    if hasattr(ticket, 'order_item') and ticket.order_item:
+                        promo_code_used = ticket.order_item.promo_code or ''
+                        
+                        # Calculate discount (difference between unit_price and actual price paid)
+                        if hasattr(ticket.order_item, 'unit_price') and ticket.order_item.unit_price:
+                            original_price = ticket.order_item.unit_price
+                            if original_price > ticket_price:
+                                discount_amount = original_price - ticket_price
+                                total_promo_discount += discount_amount
+                    
+                    # Get customer information
+                    customer_name = 'Guest'
+                    customer_email = ''
+                    
+                    if ticket.customer:
+                        try:
+                            if hasattr(ticket.customer, 'get_full_name'):
+                                customer_name = ticket.customer.get_full_name()
+                            elif hasattr(ticket.customer, 'first_name'):
+                                customer_name = f"{getattr(ticket.customer, 'first_name', '')} {getattr(ticket.customer, 'last_name', '')}".strip()
+                            
+                            if not customer_name:
+                                customer_name = str(ticket.customer)
+                                
+                            customer_email = getattr(ticket.customer, 'email', '')
+                        except:
+                            customer_name = 'Customer'
+                    
+                    # Use guest name if available
+                    if not customer_name or customer_name.strip() in ['', 'Customer']:
+                        customer_name = ticket.guest_name or 'Guest'
+                    
+                    original_price = ticket_price + discount_amount
+                    
+                    ticket_details.append({
+                        'customer_name': customer_name,
+                        'customer_email': customer_email,
+                        'ticket_type': ticket.event_ticket.name,
+                        'original_price': original_price,
+                        'promo_code': promo_code_used,
+                        'discount_amount': discount_amount,
+                        'final_price': ticket_price,
+                        'purchase_date': ticket.created_at
+                    })
+                
+                # Calculate net revenue
+                net_revenue = gross_revenue - total_promo_discount
+                total_tickets_sold = len(ticket_details)
+                
+                revenue_data = {
+                    'gross_revenue': gross_revenue,
+                    'total_promo_discount': total_promo_discount,
+                    'net_revenue': net_revenue,
+                    'total_tickets_sold': total_tickets_sold,
+                    'ticket_details': ticket_details
+                }
+                
+            except Event.DoesNotExist:
+                messages.error(request, "Event not found.")
+            except Exception as e:
+                logger.error(f"Error processing event data: {e}")
+                messages.error(request, "Error loading event data.")
+        
+        context = {
+            'events': events,
+            'selected_event': selected_event,
+            'revenue_data': revenue_data,
+            'promoter': promoter
+        }
+        
+        return render(request, 'reports/revenue_report.html', context)
+        
+    except Exception as e:
+        logger.error(f"Error in revenue_report: {e}")
+        messages.error(request, "An error occurred while generating the revenue report.")
+        return redirect('promoter:promoter_dashboard')
+
+
+@login_required(login_url='/promoter/account/login/')
+def revenue_report_export(request, event_id):
+    """
+    Export revenue report to Excel
+    """
+    try:
+        # Check if user has promoter profile first
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+            
+        from ticket.models import Ticket as TicketSold
+        from promoter.models import PromoCodeUsage
+        
+        promoter = request.user.promoter
+        selected_event = get_object_or_404(Event, pk=event_id, promoter=promoter)
+        
+        # Create response
+        output = BytesIO()
+        response = StreamingHttpResponse(
+            output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename=revenue_report_{selected_event.slug}_{timezone.now().strftime("%Y%m%d")}.xlsx'
+        
+        # Create workbook
+        workbook = xlsxwriter.Workbook(output)
+        
+        # Styles
+        title_format = workbook.add_format({
+            'bold': True, 'font_size': 16, 'align': 'center', 'valign': 'vcenter'
+        })
+        header_format = workbook.add_format({
+            'bold': True, 'font_size': 12, 'bg_color': '#d90075', 'font_color': 'white',
+            'align': 'center', 'valign': 'vcenter', 'border': 1
+        })
+        money_format = workbook.add_format({
+            'num_format': '$#,##0.00', 'align': 'right', 'border': 1
+        })
+        number_format = workbook.add_format({
+            'num_format': '#,##0', 'align': 'right', 'border': 1
+        })
+        text_format = workbook.add_format({
+            'align': 'left', 'border': 1
+        })
+        
+        # Summary Sheet
+        summary_sheet = workbook.add_worksheet('Revenue Summary')
+        summary_sheet.set_column('A:A', 25)
+        summary_sheet.set_column('B:B', 15)
+        
+        # Get data
+        tickets_sold = TicketSold.objects.filter(event_ticket__event=selected_event)
+        gross_revenue = tickets_sold.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
+        
+        promo_usage = PromoCodeUsage.objects.filter(promo_code__event=selected_event)
+        total_promo_discount = promo_usage.aggregate(total=Sum('discount_amount'))['total'] or Decimal('0.00')
+        net_revenue = gross_revenue - total_promo_discount
+        
+        # Write summary
+        row = 0
+        summary_sheet.write(row, 0, f'Revenue Report - {selected_event.name}', title_format)
+        row += 2
+        
+        summary_sheet.write(row, 0, 'Event Name:', header_format)
+        summary_sheet.write(row, 1, selected_event.name, text_format)
+        row += 1
+        
+        summary_sheet.write(row, 0, 'Event Date:', header_format)
+        summary_sheet.write(row, 1, selected_event.event_date.strftime('%Y-%m-%d %H:%M'), text_format)
+        row += 1
+        
+        summary_sheet.write(row, 0, 'Report Generated:', header_format)
+        summary_sheet.write(row, 1, timezone.now().strftime('%Y-%m-%d %H:%M'), text_format)
+        row += 2
+        
+        summary_sheet.write(row, 0, 'Gross Revenue:', header_format)
+        summary_sheet.write(row, 1, float(gross_revenue), money_format)
+        row += 1
+        
+        summary_sheet.write(row, 0, 'Total Promo Discounts:', header_format)
+        summary_sheet.write(row, 1, float(total_promo_discount), money_format)
+        row += 1
+        
+        summary_sheet.write(row, 0, 'Net Revenue:', header_format)
+        summary_sheet.write(row, 1, float(net_revenue), money_format)
+        row += 1
+        
+        summary_sheet.write(row, 0, 'Total Tickets Sold:', header_format)
+        summary_sheet.write(row, 1, tickets_sold.count(), number_format)
+        row += 1
+        
+        # Ticket Details Sheet
+        details_sheet = workbook.add_worksheet('Ticket Details')
+        details_sheet.set_column('A:A', 15)
+        details_sheet.set_column('B:B', 30)
+        details_sheet.set_column('C:C', 15)
+        details_sheet.set_column('D:D', 15)
+        details_sheet.set_column('E:E', 20)
+        details_sheet.set_column('F:F', 15)
+        
+        # Headers
+        headers = ['Ticket ID', 'Ticket Type', 'Price', 'Promo Code', 'Purchase Date', 'Customer']
+        for col, header in enumerate(headers):
+            details_sheet.write(0, col, header, header_format)
+        
+        # Data
+        row = 1
+        for ticket in tickets_sold.select_related('order_item', 'customer', 'event_ticket'):
+            details_sheet.write(row, 0, ticket.id, number_format)
+            details_sheet.write(row, 1, ticket.event_ticket.name, text_format)
+            details_sheet.write(row, 2, float(ticket.price), money_format)
+            details_sheet.write(row, 3, ticket.order_item.promo_code or '', text_format)
+            details_sheet.write(row, 4, ticket.created_at.strftime('%Y-%m-%d %H:%M'), text_format)
+            details_sheet.write(row, 5, str(ticket.customer), text_format)
+            row += 1
+        
+        # Promo Codes Sheet
+        if promo_usage.exists():
+            promo_sheet = workbook.add_worksheet('Promo Code Usage')
+            promo_sheet.set_column('A:A', 15)
+            promo_sheet.set_column('B:B', 20)
+            promo_sheet.set_column('C:C', 15)
+            promo_sheet.set_column('D:D', 20)
+            
+            # Headers
+            promo_headers = ['Promo Code', 'Customer Email', 'Discount Amount', 'Used Date']
+            for col, header in enumerate(promo_headers):
+                promo_sheet.write(0, col, header, header_format)
+            
+            # Data
+            row = 1
+            for usage in promo_usage.order_by('-used_at'):
+                promo_sheet.write(row, 0, usage.promo_code.code, text_format)
+                promo_sheet.write(row, 1, usage.customer_email, text_format)
+                promo_sheet.write(row, 2, float(usage.discount_amount), money_format)
+                promo_sheet.write(row, 3, usage.used_at.strftime('%Y-%m-%d %H:%M'), text_format)
+                row += 1
+        
+        workbook.close()
+        output.seek(0)
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error exporting revenue report: {e}")
+        messages.error(request, "An error occurred while exporting the revenue report.")
+        return redirect('promoter:revenue_report')
+
+
+@login_required(login_url='/promoter/account/login/')
+def guest_lists_overview(request):
+    """
+    Guest Lists Overview - Select an event to view its guest list
+    """
+    try:
+        # Check if user has promoter profile first
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            logger.error(f"User {request.user.username} does not have promoter profile")
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+            
+        from ticket.models_complimentary import ComplimentaryTicket
+        
+        promoter = request.user.promoter
+        selected_event = None
+        guest_list_data = {}
+        
+        # Get all events for the dropdown
+        events = Event.objects.filter(promoter=promoter).order_by('-created')
+        
+        # Handle event selection
+        event_id = request.POST.get('events_choice') or request.GET.get('event_id')
+        
+        if event_id:
+            try:
+                selected_event = Event.objects.get(pk=event_id, promoter=promoter)
+                
+                # Get all complimentary tickets for this event
+                complimentary_tickets = ComplimentaryTicket.objects.filter(event=selected_event)
+                
+                # Calculate statistics
+                total_guests = complimentary_tickets.count()
+                pending_tickets = complimentary_tickets.filter(status='PENDING').count()
+                sent_tickets = complimentary_tickets.filter(status='SENT').count()
+                checked_in_tickets = complimentary_tickets.filter(status='CHECKED_IN').count()
+                cancelled_tickets = complimentary_tickets.filter(status='CANCELLED').count()
+                
+                # Recent guests (last 10)
+                recent_guests = complimentary_tickets.order_by('-created_at')[:10]
+                
+                # Guest statistics by ticket type
+                ticket_types_stats = {}
+                for ticket in complimentary_tickets:
+                    ticket_type = ticket.get_ticket_type_display()
+                    if ticket_type not in ticket_types_stats:
+                        ticket_types_stats[ticket_type] = {
+                            'total': 0,
+                            'checked_in': 0,
+                            'pending': 0,
+                            'sent': 0,
+                            'cancelled': 0
+                        }
+                    ticket_types_stats[ticket_type]['total'] += 1
+                    ticket_types_stats[ticket_type][ticket.status.lower()] += 1
+                
+                guest_list_data = {
+                    'total_guests': total_guests,
+                    'pending_tickets': pending_tickets,
+                    'sent_tickets': sent_tickets,
+                    'checked_in_tickets': checked_in_tickets,
+                    'cancelled_tickets': cancelled_tickets,
+                    'recent_guests': recent_guests,
+                    'ticket_types_stats': ticket_types_stats,
+                    'complimentary_tickets': complimentary_tickets
+                }
+                
+            except Event.DoesNotExist:
+                messages.error(request, "Event not found.")
+            except Exception as e:
+                logger.error(f"Error loading guest list data: {e}")
+                messages.error(request, "Error loading guest list data.")
+        
+        context = {
+            'events': events,
+            'selected_event': selected_event,
+            'guest_list_data': guest_list_data,
+            'promoter': promoter
+        }
+        
+        return render(request, 'guest_lists/guest_lists_overview.html', context)
+        
+    except Exception as e:
+        logger.error(f"Error in guest_lists_overview: {e}")
+        messages.error(request, "An error occurred while loading guest lists.")
+        # Removed redirect to dashboard
