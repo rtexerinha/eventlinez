@@ -128,7 +128,7 @@ jobs:
         echo "   - Time: $DEPLOY_TIMESTAMP"
         
         # Navigate to application directory
-        cd $DEPLOY_PATH/eventlinez
+        cd $DEPLOY_PATH
         
         # Record current version
         current_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
