@@ -40,6 +40,15 @@ help:
 	@echo "  install-postgres - Install PostgreSQL Python driver"
 	@echo "  fix-event-images - Fix missing/broken event images"
 
+
+up: 
+	docker compose up -d
+
+down:
+	docker compose down
+
+build:
+	docker compose build
 # Install dependencies
 install:
 	pip install -r requirements.txt

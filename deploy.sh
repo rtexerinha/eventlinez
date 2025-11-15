@@ -8,7 +8,7 @@ set -e  # Exit on any error
 # Configuration
 APP_NAME="eventlinez"
 DEPLOY_USER="sunset"
-DEPLOY_PATH="/home/sunset/eventlinez"
+DEPLOY_PATH="/home/sunset/"
 PYTHON_PATH="/home/sunset/.local/bin"
 BACKUP_DIR="/home/sunset/backups"
 LOG_FILE="/var/log/eventlinez-deploy.log"
