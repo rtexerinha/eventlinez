@@ -86,7 +86,7 @@
 
                 <!-- Guest Lists - Direct link to overview -->
                 <a class="nav-link {% if 'guest_list' in request.resolver_match.url_name or 'complimentary' in request.resolver_match.url_name %} active {% endif %}"
-                    href="{% url 'promoter:ticket_list' %}">
+                    href="{% url 'promoter:guest_lists_overview' %}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-list-ul"></i>
                     </div>
