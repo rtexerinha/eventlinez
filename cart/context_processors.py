@@ -8,6 +8,10 @@ def counter(request):
 		return {}
 	else:
 		try:
+			# Check if request has session attribute and handle gracefully
+			if not hasattr(request, 'session'):
+				return dict(item_count=0)
+				
 			cart = Cart.objects.filter(cart_id=_cart_id(request))
 			cart_items = CartItem.objects.filter(
                 cart=cart[:1],
@@ -16,6 +20,9 @@ def counter(request):
             )
 			for cart_item in cart_items:
 				item_count += cart_item.quantity
-		except Cart.DoesNotExist:
+		except (Cart.DoesNotExist, AttributeError):
+			item_count = 0
+		except Exception:
+			# Catch any other session-related errors to prevent sidebar failure
 			item_count = 0
 	return dict(item_count=item_count)

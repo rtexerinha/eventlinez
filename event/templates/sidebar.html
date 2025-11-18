@@ -85,7 +85,7 @@
                 </a>
 
                 <!-- Guest Lists - Direct link to overview -->
-                <a class="nav-link {% if 'guest_list' in request.resolver_match.url_name or 'complimentary' in request.resolver_match.url_name %} active {% endif %}"
+                <a class="nav-link {% if 'guest_lists_overview' in request.resolver_match.url_name or 'guest_list' in request.resolver_match.url_name or 'complimentary' in request.resolver_match.url_name %} active {% endif %}"
                     href="{% url 'promoter:guest_lists_overview' %}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-list-ul"></i>
@@ -113,7 +113,7 @@
                 </a>
 
                 <!-- Reports with submenu -->
-                <a class="nav-link collapsed {% if 'reports' in request.resolver_match.url_name %} active {% endif %}"
+                <a class="nav-link collapsed {% if 'revenue_report' in request.resolver_match.url_name or 'vendors_reports' in request.resolver_match.url_name %} active {% endif %}"
                     href="#reportsSubmenu" data-toggle="collapse" aria-expanded="false">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-chart-bar"></i>
@@ -123,7 +123,7 @@
                         <i class="fas fa-angle-down"></i>
                     </div>
                 </a>
-                <div class="collapse {% if 'reports' in request.resolver_match.url_name %} show {% endif %}"
+                <div class="collapse {% if 'revenue_report' in request.resolver_match.url_name or 'vendors_reports' in request.resolver_match.url_name %} show {% endif %}"
                     id="reportsSubmenu" data-parent="#sidenavAccordion">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link {% if 'vendors_reports' in request.resolver_match.url_name %} active {% endif %}"

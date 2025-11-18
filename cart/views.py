@@ -23,9 +23,15 @@ logger = logging.getLogger(__name__)
 
 
 def _cart_id(request):
-    if not request.session.session_key:
-        request.session.create()
-    return request.session.session_key
+    try:
+        if not hasattr(request, 'session'):
+            return None
+        if not request.session.session_key:
+            request.session.create()
+        return request.session.session_key
+    except Exception:
+        # Return a fallback cart ID if session fails
+        return f"fallback_{request.META.get('REMOTE_ADDR', 'unknown')}"
 
 
 def track_promo_usage(promo_code, customer_email, order_id, discount_amount):

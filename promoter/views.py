@@ -16,6 +16,23 @@ from event.forms import PromoterForm, ResetPasswordForm, VendorForm
 from event.models import Promoter, Event
 from promoter.forms import BankAccountForm, PromoCodeForm
 from promoter.models import Payment, Vendor, SalesByVendor, BankAccount, get_balance, PromoCode
+from ticket.models import Ticket
+
+# Import the models that were causing issues when imported inside views
+try:
+    from ticket.models_complimentary import ComplimentaryTicket
+except ImportError:
+    ComplimentaryTicket = None
+
+try:
+    from order.models import OrderItem
+except ImportError:
+    OrderItem = None
+
+try:
+    from promoter.models import PromoCodeUsage
+except ImportError:
+    PromoCodeUsage = None
 
 from django.http import HttpResponse
 from io import BytesIO
@@ -811,9 +828,6 @@ def revenue_report(request):
             messages.error(request, "You need to have a promoter profile to access this page.")
             return redirect('promoter:signup_promoter')
             
-        from ticket.models import Ticket as TicketSold
-        from order.models import OrderItem
-        
         promoter = request.user.promoter
         selected_event = None
         revenue_data = {}
@@ -829,7 +843,7 @@ def revenue_report(request):
                 selected_event = Event.objects.get(pk=event_id, promoter=promoter)
                 
                 # Get all tickets sold for this event
-                tickets_sold = TicketSold.objects.filter(
+                tickets_sold = Ticket.objects.filter(
                     event_ticket__event=selected_event
                 ).select_related('order_item', 'event_ticket', 'customer').order_by('-created_at')
                 
@@ -937,9 +951,6 @@ def revenue_report_export(request, event_id):
             messages.error(request, "You need to have a promoter profile to access this page.")
             return redirect('promoter:signup_promoter')
             
-        from ticket.models import Ticket as TicketSold
-        from promoter.models import PromoCodeUsage
-        
         promoter = request.user.promoter
         selected_event = get_object_or_404(Event, pk=event_id, promoter=promoter)
         
@@ -977,11 +988,17 @@ def revenue_report_export(request, event_id):
         summary_sheet.set_column('B:B', 15)
         
         # Get data
-        tickets_sold = TicketSold.objects.filter(event_ticket__event=selected_event)
+        tickets_sold = Ticket.objects.filter(event_ticket__event=selected_event)
         gross_revenue = tickets_sold.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
         
-        promo_usage = PromoCodeUsage.objects.filter(promo_code__event=selected_event)
-        total_promo_discount = promo_usage.aggregate(total=Sum('discount_amount'))['total'] or Decimal('0.00')
+        # Use conditional check for PromoCodeUsage
+        if PromoCodeUsage:
+            promo_usage = PromoCodeUsage.objects.filter(promo_code__event=selected_event)
+            total_promo_discount = promo_usage.aggregate(total=Sum('discount_amount'))['total'] or Decimal('0.00')
+        else:
+            promo_usage = []
+            total_promo_discount = Decimal('0.00')
+            
         net_revenue = gross_revenue - total_promo_discount
         
         # Write summary
@@ -1037,13 +1054,19 @@ def revenue_report_export(request, event_id):
             details_sheet.write(row, 0, ticket.id, number_format)
             details_sheet.write(row, 1, ticket.event_ticket.name, text_format)
             details_sheet.write(row, 2, float(ticket.price), money_format)
-            details_sheet.write(row, 3, ticket.order_item.promo_code or '', text_format)
+            
+            # Safe access to order_item promo_code
+            promo_code = ''
+            if hasattr(ticket, 'order_item') and ticket.order_item and hasattr(ticket.order_item, 'promo_code'):
+                promo_code = ticket.order_item.promo_code or ''
+            
+            details_sheet.write(row, 3, promo_code, text_format)
             details_sheet.write(row, 4, ticket.created_at.strftime('%Y-%m-%d %H:%M'), text_format)
             details_sheet.write(row, 5, str(ticket.customer), text_format)
             row += 1
         
-        # Promo Codes Sheet
-        if promo_usage.exists():
+        # Promo Codes Sheet - only if PromoCodeUsage is available
+        if PromoCodeUsage and promo_usage:
             promo_sheet = workbook.add_worksheet('Promo Code Usage')
             promo_sheet.set_column('A:A', 15)
             promo_sheet.set_column('B:B', 20)
@@ -1080,15 +1103,20 @@ def guest_lists_overview(request):
     Guest Lists Overview - Select an event to view its guest list
     """
     try:
-        # Check if user has promoter profile first
-        if not hasattr(request.user, 'promoter') or not request.user.promoter:
-            logger.error(f"User {request.user.username} does not have promoter profile")
+        # Check authentication first
+        if not request.user.is_authenticated:
+            return redirect('promoter:signin_promoter')
+            
+        # Check if user has promoter profile
+        try:
+            promoter = request.user.promoter
+            if not promoter:
+                messages.error(request, "You need to have a promoter profile to access this page.")
+                return redirect('promoter:signup_promoter')
+        except AttributeError:
             messages.error(request, "You need to have a promoter profile to access this page.")
             return redirect('promoter:signup_promoter')
             
-        from ticket.models_complimentary import ComplimentaryTicket
-        
-        promoter = request.user.promoter
         selected_event = None
         guest_list_data = {}
         
@@ -1098,7 +1126,7 @@ def guest_lists_overview(request):
         # Handle event selection
         event_id = request.POST.get('events_choice') or request.GET.get('event_id')
         
-        if event_id:
+        if event_id and ComplimentaryTicket:
             try:
                 selected_event = Event.objects.get(pk=event_id, promoter=promoter)
                 
@@ -1118,17 +1146,24 @@ def guest_lists_overview(request):
                 # Guest statistics by ticket type
                 ticket_types_stats = {}
                 for ticket in complimentary_tickets:
-                    ticket_type = ticket.get_ticket_type_display()
-                    if ticket_type not in ticket_types_stats:
-                        ticket_types_stats[ticket_type] = {
-                            'total': 0,
-                            'checked_in': 0,
-                            'pending': 0,
-                            'sent': 0,
-                            'cancelled': 0
-                        }
-                    ticket_types_stats[ticket_type]['total'] += 1
-                    ticket_types_stats[ticket_type][ticket.status.lower()] += 1
+                    try:
+                        ticket_type = ticket.get_ticket_type_display()
+                        if ticket_type not in ticket_types_stats:
+                            ticket_types_stats[ticket_type] = {
+                                'total': 0,
+                                'checked_in': 0,
+                                'pending': 0,
+                                'sent': 0,
+                                'cancelled': 0
+                            }
+                        ticket_types_stats[ticket_type]['total'] += 1
+                        if hasattr(ticket, 'status'):
+                            status_key = ticket.status.lower() if ticket.status else 'pending'
+                            if status_key in ticket_types_stats[ticket_type]:
+                                ticket_types_stats[ticket_type][status_key] += 1
+                    except Exception as e:
+                        logger.warning(f"Error processing ticket type stats: {e}")
+                        continue
                 
                 guest_list_data = {
                     'total_guests': total_guests,
@@ -1146,12 +1181,16 @@ def guest_lists_overview(request):
             except Exception as e:
                 logger.error(f"Error loading guest list data: {e}")
                 messages.error(request, "Error loading guest list data.")
+        elif event_id and not ComplimentaryTicket:
+            messages.warning(request, "Guest list functionality is not available - ComplimentaryTicket model not found.")
         
         context = {
             'events': events,
             'selected_event': selected_event,
             'guest_list_data': guest_list_data,
-            'promoter': promoter
+            'promoter': promoter,
+            'complimentary_available': ComplimentaryTicket is not None,
+            'today': timezone.now().date()
         }
         
         return render(request, 'guest_lists/guest_lists_overview.html', context)
@@ -1159,4 +1198,8 @@ def guest_lists_overview(request):
     except Exception as e:
         logger.error(f"Error in guest_lists_overview: {e}")
         messages.error(request, "An error occurred while loading guest lists.")
-        # Removed redirect to dashboard
+        return redirect('promoter:promoter_dashboard')
+
+
+# End of views.py
+
