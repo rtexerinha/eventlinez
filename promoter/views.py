@@ -787,6 +787,13 @@ def promoter_dashboard(request):
                     'description': 'View and edit your existing events'
                 },
                 {
+                    'title': 'Revenue Report',
+                    'url': 'promoter:revenue_report',
+                    'icon': 'fas fa-chart-line',
+                    'color': 'warning',
+                    'description': 'View detailed financial reports and sales analytics'
+                },
+                {
                     'title': 'View Payments',
                     'url': 'promoter:payment_list',
                     'icon': 'fas fa-credit-card',

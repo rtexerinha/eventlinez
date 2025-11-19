@@ -176,11 +176,11 @@
                     <select id="eventsChoice" class="form-control" name="events_choice" required>
                         <option value="">-- Select an Event --</option>
                         {% for event in events %}
-                        <option value="{{ event.id }}" {% if selected_event and selected_event.id==event.id %}selected{%
-                            endif %}>
+                        <option value="{{ event.id }}" {% if selected_event and selected_event.id == event.id %}selected{% endif %}>
                             {{ event.name }} - {{ event.event_date|date:"M d, Y" }}
-                            {% if event.event_date < today %}(Past Event){% endif %} </option>
-                                {% endfor %}
+                            {% if event.event_date|date:"Y-m-d" < today|date:"Y-m-d" %}(Past Event){% endif %}
+                        </option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
