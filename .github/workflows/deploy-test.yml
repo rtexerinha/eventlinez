@@ -7,12 +7,12 @@ on:
     branches: [ develop ]
 
 env:
-  PYTHON_VERSION: 3.6.15
+  PYTHON_VERSION: 3.6.7
   NODE_VERSION: 16
 
 jobs:
   test:
-    runs-on: ubuntu-20.04  # Use Ubuntu 20.04 for better Python 3.6 support
+    runs-on: ubuntu-18.04  # Use Ubuntu 18.04 for Python 3.6 support
     
     services:
       postgres:
@@ -33,7 +33,7 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set up Python
+    - name: Set up Python 3.6
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
