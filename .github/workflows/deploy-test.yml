@@ -6,13 +6,9 @@ on:
   pull_request:
     branches: [ develop ]
 
-env:
-  PYTHON_VERSION: 3.6.7
-  NODE_VERSION: 16
-
 jobs:
   test:
-    runs-on: ubuntu-18.04  # Use Ubuntu 18.04 for Python 3.6 support
+    runs-on: ubuntu-latest
     
     services:
       postgres:
@@ -33,47 +29,69 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Set up Python 3.6
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    - name: Install dependencies
+    - name: Build Docker image
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements_dev.txt
+        echo "🐳 Building Docker image using same Python 3.6 setup as local environment..."
+        docker build -t eventlinez-test .
 
-    - name: Clean caches and run tests
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_eventlinez
-        SECRET_KEY: test-secret-key-for-github-actions
-        DEBUG: False
+    - name: Create test environment file
       run: |
-        echo "🧹 Cleaning caches..."
-        python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Django cache cleared')" || echo "Could not clear Django cache"
-        find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "Could not clear Python cache"
-        find . -name "*.pyc" -delete 2>/dev/null || echo "Could not delete .pyc files"
-        pip cache purge 2>/dev/null || echo "Could not clear pip cache"
-        echo "✅ Caches cleaned"
-        
-        python manage.py collectstatic --noinput
-        python manage.py migrate --noinput
-        python manage.py create_sales_view --force || true
-        python manage.py test
+        cat > .env.test << EOF
+        DEBUG=False
+        SECRET_KEY=test-secret-key-for-github-actions
+        DATABASE_URL=postgres://postgres:postgres@host.docker.internal:5432/test_eventlinez
+        ALLOWED_HOSTS=localhost,127.0.0.1
+        STATIC_ROOT=/app/staticfiles
+        MEDIA_ROOT=/app/media
+        ENVIRONMENT=test
+        EOF
 
-    - name: Run linting
+    - name: Run tests in Docker container
       run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        echo "🧪 Running tests in Docker container (Python 3.6)..."
+        docker run --rm \
+          --network host \
+          -v $(pwd):/app \
+          -w /app \
+          --env-file .env.test \
+          eventlinez-test bash -c "
+            echo '🧹 Cleaning caches...'
+            find . -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
+            find . -name '*.pyc' -delete 2>/dev/null || true
+            pip cache purge 2>/dev/null || true
+            echo '✅ Caches cleaned'
+            
+            echo '📦 Collecting static files...'
+            python manage.py collectstatic --noinput
+            
+            echo '🗄️ Running migrations...'
+            python manage.py migrate --noinput
+            
+            echo '📊 Creating database views...'
+            python manage.py create_sales_view --force || true
+            
+            echo '🧪 Running tests...'
+            python manage.py test
+            
+            echo '✅ All tests completed successfully!'
+          "
+
+    - name: Run linting in Docker container
+      run: |
+        echo "🔍 Running linting in Docker container..."
+        docker run --rm \
+          -v $(pwd):/app \
+          -w /app \
+          eventlinez-test bash -c "
+            pip install flake8
+            echo '🔍 Running flake8 linting...'
+            flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+            echo '✅ Linting completed'
+          "
 
   deploy:
     needs: test
@@ -396,15 +414,24 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
     
-    - name: Python Security Check
+    - name: Build Docker image for security scan
       run: |
-        pip install safety bandit
-        echo "🔍 Running security scans..."
-        safety check -r requirements.txt || echo "Safety scan completed"
-        bandit -r . -f json -o bandit-report.json || echo "Bandit scan completed"
-        echo "✅ Security scans completed"
+        echo "🐳 Building Docker image for security scanning..."
+        docker build -t eventlinez-security .
+    
+    - name: Python Security Check in Docker
+      run: |
+        echo "🔍 Running security scans in Docker container (Python 3.6)..."
+        docker run --rm \
+          -v $(pwd):/app \
+          -w /app \
+          eventlinez-security bash -c "
+            pip install safety bandit
+            echo '🔍 Running security scans...'
+            safety check -r requirements.txt || echo 'Safety scan completed'
+            bandit -r . -f json -o bandit-report.json || echo 'Bandit scan completed'
+            echo '✅ Security scans completed'
+          "
