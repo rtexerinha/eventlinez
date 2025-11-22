@@ -90,12 +90,18 @@ jobs:
         docker run --rm \
           -v $(pwd):/app \
           -w /app \
+          --entrypoint="" \
           eventlinez-test bash -c "
+            echo '🔧 Installing linting tools...'
             pip install flake8
+            
             echo '🔍 Running flake8 linting...'
-            flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-            echo '✅ Linting completed'
+            flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,staticfiles,media,migrations,node_modules,__pycache__
+            
+            echo '📊 Running full flake8 analysis...'
+            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,staticfiles,media,migrations,node_modules,__pycache__
+            
+            echo '✅ Linting completed successfully'
           "
 
   deploy:
@@ -433,10 +439,23 @@ jobs:
         docker run --rm \
           -v $(pwd):/app \
           -w /app \
+          --entrypoint="" \
           eventlinez-security bash -c "
+            echo '🔧 Installing security tools...'
             pip install safety bandit
-            echo '🔍 Running security scans...'
-            safety check -r requirements.txt || echo 'Safety scan completed'
-            bandit -r . -f json -o bandit-report.json || echo 'Bandit scan completed'
-            echo '✅ Security scans completed'
+            
+            echo '🔍 Running Safety check on requirements.txt...'
+            safety check -r requirements.txt || echo '⚠️ Safety scan completed with warnings'
+            
+            echo '🔍 Running Bandit security linter...'
+            bandit -r . -f json -o bandit-report.json -x './venv/*,./staticfiles/*,./media/*,**/migrations/*,**/node_modules/*' || echo '⚠️ Bandit scan completed with warnings'
+            
+            echo '📊 Security scan summary:'
+            if [ -f bandit-report.json ]; then
+              echo '✅ Bandit report generated'
+              # Show a brief summary without sensitive details
+              cat bandit-report.json | grep -E '\"confidence|\"severity|\"test_name\"' | head -10 || echo 'No issues summary available'
+            fi
+            
+            echo '✅ Security scans completed successfully'
           "
