@@ -57,6 +57,12 @@ services:
       # Stripe Configuration - Using test keys from .env.docker
       - STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
       - STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+
+      # reCAPTCHA Configuration
+      - RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
+      - RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
+      - RECAPTCHA_PROJECT_ID=${RECAPTCHA_PROJECT_ID}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
     ports:
       - "8000:8000"
     volumes:

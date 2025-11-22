@@ -309,18 +309,22 @@ Get in touch with Eventlinez - Your questions, feedback, and inquiries matter to
                             </div>
 
                             {% if RECAPTCHA_PUBLIC_KEY %}
-                            <div class="mb-4" style="display: flex; justify-content: center;">
+                            <!-- reCAPTCHA v2 - Visible captcha with images -->
+                            <div class="mb-4">
                                 <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_PUBLIC_KEY }}"></div>
+                                {% if form.captcha.errors %}
+                                <div class="text-danger mt-1">{{ form.captcha.errors }}</div>
+                                {% endif %}
                             </div>
                             {% endif %}
 
-                            <button type="submit" class="submit-btn">
+                            <button type="submit" class="submit-btn" id="submit-btn">
                                 <i class="fas fa-paper-plane me-2"></i> Send Message
                             </button>
 
                             <div class="security-badge">
                                 <i class="fas fa-shield-alt"></i>
-                                <span>Protected against spam and abuse</span>
+                                <span>Protected by reCAPTCHA</span>
                             </div>
                         </form>
                     </div>

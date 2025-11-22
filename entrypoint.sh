@@ -7,6 +7,20 @@ set -e
 
 echo "🚀 Starting Eventlinez Docker container..."
 
+# Setup Google Cloud authentication if service account key is provided
+if [ ! -z "$GOOGLE_APPLICATION_CREDENTIALS_BASE64" ]; then
+    echo "🔐 Setting up Google Cloud authentication from base64..."
+    echo "$GOOGLE_APPLICATION_CREDENTIALS_BASE64" | base64 -d > /app/service-account-key.json
+    chmod 600 /app/service-account-key.json
+    export GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
+    echo "✅ Google Cloud authentication configured"
+elif [ -f "/app/service-account-key.json" ] && [ -s "/app/service-account-key.json" ]; then
+    echo "🔐 Using existing Google Cloud service account key..."
+    export GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
+else
+    echo "⚠️ No Google Cloud service account key found - reCAPTCHA Enterprise will fall back to standard API"
+fi
+
 # Function to wait for the database to be ready
 postgres_ready() {
     python << END

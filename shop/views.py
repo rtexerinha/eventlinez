@@ -20,6 +20,7 @@ from event.models import Category, Event
 from promoter.models import Vendor
 from .forms import ContactForm
 from .models import SpecialEvents, BusinessPartner, EventGallery, CustomerPhotoDownload
+from .recaptcha_utils import validate_recaptcha_token
 from django.conf import settings
 
 # Try to import requests for reCAPTCHA validation
@@ -176,45 +177,79 @@ def contact(request):
     recaptcha_response = request.POST.get('g-recaptcha-response')
     
     # Only validate reCAPTCHA if keys are configured and requests library is available
-    if settings.RECAPTCHA_PUBLIC_KEY and settings.RECAPTCHA_PRIVATE_KEY and REQUESTS_AVAILABLE:
-        recaptcha_verify_url = 'https://www.google.com/recaptcha/api/siteverify'
-        
-        # Get client IP address
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
-        else:
-            ip = request.META.get('REMOTE_ADDR')
-        
-        recaptcha_data = {
-            'secret': settings.RECAPTCHA_PRIVATE_KEY,
-            'response': recaptcha_response,
-            'remoteip': ip
-        }
-        
-        try:
-            recaptcha_result = requests.post(recaptcha_verify_url, data=recaptcha_data)
-            recaptcha_json = recaptcha_result.json()
-            
-            # Check if reCAPTCHA validation passed
-            if not recaptcha_json.get('success', False):
-                error_codes = recaptcha_json.get('error-codes', [])
-                logger.warning(f"reCAPTCHA validation failed. Error codes: {error_codes}")
-                messages.error(request, 'reCAPTCHA validation failed. Please try again.')
-                return render(request, 'pages/contactus.html', {
-                    'form': form,
-                    'PROD': settings.PROD,
-                    'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
-                })
-                
-        except Exception as e:
-            logger.error(f"reCAPTCHA verification error: {e}")
-            messages.error(request, 'Security validation error. Please try again later.')
+    if settings.RECAPTCHA_PUBLIC_KEY and settings.RECAPTCHA_PRIVATE_KEY:
+        if not recaptcha_response:
+            messages.error(request, 'reCAPTCHA verification is required. Please try again.')
             return render(request, 'pages/contactus.html', {
                 'form': form,
                 'PROD': settings.PROD,
                 'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
             })
+        
+        # Get client IP address
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0].strip()
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        
+        # Use the utility function for validation
+        try:
+            from .recaptcha_utils import validate_recaptcha_token
+            is_valid, error_message, score = validate_recaptcha_token(
+                project_id='',  # Not needed for standard reCAPTCHA
+                public_key=settings.RECAPTCHA_PUBLIC_KEY,
+                private_key=settings.RECAPTCHA_PRIVATE_KEY,
+                token=recaptcha_response,
+                action='contact',
+                user_ip=ip,
+                required_score=getattr(settings, 'RECAPTCHA_REQUIRED_SCORE', 0.5)
+            )
+            
+            if not is_valid:
+                logger.warning(f"reCAPTCHA validation failed: {error_message}")
+                messages.error(request, 'Security verification failed. Please try again.')
+                return render(request, 'pages/contactus.html', {
+                    'form': form,
+                    'PROD': settings.PROD,
+                    'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
+                })
+            
+            # Log successful verification
+            logger.info(f"reCAPTCHA verification successful. Score: {score}")
+            
+        except ImportError:
+            # Fallback to simple requests-based validation if utility is not available
+            import requests
+            verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+            data = {
+                'secret': settings.RECAPTCHA_PRIVATE_KEY,
+                'response': recaptcha_response,
+                'remoteip': ip
+            }
+            
+            try:
+                response = requests.post(verify_url, data=data, timeout=10)
+                result = response.json()
+                
+                if not result.get('success'):
+                    logger.warning(f"reCAPTCHA validation failed: {result.get('error-codes', [])}")
+                    messages.error(request, 'reCAPTCHA verification failed. Please try again.')
+                    return render(request, 'pages/contactus.html', {
+                        'form': form,
+                        'PROD': settings.PROD,
+                        'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
+                    })
+                    
+            except Exception as e:
+                logger.error(f"reCAPTCHA verification error: {e}")
+                if not settings.PROD:
+                    messages.error(request, 'Security verification error. Please try again later.')
+                    return render(request, 'pages/contactus.html', {
+                        'form': form,
+                        'PROD': settings.PROD,
+                        'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
+                    })
     
     if form.is_valid():
         subject = form.cleaned_data['subject']

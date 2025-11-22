@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     curl \
     git \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -36,7 +37,7 @@ RUN pip install --upgrade pip && \
 COPY . /app
 
 # Create necessary directories
-RUN mkdir -p /app/media /app/staticfiles
+RUN mkdir -p /app/media /app/staticfiles /app/tmp/uploads
 
 # Create entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
@@ -44,6 +45,9 @@ RUN chmod +x /app/entrypoint.sh
 
 # Set proper permissions
 RUN chmod -R 755 /app
+
+# Create placeholder for Google Cloud service account key
+RUN touch /app/service-account-key.json && chmod 600 /app/service-account-key.json
 
 EXPOSE 8000
 

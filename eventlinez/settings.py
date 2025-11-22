@@ -246,9 +246,10 @@ CART_RATE_LIMITS = {
 }
 
 # Google reCAPTCHA settings (optional - for contact form spam protection)
-# Using standard reCAPTCHA v2 keys
+# Using reCAPTCHA Enterprise API
 RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", "")
 RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_PRIVATE_KEY", "")
+RECAPTCHA_PROJECT_ID = os.getenv("RECAPTCHA_PROJECT_ID", "")
 # Score threshold for reCAPTCHA validation (0.0 - 1.0)
 RECAPTCHA_REQUIRED_SCORE = 0.5
 
