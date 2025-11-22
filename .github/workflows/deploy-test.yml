@@ -7,12 +7,12 @@ on:
     branches: [ develop ]
 
 env:
-  PYTHON_VERSION: 3.9.24
+  PYTHON_VERSION: 3.6.15
   NODE_VERSION: 16
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Use Ubuntu 20.04 for better Python 3.6 support
     
     services:
       postgres:
