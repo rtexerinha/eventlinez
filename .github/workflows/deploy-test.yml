@@ -43,6 +43,11 @@ jobs:
         DEBUG=False
         SECRET_KEY=test-secret-key-for-github-actions
         DATABASE_URL=postgres://postgres:postgres@host.docker.internal:5432/test_eventlinez
+        POSTGRES_DB=test_eventlinez
+        POSTGRES_USER=postgres
+        POSTGRES_PASSWORD=postgres
+        POSTGRES_HOST=host.docker.internal
+        POSTGRES_PORT=5432
         ALLOWED_HOSTS=localhost,127.0.0.1
         STATIC_ROOT=/app/staticfiles
         MEDIA_ROOT=/app/media
@@ -53,7 +58,7 @@ jobs:
       run: |
         echo "🧪 Running tests in Docker container (Python 3.6)..."
         docker run --rm \
-          --network host \
+          --add-host=host.docker.internal:host-gateway \
           -v $(pwd):/app \
           -w /app \
           --env-file .env.test \
