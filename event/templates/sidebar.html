@@ -84,7 +84,9 @@
                     Validated Tickets
                 </a>
 
-                <!-- Guest Lists - Direct link to overview -->
+                <!-- Guest Lists - Direct link to overview (if available) -->
+                {% url 'promoter:guest_lists_overview' as guest_lists_url %}
+                {% if guest_lists_url %}
                 <a class="nav-link {% if 'guest_list' in request.resolver_match.url_name or 'complimentary' in request.resolver_match.url_name %} active {% endif %}"
                     href="{% url 'promoter:guest_lists_overview' %}">
                     <div class="sb-nav-link-icon">
@@ -92,6 +94,7 @@
                     </div>
                     Guest Lists
                 </a>
+                {% endif %}
 
                 <!-- Management Section -->
                 <div class="sb-sidenav-menu-heading">Management</div>
@@ -133,6 +136,8 @@
                             </div>
                             Sales by Vendor
                         </a>
+                        {% url 'promoter:revenue_report' as revenue_report_url %}
+                        {% if revenue_report_url %}
                         <a class="nav-link {% if 'revenue_report' in request.resolver_match.url_name %} active {% endif %}"
                             href="{% url 'promoter:revenue_report' %}">
                             <div class="sb-nav-link-icon">
@@ -140,6 +145,7 @@
                             </div>
                             Revenue Report
                         </a>
+                        {% endif %}
                     </nav>
                 </div>
 
