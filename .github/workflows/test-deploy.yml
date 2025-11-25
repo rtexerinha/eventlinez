@@ -371,34 +371,97 @@ jobs:
         echo "   - Time: $(date '+%Y-%m-%d %H:%M:%S')"
         
         # Copy deployment script to server
-        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no deploy_script.sh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }}:/tmp/deploy_script.sh
+        echo "📤 Copying deployment script to server..."
+        if sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no deploy_script.sh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }}:/tmp/deploy_script.sh; then
+          echo "✅ Deployment script copied successfully"
+        else
+          echo "❌ Failed to copy deployment script"
+          exit 1
+        fi
         
-        # Execute deployment script on server
-        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "chmod +x /tmp/deploy_script.sh && /tmp/deploy_script.sh && rm /tmp/deploy_script.sh"
+        # Execute deployment script on server with better error handling
+        echo "🔧 Executing deployment script on server..."
+        if sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
+          set -e
+          echo '🔍 Starting deployment script execution...'
+          if [ ! -f /tmp/deploy_script.sh ]; then
+            echo '❌ Deployment script not found on server'
+            exit 1
+          fi
+          
+          chmod +x /tmp/deploy_script.sh
+          echo '✅ Deployment script permissions set'
+          
+          # Execute with error capture
+          if /tmp/deploy_script.sh; then
+            echo '✅ Deployment script executed successfully'
+            rm /tmp/deploy_script.sh
+            echo '✅ Cleanup completed'
+          else
+            DEPLOY_EXIT_CODE=\$?
+            echo \"❌ Deployment script failed with exit code: \$DEPLOY_EXIT_CODE\"
+            echo '📋 Last 50 lines of system logs:'
+            tail -50 /var/log/syslog 2>/dev/null || echo 'No system logs available'
+            rm /tmp/deploy_script.sh 2>/dev/null || true
+            exit \$DEPLOY_EXIT_CODE
+          fi
+        "; then
+          echo "✅ Deployment completed successfully"
+        else
+          DEPLOY_EXIT_CODE=$?
+          echo "❌ Deployment failed with exit code: $DEPLOY_EXIT_CODE"
+          echo ""
+          echo "🔍 Troubleshooting steps:"
+          echo "1. Check server connectivity and credentials"
+          echo "2. Verify server has required dependencies (Python 3, git, curl)"
+          echo "3. Check server disk space and permissions"
+          echo "4. Review deployment script for compatibility issues"
+          exit $DEPLOY_EXIT_CODE
+        fi
 
     - name: Verify deployment
+      if: success()
       run: |
         echo "🔍 Verifying deployment..."
         
-        # Verify git repository state on server
-        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << 'VERIFY_EOF'
+        # Add timeout and better error handling for verification
+        echo "📋 Checking server accessibility..."
+        if ! sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "echo 'Server is accessible'"; then
+          echo "❌ Cannot connect to server for verification"
+          exit 1
+        fi
+        
+        # Verify git repository state on server with error handling
+        if sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << 'VERIFY_EOF'
+        set -e
         echo "🔄 Verifying git repository state on test server..."
+        
+        if [ ! -d "/home/sunset/eventlinez" ]; then
+          echo "❌ Project directory not found"
+          exit 1
+        fi
+        
         cd /home/sunset/eventlinez
         
         echo "📥 Fetching latest changes..."
-        git fetch origin
+        git fetch origin || { echo "❌ Git fetch failed"; exit 1; }
         
         echo "⬇️ Pulling from develop branch..."
-        git pull origin develop
+        git pull origin develop || { echo "❌ Git pull failed"; exit 1; }
         echo "✅ Git repository updated"
         
-        echo "Current commit on server: $(git rev-parse HEAD)"
-        echo "Expected commit: ${{ steps.commit.outputs.commit_sha }}"
+        CURRENT_COMMIT=$(git rev-parse HEAD)
+        EXPECTED_COMMIT="${{ steps.commit.outputs.commit_sha }}"
         
-        if [ "$(git rev-parse HEAD)" = "${{ steps.commit.outputs.commit_sha }}" ]; then
+        echo "Current commit on server: $CURRENT_COMMIT"
+        echo "Expected commit: $EXPECTED_COMMIT"
+        
+        if [ "$CURRENT_COMMIT" = "$EXPECTED_COMMIT" ]; then
             echo "✅ Git commit verification successful"
         else
             echo "❌ Git commit verification failed"
+            echo "📋 Repository status:"
+            git status --porcelain || true
             exit 1
         fi
         
@@ -408,26 +471,61 @@ jobs:
         echo "📂 Current branch: $(git branch --show-current 2>/dev/null || git symbolic-ref --short HEAD 2>/dev/null || echo 'detached')"
         echo "🔗 Remote tracking: $(git branch -vv | grep '^\*' | sed 's/.*\[\([^]]*\)\].*/\1/' || echo 'none')"
         VERIFY_EOF
-        
-        # Test if the site is accessible
-        if curl -f -s https://test.eventlinez.com/ > /dev/null; then
-            echo "✅ Public site is accessible"
+        then
+          echo "✅ Git verification completed"
         else
-            echo "⚠️ Site may not be accessible via HTTPS, checking HTTP..."
-            if curl -f -s http://45.79.112.247:8000/ > /dev/null; then
-                echo "✅ Site accessible via direct IP"
-            else
-                echo "❌ Site not accessible"
-                exit 1
-            fi
+          echo "❌ Git verification failed"
+          exit 1
+        fi
+        
+        # Test site accessibility with multiple attempts
+        echo "🌐 Testing site accessibility..."
+        SITE_CHECK_RETRIES=3
+        SITE_ACCESSIBLE=false
+        
+        for i in $(seq 1 $SITE_CHECK_RETRIES); do
+          echo "Attempt $i/$SITE_CHECK_RETRIES: Testing HTTPS access..."
+          if curl -f -s --max-time 10 https://test.eventlinez.com/ > /dev/null 2>&1; then
+            echo "✅ HTTPS site is accessible"
+            SITE_ACCESSIBLE=true
+            break
+          fi
+          
+          echo "Attempt $i/$SITE_CHECK_RETRIES: Testing HTTP access via IP..."
+          if curl -f -s --max-time 10 http://45.79.112.247:8000/ > /dev/null 2>&1; then
+            echo "✅ HTTP site is accessible via direct IP"
+            SITE_ACCESSIBLE=true
+            break
+          fi
+          
+          if [ $i -lt $SITE_CHECK_RETRIES ]; then
+            echo "⏳ Waiting 10 seconds before next attempt..."
+            sleep 10
+          fi
+        done
+        
+        if [ "$SITE_ACCESSIBLE" = "false" ]; then
+          echo "❌ Site is not accessible after $SITE_CHECK_RETRIES attempts"
+          echo "🔍 Checking server status..."
+          sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
+            echo 'Server processes:'
+            pgrep -f 'gunicorn\|runserver' || echo 'No Django processes found'
+            echo ''
+            echo 'Port 8000 status:'
+            netstat -ln | grep :8000 || echo 'Port 8000 not listening'
+            echo ''
+            echo 'Recent application logs:'
+            tail -20 /tmp/django.log 2>/dev/null || echo 'No Django logs found'
+          " || true
+          exit 1
         fi
         
         # Check version endpoint if available
-        if curl -f -s https://test.eventlinez.com/version/ > /dev/null; then
-            echo "✅ Version info is accessible"
-            curl -s https://test.eventlinez.com/version/ || true
+        if curl -f -s --max-time 5 https://test.eventlinez.com/version/ > /dev/null 2>&1; then
+            echo "✅ Version endpoint is accessible"
+            curl -s --max-time 5 https://test.eventlinez.com/version/ || true
         else
-            echo "ℹ️ Version endpoint not available"
+            echo "ℹ️ Version endpoint not available (this is optional)"
         fi
 
     - name: Deployment Results
