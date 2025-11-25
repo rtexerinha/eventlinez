@@ -113,9 +113,9 @@ jobs:
         
         # Backup Docker volumes and database
         cd $PROJECT_DIR
-        if docker-compose ps -q db | xargs -r docker inspect -f '{{.State.Running}}' | grep -q true; then
+        if docker compose ps -q db | xargs -r docker inspect -f '{{.State.Running}}' | grep -q true; then
             echo -e "  ${YELLOW}→ Backing up PostgreSQL database...${NC}"
-            docker-compose exec -T db pg_dump -U eventlinez eventlinez > $BACKUP_DIR/test_$TIMESTAMP/db_backup.sql
+            docker compose exec -T db pg_dump -U eventlinez eventlinez > $BACKUP_DIR/test_$TIMESTAMP/db_backup.sql
             echo -e "  ${GREEN}✓ Database backup complete${NC}"
         fi
         
@@ -134,13 +134,13 @@ jobs:
         
         # Step 3: Stop existing containers
         echo -e "\n${BLUE}▶ Stopping existing containers...${NC}"
-        docker-compose down || true
+        docker compose down || true
         echo -e "${GREEN}✓ Containers stopped${NC}"
         
         # Step 4: Build and start new containers
         echo -e "\n${BLUE}▶ Building and starting Docker containers...${NC}"
-        docker-compose build --no-cache web
-        docker-compose up -d
+        docker compose build --no-cache web
+        docker compose up -d
         echo -e "${GREEN}✓ Containers started${NC}"
         
         # Step 5: Wait for database to be ready
@@ -149,11 +149,11 @@ jobs:
         
         # Check if database is ready
         RETRIES=30
-        while ! docker-compose exec -T db pg_isready -U eventlinez -d eventlinez > /dev/null 2>&1; do
+        while ! docker compose exec -T db pg_isready -U eventlinez -d eventlinez > /dev/null 2>&1; do
             RETRIES=$((RETRIES - 1))
             if [ $RETRIES -eq 0 ]; then
                 echo -e "${RED}✗ Database failed to start${NC}"
-                docker-compose logs db
+                docker compose logs db
                 exit 1
             fi
             echo -e "  ${YELLOW}→ Waiting for database... ($RETRIES attempts left)${NC}"
@@ -163,22 +163,22 @@ jobs:
         
         # Step 6: Run database migrations
         echo -e "\n${BLUE}▶ Running database migrations...${NC}"
-        docker-compose exec -T web python manage.py migrate --noinput
+        docker compose exec -T web python manage.py migrate --noinput
         echo -e "${GREEN}✓ Migrations applied${NC}"
         
         # Step 7: Collect static files
         echo -e "\n${BLUE}▶ Collecting static files...${NC}"
-        docker-compose exec -T web python manage.py collectstatic --noinput --clear
+        docker compose exec -T web python manage.py collectstatic --noinput --clear
         echo -e "${GREEN}✓ Static files collected${NC}"
         
         # Step 8: Clear caches
         echo -e "\n${BLUE}▶ Clearing application caches...${NC}"
-        docker-compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" || true
+        docker compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" || true
         echo -e "${GREEN}✓ Caches cleared${NC}"
         
         # Step 9: Restart containers to ensure clean state
         echo -e "\n${BLUE}▶ Restarting containers...${NC}"
-        docker-compose restart web
+        docker compose restart web
         echo -e "${GREEN}✓ Containers restarted${NC}"
         
         # Step 10: Health check
@@ -186,10 +186,10 @@ jobs:
         sleep 10
         
         # Check if containers are running
-        if ! docker-compose ps | grep -q "Up"; then
+        if ! docker compose ps | grep -q "Up"; then
             echo -e "${RED}✗ Some containers are not running${NC}"
-            docker-compose ps
-            docker-compose logs --tail=20
+            docker compose ps
+            docker compose logs --tail=20
             exit 1
         fi
         
@@ -204,9 +204,9 @@ jobs:
                 if [ $HEALTH_RETRIES -eq 0 ]; then
                     echo -e "${RED}✗ Health check failed${NC}"
                     echo -e "${YELLOW}Container status:${NC}"
-                    docker-compose ps
+                    docker compose ps
                     echo -e "${YELLOW}Application logs:${NC}"
-                    docker-compose logs --tail=20 web
+                    docker compose logs --tail=20 web
                     exit 1
                 fi
                 echo -e "  ${YELLOW}→ Health check attempt $((13-HEALTH_RETRIES))/12...${NC}"
@@ -237,7 +237,7 @@ jobs:
         echo "Backup: $BACKUP_DIR/test_$TIMESTAMP"
         echo ""
         echo "Container Status:"
-        docker-compose ps
+        docker compose ps
         echo ""
         
         ENDSSH
