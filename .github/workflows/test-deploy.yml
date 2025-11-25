@@ -141,6 +141,7 @@ jobs:
 
     - name: Add server to known hosts
       run: |
+        mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
         echo "✅ SSH connection setup completed"
 
