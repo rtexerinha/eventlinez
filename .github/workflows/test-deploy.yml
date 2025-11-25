@@ -117,7 +117,6 @@ jobs:
   deploy-test:
     needs: test
     runs-on: ubuntu-latest
-    # Only deploy to test server on develop branch pushes (not PRs)
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
 
     steps:
@@ -145,437 +144,107 @@ jobs:
         ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
         echo "✅ SSH connection setup completed"
 
-    - name: Create deployment script
+    - name: Deploy with Docker to test server
       run: |
-        cat > deploy_script.sh << 'SCRIPT_EOF'
-        #!/bin/bash
-        set -e
-        
-        # Colors for output
-        RED='\033[0;31m'
-        GREEN='\033[0;32m'
-        YELLOW='\033[1;33m'
-        BLUE='\033[0;34m'
-        NC='\033[0m'
-        
-        echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-        echo -e "${BLUE}║   Automated Test Environment Deploy   ║${NC}"
-        echo -e "${BLUE}║         Using Docker Containers       ║${NC}"
-        echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
-        
-        # Configuration
-        PROJECT_DIR="/home/sunset/eventlinez"
-        BACKUP_DIR="/home/sunset/backups"
-        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-        
-        # Step 1: Navigate to project directory
-        cd $PROJECT_DIR
-        
-        # Step 2: Check if Docker is installed
-        echo -e "\n${BLUE}▶ Checking Docker installation...${NC}"
-        if ! command -v docker &> /dev/null; then
-            echo -e "${RED}✗ Docker is not installed${NC}"
-            echo -e "${YELLOW}Installing Docker...${NC}"
-            
-            # Install Docker
-            curl -fsSL https://get.docker.com -o get-docker.sh
-            sudo sh get-docker.sh
-            sudo usermod -aG docker $USER
-            
-            # Install Docker Compose
-            sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            
-            echo -e "${GREEN}✓ Docker installed${NC}"
-        else
-            echo -e "${GREEN}✓ Docker is available${NC}"
-        fi
-        
-        # Check Docker Compose
-        if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-            echo -e "${YELLOW}Installing Docker Compose...${NC}"
-            sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            echo -e "${GREEN}✓ Docker Compose installed${NC}"
-        else
-            echo -e "${GREEN}✓ Docker Compose is available${NC}"
-        fi
-        
-        # Step 3: Create backup
-        echo -e "\n${BLUE}▶ Creating backup...${NC}"
-        mkdir -p $BACKUP_DIR/test_$TIMESTAMP
-        
-        # Backup database if exists
-        if [ -f "db.sqlite3" ]; then
-            echo -e "  ${YELLOW}→ Backing up SQLite database...${NC}"
-            cp db.sqlite3 $BACKUP_DIR/test_$TIMESTAMP/ 2>/dev/null || true
-            echo -e "  ${GREEN}✓ Database backup complete${NC}"
-        fi
-        
-        # Backup Docker volumes if they exist
-        if docker volume ls | grep -q eventlinez; then
-            echo -e "  ${YELLOW}→ Backing up Docker volumes...${NC}"
-            mkdir -p $BACKUP_DIR/test_$TIMESTAMP/volumes
-            docker run --rm -v eventlinez_postgres_data:/source -v $BACKUP_DIR/test_$TIMESTAMP/volumes:/backup alpine tar czf /backup/postgres_data.tar.gz -C /source . 2>/dev/null || true
-            echo -e "  ${GREEN}✓ Docker volumes backup complete${NC}"
-        fi
-        
-        # Backup media files
-        if [ -d "$PROJECT_DIR/media" ]; then
-            cp -r $PROJECT_DIR/media $BACKUP_DIR/test_$TIMESTAMP/ 2>/dev/null || true
-            echo -e "  ${GREEN}✓ Media files backup complete${NC}"
-        fi
-        
-        # Step 4: Stop existing containers
-        echo -e "\n${BLUE}▶ Stopping existing containers...${NC}"
-        docker-compose down 2>/dev/null || docker compose down 2>/dev/null || true
-        echo -e "${GREEN}✓ Containers stopped${NC}"
-        
-        # Step 5: Pull latest code from develop
-        echo -e "\n${BLUE}▶ Pulling latest code from develop...${NC}"
-        git fetch origin
-        git checkout develop
-        git pull origin develop
-        echo -e "${GREEN}✓ Code updated${NC}"
-        
-        # Step 6: Create .env.docker file for test environment
-        echo -e "\n${BLUE}▶ Creating Docker environment configuration...${NC}"
-        cat > .env.docker << 'ENVEOF'
-        # Django Configuration for Test Server
-        DEBUG=False
-        SECRET_KEY=test-server-secret-key-change-in-production
-        ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
-        
-        # Database Configuration (PostgreSQL in Docker)
-        DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
-        
-        # Stripe Test Keys
-        STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
-        STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
-        
-        # reCAPTCHA Configuration
-        RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
-        RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
-        RECAPTCHA_PROJECT_ID=
-        
-        # SendGrid (empty for test environment)
-        SENDGRID_API_KEY=
-        
-        # Application Settings
-        EVENTLINEZ_FEE=0.12
-        ENVIRONMENT=test
-        SEED_DATA=true
-        ENVEOF
-        echo -e "${GREEN}✓ Docker environment configuration created${NC}"
-        
-        # Step 7: Build and start Docker containers
-        echo -e "\n${BLUE}▶ Building Docker containers...${NC}"
-        docker-compose build --no-cache web || docker compose build --no-cache web
-        echo -e "${GREEN}✓ Docker containers built${NC}"
-        
-        echo -e "\n${BLUE}▶ Starting Docker containers...${NC}"
-        docker-compose up -d || docker compose up -d
-        echo -e "${GREEN}✓ Docker containers started${NC}"
-        
-        # Step 8: Wait for database to be ready
-        echo -e "\n${BLUE}▶ Waiting for database to be ready...${NC}"
-        sleep 20
-        
-        # Check if database is ready with Docker
-        RETRIES=30
-        while ! (docker-compose exec -T db pg_isready -U eventlinez -d eventlinez 2>/dev/null || docker compose exec -T db pg_isready -U eventlinez -d eventlinez 2>/dev/null); do
-            RETRIES=$((RETRIES - 1))
-            if [ $RETRIES -eq 0 ]; then
-                echo -e "${RED}✗ Database failed to start${NC}"
-                docker-compose logs db 2>/dev/null || docker compose logs db 2>/dev/null || true
-                exit 1
-            fi
-            echo -e "  ${YELLOW}→ Waiting for database... ($RETRIES attempts left)${NC}"
-            sleep 3
-        done
-        echo -e "${GREEN}✓ Database is ready${NC}"
-        
-        # Step 9: Run database migrations
-        echo -e "\n${BLUE}▶ Running database migrations...${NC}"
-        (docker-compose exec -T web python manage.py migrate --noinput 2>/dev/null) || \
-        (docker compose exec -T web python manage.py migrate --noinput 2>/dev/null)
-        echo -e "${GREEN}✓ Migrations applied${NC}"
-        
-        # Step 10: Collect static files
-        echo -e "\n${BLUE}▶ Collecting static files...${NC}"
-        (docker-compose exec -T web python manage.py collectstatic --noinput --clear 2>/dev/null) || \
-        (docker compose exec -T web python manage.py collectstatic --noinput --clear 2>/dev/null)
-        echo -e "${GREEN}✓ Static files collected${NC}"
-        
-        # Step 11: Clear caches
-        echo -e "\n${BLUE}▶ Clearing application caches...${NC}"
-        (docker-compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" 2>/dev/null) || \
-        (docker compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" 2>/dev/null) || true
-        echo -e "${GREEN}✓ Caches cleared${NC}"
-        
-        # Step 12: Health check
-        echo -e "\n${BLUE}▶ Running health check...${NC}"
-        sleep 15
-        
-        # Check if containers are running
-        if ! ((docker-compose ps | grep -q "Up") || (docker compose ps | grep -q "running")); then
-            echo -e "${RED}✗ Some containers are not running${NC}"
-            docker-compose ps 2>/dev/null || docker compose ps 2>/dev/null || true
-            docker-compose logs --tail=20 2>/dev/null || docker compose logs --tail=20 2>/dev/null || true
-            exit 1
-        fi
-        
-        # Check application response
-        HEALTH_RETRIES=15
-        while [ $HEALTH_RETRIES -gt 0 ]; do
-            if curl -f -s http://localhost:8000/admin/ > /dev/null 2>&1; then
-                echo -e "${GREEN}✓ Health check passed${NC}"
-                break
-            else
-                HEALTH_RETRIES=$((HEALTH_RETRIES - 1))
-                if [ $HEALTH_RETRIES -eq 0 ]; then
-                    echo -e "${RED}✗ Health check failed${NC}"
-                    echo -e "${YELLOW}Container status:${NC}"
-                    docker-compose ps 2>/dev/null || docker compose ps 2>/dev/null || true
-                    echo -e "${YELLOW}Application logs:${NC}"
-                    docker-compose logs --tail=30 web 2>/dev/null || docker compose logs --tail=30 web 2>/dev/null || true
-                    exit 1
-                fi
-                echo -e "  ${YELLOW}→ Health check attempt $((16-HEALTH_RETRIES))/15...${NC}"
-                sleep 5
-            fi
-        done
-        
-        # Step 13: Setup nginx proxy if needed
-        echo -e "\n${BLUE}▶ Checking nginx configuration...${NC}"
-        if command -v nginx &> /dev/null && systemctl is-active --quiet nginx 2>/dev/null; then
-            # Create or update nginx config for Docker deployment
-            sudo tee /etc/nginx/sites-available/eventlinez > /dev/null << 'NGINXEOF'
-server {
-    listen 80;
-    server_name test.eventlinez.com 45.79.112.247;
-
-    location /static/ {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /media/ {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_redirect off;
-    }
-
-    client_max_body_size 100M;
-}
-NGINXEOF
-            
-            sudo ln -sf /etc/nginx/sites-available/eventlinez /etc/nginx/sites-enabled/ 2>/dev/null || true
-            sudo nginx -t && sudo systemctl reload nginx 2>/dev/null || true
-            echo -e "  ${GREEN}✓ Nginx configured for Docker deployment${NC}"
-        else
-            echo -e "  ${YELLOW}→ Nginx not available, application running on port 8000${NC}"
-        fi
-        
-        # Step 14: Clean up old Docker images
-        echo -e "\n${BLUE}▶ Cleaning up old Docker images...${NC}"
-        docker image prune -f > /dev/null 2>&1 || true
-        echo -e "${GREEN}✓ Cleanup complete${NC}"
-        
-        echo -e "\n${GREEN}╔════════════════════════════════════════╗${NC}"
-        echo -e "${GREEN}║   Docker Test Environment Complete!   ║${NC}"
-        echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
-        echo ""
-        echo "🐳 Docker Deployment Summary:"
-        echo "   Test URL: http://test.eventlinez.com"
-        echo "   Direct URL: http://45.79.112.247:8000"
-        echo "   Backup: $BACKUP_DIR/test_$TIMESTAMP"
-        echo ""
-        echo "📊 Container Status:"
-        docker-compose ps 2>/dev/null || docker compose ps 2>/dev/null || echo "Could not get container status"
-        echo ""
-        
-        SCRIPT_EOF
-
-    - name: Deploy to test server
-      run: |
-        echo "🚀 Starting deployment to test server..."
+        echo "🚀 Starting Docker-based deployment to test server..."
         echo "📋 Deployment Info:"
         echo "   - Commit: $(git rev-parse --short HEAD)"
         echo "   - Branch: ${GITHUB_REF#refs/heads/}"
         echo "   - Message: $(git log -1 --pretty=%B | head -n1)"
         echo "   - Time: $(date '+%Y-%m-%d %H:%M:%S')"
         
-        # Copy deployment script to server
-        echo "📤 Copying deployment script to server..."
-        if sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no deploy_script.sh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }}:/tmp/deploy_script.sh; then
-          echo "✅ Deployment script copied successfully"
-        else
-          echo "❌ Failed to copy deployment script"
-          exit 1
+        # Execute deployment on server
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << 'DEPLOY_EOF'
+        set -e
+        
+        echo "🐳 Docker Deployment Starting..."
+        PROJECT_DIR="/home/sunset/eventlinez"
+        cd $PROJECT_DIR
+        
+        # Install Docker if not present
+        if ! command -v docker &> /dev/null; then
+          echo "Installing Docker..."
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sudo sh get-docker.sh
+          sudo usermod -aG docker $USER
+          
+          # Install Docker Compose
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          echo "✅ Docker installed"
         fi
         
-        # Execute deployment script on server with better error handling
-        echo "🔧 Executing deployment script on server..."
-        if sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
-          set -e
-          echo '🔍 Starting deployment script execution...'
-          if [ ! -f /tmp/deploy_script.sh ]; then
-            echo '❌ Deployment script not found on server'
-            exit 1
-          fi
-          
-          chmod +x /tmp/deploy_script.sh
-          echo '✅ Deployment script permissions set'
-          
-          # Execute with error capture
-          if /tmp/deploy_script.sh; then
-            echo '✅ Deployment script executed successfully'
-            rm /tmp/deploy_script.sh
-            echo '✅ Cleanup completed'
-          else
-            DEPLOY_EXIT_CODE=\$?
-            echo \"❌ Deployment script failed with exit code: \$DEPLOY_EXIT_CODE\"
-            echo '📋 Last 50 lines of system logs:'
-            tail -50 /var/log/syslog 2>/dev/null || echo 'No system logs available'
-            rm /tmp/deploy_script.sh 2>/dev/null || true
-            exit \$DEPLOY_EXIT_CODE
-          fi
-        "; then
-          echo "✅ Deployment completed successfully"
-        else
-          DEPLOY_EXIT_CODE=$?
-          echo "❌ Deployment failed with exit code: $DEPLOY_EXIT_CODE"
-          echo ""
-          echo "🔍 Troubleshooting steps:"
-          echo "1. Check server connectivity and credentials"
-          echo "2. Verify server has required dependencies (Python 3, git, curl)"
-          echo "3. Check server disk space and permissions"
-          echo "4. Review deployment script for compatibility issues"
-          exit $DEPLOY_EXIT_CODE
-        fi
+        # Stop existing containers
+        docker-compose down 2>/dev/null || docker compose down 2>/dev/null || true
+        
+        # Pull latest code
+        git fetch origin
+        git checkout develop
+        git pull origin develop
+        
+        # Create environment file
+        cat > .env.docker << 'ENV_EOF'
+        DEBUG=False
+        SECRET_KEY=test-server-secret-key-change-in-production
+        ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
+        DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
+        STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
+        STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+        RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
+        RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
+        RECAPTCHA_PROJECT_ID=
+        SENDGRID_API_KEY=
+        EVENTLINEZ_FEE=0.12
+        ENVIRONMENT=test
+        SEED_DATA=true
+        ENV_EOF
+        
+        # Build and start containers
+        docker-compose build --no-cache web || docker compose build --no-cache web
+        docker-compose up -d || docker compose up -d
+        
+        # Wait for services
+        sleep 30
+        
+        # Run migrations
+        (docker-compose exec -T web python manage.py migrate --noinput) || (docker compose exec -T web python manage.py migrate --noinput)
+        
+        # Collect static files
+        (docker-compose exec -T web python manage.py collectstatic --noinput --clear) || (docker compose exec -T web python manage.py collectstatic --noinput --clear)
+        
+        echo "✅ Docker deployment completed"
+        DEPLOY_EOF
 
     - name: Verify deployment
-      if: success()
       run: |
         echo "🔍 Verifying deployment..."
         
-        # Add timeout and better error handling for verification
-        echo "📋 Checking server accessibility..."
-        if ! sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "echo 'Server is accessible'"; then
-          echo "❌ Cannot connect to server for verification"
-          exit 1
-        fi
+        # Wait for application to be fully ready
+        sleep 20
         
-        # Verify git repository state on server with error handling
-        if sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << 'VERIFY_EOF'
-        set -e
-        echo "🔄 Verifying git repository state on test server..."
-        
-        if [ ! -d "/home/sunset/eventlinez" ]; then
-          echo "❌ Project directory not found"
-          exit 1
-        fi
-        
-        cd /home/sunset/eventlinez
-        
-        echo "📥 Fetching latest changes..."
-        git fetch origin || { echo "❌ Git fetch failed"; exit 1; }
-        
-        echo "⬇️ Pulling from develop branch..."
-        git pull origin develop || { echo "❌ Git pull failed"; exit 1; }
-        echo "✅ Git repository updated"
-        
-        CURRENT_COMMIT=$(git rev-parse HEAD)
-        EXPECTED_COMMIT="${{ steps.commit.outputs.commit_sha }}"
-        
-        echo "Current commit on server: $CURRENT_COMMIT"
-        echo "Expected commit: $EXPECTED_COMMIT"
-        
-        if [ "$CURRENT_COMMIT" = "$EXPECTED_COMMIT" ]; then
-            echo "✅ Git commit verification successful"
-        else
-            echo "❌ Git commit verification failed"
-            echo "📋 Repository status:"
-            git status --porcelain || true
-            exit 1
-        fi
-        
-        echo "📋 Latest commit info:"
-        git log -1 --oneline
-        
-        echo "📂 Current branch: $(git branch --show-current 2>/dev/null || git symbolic-ref --short HEAD 2>/dev/null || echo 'detached')"
-        echo "🔗 Remote tracking: $(git branch -vv | grep '^\*' | sed 's/.*\[\([^]]*\)\].*/\1/' || echo 'none')"
-        VERIFY_EOF
-        then
-          echo "✅ Git verification completed"
-        else
-          echo "❌ Git verification failed"
-          exit 1
-        fi
-        
-        # Test site accessibility with multiple attempts
-        echo "🌐 Testing site accessibility..."
-        SITE_CHECK_RETRIES=3
-        SITE_ACCESSIBLE=false
-        
-        for i in $(seq 1 $SITE_CHECK_RETRIES); do
-          echo "Attempt $i/$SITE_CHECK_RETRIES: Testing HTTPS access..."
-          if curl -f -s --max-time 10 https://test.eventlinez.com/ > /dev/null 2>&1; then
-            echo "✅ HTTPS site is accessible"
-            SITE_ACCESSIBLE=true
-            break
-          fi
-          
-          echo "Attempt $i/$SITE_CHECK_RETRIES: Testing HTTP access via IP..."
+        # Test site accessibility
+        RETRIES=5
+        ACCESSIBLE=false
+        for i in $(seq 1 $RETRIES); do
           if curl -f -s --max-time 10 http://45.79.112.247:8000/ > /dev/null 2>&1; then
-            echo "✅ HTTP site is accessible via direct IP"
-            SITE_ACCESSIBLE=true
+            echo "✅ Site is accessible"
+            ACCESSIBLE=true
             break
           fi
-          
-          if [ $i -lt $SITE_CHECK_RETRIES ]; then
-            echo "⏳ Waiting 10 seconds before next attempt..."
-            sleep 10
-          fi
+          echo "Attempt $i/$RETRIES failed, waiting..."
+          sleep 10
         done
         
-        if [ "$SITE_ACCESSIBLE" = "false" ]; then
-          echo "❌ Site is not accessible after $SITE_CHECK_RETRIES attempts"
-          echo "🔍 Checking server status..."
+        if [ "$ACCESSIBLE" = "false" ]; then
+          echo "❌ Site is not accessible after $RETRIES attempts"
+          # Check server status
           sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
-            echo 'Server processes:'
-            pgrep -f 'gunicorn\|runserver' || echo 'No Django processes found'
-            echo ''
-            echo 'Port 8000 status:'
-            netstat -ln | grep :8000 || echo 'Port 8000 not listening'
-            echo ''
-            echo 'Recent application logs:'
-            tail -20 /tmp/django.log 2>/dev/null || echo 'No Django logs found'
-          " || true
+            echo 'Container status:'
+            docker-compose ps 2>/dev/null || docker compose ps 2>/dev/null || echo 'No containers running'
+            echo 'Application logs:'
+            docker-compose logs --tail=20 web 2>/dev/null || docker compose logs --tail=20 web 2>/dev/null || echo 'No logs available'
+          "
           exit 1
-        fi
-        
-        # Check version endpoint if available
-        if curl -f -s --max-time 5 https://test.eventlinez.com/version/ > /dev/null 2>&1; then
-            echo "✅ Version endpoint is accessible"
-            curl -s --max-time 5 https://test.eventlinez.com/version/ || true
-        else
-            echo "ℹ️ Version endpoint not available (this is optional)"
         fi
 
     - name: Deployment Results
@@ -583,7 +252,8 @@ NGINXEOF
       run: |
         if [ "${{ job.status }}" == "success" ]; then
           echo "✅ Deployment to test.eventlinez.com completed successfully!"
-          echo "🌐 Site: https://test.eventlinez.com/"
+          echo "🌐 Site: http://test.eventlinez.com/"
+          echo "🌐 Direct: http://45.79.112.247:8000/"
           echo "📊 Commit: $(git rev-parse --short HEAD)"
           echo "⏰ Time: $(date '+%Y-%m-%d %H:%M:%S')"
         else
