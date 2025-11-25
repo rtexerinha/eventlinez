@@ -28,9 +28,9 @@ WORKDIR /app
 # Create virtual environment in /opt/venv to avoid conflicts with local .venv
 RUN python -m venv $VIRTUAL_ENV
 
-# Upgrade pip and install dependencies
+# Upgrade pip to compatible version and install dependencies
 COPY requirements.txt /app/
-RUN pip install --upgrade pip && \
+RUN pip install "pip<24.1" && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
