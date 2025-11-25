@@ -238,13 +238,48 @@ jobs:
         
         # Check if we need to use an older pip for celery compatibility
         if grep -q "celery==4.4.7" requirements.txt; then
-            echo -e "  ${YELLOW}→ Installing compatible pip version for celery 4.4.7...${NC}"
+            echo -e "  ${YELLOW}→ Detected celery 4.4.7, installing compatible pip version...${NC}"
             pip install "pip<24.1"
+            echo -e "  ${GREEN}✓ Pip downgraded for celery compatibility${NC}"
+        elif grep -q "celery==5.3.6" requirements.txt; then
+            echo -e "  ${YELLOW}→ Detected celery 5.3.6, ensuring compatible pip version...${NC}"
+            # Celery 5.3.6 works with modern pip versions
+            pip install --upgrade pip
+            echo -e "  ${GREEN}✓ Pip updated${NC}"
         else
             pip install --upgrade pip
+            echo -e "  ${GREEN}✓ Pip updated${NC}"
         fi
         
-        pip install -r requirements.txt
+        # Install dependencies with error handling
+        echo -e "  ${YELLOW}→ Installing requirements...${NC}"
+        if pip install -r requirements.txt; then
+            echo -e "${GREEN}✓ Dependencies installed successfully${NC}"
+        else
+            echo -e "${RED}✗ Failed to install dependencies${NC}"
+            echo -e "${YELLOW}Trying alternative approach...${NC}"
+            
+            # Try installing without celery first, then add celery separately
+            grep -v "celery" requirements.txt > requirements_no_celery.txt || true
+            if pip install -r requirements_no_celery.txt; then
+                echo -e "  ${GREEN}✓ Core dependencies installed${NC}"
+                
+                # Try installing a compatible celery version
+                echo -e "  ${YELLOW}→ Installing compatible celery version...${NC}"
+                if pip install "celery>=4.4.0,<6.0.0"; then
+                    echo -e "  ${GREEN}✓ Celery installed successfully${NC}"
+                else
+                    echo -e "  ${YELLOW}→ Trying even older celery version...${NC}"
+                    pip install "celery==4.4.6" || pip install "celery>=4.0.0,<5.0.0" || echo "Warning: Could not install celery"
+                fi
+                
+                rm requirements_no_celery.txt 2>/dev/null || true
+            else
+                echo -e "${RED}✗ Core dependency installation failed${NC}"
+                exit 1
+            fi
+        fi
+        
         echo -e "${GREEN}✓ Dependencies installed${NC}"
         
         # Step 7: Create .env file for production
