@@ -1,10 +1,10 @@
-name: Deploy to Test Environment
+name: Test and Deploy
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, main, master ]
   pull_request:
-    branches: [ develop ]
+    branches: [ develop, main, master ]
   workflow_dispatch:
 
 jobs:
@@ -105,27 +105,23 @@ jobs:
       run: |
         docker compose down -v
 
+    - name: Test Results Summary
+      run: |
+        echo "🧪 Test Results Summary:"
+        echo "✅ Docker build completed"
+        echo "✅ Database migrations successful" 
+        echo "✅ All tests passed"
+        echo "✅ Static files collected"
+        echo "✅ Application health check passed"
+
   deploy-test:
     needs: test
     runs-on: ubuntu-latest
-    # Only run deployment if we have the required secrets AND it's a push to develop
+    # Only deploy to test server on develop branch pushes (not PRs)
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push' && secrets.TEST_SERVER_SSH_KEY != ''
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Check deployment prerequisites
-      run: |
-        echo "🔍 Checking deployment prerequisites..."
-        if [ -z "${{ secrets.TEST_SERVER_SSH_KEY }}" ]; then
-          echo "❌ TEST_SERVER_SSH_KEY secret is not configured"
-          echo "ℹ️  To enable deployment, configure these GitHub secrets:"
-          echo "   - TEST_SERVER_SSH_KEY: SSH private key for server access"
-          echo "   - TEST_SERVER_HOST: Test server hostname/IP"
-          echo "   - TEST_SERVER_USER: SSH username for server"
-          exit 1
-        fi
-        echo "✅ All secrets configured"
 
     - name: Setup SSH for Test Server
       uses: webfactory/ssh-agent@v0.8.0
@@ -323,13 +319,18 @@ jobs:
         
         ENDSSH
 
-    - name: Notify test deployment status
+    - name: Deployment Results
       if: always()
       run: |
         if [ "${{ job.status }}" == "success" ]; then
+          echo "🚀 Deployment Results:"
           echo "✅ Docker-based test environment deployment successful!"
           echo "🐳 Application running in containers"
           echo "🔗 Test URL: http://test.eventlinez.com"
+          echo "🔗 Direct URL: http://45.79.112.247:8000"
+          echo ""
+          echo "🎉 Your Eventlinez application is now live on the test server!"
         else
           echo "❌ Docker-based test environment deployment failed!"
+          echo "Please check the deployment logs above for details."
         fi
