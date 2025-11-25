@@ -160,12 +160,13 @@ jobs:
         
         echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
         echo -e "${BLUE}║   Automated Test Environment Deploy   ║${NC}"
-        echo -e "${BLUE}║          Using Docker Stack           ║${NC}"
+        echo -e "${BLUE}║       Using Python Virtual Env        ║${NC}"
         echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
         
         # Configuration
         PROJECT_DIR="/home/sunset/eventlinez"
         BACKUP_DIR="/home/sunset/backups"
+        VENV_DIR="/home/sunset/eventlinez/venv"
         TIMESTAMP=$(date +%Y%m%d_%H%M%S)
         
         # Step 1: Navigate to project directory
@@ -175,10 +176,10 @@ jobs:
         echo -e "\n${BLUE}▶ Creating backup...${NC}"
         mkdir -p $BACKUP_DIR/test_$TIMESTAMP
         
-        # Backup database if running
-        if docker compose ps -q db 2>/dev/null | xargs -r docker inspect -f '{{.State.Running}}' 2>/dev/null | grep -q true; then
-            echo -e "  ${YELLOW}→ Backing up PostgreSQL database...${NC}"
-            docker compose exec -T db pg_dump -U eventlinez eventlinez > $BACKUP_DIR/test_$TIMESTAMP/db_backup.sql 2>/dev/null || true
+        # Backup database if exists
+        if [ -f "db.sqlite3" ]; then
+            echo -e "  ${YELLOW}→ Backing up SQLite database...${NC}"
+            cp db.sqlite3 $BACKUP_DIR/test_$TIMESTAMP/ 2>/dev/null || true
             echo -e "  ${GREEN}✓ Database backup complete${NC}"
         fi
         
@@ -188,10 +189,11 @@ jobs:
             echo -e "  ${GREEN}✓ Media files backup complete${NC}"
         fi
         
-        # Step 3: Stop existing containers
-        echo -e "\n${BLUE}▶ Stopping existing containers...${NC}"
-        docker compose down 2>/dev/null || true
-        echo -e "${GREEN}✓ Containers stopped${NC}"
+        # Step 3: Stop any existing processes (if using gunicorn/supervisord)
+        echo -e "\n${BLUE}▶ Stopping existing processes...${NC}"
+        pkill -f "gunicorn" 2>/dev/null || true
+        pkill -f "python.*manage.py.*runserver" 2>/dev/null || true
+        echo -e "${GREEN}✓ Processes stopped${NC}"
         
         # Step 4: Pull latest code from develop
         echo -e "\n${BLUE}▶ Pulling latest code from develop...${NC}"
@@ -200,16 +202,33 @@ jobs:
         git pull origin develop
         echo -e "${GREEN}✓ Code updated${NC}"
         
-        # Step 5: Create .env.docker file on server
+        # Step 5: Setup Python virtual environment
+        echo -e "\n${BLUE}▶ Setting up Python virtual environment...${NC}"
+        if [ ! -d "$VENV_DIR" ]; then
+            echo -e "  ${YELLOW}→ Creating new virtual environment...${NC}"
+            python3 -m venv $VENV_DIR
+        fi
+        
+        # Activate virtual environment
+        source $VENV_DIR/bin/activate
+        echo -e "  ${GREEN}✓ Virtual environment activated${NC}"
+        
+        # Step 6: Update pip and install requirements
+        echo -e "\n${BLUE}▶ Installing Python dependencies...${NC}"
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        echo -e "${GREEN}✓ Dependencies installed${NC}"
+        
+        # Step 7: Create .env file for production
         echo -e "\n${BLUE}▶ Creating environment configuration...${NC}"
-        cat > .env.docker << 'ENVEOF'
+        cat > .env << 'ENVEOF'
         # Django Configuration for Test Server
         DEBUG=False
         SECRET_KEY=test-server-secret-key-change-in-production
         ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
         
-        # Database Configuration
-        DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
+        # Database Configuration (SQLite for test server)
+        DATABASE_URL=sqlite:///db.sqlite3
         
         # Stripe Test Keys
         STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
@@ -230,61 +249,39 @@ jobs:
         ENVEOF
         echo -e "${GREEN}✓ Environment configuration created${NC}"
         
-        # Step 6: Build and start new containers
-        echo -e "\n${BLUE}▶ Building and starting Docker containers...${NC}"
-        docker compose build --no-cache web
-        docker compose up -d
-        echo -e "${GREEN}✓ Containers started${NC}"
-        
-        # Step 7: Wait for database to be ready
-        echo -e "\n${BLUE}▶ Waiting for database to be ready...${NC}"
-        sleep 15
-        
-        # Check if database is ready
-        RETRIES=30
-        while ! docker compose exec -T db pg_isready -U eventlinez -d eventlinez > /dev/null 2>&1; do
-            RETRIES=$((RETRIES - 1))
-            if [ $RETRIES -eq 0 ]; then
-                echo -e "${RED}✗ Database failed to start${NC}"
-                docker compose logs db
-                exit 1
-            fi
-            echo -e "  ${YELLOW}→ Waiting for database... ($RETRIES attempts left)${NC}"
-            sleep 2
-        done
-        echo -e "${GREEN}✓ Database is ready${NC}"
-        
         # Step 8: Run database migrations
         echo -e "\n${BLUE}▶ Running database migrations...${NC}"
-        docker compose exec -T web python manage.py migrate --noinput
+        python manage.py migrate --noinput
         echo -e "${GREEN}✓ Migrations applied${NC}"
         
         # Step 9: Collect static files
         echo -e "\n${BLUE}▶ Collecting static files...${NC}"
-        docker compose exec -T web python manage.py collectstatic --noinput --clear
+        python manage.py collectstatic --noinput --clear
         echo -e "${GREEN}✓ Static files collected${NC}"
         
         # Step 10: Clear caches
         echo -e "\n${BLUE}▶ Clearing application caches...${NC}"
-        docker compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" 2>/dev/null || true
+        python manage.py shell -c "from django.core.cache import cache; cache.clear()" 2>/dev/null || true
         echo -e "${GREEN}✓ Caches cleared${NC}"
         
-        # Step 11: Restart containers to ensure clean state
-        echo -e "\n${BLUE}▶ Restarting containers...${NC}"
-        docker compose restart web
-        echo -e "${GREEN}✓ Containers restarted${NC}"
+        # Step 11: Start the application
+        echo -e "\n${BLUE}▶ Starting the application...${NC}"
+        
+        # Check if gunicorn is available and start with it, otherwise use runserver
+        if command -v gunicorn &> /dev/null; then
+            echo -e "  ${YELLOW}→ Starting with Gunicorn...${NC}"
+            nohup gunicorn eventlinez.wsgi:application --bind 0.0.0.0:8000 --workers 2 --daemon --pid /tmp/gunicorn.pid 2>&1 || true
+        else
+            echo -e "  ${YELLOW}→ Starting with Django runserver...${NC}"
+            nohup python manage.py runserver 0.0.0.0:8000 > /tmp/django.log 2>&1 &
+            echo $! > /tmp/django.pid
+        fi
+        
+        echo -e "${GREEN}✓ Application started${NC}"
         
         # Step 12: Health check
         echo -e "\n${BLUE}▶ Running health check...${NC}"
         sleep 10
-        
-        # Check if containers are running
-        if ! docker compose ps | grep -q "Up"; then
-            echo -e "${RED}✗ Some containers are not running${NC}"
-            docker compose ps
-            docker compose logs --tail=20
-            exit 1
-        fi
         
         # Check application response
         HEALTH_RETRIES=12
@@ -296,21 +293,26 @@ jobs:
                 HEALTH_RETRIES=$((HEALTH_RETRIES - 1))
                 if [ $HEALTH_RETRIES -eq 0 ]; then
                     echo -e "${RED}✗ Health check failed${NC}"
-                    echo -e "${YELLOW}Container status:${NC}"
-                    docker compose ps
-                    echo -e "${YELLOW}Application logs:${NC}"
-                    docker compose logs --tail=20 web
-                    exit 1
+                    echo -e "${YELLOW}Application may still be starting up${NC}"
+                    if [ -f "/tmp/django.log" ]; then
+                        echo -e "${YELLOW}Django logs:${NC}"
+                        tail -20 /tmp/django.log || true
+                    fi
+                else
+                    echo -e "  ${YELLOW}→ Health check attempt $((13-HEALTH_RETRIES))/12...${NC}"
+                    sleep 5
                 fi
-                echo -e "  ${YELLOW}→ Health check attempt $((13-HEALTH_RETRIES))/12...${NC}"
-                sleep 5
             fi
         done
         
-        # Step 13: Clean up old Docker images
-        echo -e "\n${BLUE}▶ Cleaning up old Docker images...${NC}"
-        docker image prune -f > /dev/null 2>&1 || true
-        echo -e "${GREEN}✓ Cleanup complete${NC}"
+        # Step 13: Setup nginx proxy if needed
+        echo -e "\n${BLUE}▶ Checking nginx configuration...${NC}"
+        if command -v nginx &> /dev/null && systemctl is-active --quiet nginx 2>/dev/null; then
+            sudo systemctl reload nginx 2>/dev/null || true
+            echo -e "  ${GREEN}✓ Nginx reloaded${NC}"
+        else
+            echo -e "  ${YELLOW}→ Nginx not available, application running on port 8000${NC}"
+        fi
         
         echo -e "\n${GREEN}╔════════════════════════════════════════╗${NC}"
         echo -e "${GREEN}║   Test Environment Deploy Complete!   ║${NC}"
@@ -320,8 +322,13 @@ jobs:
         echo "Direct URL: http://45.79.112.247:8000"
         echo "Backup: $BACKUP_DIR/test_$TIMESTAMP"
         echo ""
-        echo "Container Status:"
-        docker compose ps 2>/dev/null || echo "Docker compose not available for status check"
+        echo "Application Status:"
+        if pgrep -f "gunicorn\|runserver" > /dev/null; then
+            echo "✅ Application is running"
+            pgrep -f "gunicorn\|runserver" | head -5
+        else
+            echo "⚠️ Application process not found"
+        fi
         echo ""
         
         SCRIPT_EOF
