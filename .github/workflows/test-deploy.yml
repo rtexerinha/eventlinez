@@ -235,7 +235,15 @@ jobs:
         
         # Step 6: Update pip and install requirements
         echo -e "\n${BLUE}▶ Installing Python dependencies...${NC}"
-        pip install --upgrade pip
+        
+        # Check if we need to use an older pip for celery compatibility
+        if grep -q "celery==4.4.7" requirements.txt; then
+            echo -e "  ${YELLOW}→ Installing compatible pip version for celery 4.4.7...${NC}"
+            pip install "pip<24.1"
+        else
+            pip install --upgrade pip
+        fi
+        
         pip install -r requirements.txt
         echo -e "${GREEN}✓ Dependencies installed${NC}"
         
