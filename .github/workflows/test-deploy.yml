@@ -160,19 +160,48 @@ jobs:
         
         echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
         echo -e "${BLUE}║   Automated Test Environment Deploy   ║${NC}"
-        echo -e "${BLUE}║       Using Python Virtual Env        ║${NC}"
+        echo -e "${BLUE}║         Using Docker Containers       ║${NC}"
         echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
         
         # Configuration
         PROJECT_DIR="/home/sunset/eventlinez"
         BACKUP_DIR="/home/sunset/backups"
-        VENV_DIR="/home/sunset/eventlinez/venv"
         TIMESTAMP=$(date +%Y%m%d_%H%M%S)
         
         # Step 1: Navigate to project directory
         cd $PROJECT_DIR
         
-        # Step 2: Create backup
+        # Step 2: Check if Docker is installed
+        echo -e "\n${BLUE}▶ Checking Docker installation...${NC}"
+        if ! command -v docker &> /dev/null; then
+            echo -e "${RED}✗ Docker is not installed${NC}"
+            echo -e "${YELLOW}Installing Docker...${NC}"
+            
+            # Install Docker
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            sudo usermod -aG docker $USER
+            
+            # Install Docker Compose
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            
+            echo -e "${GREEN}✓ Docker installed${NC}"
+        else
+            echo -e "${GREEN}✓ Docker is available${NC}"
+        fi
+        
+        # Check Docker Compose
+        if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+            echo -e "${YELLOW}Installing Docker Compose...${NC}"
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            echo -e "${GREEN}✓ Docker Compose installed${NC}"
+        else
+            echo -e "${GREEN}✓ Docker Compose is available${NC}"
+        fi
+        
+        # Step 3: Create backup
         echo -e "\n${BLUE}▶ Creating backup...${NC}"
         mkdir -p $BACKUP_DIR/test_$TIMESTAMP
         
@@ -183,115 +212,42 @@ jobs:
             echo -e "  ${GREEN}✓ Database backup complete${NC}"
         fi
         
+        # Backup Docker volumes if they exist
+        if docker volume ls | grep -q eventlinez; then
+            echo -e "  ${YELLOW}→ Backing up Docker volumes...${NC}"
+            mkdir -p $BACKUP_DIR/test_$TIMESTAMP/volumes
+            docker run --rm -v eventlinez_postgres_data:/source -v $BACKUP_DIR/test_$TIMESTAMP/volumes:/backup alpine tar czf /backup/postgres_data.tar.gz -C /source . 2>/dev/null || true
+            echo -e "  ${GREEN}✓ Docker volumes backup complete${NC}"
+        fi
+        
         # Backup media files
         if [ -d "$PROJECT_DIR/media" ]; then
             cp -r $PROJECT_DIR/media $BACKUP_DIR/test_$TIMESTAMP/ 2>/dev/null || true
             echo -e "  ${GREEN}✓ Media files backup complete${NC}"
         fi
         
-        # Step 3: Stop any existing processes (if using gunicorn/supervisord)
-        echo -e "\n${BLUE}▶ Stopping existing processes...${NC}"
-        pkill -f "gunicorn" 2>/dev/null || true
-        pkill -f "python.*manage.py.*runserver" 2>/dev/null || true
-        echo -e "${GREEN}✓ Processes stopped${NC}"
+        # Step 4: Stop existing containers
+        echo -e "\n${BLUE}▶ Stopping existing containers...${NC}"
+        docker-compose down 2>/dev/null || docker compose down 2>/dev/null || true
+        echo -e "${GREEN}✓ Containers stopped${NC}"
         
-        # Step 4: Pull latest code from develop
+        # Step 5: Pull latest code from develop
         echo -e "\n${BLUE}▶ Pulling latest code from develop...${NC}"
         git fetch origin
         git checkout develop
         git pull origin develop
         echo -e "${GREEN}✓ Code updated${NC}"
         
-        # Step 5: Setup Python virtual environment
-        echo -e "\n${BLUE}▶ Setting up Python virtual environment...${NC}"
-        
-        # Check if virtual environment exists and pip works
-        if [ -d "$VENV_DIR" ]; then
-            echo -e "  ${YELLOW}→ Checking existing virtual environment...${NC}"
-            if ! $VENV_DIR/bin/pip --version > /dev/null 2>&1; then
-                echo -e "  ${YELLOW}→ Virtual environment is broken, recreating...${NC}"
-                rm -rf $VENV_DIR
-                python3 -m venv $VENV_DIR
-                echo -e "  ${GREEN}✓ New virtual environment created${NC}"
-            else
-                echo -e "  ${GREEN}✓ Existing virtual environment is working${NC}"
-            fi
-        else
-            echo -e "  ${YELLOW}→ Creating new virtual environment...${NC}"
-            python3 -m venv $VENV_DIR
-            echo -e "  ${GREEN}✓ New virtual environment created${NC}"
-        fi
-        
-        # Activate virtual environment
-        source $VENV_DIR/bin/activate
-        echo -e "  ${GREEN}✓ Virtual environment activated${NC}"
-        
-        # Ensure pip is working
-        if ! pip --version > /dev/null 2>&1; then
-            echo -e "  ${YELLOW}→ Reinstalling pip in virtual environment...${NC}"
-            python -m ensurepip --upgrade
-            python -m pip install --upgrade pip
-        fi
-        
-        # Step 6: Update pip and install requirements
-        echo -e "\n${BLUE}▶ Installing Python dependencies...${NC}"
-        
-        # Check if we need to use an older pip for celery compatibility
-        if grep -q "celery==4.4.7" requirements.txt; then
-            echo -e "  ${YELLOW}→ Detected celery 4.4.7, installing compatible pip version...${NC}"
-            pip install "pip<24.1"
-            echo -e "  ${GREEN}✓ Pip downgraded for celery compatibility${NC}"
-        elif grep -q "celery==5.3.6" requirements.txt; then
-            echo -e "  ${YELLOW}→ Detected celery 5.3.6, ensuring compatible pip version...${NC}"
-            # Celery 5.3.6 works with modern pip versions
-            pip install --upgrade pip
-            echo -e "  ${GREEN}✓ Pip updated${NC}"
-        else
-            pip install --upgrade pip
-            echo -e "  ${GREEN}✓ Pip updated${NC}"
-        fi
-        
-        # Install dependencies with error handling
-        echo -e "  ${YELLOW}→ Installing requirements...${NC}"
-        if pip install -r requirements.txt; then
-            echo -e "${GREEN}✓ Dependencies installed successfully${NC}"
-        else
-            echo -e "${RED}✗ Failed to install dependencies${NC}"
-            echo -e "${YELLOW}Trying alternative approach...${NC}"
-            
-            # Try installing without celery first, then add celery separately
-            grep -v "celery" requirements.txt > requirements_no_celery.txt || true
-            if pip install -r requirements_no_celery.txt; then
-                echo -e "  ${GREEN}✓ Core dependencies installed${NC}"
-                
-                # Try installing a compatible celery version
-                echo -e "  ${YELLOW}→ Installing compatible celery version...${NC}"
-                if pip install "celery>=4.4.0,<6.0.0"; then
-                    echo -e "  ${GREEN}✓ Celery installed successfully${NC}"
-                else
-                    echo -e "  ${YELLOW}→ Trying even older celery version...${NC}"
-                    pip install "celery==4.4.6" || pip install "celery>=4.0.0,<5.0.0" || echo "Warning: Could not install celery"
-                fi
-                
-                rm requirements_no_celery.txt 2>/dev/null || true
-            else
-                echo -e "${RED}✗ Core dependency installation failed${NC}"
-                exit 1
-            fi
-        fi
-        
-        echo -e "${GREEN}✓ Dependencies installed${NC}"
-        
-        # Step 7: Create .env file for production
-        echo -e "\n${BLUE}▶ Creating environment configuration...${NC}"
-        cat > .env << 'ENVEOF'
+        # Step 6: Create .env.docker file for test environment
+        echo -e "\n${BLUE}▶ Creating Docker environment configuration...${NC}"
+        cat > .env.docker << 'ENVEOF'
         # Django Configuration for Test Server
         DEBUG=False
         SECRET_KEY=test-server-secret-key-change-in-production
         ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
         
-        # Database Configuration (SQLite for test server)
-        DATABASE_URL=sqlite:///db.sqlite3
+        # Database Configuration (PostgreSQL in Docker)
+        DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
         
         # Stripe Test Keys
         STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
@@ -310,44 +266,67 @@ jobs:
         ENVIRONMENT=test
         SEED_DATA=true
         ENVEOF
-        echo -e "${GREEN}✓ Environment configuration created${NC}"
+        echo -e "${GREEN}✓ Docker environment configuration created${NC}"
         
-        # Step 8: Run database migrations
+        # Step 7: Build and start Docker containers
+        echo -e "\n${BLUE}▶ Building Docker containers...${NC}"
+        docker-compose build --no-cache web || docker compose build --no-cache web
+        echo -e "${GREEN}✓ Docker containers built${NC}"
+        
+        echo -e "\n${BLUE}▶ Starting Docker containers...${NC}"
+        docker-compose up -d || docker compose up -d
+        echo -e "${GREEN}✓ Docker containers started${NC}"
+        
+        # Step 8: Wait for database to be ready
+        echo -e "\n${BLUE}▶ Waiting for database to be ready...${NC}"
+        sleep 20
+        
+        # Check if database is ready with Docker
+        RETRIES=30
+        while ! (docker-compose exec -T db pg_isready -U eventlinez -d eventlinez 2>/dev/null || docker compose exec -T db pg_isready -U eventlinez -d eventlinez 2>/dev/null); do
+            RETRIES=$((RETRIES - 1))
+            if [ $RETRIES -eq 0 ]; then
+                echo -e "${RED}✗ Database failed to start${NC}"
+                docker-compose logs db 2>/dev/null || docker compose logs db 2>/dev/null || true
+                exit 1
+            fi
+            echo -e "  ${YELLOW}→ Waiting for database... ($RETRIES attempts left)${NC}"
+            sleep 3
+        done
+        echo -e "${GREEN}✓ Database is ready${NC}"
+        
+        # Step 9: Run database migrations
         echo -e "\n${BLUE}▶ Running database migrations...${NC}"
-        python manage.py migrate --noinput
+        (docker-compose exec -T web python manage.py migrate --noinput 2>/dev/null) || \
+        (docker compose exec -T web python manage.py migrate --noinput 2>/dev/null)
         echo -e "${GREEN}✓ Migrations applied${NC}"
         
-        # Step 9: Collect static files
+        # Step 10: Collect static files
         echo -e "\n${BLUE}▶ Collecting static files...${NC}"
-        python manage.py collectstatic --noinput --clear
+        (docker-compose exec -T web python manage.py collectstatic --noinput --clear 2>/dev/null) || \
+        (docker compose exec -T web python manage.py collectstatic --noinput --clear 2>/dev/null)
         echo -e "${GREEN}✓ Static files collected${NC}"
         
-        # Step 10: Clear caches
+        # Step 11: Clear caches
         echo -e "\n${BLUE}▶ Clearing application caches...${NC}"
-        python manage.py shell -c "from django.core.cache import cache; cache.clear()" 2>/dev/null || true
+        (docker-compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" 2>/dev/null) || \
+        (docker compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" 2>/dev/null) || true
         echo -e "${GREEN}✓ Caches cleared${NC}"
-        
-        # Step 11: Start the application
-        echo -e "\n${BLUE}▶ Starting the application...${NC}"
-        
-        # Check if gunicorn is available and start with it, otherwise use runserver
-        if command -v gunicorn &> /dev/null; then
-            echo -e "  ${YELLOW}→ Starting with Gunicorn...${NC}"
-            nohup gunicorn eventlinez.wsgi:application --bind 0.0.0.0:8000 --workers 2 --daemon --pid /tmp/gunicorn.pid 2>&1 || true
-        else
-            echo -e "  ${YELLOW}→ Starting with Django runserver...${NC}"
-            nohup python manage.py runserver 0.0.0.0:8000 > /tmp/django.log 2>&1 &
-            echo $! > /tmp/django.pid
-        fi
-        
-        echo -e "${GREEN}✓ Application started${NC}"
         
         # Step 12: Health check
         echo -e "\n${BLUE}▶ Running health check...${NC}"
-        sleep 10
+        sleep 15
+        
+        # Check if containers are running
+        if ! ((docker-compose ps | grep -q "Up") || (docker compose ps | grep -q "running")); then
+            echo -e "${RED}✗ Some containers are not running${NC}"
+            docker-compose ps 2>/dev/null || docker compose ps 2>/dev/null || true
+            docker-compose logs --tail=20 2>/dev/null || docker compose logs --tail=20 2>/dev/null || true
+            exit 1
+        fi
         
         # Check application response
-        HEALTH_RETRIES=12
+        HEALTH_RETRIES=15
         while [ $HEALTH_RETRIES -gt 0 ]; do
             if curl -f -s http://localhost:8000/admin/ > /dev/null 2>&1; then
                 echo -e "${GREEN}✓ Health check passed${NC}"
@@ -356,42 +335,78 @@ jobs:
                 HEALTH_RETRIES=$((HEALTH_RETRIES - 1))
                 if [ $HEALTH_RETRIES -eq 0 ]; then
                     echo -e "${RED}✗ Health check failed${NC}"
-                    echo -e "${YELLOW}Application may still be starting up${NC}"
-                    if [ -f "/tmp/django.log" ]; then
-                        echo -e "${YELLOW}Django logs:${NC}"
-                        tail -20 /tmp/django.log || true
-                    fi
-                else
-                    echo -e "  ${YELLOW}→ Health check attempt $((13-HEALTH_RETRIES))/12...${NC}"
-                    sleep 5
+                    echo -e "${YELLOW}Container status:${NC}"
+                    docker-compose ps 2>/dev/null || docker compose ps 2>/dev/null || true
+                    echo -e "${YELLOW}Application logs:${NC}"
+                    docker-compose logs --tail=30 web 2>/dev/null || docker compose logs --tail=30 web 2>/dev/null || true
+                    exit 1
                 fi
+                echo -e "  ${YELLOW}→ Health check attempt $((16-HEALTH_RETRIES))/15...${NC}"
+                sleep 5
             fi
         done
         
         # Step 13: Setup nginx proxy if needed
         echo -e "\n${BLUE}▶ Checking nginx configuration...${NC}"
         if command -v nginx &> /dev/null && systemctl is-active --quiet nginx 2>/dev/null; then
-            sudo systemctl reload nginx 2>/dev/null || true
-            echo -e "  ${GREEN}✓ Nginx reloaded${NC}"
+            # Create or update nginx config for Docker deployment
+            sudo tee /etc/nginx/sites-available/eventlinez > /dev/null << 'NGINXEOF'
+server {
+    listen 80;
+    server_name test.eventlinez.com 45.79.112.247;
+
+    location /static/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /media/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect off;
+    }
+
+    client_max_body_size 100M;
+}
+NGINXEOF
+            
+            sudo ln -sf /etc/nginx/sites-available/eventlinez /etc/nginx/sites-enabled/ 2>/dev/null || true
+            sudo nginx -t && sudo systemctl reload nginx 2>/dev/null || true
+            echo -e "  ${GREEN}✓ Nginx configured for Docker deployment${NC}"
         else
             echo -e "  ${YELLOW}→ Nginx not available, application running on port 8000${NC}"
         fi
         
+        # Step 14: Clean up old Docker images
+        echo -e "\n${BLUE}▶ Cleaning up old Docker images...${NC}"
+        docker image prune -f > /dev/null 2>&1 || true
+        echo -e "${GREEN}✓ Cleanup complete${NC}"
+        
         echo -e "\n${GREEN}╔════════════════════════════════════════╗${NC}"
-        echo -e "${GREEN}║   Test Environment Deploy Complete!   ║${NC}"
+        echo -e "${GREEN}║   Docker Test Environment Complete!   ║${NC}"
         echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
         echo ""
-        echo "Test URL: http://test.eventlinez.com"
-        echo "Direct URL: http://45.79.112.247:8000"
-        echo "Backup: $BACKUP_DIR/test_$TIMESTAMP"
+        echo "🐳 Docker Deployment Summary:"
+        echo "   Test URL: http://test.eventlinez.com"
+        echo "   Direct URL: http://45.79.112.247:8000"
+        echo "   Backup: $BACKUP_DIR/test_$TIMESTAMP"
         echo ""
-        echo "Application Status:"
-        if pgrep -f "gunicorn\|runserver" > /dev/null; then
-            echo "✅ Application is running"
-            pgrep -f "gunicorn\|runserver" | head -5
-        else
-            echo "⚠️ Application process not found"
-        fi
+        echo "📊 Container Status:"
+        docker-compose ps 2>/dev/null || docker compose ps 2>/dev/null || echo "Could not get container status"
         echo ""
         
         SCRIPT_EOF
