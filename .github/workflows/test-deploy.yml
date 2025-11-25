@@ -204,14 +204,34 @@ jobs:
         
         # Step 5: Setup Python virtual environment
         echo -e "\n${BLUE}▶ Setting up Python virtual environment...${NC}"
-        if [ ! -d "$VENV_DIR" ]; then
+        
+        # Check if virtual environment exists and pip works
+        if [ -d "$VENV_DIR" ]; then
+            echo -e "  ${YELLOW}→ Checking existing virtual environment...${NC}"
+            if ! $VENV_DIR/bin/pip --version > /dev/null 2>&1; then
+                echo -e "  ${YELLOW}→ Virtual environment is broken, recreating...${NC}"
+                rm -rf $VENV_DIR
+                python3 -m venv $VENV_DIR
+                echo -e "  ${GREEN}✓ New virtual environment created${NC}"
+            else
+                echo -e "  ${GREEN}✓ Existing virtual environment is working${NC}"
+            fi
+        else
             echo -e "  ${YELLOW}→ Creating new virtual environment...${NC}"
             python3 -m venv $VENV_DIR
+            echo -e "  ${GREEN}✓ New virtual environment created${NC}"
         fi
         
         # Activate virtual environment
         source $VENV_DIR/bin/activate
         echo -e "  ${GREEN}✓ Virtual environment activated${NC}"
+        
+        # Ensure pip is working
+        if ! pip --version > /dev/null 2>&1; then
+            echo -e "  ${YELLOW}→ Reinstalling pip in virtual environment...${NC}"
+            python -m ensurepip --upgrade
+            python -m pip install --upgrade pip
+        fi
         
         # Step 6: Update pip and install requirements
         echo -e "\n${BLUE}▶ Installing Python dependencies...${NC}"
