@@ -118,21 +118,35 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     # Only deploy to test server on develop branch pushes (not PRs)
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push' && secrets.TEST_SERVER_SSH_KEY != ''
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
 
     steps:
     - uses: actions/checkout@v4
 
+    - name: Check if deployment secrets are available
+      id: check-secrets
+      run: |
+        if [ -z "${{ secrets.TEST_SERVER_SSH_KEY }}" ]; then
+          echo "SSH key secret is not configured. Skipping deployment."
+          echo "skip-deploy=true" >> $GITHUB_OUTPUT
+        else
+          echo "SSH key secret is configured. Proceeding with deployment."
+          echo "skip-deploy=false" >> $GITHUB_OUTPUT
+        fi
+
     - name: Setup SSH for Test Server
+      if: steps.check-secrets.outputs.skip-deploy == 'false'
       uses: webfactory/ssh-agent@v0.8.0
       with:
         ssh-private-key: ${{ secrets.TEST_SERVER_SSH_KEY }}
 
     - name: Add test server to known hosts
+      if: steps.check-secrets.outputs.skip-deploy == 'false'
       run: |
         ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
 
     - name: Deploy to Test Environment using Docker
+      if: steps.check-secrets.outputs.skip-deploy == 'false'
       run: |
         ssh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << 'ENDSSH'
         set -e
