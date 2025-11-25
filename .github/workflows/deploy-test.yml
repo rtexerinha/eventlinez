@@ -1,10 +1,11 @@
-name: Deploy to Test Server
+name: Deploy to Test Environment
 
 on:
   push:
     branches: [ develop ]
   pull_request:
     branches: [ develop ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -21,441 +22,177 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
       with:
-        fetch-depth: 0
+        python-version: '3.11'
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
-    - name: Build Docker image
+    - name: Install dependencies
       run: |
-        echo "🐳 Building Docker image using same Python 3.6 setup as local environment..."
-        docker build -t eventlinez-test .
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install coverage
 
-    - name: Create test environment file
+    - name: Set up environment variables
       run: |
-        cat > .env.test << EOF
-        DEBUG=False
-        SECRET_KEY=test-secret-key-for-github-actions
-        DATABASE_URL=postgres://postgres:postgres@host.docker.internal:5432/test_eventlinez
-        POSTGRES_DB=test_eventlinez
-        POSTGRES_USER=postgres
-        POSTGRES_PASSWORD=postgres
-        POSTGRES_HOST=host.docker.internal
-        POSTGRES_PORT=5432
-        ALLOWED_HOSTS=localhost,127.0.0.1
-        STATIC_ROOT=/app/staticfiles
-        MEDIA_ROOT=/app/media
-        ENVIRONMENT=test
-        EOF
+        echo "DEBUG=True" >> .env
+        echo "SECRET_KEY=test-secret-key-for-ci" >> .env
+        echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test_eventlinez" >> .env
+        echo "ALLOWED_HOSTS=localhost,127.0.0.1" >> .env
 
-    - name: Run tests in Docker container
+    - name: Run migrations
       run: |
-        echo "🧪 Running tests in Docker container (Python 3.6)..."
-        docker run --rm \
-          --add-host=host.docker.internal:host-gateway \
-          -v $(pwd):/app \
-          -w /app \
-          --env-file .env.test \
-          eventlinez-test bash -c "
-            echo '🧹 Cleaning caches...'
-            find . -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
-            find . -name '*.pyc' -delete 2>/dev/null || true
-            pip cache purge 2>/dev/null || true
-            echo '✅ Caches cleaned'
-            
-            echo '📦 Collecting static files...'
-            python manage.py collectstatic --noinput
-            
-            echo '🗄️ Running migrations...'
-            python manage.py migrate --noinput
-            
-            echo '📊 Creating database views...'
-            python manage.py create_sales_view --force || true
-            
-            echo '🧪 Running tests...'
-            python manage.py test
-            
-            echo '✅ All tests completed successfully!'
-          "
+        python manage.py migrate
 
-    - name: Run linting in Docker container
+    - name: Run tests
       run: |
-        echo "🔍 Running linting in Docker container..."
-        docker run --rm \
-          -v $(pwd):/app \
-          -w /app \
-          --entrypoint="" \
-          eventlinez-test bash -c "
-            echo '🔧 Installing linting tools...'
-            pip install flake8
-            
-            echo '🔍 Running flake8 linting...'
-            flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,staticfiles,media,migrations,node_modules,__pycache__
-            
-            echo '📊 Running full flake8 analysis...'
-            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,staticfiles,media,migrations,node_modules,__pycache__
-            
-            echo '✅ Linting completed successfully'
-          "
+        coverage run --source='.' manage.py test
+        coverage report
+        coverage xml
 
-  deploy:
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+
+  deploy-test:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-    
+    if: github.ref == 'refs/heads/develop'
+
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+
+    - name: Setup SSH for Test Server
+      uses: webfactory/ssh-agent@v0.8.0
       with:
-        fetch-depth: 0
+        ssh-private-key: ${{ secrets.TEST_SSH_KEY }}
 
-    - name: Get deployment info
-      id: deploy_info
+    - name: Add test server to known hosts
       run: |
-        echo "commit_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-        echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-        echo "commit_message=$(git log -1 --pretty=%B | head -n1 | tr -d '\n' | tr -d '\r')" >> $GITHUB_OUTPUT
-        echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-        echo "timestamp=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+        ssh-keyscan -H ${{ secrets.TEST_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Check SSH Configuration
-      id: check_ssh
+    - name: Deploy to Test Environment
       run: |
-        if [ -z "${{ secrets.TEST_SERVER_HOST }}" ] || [ -z "${{ secrets.TEST_SERVER_USER }}" ] || [ -z "${{ secrets.DEPLOY_PATH }}" ]; then
-          echo "🔑 Server connection secrets not configured. Skipping deployment."
-          echo "deployment_enabled=false" >> $GITHUB_OUTPUT
-        else
-          echo "✅ Server connection secrets configured. Proceeding with deployment."
-          echo "deployment_enabled=true" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Setup SSH Connection
-      if: steps.check_ssh.outputs.deployment_enabled == 'true'
-      run: |
-        sudo apt-get update && sudo apt-get install -y sshpass
-        mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
-        echo "✅ SSH connection setup completed"
-
-    - name: Create deployment script
-      if: steps.check_ssh.outputs.deployment_enabled == 'true'
-      run: |
-        cat > deploy_script.sh << 'SCRIPT_EOF'
-        #!/bin/bash
+        ssh ${{ secrets.TEST_USER }}@${{ secrets.TEST_HOST }} << 'ENDSSH'
         set -e
         
-        echo "🚀 Starting deployment to test server..."
-        echo "📋 Deployment Info:"
-        echo "   - Commit: $COMMIT_SHORT"
-        echo "   - Branch: $BRANCH_NAME"
-        echo "   - Message: $COMMIT_MESSAGE"
-        echo "   - Time: $DEPLOY_TIMESTAMP"
+        # Colors for output
+        RED='\033[0;31m'
+        GREEN='\033[0;32m'
+        YELLOW='\033[1;33m'
+        BLUE='\033[0;34m'
+        NC='\033[0m'
         
-        # Navigate to application directory
-        cd $DEPLOY_PATH
+        echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
+        echo -e "${BLUE}║    Automated Test Environment Deploy  ║${NC}"
+        echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
         
-        # Record current version
-        current_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
-        echo "Current server commit: $current_commit"
-        echo "Deploying commit: $COMMIT_SHA"
+        # Configuration
+        PROJECT_DIR="/home/sunset/eventlinez"
+        BACKUP_DIR="/home/sunset/backups"
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
         
-        # Stop services
-        echo "⏹️ Stopping services..."
-        systemctl --user stop eventlinez 2>/dev/null || echo "Service not running"
-        docker-compose down --timeout 30 2>/dev/null || echo "Docker compose not running"
+        # Step 1: Create backup
+        echo -e "\n${BLUE}▶ Creating backup...${NC}"
+        mkdir -p $BACKUP_DIR/test_$TIMESTAMP
         
-        # Create deployment log
-        mkdir -p ../deployment_logs
-        echo "Deployment Started: $DEPLOY_TIMESTAMP" > ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log
-        echo "Branch: $BRANCH_NAME" >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log
-        echo "Commit SHA: $COMMIT_SHA" >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log
-        echo "Previous Commit: $current_commit" >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log
-        
-        # Backup current version
-        echo "💾 Creating backup..."
-        timestamp=$(date +%Y%m%d_%H%M%S)
-        backup_dir="../backups/eventlinez_backup_${timestamp}_${current_commit:0:7}"
-        mkdir -p ../backups
-        cp -r . "$backup_dir" || echo "Backup failed, continuing..."
-        
-        # Force clean git state
-        echo "🔄 Cleaning git state and pulling latest changes..."
-        git fetch --all --prune
-        git reset --hard HEAD
-        git clean -fd
-        git checkout develop
-        git reset --hard origin/develop
-        git clean -fd
-        
-        # Verify commit
-        deployed_commit=$(git rev-parse HEAD)
-        echo "✅ Deployed commit: $deployed_commit"
-        if [ "$deployed_commit" != "$COMMIT_SHA" ]; then
-          echo "⚠️ WARNING: Commit mismatch!"
-        else
-          echo "✅ Commit verification successful"
+        if [ -f "$PROJECT_DIR/db.sqlite3" ]; then
+            cp $PROJECT_DIR/db.sqlite3 $BACKUP_DIR/test_$TIMESTAMP/
+            echo -e "  ${GREEN}✓ Database backup complete${NC}"
         fi
         
-        # Clean caches
-        echo "🧹 Cleaning caches..."
+        if [ -d "$PROJECT_DIR/media" ]; then
+            cp -r $PROJECT_DIR/media $BACKUP_DIR/test_$TIMESTAMP/ 2>/dev/null || true
+            echo -e "  ${GREEN}✓ Media files backup complete${NC}"
+        fi
+        
+        # Step 2: Pull latest code from develop
+        echo -e "\n${BLUE}▶ Pulling latest code from develop...${NC}"
+        cd $PROJECT_DIR
+        git fetch origin
+        git checkout develop
+        git pull origin develop
+        echo -e "${GREEN}✓ Code updated${NC}"
+        
+        # Step 3: Activate virtual environment and update dependencies
+        echo -e "\n${BLUE}▶ Updating dependencies...${NC}"
+        source venv/bin/activate
+        pip install --upgrade pip -q
+        pip install -r requirements.txt -q
+        echo -e "${GREEN}✓ Dependencies updated${NC}"
+        
+        # Step 4: Run database migrations
+        echo -e "\n${BLUE}▶ Running database migrations...${NC}"
+        python manage.py migrate --noinput
+        echo -e "${GREEN}✓ Migrations applied${NC}"
+        
+        # Step 5: Collect static files
+        echo -e "\n${BLUE}▶ Collecting static files...${NC}"
+        python manage.py collectstatic --noinput --clear
+        echo -e "${GREEN}✓ Static files collected${NC}"
+        
+        # Step 6: Clear caches
+        echo -e "\n${BLUE}▶ Clearing caches...${NC}"
+        python manage.py shell -c "from django.core.cache import cache; cache.clear()" || true
         find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
         find . -name "*.pyc" -delete 2>/dev/null || true
-        find . -name "*.pyo" -delete 2>/dev/null || true
-        python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Cache cleared')" 2>/dev/null || true
-        rm -rf staticfiles/* 2>/dev/null || true
-        rm -rf /tmp/eventlinez_* 2>/dev/null || true
-        pip cache purge 2>/dev/null || true
-        echo "✅ Caches cleaned"
+        echo -e "${GREEN}✓ Caches cleared${NC}"
         
-        # Choose deployment method
-        if [ -f docker-compose.yml ] && command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-          echo "🐳 Using Docker deployment..."
-          DOCKER_COMPOSE_CMD="docker-compose"
-          if ! docker version >/dev/null 2>&1; then
-            DOCKER_COMPOSE_CMD="sudo docker-compose"
-          fi
-          
-          $DOCKER_COMPOSE_CMD down --volumes --remove-orphans
-          docker system prune -af --volumes 2>/dev/null || sudo docker system prune -af --volumes
-          $DOCKER_COMPOSE_CMD build --no-cache --pull
-          $DOCKER_COMPOSE_CMD up -d --force-recreate
-          
-          echo "⏳ Waiting for containers..."
-          sleep 30
-          
-          $DOCKER_COMPOSE_CMD ps
-          DEPLOYMENT_METHOD="Docker"
+        # Step 7: Restart test service
+        echo -e "\n${BLUE}▶ Restarting test service...${NC}"
+        if systemctl is-active --quiet eventlinez.service; then
+            sudo systemctl restart eventlinez.service
+            echo -e "  ${GREEN}✓ Eventlinez service restarted${NC}"
         else
-          echo "📦 Using traditional deployment..."
-          
-          # Detect OS for proper Python path
-          if [ -f /etc/redhat-release ]; then
-            echo "🖥️ Detected CentOS/RHEL system"
-            # Check for pyenv installation first (sunset user's pyenv)
-            if [ -f /app/.pyenv/versions/3.9.24/bin/python ]; then
-              PYTHON_CMD="/app/.pyenv/versions/3.9.24/bin/python"  
-              PIP_CMD="/app/.pyenv/versions/3.9.24/bin/pip"
-              echo "✅ Using pyenv Python 3.9.24"
-            elif [ -f /usr/local/bin/python3.9 ]; then
-              PYTHON_CMD="/usr/local/bin/python3.9"
-              PIP_CMD="/usr/local/bin/pip3.9"
-              echo "✅ Using system Python 3.9"
-            else
-              PYTHON_CMD="python3"
-              PIP_CMD="pip3"
-              echo "⚠️ Falling back to system Python 3"
-            fi
-            # Ensure proper PATH for CentOS with pyenv
-            export PATH="/usr/local/bin:/app/.pyenv/versions/3.9.24/bin:$PATH"
-            export PYENV_ROOT="/app/.pyenv"
-          else
-            echo "🖥️ Detected Debian/Ubuntu system"
-            PYTHON_CMD="python3.9"
-            PIP_CMD="pip3.9"
-          fi
-          
-          # Ensure Python 3.9 is available
-          echo "🐍 Verifying Python 3.9..."
-          if $PYTHON_CMD --version 2>/dev/null | grep -q "3.9"; then
-            echo "✅ Python 3.9 found at $PYTHON_CMD"
-            $PYTHON_CMD --version
-          else
-            echo "⚠️ Python 3.9 not found, using available Python 3"
-            PYTHON_CMD="python3"
-            PIP_CMD="pip3"
-          fi
-          
-          # Virtual environment
-          if [ ! -d "venv" ]; then
-            $PYTHON_CMD -m venv venv
-          fi
-          source venv/bin/activate
-          
-          # Verify Python version in virtual environment
-          echo "🐍 Using Python version: $(python --version)"
-          
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          
-          # Database and static files
-          python manage.py migrate --noinput
-          python manage.py create_sales_view --force || echo "View creation failed"
-          python manage.py collectstatic --noinput --clear
-          
-          # Start service (CentOS 7 uses systemctl)
-          if command -v systemctl >/dev/null 2>&1; then
-            sudo systemctl start eventlinez 2>/dev/null || echo "Could not start systemd service"
-          else
-            # Fallback for systems without systemd
-            systemctl --user start eventlinez 2>/dev/null || echo "Could not start user service"
-          fi
-          
-          DEPLOYMENT_METHOD="Traditional"
+            sudo systemctl start eventlinez.service
+            echo -e "  ${GREEN}✓ Eventlinez service started${NC}"
         fi
         
-        # Create version info
-        echo "{" > version_info.json
-        echo "  \"deployment_time\": \"$DEPLOY_TIMESTAMP\"," >> version_info.json
-        echo "  \"commit_sha\": \"$COMMIT_SHA\"," >> version_info.json
-        echo "  \"commit_short\": \"$COMMIT_SHORT\"," >> version_info.json
-        echo "  \"branch\": \"$BRANCH_NAME\"," >> version_info.json
-        echo "  \"commit_message\": \"$COMMIT_MESSAGE\"," >> version_info.json
-        echo "  \"deployment_method\": \"$DEPLOYMENT_METHOD\"" >> version_info.json
-        echo "}" >> version_info.json
-        
-        cp version_info.json staticfiles/ 2>/dev/null || echo "Could not copy version info"
-        
-        # Final tests
-        echo "🏥 Testing application..."
-        sleep 15
-        
-        if curl -f http://localhost:8000/ >/dev/null 2>&1; then
-          echo "✅ Local application test passed"
-        else
-          echo "⚠️ Local application test failed"
+        if systemctl is-active --quiet nginx; then
+            sudo systemctl reload nginx
+            echo -e "  ${GREEN}✓ Nginx reloaded${NC}"
         fi
         
-        if [ -f "staticfiles/css/bootstrap.min.css" ]; then
-          echo "✅ Static files present"
+        # Step 8: Health check
+        echo -e "\n${BLUE}▶ Running health check...${NC}"
+        sleep 10
+        
+        if curl -f -s http://localhost:8000/admin/ > /dev/null; then
+            echo -e "${GREEN}✓ Health check passed${NC}"
         else
-          echo "❌ Static files missing"
-          python manage.py collectstatic --noinput --clear
+            echo -e "${RED}✗ Health check failed${NC}"
+            sudo journalctl -u eventlinez.service --no-pager -n 10
         fi
         
-        # Update deployment log
-        final_commit=$(git rev-parse HEAD)
-        echo "Deployment Method: $DEPLOYMENT_METHOD" >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log
-        echo "Final Commit: $final_commit" >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log
-        echo "Status: SUCCESS" >> ../deployment_logs/deployment_$(date +%Y%m%d_%H%M%S).log
+        echo -e "\n${GREEN}╔════════════════════════════════════════╗${NC}"
+        echo -e "${GREEN}║   Test Environment Deploy Complete!   ║${NC}"
+        echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
+        echo ""
+        echo "Test URL: http://test.eventlinez.com"
+        echo "Backup: $BACKUP_DIR/test_$TIMESTAMP"
+        echo ""
         
-        echo "✅ Deployment completed successfully!"
-        SCRIPT_EOF
-        
-        chmod +x deploy_script.sh
+        ENDSSH
 
-    - name: Deploy to Test Server
-      if: steps.check_ssh.outputs.deployment_enabled == 'true'
-      env:
-        COMMIT_SHA: ${{ steps.deploy_info.outputs.commit_sha }}
-        COMMIT_SHORT: ${{ steps.deploy_info.outputs.commit_short }}
-        COMMIT_MESSAGE: ${{ steps.deploy_info.outputs.commit_message }}
-        BRANCH_NAME: ${{ steps.deploy_info.outputs.branch_name }}
-        DEPLOY_TIMESTAMP: ${{ steps.deploy_info.outputs.timestamp }}
-        DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-      run: |
-        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no deploy_script.sh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }}:/tmp/deploy_script.sh
-        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
-          export COMMIT_SHA='$COMMIT_SHA'
-          export COMMIT_SHORT='$COMMIT_SHORT'
-          export COMMIT_MESSAGE='$COMMIT_MESSAGE'
-          export BRANCH_NAME='$BRANCH_NAME'
-          export DEPLOY_TIMESTAMP='$DEPLOY_TIMESTAMP'
-          export DEPLOY_PATH='$DEPLOY_PATH'
-          chmod +x /tmp/deploy_script.sh
-          /tmp/deploy_script.sh
-          rm -f /tmp/deploy_script.sh
-        "
-
-    - name: Verify Deployment
-      if: steps.check_ssh.outputs.deployment_enabled == 'true'
-      run: |
-        echo "🔍 Verifying deployment..."
-        sleep 30
-        
-        # Verify git changes were applied on the test server
-        echo "🔄 Verifying git repository state on test server..."
-        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
-          cd ${{ secrets.DEPLOY_PATH }}/eventlinez
-          echo '📥 Fetching latest changes...'
-          git fetch origin develop
-          echo '⬇️ Pulling from develop branch...'
-          git pull origin develop
-          echo '✅ Git repository updated'
-          
-          current_commit=\$(git rev-parse HEAD)
-          echo \"Current commit on server: \$current_commit\"
-          echo \"Expected commit: ${{ steps.deploy_info.outputs.commit_sha }}\"
-          
-          if [ \"\$current_commit\" = \"${{ steps.deploy_info.outputs.commit_sha }}\" ]; then
-            echo \"✅ Git commit verification successful\"
-          else
-            echo \"⚠️ WARNING: Git commit mismatch detected!\"
-            echo \"Expected: ${{ steps.deploy_info.outputs.commit_sha }}\"
-            echo \"Actual: \$current_commit\"
-          fi
-          
-          echo \"📋 Latest commit info:\"
-          git log -1 --oneline
-          echo \"📂 Current branch: \$(git branch --show-current)\"
-          echo \"🔗 Remote tracking: \$(git rev-parse --abbrev-ref HEAD@{upstream} 2>/dev/null || echo 'Not set')\"
-        "
-        
-        if curl -f https://test.eventlinez.com/ >/dev/null 2>&1; then
-          echo "✅ Public site is accessible"
-        else
-          echo "⚠️ Public site test failed"
-        fi
-        
-        if curl -f https://test.eventlinez.com/static/version_info.json >/dev/null 2>&1; then
-          echo "✅ Version info is accessible"
-          curl -s https://test.eventlinez.com/static/version_info.json
-        else
-          echo "⚠️ Version info not accessible"
-        fi
-
-    - name: Notify Deployment Status
-      if: always() && steps.check_ssh.outputs.deployment_enabled == 'true'
+    - name: Notify test deployment status
+      if: always()
       run: |
         if [ "${{ job.status }}" == "success" ]; then
-          echo "✅ Deployment to test.eventlinez.com completed successfully!"
-          echo "🌐 Site: https://test.eventlinez.com/"
-          echo "📊 Commit: ${{ steps.deploy_info.outputs.commit_short }}"
-          echo "⏰ Time: ${{ steps.deploy_info.outputs.timestamp }}"
+          echo "✅ Test environment deployment successful!"
         else
-          echo "❌ Deployment failed!"
+          echo "❌ Test environment deployment failed!"
         fi
-
-  security-scan:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    
-    - name: Build Docker image for security scan
-      run: |
-        echo "🐳 Building Docker image for security scanning..."
-        docker build -t eventlinez-security .
-    
-    - name: Python Security Check in Docker
-      run: |
-        echo "🔍 Running security scans in Docker container (Python 3.6)..."
-        docker run --rm \
-          -v $(pwd):/app \
-          -w /app \
-          --entrypoint="" \
-          eventlinez-security bash -c "
-            echo '🔧 Installing security tools...'
-            pip install safety bandit
-            
-            echo '🔍 Running Safety check on requirements.txt...'
-            safety check -r requirements.txt || echo '⚠️ Safety scan completed with warnings'
-            
-            echo '🔍 Running Bandit security linter...'
-            bandit -r . -f json -o bandit-report.json -x './venv/*,./staticfiles/*,./media/*,**/migrations/*,**/node_modules/*' || echo '⚠️ Bandit scan completed with warnings'
-            
-            echo '📊 Security scan summary:'
-            if [ -f bandit-report.json ]; then
-              echo '✅ Bandit report generated'
-              # Show a brief summary without sensitive details
-              cat bandit-report.json | grep -E '\"confidence|\"severity|\"test_name\"' | head -10 || echo 'No issues summary available'
-            fi
-            
-            echo '✅ Security scans completed successfully'
-          "

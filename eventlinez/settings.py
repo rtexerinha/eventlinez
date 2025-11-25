@@ -236,6 +236,17 @@ CACHES = {
     }
 }
 
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': { 'class': 'logging.StreamHandler' }
+    },
+    'loggers': {
+        '': { 'handlers': ['console'], 'level': 'INFO' }
+    }
+}
+
 # Cart Rate Limiting Configuration
 CART_RATE_LIMITS = {
     'cart_add': {'requests': 30, 'window': 300},      # 30 requests per 5 minutes
