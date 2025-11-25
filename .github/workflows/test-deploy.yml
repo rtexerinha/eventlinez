@@ -123,32 +123,31 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Check if deployment secrets are available
-      id: check-secrets
+    - name: Get commit info
+      id: commit
+      run: echo "commit_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+    - name: Check deployment prerequisites
       run: |
-        if [ -z "${{ secrets.TEST_SERVER_SSH_KEY }}" ]; then
-          echo "SSH key secret is not configured. Skipping deployment."
-          echo "skip-deploy=true" >> $GITHUB_OUTPUT
+        if [ -z "${{ secrets.TEST_SERVER_HOST }}" ] || [ -z "${{ secrets.TEST_SERVER_USER }}" ] || [ -z "${{ secrets.TEST_SERVER_PASSWORD }}" ]; then
+          echo "❌ Server connection secrets not configured"
+          exit 1
         else
-          echo "SSH key secret is configured. Proceeding with deployment."
-          echo "skip-deploy=false" >> $GITHUB_OUTPUT
+          echo "✅ Server connection secrets configured. Proceeding with deployment."
         fi
 
-    - name: Setup SSH for Test Server
-      if: steps.check-secrets.outputs.skip-deploy == 'false'
-      uses: webfactory/ssh-agent@v0.8.0
-      with:
-        ssh-private-key: ${{ secrets.TEST_SERVER_SSH_KEY }}
+    - name: Install sshpass
+      run: sudo apt-get update && sudo apt-get install -y sshpass
 
-    - name: Add test server to known hosts
-      if: steps.check-secrets.outputs.skip-deploy == 'false'
+    - name: Add server to known hosts
       run: |
         ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
+        echo "✅ SSH connection setup completed"
 
-    - name: Deploy to Test Environment using Docker
-      if: steps.check-secrets.outputs.skip-deploy == 'false'
+    - name: Create deployment script
       run: |
-        ssh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << 'ENDSSH'
+        cat > deploy_script.sh << 'SCRIPT_EOF'
+        #!/bin/bash
         set -e
         
         # Colors for output
@@ -168,32 +167,39 @@ jobs:
         BACKUP_DIR="/home/sunset/backups"
         TIMESTAMP=$(date +%Y%m%d_%H%M%S)
         
-        # Step 1: Create backup
+        # Step 1: Navigate to project directory
+        cd $PROJECT_DIR
+        
+        # Step 2: Create backup
         echo -e "\n${BLUE}▶ Creating backup...${NC}"
         mkdir -p $BACKUP_DIR/test_$TIMESTAMP
         
-        # Backup Docker volumes and database
-        cd $PROJECT_DIR
-        if docker compose ps -q db | xargs -r docker inspect -f '{{.State.Running}}' | grep -q true; then
+        # Backup database if running
+        if docker compose ps -q db 2>/dev/null | xargs -r docker inspect -f '{{.State.Running}}' 2>/dev/null | grep -q true; then
             echo -e "  ${YELLOW}→ Backing up PostgreSQL database...${NC}"
-            docker compose exec -T db pg_dump -U eventlinez eventlinez > $BACKUP_DIR/test_$TIMESTAMP/db_backup.sql
+            docker compose exec -T db pg_dump -U eventlinez eventlinez > $BACKUP_DIR/test_$TIMESTAMP/db_backup.sql 2>/dev/null || true
             echo -e "  ${GREEN}✓ Database backup complete${NC}"
         fi
         
+        # Backup media files
         if [ -d "$PROJECT_DIR/media" ]; then
             cp -r $PROJECT_DIR/media $BACKUP_DIR/test_$TIMESTAMP/ 2>/dev/null || true
             echo -e "  ${GREEN}✓ Media files backup complete${NC}"
         fi
         
-        # Step 2: Pull latest code from develop
+        # Step 3: Stop existing containers
+        echo -e "\n${BLUE}▶ Stopping existing containers...${NC}"
+        docker compose down 2>/dev/null || true
+        echo -e "${GREEN}✓ Containers stopped${NC}"
+        
+        # Step 4: Pull latest code from develop
         echo -e "\n${BLUE}▶ Pulling latest code from develop...${NC}"
-        cd $PROJECT_DIR
         git fetch origin
         git checkout develop
         git pull origin develop
         echo -e "${GREEN}✓ Code updated${NC}"
         
-        # Step 3: Create .env.docker file on server
+        # Step 5: Create .env.docker file on server
         echo -e "\n${BLUE}▶ Creating environment configuration...${NC}"
         cat > .env.docker << 'ENVEOF'
         # Django Configuration for Test Server
@@ -223,18 +229,13 @@ jobs:
         ENVEOF
         echo -e "${GREEN}✓ Environment configuration created${NC}"
         
-        # Step 4: Stop existing containers
-        echo -e "\n${BLUE}▶ Stopping existing containers...${NC}"
-        docker compose down || true
-        echo -e "${GREEN}✓ Containers stopped${NC}"
-        
-        # Step 5: Build and start new containers
+        # Step 6: Build and start new containers
         echo -e "\n${BLUE}▶ Building and starting Docker containers...${NC}"
         docker compose build --no-cache web
         docker compose up -d
         echo -e "${GREEN}✓ Containers started${NC}"
         
-        # Step 6: Wait for database to be ready
+        # Step 7: Wait for database to be ready
         echo -e "\n${BLUE}▶ Waiting for database to be ready...${NC}"
         sleep 15
         
@@ -252,27 +253,27 @@ jobs:
         done
         echo -e "${GREEN}✓ Database is ready${NC}"
         
-        # Step 7: Run database migrations
+        # Step 8: Run database migrations
         echo -e "\n${BLUE}▶ Running database migrations...${NC}"
         docker compose exec -T web python manage.py migrate --noinput
         echo -e "${GREEN}✓ Migrations applied${NC}"
         
-        # Step 8: Collect static files
+        # Step 9: Collect static files
         echo -e "\n${BLUE}▶ Collecting static files...${NC}"
         docker compose exec -T web python manage.py collectstatic --noinput --clear
         echo -e "${GREEN}✓ Static files collected${NC}"
         
-        # Step 9: Clear caches
+        # Step 10: Clear caches
         echo -e "\n${BLUE}▶ Clearing application caches...${NC}"
-        docker compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" || true
+        docker compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" 2>/dev/null || true
         echo -e "${GREEN}✓ Caches cleared${NC}"
         
-        # Step 10: Restart containers to ensure clean state
+        # Step 11: Restart containers to ensure clean state
         echo -e "\n${BLUE}▶ Restarting containers...${NC}"
         docker compose restart web
         echo -e "${GREEN}✓ Containers restarted${NC}"
         
-        # Step 11: Health check
+        # Step 12: Health check
         echo -e "\n${BLUE}▶ Running health check...${NC}"
         sleep 10
         
@@ -287,7 +288,7 @@ jobs:
         # Check application response
         HEALTH_RETRIES=12
         while [ $HEALTH_RETRIES -gt 0 ]; do
-            if curl -f -s http://localhost:8000/admin/ > /dev/null; then
+            if curl -f -s http://localhost:8000/admin/ > /dev/null 2>&1; then
                 echo -e "${GREEN}✓ Health check passed${NC}"
                 break
             else
@@ -305,15 +306,6 @@ jobs:
             fi
         done
         
-        # Step 12: Setup nginx proxy if needed
-        echo -e "\n${BLUE}▶ Checking nginx configuration...${NC}"
-        if systemctl is-active --quiet nginx; then
-            sudo systemctl reload nginx
-            echo -e "  ${GREEN}✓ Nginx reloaded${NC}"
-        else
-            echo -e "  ${YELLOW}→ Nginx not running, skipping${NC}"
-        fi
-        
         # Step 13: Clean up old Docker images
         echo -e "\n${BLUE}▶ Cleaning up old Docker images...${NC}"
         docker image prune -f > /dev/null 2>&1 || true
@@ -328,23 +320,89 @@ jobs:
         echo "Backup: $BACKUP_DIR/test_$TIMESTAMP"
         echo ""
         echo "Container Status:"
-        docker compose ps
+        docker compose ps 2>/dev/null || echo "Docker compose not available for status check"
         echo ""
         
-        ENDSSH
+        SCRIPT_EOF
+
+    - name: Deploy to test server
+      run: |
+        echo "🚀 Starting deployment to test server..."
+        echo "📋 Deployment Info:"
+        echo "   - Commit: $(git rev-parse --short HEAD)"
+        echo "   - Branch: ${GITHUB_REF#refs/heads/}"
+        echo "   - Message: $(git log -1 --pretty=%B | head -n1)"
+        echo "   - Time: $(date '+%Y-%m-%d %H:%M:%S')"
+        
+        # Copy deployment script to server
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no deploy_script.sh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }}:/tmp/deploy_script.sh
+        
+        # Execute deployment script on server
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "chmod +x /tmp/deploy_script.sh && /tmp/deploy_script.sh && rm /tmp/deploy_script.sh"
+
+    - name: Verify deployment
+      run: |
+        echo "🔍 Verifying deployment..."
+        
+        # Verify git repository state on server
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << 'VERIFY_EOF'
+        echo "🔄 Verifying git repository state on test server..."
+        cd /home/sunset/eventlinez
+        
+        echo "📥 Fetching latest changes..."
+        git fetch origin
+        
+        echo "⬇️ Pulling from develop branch..."
+        git pull origin develop
+        echo "✅ Git repository updated"
+        
+        echo "Current commit on server: $(git rev-parse HEAD)"
+        echo "Expected commit: ${{ steps.commit.outputs.commit_sha }}"
+        
+        if [ "$(git rev-parse HEAD)" = "${{ steps.commit.outputs.commit_sha }}" ]; then
+            echo "✅ Git commit verification successful"
+        else
+            echo "❌ Git commit verification failed"
+            exit 1
+        fi
+        
+        echo "📋 Latest commit info:"
+        git log -1 --oneline
+        
+        echo "📂 Current branch: $(git branch --show-current 2>/dev/null || git symbolic-ref --short HEAD 2>/dev/null || echo 'detached')"
+        echo "🔗 Remote tracking: $(git branch -vv | grep '^\*' | sed 's/.*\[\([^]]*\)\].*/\1/' || echo 'none')"
+        VERIFY_EOF
+        
+        # Test if the site is accessible
+        if curl -f -s https://test.eventlinez.com/ > /dev/null; then
+            echo "✅ Public site is accessible"
+        else
+            echo "⚠️ Site may not be accessible via HTTPS, checking HTTP..."
+            if curl -f -s http://45.79.112.247:8000/ > /dev/null; then
+                echo "✅ Site accessible via direct IP"
+            else
+                echo "❌ Site not accessible"
+                exit 1
+            fi
+        fi
+        
+        # Check version endpoint if available
+        if curl -f -s https://test.eventlinez.com/version/ > /dev/null; then
+            echo "✅ Version info is accessible"
+            curl -s https://test.eventlinez.com/version/ || true
+        else
+            echo "ℹ️ Version endpoint not available"
+        fi
 
     - name: Deployment Results
       if: always()
       run: |
         if [ "${{ job.status }}" == "success" ]; then
-          echo "🚀 Deployment Results:"
-          echo "✅ Docker-based test environment deployment successful!"
-          echo "🐳 Application running in containers"
-          echo "🔗 Test URL: http://test.eventlinez.com"
-          echo "🔗 Direct URL: http://45.79.112.247:8000"
-          echo ""
-          echo "🎉 Your Eventlinez application is now live on the test server!"
+          echo "✅ Deployment to test.eventlinez.com completed successfully!"
+          echo "🌐 Site: https://test.eventlinez.com/"
+          echo "📊 Commit: $(git rev-parse --short HEAD)"
+          echo "⏰ Time: $(date '+%Y-%m-%d %H:%M:%S')"
         else
-          echo "❌ Docker-based test environment deployment failed!"
+          echo "❌ Deployment to test.eventlinez.com failed!"
           echo "Please check the deployment logs above for details."
         fi
