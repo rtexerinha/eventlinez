@@ -17,14 +17,34 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Set up environment variables for testing
+    - name: Create .env.docker file for testing
       run: |
-        echo "DEBUG=True" >> .env
-        echo "SECRET_KEY=test-secret-key-for-ci" >> .env
-        echo "DATABASE_URL=postgres://eventlinez:eventlinez@db:5432/eventlinez" >> .env
-        echo "ALLOWED_HOSTS=localhost,127.0.0.1" >> .env
-        echo "SENDGRID_API_KEY=" >> .env
-        echo "RECAPTCHA_PROJECT_ID=" >> .env
+        cat > .env.docker << 'EOF'
+        # Django Configuration for Testing
+        DEBUG=True
+        SECRET_KEY=test-secret-key-for-ci-cd-pipeline
+        ALLOWED_HOSTS=localhost,127.0.0.1
+        
+        # Database Configuration (will be overridden by docker-compose environment)
+        DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
+        
+        # Stripe Test Keys
+        STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
+        STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+        
+        # reCAPTCHA Test Configuration
+        RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
+        RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
+        RECAPTCHA_PROJECT_ID=
+        
+        # SendGrid (empty for testing)
+        SENDGRID_API_KEY=
+        
+        # Application Settings
+        EVENTLINEZ_FEE=0.12
+        ENVIRONMENT=test
+        SEED_DATA=true
+        EOF
 
     - name: Build Docker images
       run: |
@@ -149,18 +169,48 @@ jobs:
         git pull origin develop
         echo -e "${GREEN}✓ Code updated${NC}"
         
-        # Step 3: Stop existing containers
+        # Step 3: Create .env.docker file on server
+        echo -e "\n${BLUE}▶ Creating environment configuration...${NC}"
+        cat > .env.docker << 'ENVEOF'
+        # Django Configuration for Test Server
+        DEBUG=False
+        SECRET_KEY=test-server-secret-key-change-in-production
+        ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
+        
+        # Database Configuration
+        DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
+        
+        # Stripe Test Keys
+        STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
+        STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+        
+        # reCAPTCHA Configuration
+        RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
+        RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
+        RECAPTCHA_PROJECT_ID=
+        
+        # SendGrid (empty for test environment)
+        SENDGRID_API_KEY=
+        
+        # Application Settings
+        EVENTLINEZ_FEE=0.12
+        ENVIRONMENT=test
+        SEED_DATA=true
+        ENVEOF
+        echo -e "${GREEN}✓ Environment configuration created${NC}"
+        
+        # Step 4: Stop existing containers
         echo -e "\n${BLUE}▶ Stopping existing containers...${NC}"
         docker compose down || true
         echo -e "${GREEN}✓ Containers stopped${NC}"
         
-        # Step 4: Build and start new containers
+        # Step 5: Build and start new containers
         echo -e "\n${BLUE}▶ Building and starting Docker containers...${NC}"
         docker compose build --no-cache web
         docker compose up -d
         echo -e "${GREEN}✓ Containers started${NC}"
         
-        # Step 5: Wait for database to be ready
+        # Step 6: Wait for database to be ready
         echo -e "\n${BLUE}▶ Waiting for database to be ready...${NC}"
         sleep 15
         
@@ -178,27 +228,27 @@ jobs:
         done
         echo -e "${GREEN}✓ Database is ready${NC}"
         
-        # Step 6: Run database migrations
+        # Step 7: Run database migrations
         echo -e "\n${BLUE}▶ Running database migrations...${NC}"
         docker compose exec -T web python manage.py migrate --noinput
         echo -e "${GREEN}✓ Migrations applied${NC}"
         
-        # Step 7: Collect static files
+        # Step 8: Collect static files
         echo -e "\n${BLUE}▶ Collecting static files...${NC}"
         docker compose exec -T web python manage.py collectstatic --noinput --clear
         echo -e "${GREEN}✓ Static files collected${NC}"
         
-        # Step 8: Clear caches
+        # Step 9: Clear caches
         echo -e "\n${BLUE}▶ Clearing application caches...${NC}"
         docker compose exec -T web python manage.py shell -c "from django.core.cache import cache; cache.clear()" || true
         echo -e "${GREEN}✓ Caches cleared${NC}"
         
-        # Step 9: Restart containers to ensure clean state
+        # Step 10: Restart containers to ensure clean state
         echo -e "\n${BLUE}▶ Restarting containers...${NC}"
         docker compose restart web
         echo -e "${GREEN}✓ Containers restarted${NC}"
         
-        # Step 10: Health check
+        # Step 11: Health check
         echo -e "\n${BLUE}▶ Running health check...${NC}"
         sleep 10
         
@@ -231,7 +281,7 @@ jobs:
             fi
         done
         
-        # Step 11: Setup nginx proxy if needed
+        # Step 12: Setup nginx proxy if needed
         echo -e "\n${BLUE}▶ Checking nginx configuration...${NC}"
         if systemctl is-active --quiet nginx; then
             sudo systemctl reload nginx
@@ -240,7 +290,7 @@ jobs:
             echo -e "  ${YELLOW}→ Nginx not running, skipping${NC}"
         fi
         
-        # Step 12: Clean up old Docker images
+        # Step 13: Clean up old Docker images
         echo -e "\n${BLUE}▶ Cleaning up old Docker images...${NC}"
         docker image prune -f > /dev/null 2>&1 || true
         echo -e "${GREEN}✓ Cleanup complete${NC}"
