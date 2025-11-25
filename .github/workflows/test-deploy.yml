@@ -11,62 +11,79 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_eventlinez
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install coverage
-
-    - name: Set up environment variables
+    - name: Set up environment variables for testing
       run: |
         echo "DEBUG=True" >> .env
         echo "SECRET_KEY=test-secret-key-for-ci" >> .env
-        echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/test_eventlinez" >> .env
+        echo "DATABASE_URL=postgres://eventlinez:eventlinez@db:5432/eventlinez" >> .env
         echo "ALLOWED_HOSTS=localhost,127.0.0.1" >> .env
+        echo "SENDGRID_API_KEY=" >> .env
+        echo "RECAPTCHA_PROJECT_ID=" >> .env
 
-    - name: Run migrations
+    - name: Build Docker images
       run: |
-        python manage.py migrate
+        docker compose build --no-cache
 
-    - name: Run tests
+    - name: Start test environment
       run: |
-        coverage run --source='.' manage.py test
-        coverage report
-        coverage xml
+        docker compose up -d
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: false
+    - name: Wait for database to be ready
+      run: |
+        echo "Waiting for database to be ready..."
+        sleep 15
+        
+        # Check if database is ready
+        RETRIES=30
+        while ! docker compose exec -T db pg_isready -U eventlinez -d eventlinez > /dev/null 2>&1; do
+          RETRIES=$((RETRIES - 1))
+          if [ $RETRIES -eq 0 ]; then
+            echo "Database failed to start"
+            docker compose logs db
+            exit 1
+          fi
+          echo "Waiting for database... ($RETRIES attempts left)"
+          sleep 2
+        done
+        echo "Database is ready"
+
+    - name: Run database migrations
+      run: |
+        docker compose exec -T web python manage.py migrate --noinput
+
+    - name: Run tests in Docker
+      run: |
+        docker compose exec -T web python manage.py test --verbosity=2
+
+    - name: Collect static files
+      run: |
+        docker compose exec -T web python manage.py collectstatic --noinput --clear
+
+    - name: Check application health
+      run: |
+        # Wait for application to be ready
+        sleep 10
+        
+        # Test if application responds
+        if curl -f -s http://localhost:8000/admin/ > /dev/null; then
+          echo "✅ Application health check passed"
+        else
+          echo "❌ Application health check failed"
+          echo "Container logs:"
+          docker compose logs web
+          exit 1
+        fi
+
+    - name: Stop test environment
+      if: always()
+      run: |
+        docker compose down -v
 
   deploy-test:
     needs: test
