@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch full history for better git operations
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -120,11 +122,17 @@ jobs:
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch full history for git operations
 
     - name: Get commit info
       id: commit
-      run: echo "commit_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+      run: |
+        echo "commit_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        echo "commit_message=$(git log -1 --pretty=%B | head -n1)" >> $GITHUB_OUTPUT
+        echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
     - name: Check deployment prerequisites
       run: |
@@ -135,60 +143,86 @@ jobs:
           echo "✅ Server connection secrets configured. Proceeding with deployment."
         fi
 
-    - name: Install sshpass
-      run: sudo apt-get update && sudo apt-get install -y sshpass
-
-    - name: Add server to known hosts
+    - name: Install sshpass and setup SSH
       run: |
+        sudo apt-get update && sudo apt-get install -y sshpass
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
         echo "✅ SSH connection setup completed"
 
-    - name: Deploy with Docker to test server
+    - name: Create deployment script
       run: |
-        echo "🚀 Starting deployment to test server..."
-        echo "📋 Deployment Info:"
-        echo "   - Commit: $(git rev-parse --short HEAD)"
-        echo "   - Branch: ${GITHUB_REF#refs/heads/}"
-        echo "   - Message: $(git log -1 --pretty=%B | head -n1)"
-        echo "   - Time: $(date '+%Y-%m-%d %H:%M:%S')"
-        
-        # Execute deployment on server
-        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << 'DEPLOY_EOF'
+        cat > deploy_script.sh << 'SCRIPT_EOF'
+        #!/bin/bash
         set -e
         
-        echo "🔍 Checking deployment options..."
-        PROJECT_DIR="/home/sunset/eventlinez"
-        cd $PROJECT_DIR
+        echo "🚀 Starting deployment to test server..."
+        echo "📋 Deployment Info:"
+        echo "   - Commit: ${{ steps.commit.outputs.commit_short }}"
+        echo "   - Branch: ${{ steps.commit.outputs.branch_name }}"
+        echo "   - Message: ${{ steps.commit.outputs.commit_message }}"
+        echo "   - Time: $(date '+%Y-%m-%d %H:%M:%S')"
         
-        # Check if Docker is available
+        PROJECT_DIR="/home/sunset/eventlinez"
+        
+        # Get current server commit for comparison
+        cd "$PROJECT_DIR"
+        CURRENT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+        echo "Current server commit: ${CURRENT_COMMIT:0:7}"
+        echo "Deploying commit: ${{ steps.commit.outputs.commit_sha }}"
+        
+        # Stop services
+        echo "⏹️ Stopping services..."
+        pkill -f "gunicorn.*eventlinez" || echo "Service not running"
+        docker compose down 2>/dev/null || docker-compose down 2>/dev/null || echo "Docker compose not running"
+        
+        # Create deployment logs directory
+        mkdir -p ../deployment_logs || echo "Directory creation failed or already exists"
+        
+        # Update git repository
+        echo "🔄 Updating git repository..."
+        git fetch origin
+        git checkout develop
+        git pull origin develop
+        
+        # Verify git state
+        NEW_COMMIT=$(git rev-parse HEAD)
+        if [ "$NEW_COMMIT" = "${{ steps.commit.outputs.commit_sha }}" ]; then
+          echo "✅ Git commit verification successful"
+        else
+          echo "⚠️ Git commit mismatch. Expected: ${{ steps.commit.outputs.commit_sha }}, Got: $NEW_COMMIT"
+        fi
+        
+        # Show latest commit info
+        echo "📋 Latest commit info:"
+        git log -1 --oneline
+        
+        # Check current branch and tracking
+        echo "📂 Current branch: $(git branch --show-current 2>/dev/null || git symbolic-ref --short HEAD 2>/dev/null || echo 'detached')"
+        echo "🔗 Remote tracking: $(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo 'none')"
+        
+        # Choose deployment method based on Docker availability
         if command -v docker &> /dev/null && groups | grep -q docker; then
-          echo "🐳 Docker is available - using Docker deployment"
-          
-          # Docker deployment
-          docker-compose down 2>/dev/null || docker compose down 2>/dev/null || true
-          
-          git fetch origin
-          git checkout develop
-          git pull origin develop
+          echo "🐳 Using Docker deployment..."
           
           # Create Docker environment file
           cat > .env.docker << 'DOCKER_ENV_EOF'
-DEBUG=False
-SECRET_KEY=test-server-secret-key-change-in-production
-ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
-DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
-STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
-STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
-RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
-RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
-RECAPTCHA_PROJECT_ID=
-SENDGRID_API_KEY=
-EVENTLINEZ_FEE=0.12
-ENVIRONMENT=test
-SEED_DATA=true
-DOCKER_ENV_EOF
+        DEBUG=False
+        SECRET_KEY=test-server-secret-key-change-in-production
+        ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,${{ secrets.TEST_SERVER_HOST }}
+        DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
+        STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
+        STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+        RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
+        RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
+        RECAPTCHA_PROJECT_ID=
+        SENDGRID_API_KEY=
+        EVENTLINEZ_FEE=0.12
+        ENVIRONMENT=test
+        SEED_DATA=true
+        DOCKER_ENV_EOF
           
+          # Build and start containers
           if command -v docker-compose &> /dev/null; then
             docker-compose build --no-cache web
             docker-compose up -d
@@ -196,188 +230,151 @@ DOCKER_ENV_EOF
             docker-compose exec -T web python manage.py migrate --noinput
             docker-compose exec -T web python manage.py collectstatic --noinput --clear
           else
-            docker compose build --no-cache web
+            docker compose build --no-cache web  
             docker compose up -d
             sleep 30
             docker compose exec -T web python manage.py migrate --noinput
             docker compose exec -T web python manage.py collectstatic --noinput --clear
           fi
-          
-          echo "✅ Docker deployment completed"
-          
         else
-          echo "🐍 Docker not available - using Python virtual environment deployment"
+          echo "🐍 Using Python virtual environment deployment..."
           
-          # Stop any existing processes
-          pkill -f "gunicorn.*eventlinez" || true
-          pkill -f "python.*manage.py.*runserver" || true
-          sleep 2
-          
-          # Pull latest code
-          git fetch origin
-          git checkout develop  
-          git pull origin develop
-          
-          # Setup Python virtual environment
+          # Setup virtual environment
           if [ ! -d "venv" ]; then
-            echo "Creating Python virtual environment..."
             python3 -m venv venv
           fi
-          
           source venv/bin/activate
           
-          # Upgrade pip to compatible version for celery
-          pip install "pip<24.1"
-          
           # Install dependencies with fallback strategy
-          echo "Installing Python dependencies..."
-          if pip install -r requirements.txt; then
-            echo "✅ Dependencies installed successfully"
-          else
-            echo "⚠️ Main installation failed, trying fallback approach..."
-            
-            # Create requirements without problematic packages
-            echo "Creating fallback requirements file..."
-            cat requirements.txt | grep -v -E "(celery|sshtunnel|paramiko|bcrypt|cryptography)" > requirements_core.txt || {
-              # If grep fails, create core requirements manually
-              cat > requirements_core.txt << 'CORE_REQUIREMENTS_EOF'
-django==3.2.25
-djangorestframework==3.14.0
-psycopg2-binary==2.9.8
-django-crispy-forms==1.13.0
-django-ckeditor==6.0.0
-django-imagekit==5.0.0
-pillow>=8.0.0,<10.0.0
-stripe==2.58.0
-sentry-sdk<2.0.0
-xlsxwriter==1.4.4
-django-bootstrap-datepicker-plus==4.0.0
-python-dotenv<1.0.0
-dj-database-url<2.0.0
-qrcode==7.2
-reportlab==3.5.68
-gunicorn>=20,<22
-whitenoise==5.3.0
-requests>=2.25.0,<3.0.0
-model-bakery==1.5.0
-PyPDF2==2.12.1
-CORE_REQUIREMENTS_EOF
-            }
-            
-            # Install core dependencies
-            echo "Installing core dependencies..."
-            pip install -r requirements_core.txt
-            
-            # Try to install compatible versions of problematic packages
-            echo "Installing compatible versions of additional packages..."
-            
-            # Install SSH tunnel support with compatible versions
-            pip install "paramiko>=2.7.2,<3.0.0" "sshtunnel>=0.4.0" || {
-              echo "⚠️ SSH tunnel packages failed, trying older versions..."
-              pip install "paramiko==2.7.2" "sshtunnel==0.4.0" || echo "SSH tunnel support not available"
-            }
-            
-            # Install compatible celery version
-            pip install "celery==4.4.6" || pip install "celery>=4.0.0,<5.0.0" || echo "⚠️ Celery not available"
-            
-            # Install compatible crypto packages
-            pip install "cryptography>=3.4.8,<4.0.0" "bcrypt>=3.2.0,<4.0.0" || echo "⚠️ Some crypto packages may not be available"
-            
-            # Clean up
-            rm requirements_core.txt 2>/dev/null || true
-            
-            echo "✅ Fallback installation completed"
-          fi
+          pip install "pip<24.1"
+          pip install -r requirements.txt || {
+            echo "⚠️ Fallback dependency installation..."
+            pip install django djangorestframework psycopg2-binary pillow stripe gunicorn whitenoise
+          }
           
           # Create environment file
           cat > .env << 'VENV_ENV_EOF'
-DEBUG=False
-SECRET_KEY=test-server-secret-key-change-in-production
-ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
-DATABASE_URL=sqlite:///db.sqlite3
-STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
-STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
-RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
-RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
-RECAPTCHA_PROJECT_ID=
-SENDGRID_API_KEY=
-EVENTLINEZ_FEE=0.12
-ENVIRONMENT=test
-SEED_DATA=true
-VENV_ENV_EOF
+        DEBUG=False
+        SECRET_KEY=test-server-secret-key-change-in-production
+        ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,${{ secrets.TEST_SERVER_HOST }}
+        DATABASE_URL=sqlite:///db.sqlite3
+        STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
+        STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+        RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
+        RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
+        EVENTLINEZ_FEE=0.12
+        ENVIRONMENT=test
+        SEED_DATA=true
+        VENV_ENV_EOF
           
-          # Run Django management commands
+          # Run Django commands and start application
           python manage.py migrate --noinput
           python manage.py collectstatic --noinput --clear
-          
-          # Start the application with gunicorn
-          echo "Starting application with gunicorn..."
           nohup gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 eventlinez.wsgi:application > /tmp/django.log 2>&1 &
-          
-          # Wait for application to start
-          sleep 10
-          
-          echo "✅ Python virtual environment deployment completed"
         fi
         
         # Final health check
-        echo "🔍 Performing health check..."
-        sleep 5
+        echo "🔍 Performing final health check..."
+        sleep 10
         if curl -f -s http://localhost:8000/ > /dev/null 2>&1; then
-          echo "✅ Application is responding successfully"
+          echo "✅ Application is responding"
+          DEPLOYMENT_STATUS="success"
         else
-          echo "⚠️ Application may still be starting up"
-          if [ -f /tmp/django.log ]; then
-            echo "📋 Recent application logs:"
-            tail -10 /tmp/django.log
-          fi
+          echo "⚠️ Application health check inconclusive"
+          DEPLOYMENT_STATUS="warning"
         fi
         
-        echo "🎉 Deployment completed successfully!"
-        DEPLOY_EOF
+        # Create deployment info JSON (matching your log format)
+        cat > /tmp/deployment_info.json << DEPLOY_INFO_EOF
+        {
+          "deployment_time": "$(date '+%Y-%m-%d %H:%M:%S')",
+          "commit_sha": "${{ steps.commit.outputs.commit_sha }}",
+          "commit_short": "${{ steps.commit.outputs.commit_short }}",
+          "branch": "${{ steps.commit.outputs.branch_name }}",
+          "commit_message": "${{ steps.commit.outputs.commit_message }}",
+          "deployment_method": "GitHub Actions",
+          "server_time": "$(date)"
+        }
+        DEPLOY_INFO_EOF
+        
+        echo "✅ Deployment script completed with status: $DEPLOYMENT_STATUS"
+        echo "$DEPLOYMENT_STATUS" > /tmp/deployment_status
+        SCRIPT_EOF
+        
+        chmod +x deploy_script.sh
 
-    - name: Verify deployment
+    - name: Upload and execute deployment script
+      run: |
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no deploy_script.sh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }}:/tmp/deploy_script.sh
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "chmod +x /tmp/deploy_script.sh && /tmp/deploy_script.sh"
+
+    - name: Verify deployment and git state
       run: |
         echo "🔍 Verifying deployment..."
         
-        # Wait for application to be fully ready
-        sleep 20
-        
-        # Test site accessibility
-        RETRIES=5
-        ACCESSIBLE=false
-        for i in $(seq 1 $RETRIES); do
-          if curl -f -s --max-time 10 http://45.79.112.247:8000/ > /dev/null 2>&1; then
-            echo "✅ Site is accessible"
-            ACCESSIBLE=true
-            break
+        # Verify git repository state on test server
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
+          cd /home/sunset/eventlinez
+          echo '🔄 Verifying git repository state on test server...'
+          echo '📥 Fetching latest changes...'
+          git fetch origin
+          echo '⬇️ Pulling from develop branch...'
+          git pull origin develop
+          echo '✅ Git repository updated'
+          
+          CURRENT_COMMIT=\$(git rev-parse HEAD)
+          EXPECTED_COMMIT='${{ steps.commit.outputs.commit_sha }}'
+          echo \"Current commit on server: \$CURRENT_COMMIT\"
+          echo \"Expected commit: \$EXPECTED_COMMIT\"
+          
+          if [ \"\$CURRENT_COMMIT\" = \"\$EXPECTED_COMMIT\" ]; then
+            echo '✅ Git commit verification successful'
+          else
+            echo '❌ Git commit mismatch!'
+            exit 1
           fi
-          echo "Attempt $i/$RETRIES failed, waiting..."
-          sleep 10
-        done
+          
+          echo '📋 Latest commit info:'
+          git log -1 --oneline
+          echo '📂 Current branch: \$(git branch --show-current 2>/dev/null || echo \"unknown\")'
+          echo '🔗 Remote tracking: \$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo \"origin/develop\")'
+        "
+
+    - name: Test site accessibility
+      run: |
+        echo "🌐 Testing site accessibility..."
         
-        if [ "$ACCESSIBLE" = "false" ]; then
-          echo "❌ Site is not accessible after $RETRIES attempts"
-          # Check server status
-          sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
-            echo 'Container status:'
-            docker-compose ps 2>/dev/null || docker compose ps 2>/dev/null || echo 'No containers running'
-            echo 'Application logs:'
-            docker-compose logs --tail=20 web 2>/dev/null || docker compose logs --tail=20 web 2>/dev/null || echo 'No logs available'
-          "
+        # Test public site accessibility
+        if curl -f -s --max-time 10 "http://${{ secrets.TEST_SERVER_HOST }}:8000/" > /dev/null 2>&1; then
+          echo "✅ Public site is accessible"
+        else
+          echo "❌ Public site is not accessible"
           exit 1
         fi
+        
+        # Test version info endpoint (if available)
+        VERSION_INFO=$(curl -f -s --max-time 10 "http://${{ secrets.TEST_SERVER_HOST }}:8000/version/" 2>/dev/null || echo "Version endpoint not available")
+        if [ "$VERSION_INFO" != "Version endpoint not available" ]; then
+          echo "✅ Version info is accessible"
+          echo "$VERSION_INFO" | jq . 2>/dev/null || echo "$VERSION_INFO"
+        fi
+
+    - name: Get deployment status
+      id: deployment_status
+      run: |
+        DEPLOYMENT_RESULT=$(sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "cat /tmp/deployment_status 2>/dev/null || echo 'unknown'")
+        echo "status=$DEPLOYMENT_RESULT" >> $GITHUB_OUTPUT
 
     - name: Deployment Results
       if: always()
       run: |
-        if [ "${{ job.status }}" == "success" ]; then
+        if [ "${{ steps.deployment_status.outputs.status }}" == "success" ]; then
           echo "✅ Deployment to test.eventlinez.com completed successfully!"
-          echo "🌐 Site: http://test.eventlinez.com/"
-          echo "🌐 Direct: http://45.79.112.247:8000/"
-          echo "📊 Commit: $(git rev-parse --short HEAD)"
+          echo "🌐 Site: https://test.eventlinez.com/"
+          echo "📊 Commit: ${{ steps.commit.outputs.commit_short }}"
           echo "⏰ Time: $(date '+%Y-%m-%d %H:%M:%S')"
         else
-          echo "❌ Deployment to test.eventlinez.com failed!"
+          echo "❌ Deployment to test.eventlinez.com failed or completed with warnings!"
           echo "Please check the deployment logs above for details."
+          exit 1
         fi
