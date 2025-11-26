@@ -1,0 +1,109 @@
+name: Hotfix Deploy - Force Clean Reset
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_reset:
+        description: 'Force reset server repository (type "yes" to confirm)'
+        required: true
+        default: 'no'
+
+jobs:
+  hotfix-deploy:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.force_reset == 'yes'
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Get commit info
+      id: commit
+      run: |
+        echo "commit_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+    - name: Install sshpass
+      run: |
+        sudo apt-get update && sudo apt-get install -y sshpass
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Create hotfix script
+      run: |
+        cat > hotfix_script.sh << 'HOTFIX_EOF'
+        #!/bin/bash
+        set -e
+        
+        echo "🚨 HOTFIX: Force cleaning server repository..."
+        echo "⚠️  This will discard all uncommitted changes on the server"
+        
+        PROJECT_DIR="/home/sunset/eventlinez"
+        cd "$PROJECT_DIR"
+        
+        # Stop any running services
+        echo "⏹️ Stopping services..."
+        pkill -f "gunicorn.*eventlinez" || echo "Service not running"
+        docker compose down 2>/dev/null || docker-compose down 2>/dev/null || echo "Docker compose not running"
+        
+        # Show current status
+        echo "📋 Current repository status:"
+        git status --porcelain || echo "Git status unavailable"
+        
+        # Force reset to clean state
+        echo "🧹 Force resetting repository to clean state..."
+        git reset --hard HEAD
+        git clean -fd
+        
+        # Fetch and checkout latest
+        echo "📥 Fetching latest changes..."
+        git fetch origin
+        git checkout develop
+        git reset --hard origin/develop
+        
+        # Verify the fix
+        echo "✅ Verifying syntax..."
+        python -m py_compile eventlinez/urls.py || {
+          echo "❌ Syntax error still exists in eventlinez/urls.py"
+          echo "File content around the error:"
+          sed -n '25,45p' eventlinez/urls.py
+          exit 1
+        }
+        
+        echo "✅ Repository reset completed successfully"
+        echo "📋 Current commit: $(git rev-parse --short HEAD)"
+        echo "📂 Working directory is now clean"
+        
+        # Test basic Django check
+        source venv/bin/activate 2>/dev/null || echo "Virtual environment will be recreated during next deployment"
+        HOTFIX_EOF
+        
+        chmod +x hotfix_script.sh
+
+    - name: Execute hotfix on server
+      run: |
+        echo "🚨 Executing hotfix to clean server repository..."
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no hotfix_script.sh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }}:/tmp/hotfix_script.sh
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "chmod +x /tmp/hotfix_script.sh && /tmp/hotfix_script.sh"
+
+    - name: Verify hotfix success
+      run: |
+        echo "🔍 Verifying hotfix was successful..."
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "
+          cd /home/sunset/eventlinez
+          echo '📋 Repository status after hotfix:'
+          git status --porcelain
+          echo '📂 Current commit: \$(git rev-parse --short HEAD)'
+          echo '🔍 Syntax check:'
+          python -m py_compile eventlinez/urls.py && echo '✅ Syntax OK' || echo '❌ Syntax Error'
+        "
+
+    - name: Hotfix Results
+      run: |
+        echo "✅ Hotfix deployment completed!"
+        echo "🎯 The server repository has been force-reset to a clean state"
+        echo "📝 Next steps:"
+        echo "   1. The regular deployment workflow should now work"
+        echo "   2. Push any changes to the develop branch to trigger normal deployment"
+        echo "   3. The server is ready for the next deployment"
