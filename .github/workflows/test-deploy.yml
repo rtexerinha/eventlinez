@@ -185,7 +185,7 @@ jobs:
         # Check for uncommitted changes and handle them
         if ! git diff --quiet || ! git diff --cached --quiet; then
           echo "⚠️ Found uncommitted changes on server, stashing them..."
-          git stash push -m "Automated stash before deployment $(date)"
+          git stash save "Automated stash before deployment $(date)"
         fi
         
         git fetch origin
