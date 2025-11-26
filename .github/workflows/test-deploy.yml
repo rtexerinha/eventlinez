@@ -161,28 +161,80 @@ jobs:
         PROJECT_DIR="/home/sunset/eventlinez"
         cd $PROJECT_DIR
         
-        # Install Docker if not present
+        # Check Docker installation and install if needed
         if ! command -v docker &> /dev/null; then
-          echo "Installing Docker..."
-          curl -fsSL https://get.docker.com -o get-docker.sh
-          sudo sh get-docker.sh
-          sudo usermod -aG docker $USER
+          echo "Docker not found. Checking if we can install it..."
           
-          # Install Docker Compose
-          sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          echo "✅ Docker installed"
+          # Try to install Docker without interactive mode
+          if sudo -n true 2>/dev/null; then
+            echo "Installing Docker with sudo access..."
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            sudo usermod -aG docker $USER
+            
+            # Install Docker Compose
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            echo "✅ Docker installed successfully"
+          else
+            echo "❌ Cannot install Docker - no sudo access or sudo requires password"
+            echo "Please install Docker manually on the server:"
+            echo "  1. SSH into the server"
+            echo "  2. Run: curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh"
+            echo "  3. Add user to docker group: sudo usermod -aG docker $USER"
+            echo "  4. Install docker-compose"
+            echo ""
+            echo "Attempting deployment without Docker installation..."
+            exit 1
+          fi
+        else
+          echo "✅ Docker is already installed"
+        fi
+        
+        # Check if Docker Compose is available
+        if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+          echo "Docker Compose not found. Trying to install..."
+          if sudo -n true 2>/dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            echo "✅ Docker Compose installed"
+          else
+            echo "❌ Cannot install Docker Compose - checking for built-in compose..."
+            if docker compose version &> /dev/null; then
+              echo "✅ Docker built-in compose is available"
+            else
+              echo "❌ No Docker Compose available"
+              exit 1
+            fi
+          fi
+        else
+          echo "✅ Docker Compose is available"
+        fi
+        
+        # Ensure we're in the docker group (may require re-login)
+        if groups | grep -q docker; then
+          echo "✅ User is in docker group"
+        else
+          echo "⚠️ User not in docker group, trying to add..."
+          if sudo -n usermod -aG docker $USER 2>/dev/null; then
+            echo "✅ Added to docker group (may need re-login for permissions)"
+          else
+            echo "⚠️ Could not add to docker group, continuing anyway..."
+          fi
         fi
         
         # Stop existing containers
+        echo "Stopping existing containers..."
         docker-compose down 2>/dev/null || docker compose down 2>/dev/null || true
         
         # Pull latest code
+        echo "Updating code from repository..."
         git fetch origin
         git checkout develop
         git pull origin develop
         
         # Create environment file
+        echo "Creating environment configuration..."
         cat > .env.docker << 'ENV_EOF'
         DEBUG=False
         SECRET_KEY=test-server-secret-key-change-in-production
@@ -200,19 +252,49 @@ jobs:
         ENV_EOF
         
         # Build and start containers
-        docker-compose build --no-cache web || docker compose build --no-cache web
-        docker-compose up -d || docker compose up -d
+        echo "Building Docker containers..."
+        if command -v docker-compose &> /dev/null; then
+          docker-compose build --no-cache web
+          echo "Starting containers with docker-compose..."
+          docker-compose up -d
+        else
+          docker compose build --no-cache web
+          echo "Starting containers with docker compose..."
+          docker compose up -d
+        fi
         
         # Wait for services
+        echo "Waiting for services to start..."
         sleep 30
         
+        # Check if containers are running
+        if command -v docker-compose &> /dev/null; then
+          docker-compose ps
+          COMPOSE_CMD="docker-compose"
+        else
+          docker compose ps
+          COMPOSE_CMD="docker compose"
+        fi
+        
         # Run migrations
-        (docker-compose exec -T web python manage.py migrate --noinput) || (docker compose exec -T web python manage.py migrate --noinput)
+        echo "Running database migrations..."
+        $COMPOSE_CMD exec -T web python manage.py migrate --noinput
         
         # Collect static files
-        (docker-compose exec -T web python manage.py collectstatic --noinput --clear) || (docker compose exec -T web python manage.py collectstatic --noinput --clear)
+        echo "Collecting static files..."
+        $COMPOSE_CMD exec -T web python manage.py collectstatic --noinput --clear
         
-        echo "✅ Docker deployment completed"
+        # Final health check
+        echo "Performing final health check..."
+        sleep 10
+        if curl -f -s http://localhost:8000/ > /dev/null 2>&1; then
+          echo "✅ Application is responding"
+        else
+          echo "⚠️ Application may still be starting up"
+          $COMPOSE_CMD logs --tail=10 web
+        fi
+        
+        echo "✅ Docker deployment completed successfully"
         DEPLOY_EOF
 
     - name: Verify deployment
