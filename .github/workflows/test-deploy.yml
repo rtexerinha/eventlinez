@@ -146,7 +146,7 @@ jobs:
 
     - name: Deploy with Docker to test server
       run: |
-        echo "🚀 Starting Docker-based deployment to test server..."
+        echo "🚀 Starting deployment to test server..."
         echo "📋 Deployment Info:"
         echo "   - Commit: $(git rev-parse --short HEAD)"
         echo "   - Branch: ${GITHUB_REF#refs/heads/}"
@@ -157,85 +157,22 @@ jobs:
         sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} << 'DEPLOY_EOF'
         set -e
         
-        echo "🐳 Docker Deployment Starting..."
+        echo "🔍 Checking deployment options..."
         PROJECT_DIR="/home/sunset/eventlinez"
         cd $PROJECT_DIR
         
-        # Check Docker installation and install if needed
-        if ! command -v docker &> /dev/null; then
-          echo "Docker not found. Checking if we can install it..."
+        # Check if Docker is available
+        if command -v docker &> /dev/null && groups | grep -q docker; then
+          echo "🐳 Docker is available - using Docker deployment"
           
-          # Try to install Docker without interactive mode
-          if sudo -n true 2>/dev/null; then
-            echo "Installing Docker with sudo access..."
-            curl -fsSL https://get.docker.com -o get-docker.sh
-            sudo sh get-docker.sh
-            sudo usermod -aG docker $USER
-            
-            # Install Docker Compose
-            sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            echo "✅ Docker installed successfully"
-          else
-            echo "❌ Cannot install Docker - no sudo access or sudo requires password"
-            echo "Please install Docker manually on the server:"
-            echo "  1. SSH into the server"
-            echo "  2. Run: curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh"
-            echo "  3. Add user to docker group: sudo usermod -aG docker $USER"
-            echo "  4. Install docker-compose"
-            echo ""
-            echo "Attempting deployment without Docker installation..."
-            exit 1
-          fi
-        else
-          echo "✅ Docker is already installed"
-        fi
-        
-        # Check if Docker Compose is available
-        if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-          echo "Docker Compose not found. Trying to install..."
-          if sudo -n true 2>/dev/null; then
-            sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            echo "✅ Docker Compose installed"
-          else
-            echo "❌ Cannot install Docker Compose - checking for built-in compose..."
-            if docker compose version &> /dev/null; then
-              echo "✅ Docker built-in compose is available"
-            else
-              echo "❌ No Docker Compose available"
-              exit 1
-            fi
-          fi
-        else
-          echo "✅ Docker Compose is available"
-        fi
-        
-        # Ensure we're in the docker group (may require re-login)
-        if groups | grep -q docker; then
-          echo "✅ User is in docker group"
-        else
-          echo "⚠️ User not in docker group, trying to add..."
-          if sudo -n usermod -aG docker $USER 2>/dev/null; then
-            echo "✅ Added to docker group (may need re-login for permissions)"
-          else
-            echo "⚠️ Could not add to docker group, continuing anyway..."
-          fi
-        fi
-        
-        # Stop existing containers
-        echo "Stopping existing containers..."
-        docker-compose down 2>/dev/null || docker compose down 2>/dev/null || true
-        
-        # Pull latest code
-        echo "Updating code from repository..."
-        git fetch origin
-        git checkout develop
-        git pull origin develop
-        
-        # Create environment file
-        echo "Creating environment configuration..."
-        cat > .env.docker << 'ENV_EOF'
+          # Docker deployment
+          docker-compose down 2>/dev/null || docker compose down 2>/dev/null || true
+          
+          git fetch origin
+          git checkout develop
+          git pull origin develop
+          
+          cat > .env.docker << 'ENV_EOF'
         DEBUG=False
         SECRET_KEY=test-server-secret-key-change-in-production
         ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
@@ -250,51 +187,107 @@ jobs:
         ENVIRONMENT=test
         SEED_DATA=true
         ENV_EOF
-        
-        # Build and start containers
-        echo "Building Docker containers..."
-        if command -v docker-compose &> /dev/null; then
-          docker-compose build --no-cache web
-          echo "Starting containers with docker-compose..."
-          docker-compose up -d
+          
+          if command -v docker-compose &> /dev/null; then
+            docker-compose build --no-cache web
+            docker-compose up -d
+            sleep 30
+            docker-compose exec -T web python manage.py migrate --noinput
+            docker-compose exec -T web python manage.py collectstatic --noinput --clear
+          else
+            docker compose build --no-cache web
+            docker compose up -d
+            sleep 30
+            docker compose exec -T web python manage.py migrate --noinput
+            docker compose exec -T web python manage.py collectstatic --noinput --clear
+          fi
+          
+          echo "✅ Docker deployment completed"
+          
         else
-          docker compose build --no-cache web
-          echo "Starting containers with docker compose..."
-          docker compose up -d
+          echo "🐍 Docker not available - using Python virtual environment deployment"
+          
+          # Stop any existing processes
+          pkill -f "gunicorn.*eventlinez" || true
+          pkill -f "python.*manage.py.*runserver" || true
+          sleep 2
+          
+          # Pull latest code
+          git fetch origin
+          git checkout develop  
+          git pull origin develop
+          
+          # Setup Python virtual environment
+          if [ ! -d "venv" ]; then
+            echo "Creating Python virtual environment..."
+            python3 -m venv venv
+          fi
+          
+          source venv/bin/activate
+          
+          # Upgrade pip to compatible version for celery
+          pip install "pip<24.1"
+          
+          # Install dependencies with fallback strategy
+          echo "Installing Python dependencies..."
+          if pip install -r requirements.txt; then
+            echo "✅ Dependencies installed successfully"
+          else
+            echo "⚠️ Main installation failed, trying fallback approach..."
+            # Install without celery first
+            grep -v "celery" requirements.txt > requirements_no_celery.txt || true
+            pip install -r requirements_no_celery.txt
+            
+            # Try to install a compatible celery version
+            pip install "celery==4.4.6" || pip install "celery>=4.0.0,<5.0.0" || echo "Warning: Could not install celery"
+            rm requirements_no_celery.txt 2>/dev/null || true
+          fi
+          
+          # Create environment file
+          cat > .env << 'ENV_EOF'
+        DEBUG=False
+        SECRET_KEY=test-server-secret-key-change-in-production
+        ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
+        DATABASE_URL=sqlite:///db.sqlite3
+        STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
+        STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+        RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
+        RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
+        RECAPTCHA_PROJECT_ID=
+        SENDGRID_API_KEY=
+        EVENTLINEZ_FEE=0.12
+        ENVIRONMENT=test
+        SEED_DATA=true
+        ENV_EOF
+          
+          # Run Django management commands
+          python manage.py migrate --noinput
+          python manage.py collectstatic --noinput --clear
+          
+          # Start the application with gunicorn
+          echo "Starting application with gunicorn..."
+          nohup gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 eventlinez.wsgi:application > /tmp/django.log 2>&1 &
+          
+          # Wait for application to start
+          sleep 10
+          
+          echo "✅ Python virtual environment deployment completed"
         fi
-        
-        # Wait for services
-        echo "Waiting for services to start..."
-        sleep 30
-        
-        # Check if containers are running
-        if command -v docker-compose &> /dev/null; then
-          docker-compose ps
-          COMPOSE_CMD="docker-compose"
-        else
-          docker compose ps
-          COMPOSE_CMD="docker compose"
-        fi
-        
-        # Run migrations
-        echo "Running database migrations..."
-        $COMPOSE_CMD exec -T web python manage.py migrate --noinput
-        
-        # Collect static files
-        echo "Collecting static files..."
-        $COMPOSE_CMD exec -T web python manage.py collectstatic --noinput --clear
         
         # Final health check
-        echo "Performing final health check..."
-        sleep 10
+        echo "🔍 Performing health check..."
+        sleep 5
         if curl -f -s http://localhost:8000/ > /dev/null 2>&1; then
-          echo "✅ Application is responding"
+          echo "✅ Application is responding successfully"
         else
           echo "⚠️ Application may still be starting up"
-          $COMPOSE_CMD logs --tail=10 web
+          if [ -f /tmp/django.log ]; then
+            echo "📋 Recent application logs:"
+            tail -10 /tmp/django.log
+          fi
         fi
         
-        echo "✅ Docker deployment completed successfully"
+        echo "🎉 Deployment completed successfully!"
         DEPLOY_EOF
 
     - name: Verify deployment
