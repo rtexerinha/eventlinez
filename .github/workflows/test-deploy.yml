@@ -125,11 +125,19 @@ jobs:
         fi
         source venv/bin/activate
         
-        # Install dependencies
+        # Install dependencies with fallback for celery compatibility
         echo "📦 Installing dependencies..."
-        pip install --upgrade pip -q
-        pip install -r requirements.txt -q
-        echo "✅ Dependencies installed"
+        
+        # First, try with current pip
+        if pip install -r requirements.txt -q; then
+          echo "✅ Dependencies installed successfully"
+        else
+          echo "⚠️ Modern pip failed, trying with older pip for celery compatibility..."
+          # Downgrade pip temporarily to handle celery metadata issues
+          pip install 'pip<24.1' -q
+          pip install -r requirements.txt -q
+          echo "✅ Dependencies installed with compatibility mode"
+        fi
         
         # Create environment file
         echo "⚙️ Setting up environment..."
