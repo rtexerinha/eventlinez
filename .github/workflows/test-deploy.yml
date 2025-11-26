@@ -234,13 +234,58 @@ jobs:
             echo "✅ Dependencies installed successfully"
           else
             echo "⚠️ Main installation failed, trying fallback approach..."
-            # Install without celery first
-            grep -v "celery" requirements.txt > requirements_no_celery.txt || true
-            pip install -r requirements_no_celery.txt
             
-            # Try to install a compatible celery version
-            pip install "celery==4.4.6" || pip install "celery>=4.0.0,<5.0.0" || echo "Warning: Could not install celery"
-            rm requirements_no_celery.txt 2>/dev/null || true
+            # Create requirements without problematic packages
+            echo "Creating fallback requirements file..."
+            cat requirements.txt | grep -v -E "(celery|sshtunnel|paramiko|bcrypt|cryptography)" > requirements_core.txt || {
+              # If grep fails, create core requirements manually
+              cat > requirements_core.txt << 'CORE_EOF'
+django==3.2.25
+djangorestframework==3.14.0
+psycopg2-binary==2.9.8
+django-crispy-forms==1.13.0
+django-ckeditor==6.0.0
+django-imagekit==5.0.0
+pillow>=8.0.0,<10.0.0
+stripe==2.58.0
+sentry-sdk<2.0.0
+xlsxwriter==1.4.4
+django-bootstrap-datepicker-plus==4.0.0
+python-dotenv<1.0.0
+dj-database-url<2.0.0
+qrcode==7.2
+reportlab==3.5.68
+gunicorn>=20,<22
+whitenoise==5.3.0
+requests>=2.25.0,<3.0.0
+model-bakery==1.5.0
+PyPDF2==2.12.1
+CORE_EOF
+            }
+            
+            # Install core dependencies
+            echo "Installing core dependencies..."
+            pip install -r requirements_core.txt
+            
+            # Try to install compatible versions of problematic packages
+            echo "Installing compatible versions of additional packages..."
+            
+            # Install SSH tunnel support with compatible versions
+            pip install "paramiko>=2.7.2,<3.0.0" "sshtunnel>=0.4.0" || {
+              echo "⚠️ SSH tunnel packages failed, trying older versions..."
+              pip install "paramiko==2.7.2" "sshtunnel==0.4.0" || echo "SSH tunnel support not available"
+            }
+            
+            # Install compatible celery version
+            pip install "celery==4.4.6" || pip install "celery>=4.0.0,<5.0.0" || echo "⚠️ Celery not available"
+            
+            # Install compatible crypto packages
+            pip install "cryptography>=3.4.8,<4.0.0" "bcrypt>=3.2.0,<4.0.0" || echo "⚠️ Some crypto packages may not be available"
+            
+            # Clean up
+            rm requirements_core.txt 2>/dev/null || true
+            
+            echo "✅ Fallback installation completed"
           fi
           
           # Create environment file
