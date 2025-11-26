@@ -181,9 +181,19 @@ jobs:
         
         # Update git repository
         echo "🔄 Updating git repository..."
+        
+        # Check for uncommitted changes and handle them
+        if ! git diff --quiet || ! git diff --cached --quiet; then
+          echo "⚠️ Found uncommitted changes on server, stashing them..."
+          git stash push -m "Automated stash before deployment $(date)"
+        fi
+        
         git fetch origin
         git checkout develop
         git pull origin develop
+        
+        # If there were stashed changes, we can optionally restore them later
+        # For now, we'll continue with the clean deployment
         
         # Verify git state
         NEW_COMMIT=$(git rev-parse HEAD)
