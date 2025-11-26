@@ -172,21 +172,22 @@ jobs:
           git checkout develop
           git pull origin develop
           
-          cat > .env.docker << 'ENV_EOF'
-        DEBUG=False
-        SECRET_KEY=test-server-secret-key-change-in-production
-        ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
-        DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
-        STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
-        STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
-        RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
-        RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
-        RECAPTCHA_PROJECT_ID=
-        SENDGRID_API_KEY=
-        EVENTLINEZ_FEE=0.12
-        ENVIRONMENT=test
-        SEED_DATA=true
-        ENV_EOF
+          # Create Docker environment file
+          cat > .env.docker << 'DOCKER_ENV_EOF'
+DEBUG=False
+SECRET_KEY=test-server-secret-key-change-in-production
+ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
+DATABASE_URL=postgres://eventlinez:Texera123@@db:5432/eventlinez
+STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
+STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
+RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
+RECAPTCHA_PROJECT_ID=
+SENDGRID_API_KEY=
+EVENTLINEZ_FEE=0.12
+ENVIRONMENT=test
+SEED_DATA=true
+DOCKER_ENV_EOF
           
           if command -v docker-compose &> /dev/null; then
             docker-compose build --no-cache web
@@ -239,7 +240,7 @@ jobs:
             echo "Creating fallback requirements file..."
             cat requirements.txt | grep -v -E "(celery|sshtunnel|paramiko|bcrypt|cryptography)" > requirements_core.txt || {
               # If grep fails, create core requirements manually
-              cat > requirements_core.txt << 'CORE_EOF'
+              cat > requirements_core.txt << 'CORE_REQUIREMENTS_EOF'
 django==3.2.25
 djangorestframework==3.14.0
 psycopg2-binary==2.9.8
@@ -260,7 +261,7 @@ whitenoise==5.3.0
 requests>=2.25.0,<3.0.0
 model-bakery==1.5.0
 PyPDF2==2.12.1
-CORE_EOF
+CORE_REQUIREMENTS_EOF
             }
             
             # Install core dependencies
@@ -289,21 +290,21 @@ CORE_EOF
           fi
           
           # Create environment file
-          cat > .env << 'ENV_EOF'
-        DEBUG=False
-        SECRET_KEY=test-server-secret-key-change-in-production
-        ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
-        DATABASE_URL=sqlite:///db.sqlite3
-        STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
-        STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
-        RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
-        RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
-        RECAPTCHA_PROJECT_ID=
-        SENDGRID_API_KEY=
-        EVENTLINEZ_FEE=0.12
-        ENVIRONMENT=test
-        SEED_DATA=true
-        ENV_EOF
+          cat > .env << 'VENV_ENV_EOF'
+DEBUG=False
+SECRET_KEY=test-server-secret-key-change-in-production
+ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
+DATABASE_URL=sqlite:///db.sqlite3
+STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
+STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
+RECAPTCHA_PUBLIC_KEY=6LdK0-ErAAAAALmLHyOhfrARGwmoAyi0N-43_XSx
+RECAPTCHA_PRIVATE_KEY=6LdK0-ErAAAAAJDF60tuza2uqVJhMunY4_kPqiz9
+RECAPTCHA_PROJECT_ID=
+SENDGRID_API_KEY=
+EVENTLINEZ_FEE=0.12
+ENVIRONMENT=test
+SEED_DATA=true
+VENV_ENV_EOF
           
           # Run Django management commands
           python manage.py migrate --noinput
