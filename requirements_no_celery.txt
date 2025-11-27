@@ -1,0 +1,60 @@
+# Core Django packages
+Django==3.2.25
+djangorestframework==3.14.0
+
+# Database
+psycopg2-binary==2.9.8
+
+# UI/Forms
+django-crispy-forms==1.13.0
+
+# CKEditor for rich text
+django-ckeditor==6.0.0
+
+# Image processing
+django-imagekit==5.0.0
+pillow<10.0.0,>=8.0.0
+
+# Payment processing
+stripe==2.58.0
+
+# Error tracking
+sentry-sdk<2.0.0
+
+# Excel generation
+xlsxwriter==1.4.4
+
+# Date picker widget
+django-bootstrap-datepicker-plus==4.0.0
+
+# Environment and database configuration
+python-dotenv<1.0.0
+dj-database-url<2.0.0
+
+# SSH tunneling for database connections
+sshtunnel==0.4.0
+paramiko==2.6.0
+bcrypt==3.1.7
+cryptography==3.2.1
+
+# QR code generation
+qrcode==7.2
+
+# PDF generation
+reportlab==3.5.68
+
+# WSGI server for production
+gunicorn<22,>=20
+
+# Static file serving
+whitenoise==5.3.0
+
+# Task queue - TEMPORARILY DISABLED DUE TO PIP METADATA ISSUES
+# celery==4.4.5
+
+# HTTP requests
+requests<3.0.0,>=2.25.0
+
+# Testing utilities
+model-bakery==1.5.0
+PyPDF2==2.12.1
