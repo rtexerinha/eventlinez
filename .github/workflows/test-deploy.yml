@@ -145,7 +145,11 @@ jobs:
         DEBUG=False
         SECRET_KEY=test-server-secret-key-change-in-production
         ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,${{ secrets.TEST_SERVER_HOST }}
-        DATABASE_URL=sqlite:///db.sqlite3
+        POSTGRES_DB=eventlinez
+        POSTGRES_USER=eventlinez
+        POSTGRES_PASSWORD=Texera123@
+        POSTGRES_HOST=localhost
+        POSTGRES_PORT=5432
         STATIC_ROOT=/home/sunset/eventlinez/staticfiles
         MEDIA_ROOT=/home/sunset/eventlinez/media
         APP_HOST=https://test.eventlinez.com

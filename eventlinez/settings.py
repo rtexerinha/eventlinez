@@ -31,9 +31,6 @@ STRIPE_WEBHOOK_SECRET = "whsec_UncYtClVKoVzrioZyCT3vouPDASAztau"
 APP_HOST = os.getenv("APP_HOST", "http://localhost:8000")
 
 
-# ----- Database (container-native)
-USE_SQLITE = env_bool("USE_SQLITE", False)
-
 # ----- Email (env-driven; defaults suitable for SendGrid SMTP)
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = os.getenv("EMAIL_HOST", "")
@@ -45,21 +42,14 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@eventlinez.com")
 SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
+# ----- Database (PostgreSQL only)
 DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL and not USE_SQLITE:
+if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=int(os.getenv("DB_CONN_MAX_AGE", "60")),
         )
-    }
-elif USE_SQLITE:
-    # SQLite configuration when explicitly requested
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        }
     }
 else:
     # Detect if running in Docker
