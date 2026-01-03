@@ -104,8 +104,20 @@ jobs:
         echo "   - Message: ${{ steps.commit.outputs.commit_message }}"
         echo "   - Time: $(date '+%Y-%m-%d %H:%M:%S')"
         
+        # Create app directory if it doesn't exist
+        sudo mkdir -p /app
+        sudo chown -R $USER:$USER /app
+        
         # Navigate to project directory
-        cd /home/sunset/eventlinez
+        cd /app
+        
+        # Clone or update repository
+        if [ ! -d "eventlinez" ]; then
+          echo "📥 Cloning repository..."
+          git clone https://github.com/rafaelteixeira/eventlinez.git eventlinez
+        fi
+        
+        cd /app/eventlinez
         
         # Stop any running services
         echo "⏹️ Stopping services..."
@@ -150,8 +162,8 @@ jobs:
         POSTGRES_PASSWORD=Texera123@
         POSTGRES_HOST=localhost
         POSTGRES_PORT=5432
-        STATIC_ROOT=/home/sunset/eventlinez/staticfiles
-        MEDIA_ROOT=/home/sunset/eventlinez/media
+        STATIC_ROOT=/app/eventlinez/staticfiles
+        MEDIA_ROOT=/app/eventlinez/media
         APP_HOST=https://test.eventlinez.com
         STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
         STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
