@@ -178,9 +178,8 @@
                         {% for event in events %}
                         <option value="{{ event.id }}" {% ifequal selected_event.id event.id %}selected{% endifequal %}>
                             {{ event.name }} - {{ event.event_date|date:"M d, Y" }}
-                            {% if event.event_date|date:"Y-m-d" < today|date:"Y-m-d" %}(Past Event){% endif %}
-                        </option>
-                        {% endfor %}
+                            {% if event.event_date|date:"Y-m-d" < today|date:"Y-m-d" %}(Past Event){% endif %} </option>
+                                {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">

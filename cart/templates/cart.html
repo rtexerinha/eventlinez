@@ -267,13 +267,15 @@ This is the shopping cart page. Proceed to review your items and place the order
                     <div class="col-lg-12 mb-2 p-0">
                         <div class="d-flex justify-content-end">
                             <span class="col-6 h6-home pt-1">Subtotal:</span>
-                            <span class="col-6 h6-home d-flex justify-content-end p-0">${{ subtotal|floatformat:2 }}</span>
+                            <span class="col-6 h6-home d-flex justify-content-end p-0">${{ subtotal|floatformat:2
+                                }}</span>
                         </div>
                     </div>
                     <div class="col-lg-12 mb-2 p-0">
                         <div class="d-flex justify-content-end text-success">
                             <span class="col-6 h6-home pt-1">Promo discount:</span>
-                            <span class="col-6 h6-home d-flex justify-content-end p-0">-${{ cart.promo_discount|floatformat:2 }}</span>
+                            <span class="col-6 h6-home d-flex justify-content-end p-0">-${{
+                                cart.promo_discount|floatformat:2 }}</span>
                         </div>
                     </div>
                     <hr>
