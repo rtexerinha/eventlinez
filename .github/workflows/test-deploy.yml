@@ -202,7 +202,7 @@ jobs:
         echo "🔍 Verifying deployment..."
         
         # Test site accessibility
-        if curl -f -s --max-time 10 "http://${{ secrets.TEST_SERVER_HOST }}:8000/" > /dev/null 2>&1; then
+        if curl -f -s --max-time 10 "http://${{ secrets.TEST_SERVER_HOST }}/" > /dev/null 2>&1; then
           echo "✅ Site is accessible at http://${{ secrets.TEST_SERVER_HOST }}:8000/"
         else
           echo "❌ Site is not accessible"
@@ -214,7 +214,7 @@ jobs:
         
         if [ "$DEPLOYMENT_STATUS" == "success" ]; then
           echo "✅ Deployment completed successfully!"
-          echo "🌐 Site: http://${{ secrets.TEST_SERVER_HOST }}:8000/"
+          echo "🌐 Site: http://${{ secrets.TEST_SERVER_HOST }}/"
           echo "📊 Commit: ${{ steps.commit.outputs.commit_short }}"
         else
           echo "❌ Deployment completed with warnings"
