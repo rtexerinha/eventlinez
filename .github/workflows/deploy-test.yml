@@ -1,23 +1,20 @@
 name: Deploy to Test Environment (DISABLED - Replaced by Docker-based workflow)
 
-# This workflow has been disabled to prevent conflicts
+# This workflow has been completely disabled to prevent conflicts
 # The new Docker-based test-deploy.yml workflow handles testing and deployment
 on:
-  # Commented out to disable this workflow
-  # push:
-  #   branches: [ develop ]
-  # pull_request:
-  #   branches: [ develop ]
-  workflow_dispatch: # Only allow manual triggers for emergency
+  # All triggers disabled to prevent this workflow from running
+  workflow_dispatch: # Only allow manual triggers for emergency documentation
 
 jobs:
-  disabled:
+  # This job is completely removed to prevent any execution
+  documentation:
+    if: false # Ensures this never runs
     runs-on: ubuntu-latest
-    if: false # This will never run
     
     steps:
-    - name: Workflow Disabled
+    - name: Workflow Information
       run: |
-        echo "This workflow has been disabled."
-        echo "Please use the Docker-based test-deploy.yml workflow instead."
-        exit 1
+        echo "ℹ️ This workflow has been replaced by test-deploy.yml"
+        echo "📋 The new workflow uses Docker for better consistency"
+        echo "🚀 All deployments should use the active test-deploy.yml workflow"
