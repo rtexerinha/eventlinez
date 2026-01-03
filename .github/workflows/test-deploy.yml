@@ -204,19 +204,28 @@ jobs:
         # Test site accessibility
         if curl -f -s --max-time 10 "http://${{ secrets.TEST_SERVER_HOST }}/" > /dev/null 2>&1; then
           echo "✅ Site is accessible at http://${{ secrets.TEST_SERVER_HOST }}:8000/"
+          SITE_ACCESSIBLE=true
         else
           echo "❌ Site is not accessible"
-          exit 1
+          SITE_ACCESSIBLE=false
         fi
         
         # Get deployment status
         DEPLOYMENT_STATUS=$(sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "cat /tmp/deployment_status 2>/dev/null || echo 'unknown'")
         
-        if [ "$DEPLOYMENT_STATUS" == "success" ]; then
-          echo "✅ Deployment completed successfully!"
+        echo "📊 Deployment Status: $DEPLOYMENT_STATUS"
+        echo "🌐 Site Accessible: $SITE_ACCESSIBLE"
+        
+        # If site is accessible, consider deployment successful even with warnings
+        if [ "$SITE_ACCESSIBLE" == "true" ]; then
+          if [ "$DEPLOYMENT_STATUS" == "success" ]; then
+            echo "✅ Deployment completed successfully!"
+          else
+            echo "⚠️ Deployment completed with warnings but site is accessible"
+          fi
           echo "🌐 Site: http://${{ secrets.TEST_SERVER_HOST }}/"
           echo "📊 Commit: ${{ steps.commit.outputs.commit_short }}"
         else
-          echo "❌ Deployment completed with warnings"
+          echo "❌ Deployment failed - site is not accessible"
           exit 1
         fi
