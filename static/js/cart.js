@@ -1,4 +1,11 @@
 function _updateTotal() {
+  // Check if we have a promo code applied - if so, don't override the server-calculated total
+  const promoApplied = document.querySelector('.applied-promo-code');
+  if (promoApplied) {
+    console.log('Promo code applied - keeping server-calculated total');
+    return; // Don't override the total when promo code is applied
+  }
+
   let total = 0.0;
   console.log('Updating total...');
   $(".ticket-row").each(function (index) {

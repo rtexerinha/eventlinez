@@ -205,8 +205,11 @@ def cart_detail(request, cart_items=None):
         promo_code = cart_items.first().promo_code if cart_items.exists() else None
         subtotal = sum(item.price_total() for item in cart_items)
         
-        # Calculate total with promo discount
-        total = cart.total_with_promo() if cart.promo_discount > 0 else subtotal
+        # Calculate total - always use cart.total_with_promo() if there's an applied promo code
+        if cart.applied_promo_code:
+            total = cart.total_with_promo()
+        else:
+            total = subtotal
 
     except Cart.DoesNotExist:
         logger.error("The cart does not exist.")

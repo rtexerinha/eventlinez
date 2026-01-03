@@ -53,4 +53,4 @@ EXPOSE 8000
 
 # Use entrypoint script to handle migrations and static files
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["gunicorn", "eventlinez.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "eventlinez.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "--worker-class", "sync", "--max-requests", "1000", "--max-requests-jitter", "100", "--preload"]
