@@ -17,14 +17,18 @@ function _updateTotal() {
 
     if (amountElement.length > 0) {
       // Cart page: use ticket-amount (includes fee)
-      amount = parseFloat(amountElement.text().replace('$', ''));
+      let amountText = amountElement.text().replace('$', '').replace(',', '');
+      amount = parseFloat(amountText) || 0;
     } else {
       // Event page: use ticket-price (unit price only)
-      amount = parseFloat($(this).find(".ticket-price").text().replace('$', ''));
+      let priceText = $(this).find(".ticket-price").text().replace('$', '').replace(',', '');
+      amount = parseFloat(priceText) || 0;
     }
 
     console.log(`Item ${index}: qty=${qty}, amount=${amount}`);
-    total = total + amount * qty;
+    if (!isNaN(qty) && !isNaN(amount)) {
+      total = total + (amount * qty);
+    }
   });
 
   console.log('Calculated total:', total);
@@ -35,15 +39,20 @@ function _updateTotal() {
     return;
   }
 
-  let fmt = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: "2",
-    maximumFractionDigits: "2",
-  });
+  // Only update if we have a valid total and no template syntax is present
+  if (total >= 0 && !amountField.textContent.includes('{{')) {
+    let fmt = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
-  amountField.textContent = fmt.format(total);
-  console.log('Total updated to:', fmt.format(total));
+    amountField.textContent = fmt.format(total);
+    console.log('Total updated to:', fmt.format(total));
+  } else {
+    console.log('Skipping total update - invalid total or template syntax detected');
+  }
 }
 
 function controlQty(ticket_id, command) {

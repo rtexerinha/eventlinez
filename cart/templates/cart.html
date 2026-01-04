@@ -82,6 +82,10 @@ This is the shopping cart page. Proceed to review your items and place the order
     <header class="bg-gradient col-lg-12 v-center">
         <img class="mr-2" src="{% static 'img/ticket.svg' %}" alt="ticket">
         <h3 class="mt-2 h3-home p-light">Cart summary</h3>
+        <!-- Debug test to verify template rendering -->
+        {% if debug_test %}
+        <small style="color: white; opacity: 0.8;">Debug: {{ debug_test }}</small>
+        {% endif %}
     </header>
 
     <main class="col-12 p-0">
@@ -195,7 +199,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 <div class="col-lg-1 col-12 pt-lg-5 d-flex">
                     <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Unit Price</p>
                     <p class="h6-home text-lg-center">
-                        <span class="ticket-price">{{item.ticket.price }}</span>
+                        <span class="ticket-price">${{item.ticket.price|floatformat:2 }}</span>
                     </p>
                 </div>
 
@@ -208,7 +212,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 <div class="col-lg-1 col-12 pt-lg-5 d-flex">
                     <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Amount</p>
                     <p class="h6-home text-lg-center">
-                        <span class="ticket-amount">${{item.price_total| floatformat:2 }}</span>
+                        <span class="ticket-amount">${{item.price_total|floatformat:2 }}</span>
                     </p>
                 </div>
             </aside>
@@ -267,15 +271,18 @@ This is the shopping cart page. Proceed to review your items and place the order
                     <div class="col-lg-12 mb-2 p-0">
                         <div class="d-flex justify-content-end">
                             <span class="col-6 h6-home pt-1">Subtotal:</span>
-                            <span class="col-6 h6-home d-flex justify-content-end p-0">${{ subtotal|floatformat:2
-                                }}</span>
+                            <span class="col-6 h6-home d-flex justify-content-end p-0">
+                                {% if subtotal %}${{ subtotal|floatformat:2 }}{% else %}$0.00{% endif %}
+                            </span>
                         </div>
                     </div>
                     <div class="col-lg-12 mb-2 p-0">
                         <div class="d-flex justify-content-end text-success">
                             <span class="col-6 h6-home pt-1">Promo discount:</span>
-                            <span class="col-6 h6-home d-flex justify-content-end p-0">-${{
-                                cart.promo_discount|floatformat:2 }}</span>
+                            <span class="col-6 h6-home d-flex justify-content-end p-0">
+                                {% if cart.promo_discount %}-${{ cart.promo_discount|floatformat:2 }}{% else %}-$0.00{%
+                                endif %}
+                            </span>
                         </div>
                     </div>
                     <hr>
@@ -285,8 +292,9 @@ This is the shopping cart page. Proceed to review your items and place the order
                     <div class="col-lg-12 mb-3 p-0">
                         <div class="d-flex justify-content-end">
                             <strong class="col-6 h4-home pt-1">Your total is:</strong>
-                            <strong class="col-6 h3-home d-flex justify-content-end p-0" id="total">${{
-                                total|floatformat:2 }}</strong>
+                            <strong class="col-6 h3-home d-flex justify-content-end p-0" id="total">
+                                {% if total %}${{ total|floatformat:2 }}{% else %}$0.00{% endif %}
+                            </strong>
                         </div>
                     </div>
 
