@@ -211,7 +211,7 @@ jobs:
         POSTGRES_HOST=localhost
         POSTGRES_PORT=5432
         STATIC_ROOT=/home/$USER/app/eventlinez/staticfiles
-        MEDIA_ROOT=/home/$USER/app/eventlinez/media
+        MEDIA_ROOT=/home/$USER/eventlinez/media
         APP_HOST=https://test.eventlinez.com
         STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
         STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
