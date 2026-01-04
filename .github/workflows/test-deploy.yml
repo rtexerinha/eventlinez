@@ -95,8 +95,40 @@ jobs:
     - name: Create deployment archive
       run: |
         echo "📦 Creating deployment archive..."
-        tar -czf eventlinez-deploy.tar.gz --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' --exclude='node_modules' --exclude='.env*' --exclude='venv' --exclude='staticfiles' .
-        echo "✅ Archive created"
+        # Create archive with more specific exclusions and ignore warnings about files changing
+        tar -czf eventlinez-deploy.tar.gz \
+          --exclude='.git' \
+          --exclude='__pycache__' \
+          --exclude='*.pyc' \
+          --exclude='*.pyo' \
+          --exclude='node_modules' \
+          --exclude='.env*' \
+          --exclude='venv' \
+          --exclude='env' \
+          --exclude='staticfiles' \
+          --exclude='media/CACHE' \
+          --exclude='*.log' \
+          --exclude='.pytest_cache' \
+          --exclude='.coverage' \
+          --exclude='htmlcov' \
+          --exclude='tmp' \
+          --exclude='*.tmp' \
+          --exclude='*.swp' \
+          --exclude='.DS_Store' \
+          --exclude='db.sqlite3' \
+          --exclude='cookies.txt' \
+          --exclude='backups' \
+          --warning=no-file-changed \
+          . || [ $? -eq 1 ]
+        
+        # Verify archive was created successfully
+        if [ -f "eventlinez-deploy.tar.gz" ]; then
+          echo "✅ Archive created successfully"
+          ls -lh eventlinez-deploy.tar.gz
+        else
+          echo "❌ Failed to create archive"
+          exit 1
+        fi
 
     - name: Create simple deployment script
       run: |
