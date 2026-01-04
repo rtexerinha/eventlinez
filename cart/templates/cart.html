@@ -145,35 +145,33 @@ This is the shopping cart page. Proceed to review your items and place the order
                 </div>
 
                 <aside class="col-lg-2 col-6 pt-lg-5 d-justy">
+                    {% if item.quantity < item.ticket.qty_available %}
+                        <div class="h6-home text-lg-center">
+                            <button
+                                onclick="console.log('Decrease clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'decrease')"
+                                class="button-increment ml-2 pl-5px">
+                                <i class="fas fa-minus"></i>
+                            </button>&nbsp;
 
-                    {% if item.quantity < item.ticket.qty_available %} <div class="h6-home text-lg-center">
-                        <button
-                            onclick="console.log('Decrease clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'decrease')"
-                            class="button-increment ml-2 pl-5px">
-                            <i class="fas fa-minus"></i>
-                        </button>&nbsp;
+                            <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
 
-                        <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
+                            {% if item.ticket.qty_available == 1 %}
+                            <button style="pointer-events: none; cursor: not-allowed;" class="button-increment mr-2 pl-5px"
+                                disabled>
+                                <i class="fas fa-plus" style=" color: gray!important; text-decoration: none"></i>
+                            </button>
 
-                        {% if item.ticket.qty_available == 1 %}
-                        <button style="pointer-events: none; cursor: not-allowed;" class="button-increment mr-2 pl-5px"
-                            disabled>
-                            <i class="fas fa-plus" style=" color: gray!important; text-decoration: none"></i>
-                        </button>
+                            <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
 
-                        <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
-
-                        {% else %}
-                        <button
-                            onclick="console.log('Increase clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'increase')"
-                            class="button-increment mr-2 pl-5px">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        {% endif %}
-
+                            {% else %}
+                            <button
+                                onclick="console.log('Increase clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'increase')"
+                                class="button-increment mr-2 pl-5px">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            {% endif %}
                         </div>
-
-                        {% else %}
+                    {% else %}
                         <div class="h6-home">
                             <button
                                 onclick="console.log('Decrease clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'decrease')"
@@ -192,8 +190,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                                 There are only {{item.quantity }} tickets available
                             </p>
                         </div>
-
-                        {% endif %}
+                    {% endif %}
                 </aside>
 
                 <div class="col-lg-1 col-12 pt-lg-5 d-flex">
