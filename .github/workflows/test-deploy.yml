@@ -92,6 +92,12 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.TEST_SERVER_HOST }} >> ~/.ssh/known_hosts
 
+    - name: Create deployment archive
+      run: |
+        echo "📦 Creating deployment archive..."
+        tar -czf eventlinez-deploy.tar.gz --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' --exclude='node_modules' --exclude='.env*' --exclude='venv' --exclude='staticfiles' .
+        echo "✅ Archive created"
+
     - name: Create simple deployment script
       run: |
         cat > simple_deploy.sh << 'EOF'
@@ -110,24 +116,28 @@ jobs:
         # Navigate to project directory
         cd ~/app
         
-        # Clone or update repository
-        if [ ! -d "eventlinez" ]; then
-          echo "📥 Cloning repository..."
-          git clone https://github.com/rafaelteixeira/eventlinez.git eventlinez
-        fi
-        
-        cd ~/app/eventlinez
-        
-        # Stop any running services
+        # Stop any running services first
         echo "⏹️ Stopping services..."
         pkill -f "gunicorn.*eventlinez" || echo "Service not running"
         
-        # Update code - simple and reliable
-        echo "📥 Updating code..."
-        git fetch origin
-        git reset --hard origin/develop
-        git clean -fd
-        echo "✅ Code updated"
+        # Extract the deployment archive
+        echo "📥 Extracting deployment files..."
+        if [ -f /tmp/eventlinez-deploy.tar.gz ]; then
+          # Create backup if directory exists
+          if [ -d "eventlinez" ]; then
+            echo "💾 Creating backup..."
+            mv eventlinez "eventlinez_backup_$(date +%Y%m%d_%H%M%S)" || true
+          fi
+          
+          # Create new directory and extract
+          mkdir -p eventlinez
+          cd eventlinez
+          tar -xzf /tmp/eventlinez-deploy.tar.gz
+          echo "✅ Code extracted successfully"
+        else
+          echo "❌ Deployment archive not found"
+          exit 1
+        fi
         
         # Setup virtual environment
         echo "🐍 Setting up Python environment..."
@@ -205,7 +215,10 @@ jobs:
     - name: Deploy to test server
       run: |
         echo "🚀 Deploying to test server..."
+        # Transfer the deployment archive and script
+        sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no eventlinez-deploy.tar.gz ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }}:/tmp/
         sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" scp -o StrictHostKeyChecking=no simple_deploy.sh ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }}:/tmp/simple_deploy.sh
+        # Execute the deployment script
         sshpass -p "${{ secrets.TEST_SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TEST_SERVER_USER }}@${{ secrets.TEST_SERVER_HOST }} "chmod +x /tmp/simple_deploy.sh && /tmp/simple_deploy.sh"
 
     - name: Verify deployment
