@@ -190,30 +190,51 @@ success "Static files collected and verified"
 
 # Step 9.5: Generate ImageKit cache and fix media permissions
 log "🖼️ Generating ImageKit cache and setting media permissions..."
-# Create media directories if they don't exist
-mkdir -p $DEPLOY_PATH/eventlinez/media/event
-mkdir -p $DEPLOY_PATH/eventlinez/media/CACHE/images/event
-mkdir -p $DEPLOY_PATH/eventlinez/media/gallery
-mkdir -p $DEPLOY_PATH/eventlinez/media/partners
+
+# Ensure we're in the right directory
+cd $DEPLOY_PATH/eventlinez || {
+    error "Failed to navigate to project directory"
+    exit 1
+}
+
+# Create media directories with absolute paths (more reliable)
+log "Creating media directory structure..."
+mkdir -p /home/sunset/eventlinez/media/event
+mkdir -p /home/sunset/eventlinez/media/CACHE/images/event
+mkdir -p /home/sunset/eventlinez/media/gallery
+mkdir -p /home/sunset/eventlinez/media/partners
+
+# Verify directories were created
+if [ -d "/home/sunset/eventlinez/media/event" ]; then
+    success "Media directories created successfully"
+else
+    error "Failed to create media directories"
+fi
 
 # If this is initial deployment and no media exists, create sample media structure
-if [ ! "$(ls -A $DEPLOY_PATH/eventlinez/media/event 2>/dev/null)" ]; then
-    log "🎨 No media files found - this appears to be initial deployment"
-    log "Creating placeholder structure for media files..."
+if [ ! "$(ls -A /home/sunset/eventlinez/media/event 2>/dev/null)" ]; then
+    log "🎨 No media files found - creating sample images..."
     
-    # Create a simple placeholder image or copy from development if available
-    if [ -f "media/event/mock_img.jpg" ]; then
-        cp -r media/* $DEPLOY_PATH/eventlinez/media/ 2>/dev/null || warning "Could not copy sample media files"
+    # Create sample images if curl is available
+    if command -v curl &> /dev/null; then
+        curl -s "https://via.placeholder.com/800x500/4A90E2/FFFFFF?text=Sample+Event" -o /home/sunset/eventlinez/media/event/sample-event.jpg || warning "Could not download sample image"
+        success "Sample images created"
+    fi
+    
+    # Try to copy from local development if available
+    if [ -d "media/event" ] && [ "$(ls -A media/event 2>/dev/null)" ]; then
+        cp -r media/* /home/sunset/eventlinez/media/ 2>/dev/null && success "Copied development media files" || warning "Could not copy development media files"
     fi
 fi
 
 # Generate ImageKit cache for better performance
-python manage.py generateimages || warning "Could not generate ImageKit images (might not be needed)"
+python manage.py generateimages || warning "Could not generate ImageKit images (command might not exist)"
 
-# Set proper permissions for media files
-chown -R $DEPLOY_USER:www-data $DEPLOY_PATH/eventlinez/media 2>/dev/null || chown -R $DEPLOY_USER:$DEPLOY_USER $DEPLOY_PATH/eventlinez/media
-chmod -R 755 $DEPLOY_PATH/eventlinez/media
-find $DEPLOY_PATH/eventlinez/media -type f -exec chmod 644 {} \; 2>/dev/null || true
+# Set proper permissions for media files with absolute paths
+log "Setting media file permissions..."
+chown -R $DEPLOY_USER:www-data /home/sunset/eventlinez/media 2>/dev/null || chown -R $DEPLOY_USER:$DEPLOY_USER /home/sunset/eventlinez/media
+chmod -R 755 /home/sunset/eventlinez/media
+find /home/sunset/eventlinez/media -type f -exec chmod 644 {} \; 2>/dev/null || true
 
 success "ImageKit cache generated and media permissions set"
 
