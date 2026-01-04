@@ -149,30 +149,25 @@ jobs:
         echo "   - Message: ${{ steps.commit.outputs.commit_message }}"
         echo "   - Time: $(date '+%Y-%m-%d %H:%M:%S')"
         
-        # Create app directory in user's home directory to avoid sudo
-        mkdir -p ~/app
-        
-        # Navigate to project directory
-        cd ~/app
-        
         # Stop any running services first
         echo "⏹️ Stopping services..."
         pkill -f "gunicorn.*eventlinez" || echo "Service not running"
         
-        # Extract the deployment archive
+        # Extract the deployment archive directly to /app/eventlinez
         echo "📥 Extracting deployment files..."
         if [ -f /tmp/eventlinez-deploy.tar.gz ]; then
           # Create backup if directory exists
-          if [ -d "eventlinez" ]; then
+          if [ -d "/app/eventlinez" ]; then
             echo "💾 Creating backup..."
-            mv eventlinez "eventlinez_backup_$(date +%Y%m%d_%H%M%S)" || true
+            sudo mv /app/eventlinez "/app/eventlinez_backup_$(date +%Y%m%d_%H%M%S)" || true
           fi
           
-          # Create new directory and extract
-          mkdir -p eventlinez
-          cd eventlinez
+          # Create the target directory and extract directly there
+          sudo mkdir -p /app/eventlinez
+          sudo chown -R $USER:$USER /app/eventlinez
+          cd /app/eventlinez
           tar -xzf /tmp/eventlinez-deploy.tar.gz
-          echo "✅ Code extracted successfully"
+          echo "✅ Code extracted successfully to /app/eventlinez"
         else
           echo "❌ Deployment archive not found"
           exit 1
@@ -210,8 +205,8 @@ jobs:
         POSTGRES_PASSWORD=Texera123@
         POSTGRES_HOST=localhost
         POSTGRES_PORT=5432
-        STATIC_ROOT=/home/$USER/app/eventlinez/staticfiles
-        MEDIA_ROOT=/home/$USER/eventlinez/media
+        STATIC_ROOT=/app/eventlinez/staticfiles
+        MEDIA_ROOT=/app/eventlinez/media
         APP_HOST=https://test.eventlinez.com
         STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
         STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
@@ -229,6 +224,7 @@ jobs:
         
         # Start application
         echo "🚀 Starting application..."
+        cd /app/eventlinez
         nohup gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 eventlinez.wsgi:application > /tmp/django.log 2>&1 &
         
         # Wait and health check
