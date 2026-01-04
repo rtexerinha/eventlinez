@@ -153,29 +153,20 @@ jobs:
         echo "⏹️ Stopping services..."
         pkill -f "gunicorn.*eventlinez" || echo "Service not running"
         
-        # Extract the deployment archive directly to /app/eventlinez
+        # Extract the deployment archive directly to /home/sunset/eventlinez
         echo "📥 Extracting deployment files..."
         if [ -f /tmp/eventlinez-deploy.tar.gz ]; then
-          # Create backup if directory exists (without sudo)
-          if [ -d "/app/eventlinez" ]; then
+          # Create backup if directory exists
+          if [ -d "/home/sunset/eventlinez" ]; then
             echo "💾 Creating backup..."
-            if [ -w "/app" ]; then
-              mv /app/eventlinez "/app/eventlinez_backup_$(date +%Y%m%d_%H%M%S)" || echo "Warning: Could not create backup"
-            else
-              echo "Warning: No write permission to /app, skipping backup"
-            fi
+            mv /home/sunset/eventlinez "/home/sunset/eventlinez_backup_$(date +%Y%m%d_%H%M%S)" || echo "Warning: Could not create backup"
           fi
           
-          # Create the target directory (without sudo - assume /app exists and is writable)
-          if [ ! -w "/app" ]; then
-            echo "❌ No write permission to /app directory. Please ensure the deployment user has write access to /app"
-            exit 1
-          fi
-          
-          mkdir -p /app/eventlinez
-          cd /app/eventlinez
+          # Create the target directory
+          mkdir -p /home/sunset/eventlinez
+          cd /home/sunset/eventlinez
           tar -xzf /tmp/eventlinez-deploy.tar.gz
-          echo "✅ Code extracted successfully to /app/eventlinez"
+          echo "✅ Code extracted successfully to /home/sunset/eventlinez"
         else
           echo "❌ Deployment archive not found"
           exit 1
@@ -213,8 +204,8 @@ jobs:
         POSTGRES_PASSWORD=Texera123@
         POSTGRES_HOST=localhost
         POSTGRES_PORT=5432
-        STATIC_ROOT=/app/eventlinez/staticfiles
-        MEDIA_ROOT=/app/eventlinez/media
+        STATIC_ROOT=/home/sunset/eventlinez/staticfiles
+        MEDIA_ROOT=/home/sunset/eventlinez/media
         APP_HOST=https://test.eventlinez.com
         STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
         STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
@@ -232,7 +223,7 @@ jobs:
         
         # Start application
         echo "🚀 Starting application..."
-        cd /app/eventlinez
+        cd /home/sunset/eventlinez
         nohup gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 eventlinez.wsgi:application > /tmp/django.log 2>&1 &
         
         # Wait and health check
