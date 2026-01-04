@@ -192,7 +192,20 @@ success "Static files collected and verified"
 log "🖼️ Generating ImageKit cache and setting media permissions..."
 # Create media directories if they don't exist
 mkdir -p $DEPLOY_PATH/eventlinez/media/event
-mkdir -p $DEPLOY_PATH/eventlinez/media/CACHE
+mkdir -p $DEPLOY_PATH/eventlinez/media/CACHE/images/event
+mkdir -p $DEPLOY_PATH/eventlinez/media/gallery
+mkdir -p $DEPLOY_PATH/eventlinez/media/partners
+
+# If this is initial deployment and no media exists, create sample media structure
+if [ ! "$(ls -A $DEPLOY_PATH/eventlinez/media/event 2>/dev/null)" ]; then
+    log "🎨 No media files found - this appears to be initial deployment"
+    log "Creating placeholder structure for media files..."
+    
+    # Create a simple placeholder image or copy from development if available
+    if [ -f "media/event/mock_img.jpg" ]; then
+        cp -r media/* $DEPLOY_PATH/eventlinez/media/ 2>/dev/null || warning "Could not copy sample media files"
+    fi
+fi
 
 # Generate ImageKit cache for better performance
 python manage.py generateimages || warning "Could not generate ImageKit images (might not be needed)"
