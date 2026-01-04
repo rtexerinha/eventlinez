@@ -188,6 +188,22 @@ fi
 
 success "Static files collected and verified"
 
+# Step 9.5: Generate ImageKit cache and fix media permissions
+log "🖼️ Generating ImageKit cache and setting media permissions..."
+# Create media directories if they don't exist
+mkdir -p $DEPLOY_PATH/eventlinez/media/event
+mkdir -p $DEPLOY_PATH/eventlinez/media/CACHE
+
+# Generate ImageKit cache for better performance
+python manage.py generateimages || warning "Could not generate ImageKit images (might not be needed)"
+
+# Set proper permissions for media files
+chown -R $DEPLOY_USER:www-data $DEPLOY_PATH/eventlinez/media 2>/dev/null || chown -R $DEPLOY_USER:$DEPLOY_USER $DEPLOY_PATH/eventlinez/media
+chmod -R 755 $DEPLOY_PATH/eventlinez/media
+find $DEPLOY_PATH/eventlinez/media -type f -exec chmod 644 {} \; 2>/dev/null || true
+
+success "ImageKit cache generated and media permissions set"
+
 # Step 10: Set proper permissions
 log "🔐 Setting proper file permissions..."
 chown -R $DEPLOY_USER:$DEPLOY_USER $DEPLOY_PATH
