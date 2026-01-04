@@ -167,17 +167,20 @@ sudo rm -rf /var/cache/nginx/* 2>/dev/null || warning "Could not clear nginx cac
 success "Caches cleaned"
 
 log "📁 Collecting static files..."
+# Create the staticfiles directory if it doesn't exist
+mkdir -p $DEPLOY_PATH/eventlinez/staticfiles
+
 # Remove old static files first
-rm -rf $DEPLOY_PATH/staticfiles/* 2>/dev/null || true
+rm -rf $DEPLOY_PATH/eventlinez/staticfiles/* 2>/dev/null || true
 
 python manage.py collectstatic --noinput --clear
 
 # CRITICAL: Ensure no HTML templates were collected as static files
 log "🔍 Verifying templates are not in static files..."
-TEMPLATE_COUNT=$(find $DEPLOY_PATH/staticfiles -name "*.html" -type f 2>/dev/null | wc -l)
+TEMPLATE_COUNT=$(find $DEPLOY_PATH/eventlinez/staticfiles -name "*.html" -type f 2>/dev/null | wc -l)
 if [ "$TEMPLATE_COUNT" -gt 0 ]; then
     warning "Found $TEMPLATE_COUNT HTML templates in staticfiles - removing them..."
-    find $DEPLOY_PATH/staticfiles -name "*.html" -type f -delete
+    find $DEPLOY_PATH/eventlinez/staticfiles -name "*.html" -type f -delete
     success "Removed HTML templates from staticfiles"
 else
     log "✅ No HTML templates in staticfiles (correct)"
@@ -236,13 +239,13 @@ server {
     server_name test.eventlinez.com 45.79.112.247;
 
     location /static/ {
-        alias $DEPLOY_PATH/staticfiles/;
+        alias $DEPLOY_PATH/eventlinez/staticfiles/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
 
     location /media/ {
-        alias $DEPLOY_PATH/media/;
+        alias $DEPLOY_PATH/eventlinez/media/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
