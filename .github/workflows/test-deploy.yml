@@ -95,6 +95,12 @@ jobs:
     - name: Create deployment archive
       run: |
         echo "📦 Creating deployment archive..."
+        # Fix any future timestamps before creating archive
+        find . -type f -newer /proc/1/stat 2>/dev/null | head -10 | while read file; do
+          echo "Fixing future timestamp on: $file"
+          touch "$file"
+        done
+        
         # Create archive with more specific exclusions and ignore warnings about files changing
         tar -czf eventlinez-deploy.tar.gz \
           --exclude='.git' \
@@ -119,6 +125,7 @@ jobs:
           --exclude='cookies.txt' \
           --exclude='backups' \
           --warning=no-file-changed \
+          --warning=no-timestamp \
           . || [ $? -eq 1 ]
         
         # Verify archive was created successfully
@@ -203,8 +210,8 @@ jobs:
         POSTGRES_PASSWORD=Texera123@
         POSTGRES_HOST=localhost
         POSTGRES_PORT=5432
-        STATIC_ROOT=~/app/eventlinez/staticfiles
-        MEDIA_ROOT=~/app/eventlinez/media
+        STATIC_ROOT=/home/$USER/app/eventlinez/staticfiles
+        MEDIA_ROOT=/home/$USER/app/eventlinez/media
         APP_HOST=https://test.eventlinez.com
         STRIPE_SECRET_KEY=sk_test_YHj724JNB8fMwCfcCb4ieHRU007hQB7qwU
         STRIPE_PUBLISHABLE_KEY=pk_test_X0l8E5nTKtSMa8fcs4983IoP00wOhfcpbC
