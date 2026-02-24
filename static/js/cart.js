@@ -1,32 +1,50 @@
 function _updateTotal() {
+  // On the cart page the total is server-rendered and authoritative — skip JS recalculation.
+  // The cart page sets data-cart-page on the body to signal this.
+  if (document.body && document.body.dataset.cartPage) {
+    console.log('Cart page detected — skipping _updateTotal(), using server-rendered total.');
+    return;
+  }
+
   // Check if we have a promo code applied - if so, don't override the server-calculated total
   const promoApplied = document.querySelector('.applied-promo-code');
   if (promoApplied) {
     console.log('Promo code applied - keeping server-calculated total');
-    return; // Don't override the total when promo code is applied
+    return;
   }
 
   let total = 0.0;
   console.log('Updating total...');
   $(".ticket-row").each(function (index) {
-    let qty = parseInt($(this).find(".ticket-qty").text());
+    let qty = parseInt($(this).find(".ticket-qty").text().trim(), 10);
 
-    // Try to find ticket-amount first (for cart page), then ticket-price (for event page)
-    let amountElement = $(this).find(".ticket-amount");
     let amount = 0;
+    let amountElement = $(this).find(".ticket-amount");
 
     if (amountElement.length > 0) {
-      // Cart page: use ticket-amount (includes fee)
-      let amountText = amountElement.text().replace('$', '').replace(',', '');
-      amount = parseFloat(amountText) || 0;
+      // Prefer data-price attribute (set by server, no parsing needed)
+      let dataPrice = amountElement.attr('data-price');
+      if (dataPrice !== undefined) {
+        amount = parseFloat(dataPrice) || 0;
+      } else {
+        // Fallback: strip currency symbols and parse text
+        let amountText = amountElement.text().replace(/[^0-9.]/g, '');
+        amount = parseFloat(amountText) || 0;
+      }
     } else {
-      // Event page: use ticket-price (unit price only)
-      let priceText = $(this).find(".ticket-price").text().replace('$', '').replace(',', '');
-      amount = parseFloat(priceText) || 0;
+      // Event page: use ticket-price (unit price × qty)
+      let priceEl = $(this).find(".ticket-price");
+      let dataPrice = priceEl.attr('data-price');
+      if (dataPrice !== undefined) {
+        amount = parseFloat(dataPrice) || 0;
+      } else {
+        let priceText = priceEl.text().replace(/[^0-9.]/g, '');
+        amount = parseFloat(priceText) || 0;
+      }
     }
 
     console.log(`Item ${index}: qty=${qty}, amount=${amount}`);
-    if (!isNaN(qty) && !isNaN(amount)) {
+    if (!isNaN(qty) && !isNaN(amount) && qty > 0) {
       total = total + (amount * qty);
     }
   });
@@ -39,19 +57,15 @@ function _updateTotal() {
     return;
   }
 
-  // Only update if we have a valid total and no template syntax is present
-  if (total >= 0 && !amountField.textContent.includes('{{')) {
+  if (total >= 0) {
     let fmt = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
-
     amountField.textContent = fmt.format(total);
     console.log('Total updated to:', fmt.format(total));
-  } else {
-    console.log('Skipping total update - invalid total or template syntax detected');
   }
 }
 

@@ -4,6 +4,7 @@
 This is the shopping cart page. Proceed to review your items and place the order.
 {% endblock %}
 {% block title %}Cart - Eventlinez{% endblock %}
+{% block body_attrs %}data-cart-page="true"{% endblock %}
 
 {% if messages %}
 {% for message in messages %}
@@ -82,10 +83,6 @@ This is the shopping cart page. Proceed to review your items and place the order
     <header class="bg-gradient col-lg-12 v-center">
         <img class="mr-2" src="{% static 'img/ticket.svg' %}" alt="ticket">
         <h3 class="mt-2 h3-home p-light">Cart summary</h3>
-        <!-- Debug test to verify template rendering -->
-        {% if debug_test %}
-        <small style="color: white; opacity: 0.8;">Debug: {{ debug_test }}</small>
-        {% endif %}
     </header>
 
     <main class="col-12 p-0">
@@ -209,7 +206,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 <div class="col-lg-1 col-12 pt-lg-5 d-flex">
                     <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Amount</p>
                     <p class="h6-home text-lg-center">
-                        <span class="ticket-amount">${{item.price_total|floatformat:2 }}</span>
+                        <span class="ticket-amount" data-price="{{item.price_total|floatformat:2 }}">${{item.price_total|floatformat:2 }}</span>
                     </p>
                 </div>
             </aside>
@@ -319,14 +316,11 @@ This is the shopping cart page. Proceed to review your items and place the order
 <script src="{% static 'js/cart.js' %}"></script>
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    // Update total when page loads
+    // Cart page: DO NOT call _updateTotal() on load.
+    // The total is already correctly calculated and rendered by the server.
+    // _updateTotal() is only needed on the event detail page for live qty selection.
     document.addEventListener('DOMContentLoaded', function () {
-        console.log('Cart page loaded, calling _updateTotal()');
-        if (typeof _updateTotal === 'function') {
-            _updateTotal();
-        } else {
-            console.error('_updateTotal function not found');
-        }
+        console.log('Cart page loaded. Server-rendered total is authoritative.');
     });
 </script>
 

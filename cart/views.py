@@ -211,13 +211,9 @@ def cart_detail(request, cart_items=None):
         else:
             total = subtotal
 
-        # Ensure all values are Decimal for consistent formatting - add debugging
         from decimal import Decimal
         total = Decimal(str(total)) if total else Decimal('0.00')
         subtotal = Decimal(str(subtotal)) if subtotal else Decimal('0.00')
-        
-        # Debug logging to see what values are being passed
-        logger.info(f"Cart debug - total: {total}, subtotal: {subtotal}, cart: {cart}, promo_discount: {getattr(cart, 'promo_discount', 'None')}")
 
     except Cart.DoesNotExist:
         logger.error("The cart does not exist.")
@@ -243,20 +239,14 @@ def cart_detail(request, cart_items=None):
         except Exception as e:
             logger.warning(f"Failed to track cart abandonment: {e}")
 
-    # Create a more explicit context dictionary with debugging
     context = {
-        'total': total, 
+        'total': total,
         'subtotal': subtotal,
-        'cart_items': cart_items, 
-        'promo_code': promo_code, 
+        'cart_items': cart_items,
+        'promo_code': promo_code,
         'cart': cart,
         'PROD': settings.PROD,
-        # Add a simple debug variable to test template rendering
-        'debug_test': 'Template rendering works!'
     }
-    
-    # Debug the context
-    logger.info(f"Cart context debug: {context}")
     
     return render(request, 'cart.html', context)
 
