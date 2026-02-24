@@ -32,7 +32,7 @@ services:
       # Django Configuration
       - DEBUG=False
       - SECRET_KEY=docker-secret-key-change-in-production
-      - ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,45.79.112.247
+      - ALLOWED_HOSTS=localhost,127.0.0.1,test.eventlinez.com,eventlinez.com,www.eventlinez.com,45.79.112.247
       - IN_DOCKER=true
       - PROD=True
 

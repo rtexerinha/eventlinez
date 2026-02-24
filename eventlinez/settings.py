@@ -23,6 +23,12 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "chave-padrao-segura")
 DEBUG = os.getenv("DEBUG", "False").strip().lower() == "true"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")  # for dev, "*" is fine
 
+# Required in Django 4+ with DEBUG=False so the admin login CSRF check passes
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "https://eventlinez.com,https://www.eventlinez.com,http://localhost:8000"
+).split(",")
+
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "sk_test_placeholder")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "pk_test_placeholder")
 STRIPE_WEBHOOK_SECRET = "whsec_UncYtClVKoVzrioZyCT3vouPDASAztau"
