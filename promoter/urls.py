@@ -19,7 +19,12 @@ from event.views import event_list, event_create, event_remove, event_update
 from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, CategoryListAPIView, TicketTypeAPIView, \
     EventUpdateAPIView, TicketTypeUpdateAPIView, EventDetailsAPIView, sales_report, TicketTypeListView, \
     EventCreateAPIView, PartnerCreateAPIView, PartnerUpdateAPIView, PartnerListView, \
-    EventCreateAPIView, TicketSoldOutUpdateAPIView
+    EventCreateAPIView, TicketSoldOutUpdateAPIView, PromoCodeListCreateAPIView, PromoCodeDetailAPIView, \
+    PromoCodeToggleAPIView, PromoCodeValidateAPIView, GuestListAPIView, GuestBulkCreateAPIView, GuestDetailAPIView, \
+    GuestResendEmailAPIView, GuestShareLinksAPIView, GuestCheckinAPIView, \
+    DoormanProfileAPIView, DoormanEventListAPIView, DoormanCheckinStatsAPIView, \
+    DoormanScanPaidTicketAPIView, DoormanScanGuestTicketAPIView, \
+    DoormanAssignAPIView, DoormanListAPIView
 
 app_name = 'promoter'
 
@@ -138,5 +143,45 @@ urlpatterns = [
     
     path('api/ticket/<int:pk>/sold-out/', TicketSoldOutUpdateAPIView.as_view(), name="ticket_sold_out"),
 
+    # ── Promo Code API ────────────────────────────────────────────────────────
+    # Promoter: list all / create
+    path('api/promo-codes/', PromoCodeListCreateAPIView.as_view(), name='api_promo_codes'),
+    # Public: validate a code (no auth needed)
+    path('api/promo-codes/validate/', PromoCodeValidateAPIView.as_view(), name='api_promo_code_validate'),
+    # Promoter: retrieve / partial-update / delete a specific code
+    path('api/promo-codes/<int:pk>/', PromoCodeDetailAPIView.as_view(), name='api_promo_code_detail'),
+    # Promoter: toggle active/inactive
+    path('api/promo-codes/<int:pk>/toggle/', PromoCodeToggleAPIView.as_view(), name='api_promo_code_toggle'),
 
+    # ── Guest List API ────────────────────────────────────────────────────────
+    # Promoter: list guests / add single guest
+    path('api/guest-list/', GuestListAPIView.as_view(), name='api_guest_list'),
+    # Promoter: bulk add guests
+    path('api/guest-list/bulk/', GuestBulkCreateAPIView.as_view(), name='api_guest_list_bulk'),
+    # Public (QR scan): check-in by UUID
+    path('api/guest-list/checkin/<uuid:uuid>/', GuestCheckinAPIView.as_view(), name='api_guest_checkin'),
+    # Promoter: retrieve / update / cancel a single guest ticket
+    path('api/guest-list/<int:pk>/', GuestDetailAPIView.as_view(), name='api_guest_detail'),
+    # Promoter: resend ticket email
+    path('api/guest-list/<int:pk>/resend/', GuestResendEmailAPIView.as_view(), name='api_guest_resend'),
+    # Promoter: get WhatsApp / SMS / QR share links
+    path('api/guest-list/<int:pk>/share/', GuestShareLinksAPIView.as_view(), name='api_guest_share'),
+
+    # ── Doorman API ───────────────────────────────────────────────────────────
+    # Doorman: their own profile + assigned events with live counters
+    path('api/doorman/profile/', DoormanProfileAPIView.as_view(), name='api_doorman_profile'),
+    # Doorman: list assigned events (?state=current|all)
+    path('api/doorman/events/', DoormanEventListAPIView.as_view(), name='api_doorman_events'),
+    # Doorman: live stats for a specific event
+    path('api/doorman/events/<int:event_id>/stats/', DoormanCheckinStatsAPIView.as_view(), name='api_doorman_stats'),
+    # Doorman: scan a paid ticket QR code
+    path('api/doorman/scan/ticket/', DoormanScanPaidTicketAPIView.as_view(), name='api_doorman_scan_ticket'),
+    # Doorman: scan a guest-list (complimentary) ticket QR code
+    path('api/doorman/scan/guest/', DoormanScanGuestTicketAPIView.as_view(), name='api_doorman_scan_guest'),
+    # Promoter: assign a doorman to an event
+    path('api/doorman/assign/', DoormanAssignAPIView.as_view(), name='api_doorman_assign'),
+    # Promoter: disable/remove a doorman assignment
+    path('api/doorman/assign/<int:partner_id>/', DoormanAssignAPIView.as_view(), name='api_doorman_assign_remove'),
+    # Promoter: list all doormen (?event_id=<id>)
+    path('api/doorman/list/', DoormanListAPIView.as_view(), name='api_doorman_list'),
 ]
