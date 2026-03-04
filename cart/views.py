@@ -388,49 +388,56 @@ def remove_promo_code(request):
         return JsonResponse({'error': 'An error occurred while removing the promo code'}, status=500)
 
 
-@login_required
 @csrf_exempt
 @rate_limit('cart_checkout', identifier_func=get_cart_identifier)
 def checkout(request):
     """
     Faz o redirecionamento do carrinho para processo de checkout no Stripe
     """
-    cart = Cart.objects.get(cart_id=_cart_id(request))
+    # Return JSON 401 for unauthenticated AJAX requests instead of HTML redirect
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'login_required', 'login_url': '/accounts/login/?next=/cart/'}, status=401)
+
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+    except Cart.DoesNotExist:
+        return JsonResponse({'error': 'Cart not found. Please add items to your cart first.'}, status=400)
+
     items = CartItem.objects.filter(cart=cart, active=True)
+
+    if not items.exists():
+        return JsonResponse({'error': 'Your cart is empty.'}, status=400)
 
     invalid_items = items.filter(ticket__sold_out=True)
     if invalid_items.exists():
         names = [item.ticket.name for item in invalid_items]
-        messages.error(request, "The following tickets are sold out: " + ", ".join(names))
-        return redirect('cart:cart_detail') 
+        return JsonResponse({'error': 'The following tickets are sold out: ' + ', '.join(names)}, status=400)
 
     # Check if Stripe is properly configured with real keys
     if not settings.STRIPE_SECRET_KEY or settings.STRIPE_SECRET_KEY in [
-        'sk_test_51234567890abcdef', 
+        'sk_test_51234567890abcdef',
         'sk_live_51H1234567890abcdef',
-        'sk_test_placeholder',  # Add this placeholder check
-        'sk_live_placeholder'   # Add this placeholder check
+        'sk_test_placeholder',
+        'sk_live_placeholder'
     ]:
         return JsonResponse({
             'error': 'Payment processing is not available. Please contact administrator for checkout assistance.'
         }, status=500)
-    
+
     stripe.api_key = settings.STRIPE_SECRET_KEY
     line_items = []
-    # https://stripe.com/docs/billing/subscriptions/decimal-amounts
     cents = 100
 
     try:
         # Use cart total with promo discount
         total_amount = cart.total_with_promo()
-        
-        # Create a single line item for the entire cart
+
         if total_amount > 0:
             line_item = {
                 'price_data': {
                     'product_data': {
-                        'name': f'Event Tickets ({len(items)} item{"s" if len(items) != 1 else ""})',
-                        'description': f'Cart total with {len(items)} ticket{"s" if len(items) != 1 else ""}'
+                        'name': f'Event Tickets ({items.count()} item{"s" if items.count() != 1 else ""})',
+                        'description': f'Cart total with {items.count()} ticket{"s" if items.count() != 1 else ""}'
                     },
                     'unit_amount': int(total_amount * cents),
                     'currency': 'usd'
@@ -439,34 +446,27 @@ def checkout(request):
             }
             line_items.append(line_item)
         else:
-            return JsonResponse({
-                'error': 'Cart total cannot be zero or negative'
-            }, status=400)
-            
+            return JsonResponse({'error': 'Cart total cannot be zero or negative'}, status=400)
+
     except stripe.error.StripeError as e:
         logger.error(f"Stripe error: {e}")
-        return JsonResponse({
-            'error': f'Payment processing error: {str(e)}'
-        }, status=500)
+        return JsonResponse({'error': f'Payment processing error: {str(e)}'}, status=500)
 
     try:
-        # Build description and metadata for Stripe payment using helper functions
         from order.stripe_utils import build_stripe_description, build_stripe_metadata_from_cart
-        
+
         first_item = items.first()
         if first_item:
-            # Pass event name and tier name as separate parameters
             description = build_stripe_description(
-                first_item.ticket.event.name, 
-                first_item.ticket.name, 
+                first_item.ticket.event.name,
+                first_item.ticket.name,
                 cart_id=cart.id
             )
             metadata = build_stripe_metadata_from_cart(cart, items)
         else:
-            description = f"Event Tickets - {len(items)} items"
+            description = f"Event Tickets - {items.count()} items"
             metadata = {}
 
-        # Add promo code info to metadata if applied
         if cart.applied_promo_code:
             metadata['promo_code'] = cart.applied_promo_code
             metadata['promo_discount'] = str(cart.promo_discount)
@@ -483,15 +483,12 @@ def checkout(request):
                 'metadata': metadata
             },
             client_reference_id=cart.id,
-            allow_promotion_codes=False  # We handle our own promo codes
+            allow_promotion_codes=False
         )
     except stripe.error.StripeError as e:
         logger.error(f"Stripe session creation error: {e}")
-        return JsonResponse({
-            'error': f'Payment session creation failed: {str(e)}'
-        }, status=500)
+        return JsonResponse({'error': f'Payment session creation failed: {str(e)}'}, status=500)
 
-    # Mark cart as about to be converted (we'll mark as fully converted in order processing)
     try:
         mark_cart_converted(cart.cart_id, order_id=session.id)
     except Exception as e:

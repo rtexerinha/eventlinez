@@ -11,15 +11,19 @@
 
 {% block og_type %}website{% endblock %}
 {% block og_title %}{{ event.name }} - Eventlinez{% endblock %}
-{% block og_description %}{{ event.name }} — {{ event.event_date|date:"D, d M Y H:i" }} — {{ event.city }}. Buy your tickets on Eventlinez.{% endblock %}
-{% block og_image %}{% if event.image %}{{ request.scheme }}://{{ request.get_host }}{{ event.image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo_eventlinez_new.png' %}{% endif %}{% endblock %}
+{% block og_description %}{{ event.name }} — {{ event.event_date|date:"D, d M Y H:i" }} — {{ event.city }}. Buy your
+tickets on Eventlinez.{% endblock %}
+{% block og_image %}{% if event.image %}{{ request.scheme }}://{{ request.get_host }}{{ event.image.url }}{% else %}{{
+request.scheme }}://{{ request.get_host }}{% static 'img/logo_eventlinez_new.png' %}{% endif %}{% endblock %}
 {% block og_image_width %}1200{% endblock %}
 {% block og_image_height %}630{% endblock %}
 {% block og_image_alt %}{{ event.name }}{% endblock %}
 
 {% block twitter_title %}{{ event.name }} - Eventlinez{% endblock %}
-{% block twitter_description %}{{ event.name }} — {{ event.event_date|date:"D, d M Y H:i" }} — {{ event.city }}. Buy your tickets on Eventlinez.{% endblock %}
-{% block twitter_image %}{% if event.image %}{{ request.scheme }}://{{ request.get_host }}{{ event.image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo_eventlinez_new.png' %}{% endif %}{% endblock %}
+{% block twitter_description %}{{ event.name }} — {{ event.event_date|date:"D, d M Y H:i" }} — {{ event.city }}. Buy
+your tickets on Eventlinez.{% endblock %}
+{% block twitter_image %}{% if event.image %}{{ request.scheme }}://{{ request.get_host }}{{ event.image.url }}{% else
+%}{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo_eventlinez_new.png' %}{% endif %}{% endblock %}
 
 {% block content %}
 <main class="container mt-4 mb-5">
@@ -119,7 +123,8 @@
                                 <h6 class="weight-height h6-home">
                                     {{ ticket.name }}
                                 </h6>
-                                <p class="ticket-price editable span-blue" data-price="{{ ticket.price }}" style="color: #007AFF">
+                                <p class="ticket-price editable span-blue" data-price="{{ ticket.price }}"
+                                    style="color: #007AFF">
                                     {{ ticket.price }}
                                 </p>
                             </div>

@@ -142,33 +142,32 @@ This is the shopping cart page. Proceed to review your items and place the order
                 </div>
 
                 <aside class="col-lg-2 col-6 pt-lg-5 d-justy">
-                    {% if item.quantity < item.ticket.qty_available %}
-                        <div class="h6-home text-lg-center">
-                            <button
-                                onclick="console.log('Decrease clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'decrease')"
-                                class="button-increment ml-2 pl-5px">
-                                <i class="fas fa-minus"></i>
-                            </button>&nbsp;
+                    {% if item.quantity < item.ticket.qty_available %} <div class="h6-home text-lg-center">
+                        <button
+                            onclick="console.log('Decrease clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'decrease')"
+                            class="button-increment ml-2 pl-5px">
+                            <i class="fas fa-minus"></i>
+                        </button>&nbsp;
 
-                            <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
+                        <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
 
-                            {% if item.ticket.qty_available == 1 %}
-                            <button style="pointer-events: none; cursor: not-allowed;" class="button-increment mr-2 pl-5px"
-                                disabled>
-                                <i class="fas fa-plus" style=" color: gray!important; text-decoration: none"></i>
-                            </button>
+                        {% if item.ticket.qty_available == 1 %}
+                        <button style="pointer-events: none; cursor: not-allowed;" class="button-increment mr-2 pl-5px"
+                            disabled>
+                            <i class="fas fa-plus" style=" color: gray!important; text-decoration: none"></i>
+                        </button>
 
-                            <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
+                        <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
 
-                            {% else %}
-                            <button
-                                onclick="console.log('Increase clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'increase')"
-                                class="button-increment mr-2 pl-5px">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            {% endif %}
+                        {% else %}
+                        <button
+                            onclick="console.log('Increase clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'increase')"
+                            class="button-increment mr-2 pl-5px">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        {% endif %}
                         </div>
-                    {% else %}
+                        {% else %}
                         <div class="h6-home">
                             <button
                                 onclick="console.log('Decrease clicked for ticket {{item.ticket.id}}'); controlQty({{item.ticket.id}}, 'decrease')"
@@ -187,7 +186,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                                 There are only {{item.quantity }} tickets available
                             </p>
                         </div>
-                    {% endif %}
+                        {% endif %}
                 </aside>
 
                 <div class="col-lg-1 col-12 pt-lg-5 d-flex">
@@ -197,7 +196,8 @@ This is the shopping cart page. Proceed to review your items and place the order
                     </p>
                 </div>
 
-                <div class="col-lg-1 col-12 pt-lg-5 d-lg-flex d-none">
+                <div class="col-lg-1 col-12 pt-lg-5 d-flex">
+                    <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Fee</p>
                     <p class="h6-home text-lg-center">
                         ${{item.fee|floatformat:2 }}
                     </p>
@@ -206,7 +206,8 @@ This is the shopping cart page. Proceed to review your items and place the order
                 <div class="col-lg-1 col-12 pt-lg-5 d-flex">
                     <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Amount</p>
                     <p class="h6-home text-lg-center">
-                        <span class="ticket-amount" data-price="{{item.price_total|floatformat:2 }}">${{item.price_total|floatformat:2 }}</span>
+                        <span class="ticket-amount"
+                            data-price="{{item.price_total|floatformat:2 }}">${{item.price_total|floatformat:2 }}</span>
                     </p>
                 </div>
             </aside>
@@ -274,7 +275,8 @@ This is the shopping cart page. Proceed to review your items and place the order
                         <div class="d-flex justify-content-end text-success">
                             <span class="col-6 h6-home pt-1">Promo discount:</span>
                             <span class="col-6 h6-home d-flex justify-content-end p-0">
-                                {% if cart.promo_discount %}-${{ cart.promo_discount|floatformat:2 }}{% else %}-$0.00{% endif %}
+                                {% if cart.promo_discount %}-${{ cart.promo_discount|floatformat:2 }}{% else %}-$0.00{%
+                                endif %}
                             </span>
                         </div>
                     </div>
@@ -493,7 +495,6 @@ This is the shopping cart page. Proceed to review your items and place the order
     function doCheckout() {
         console.log('Checkout button clicked');
 
-        // Show loading state
         const checkoutBtn = document.getElementById('checkout-btn');
         const originalText = checkoutBtn.innerHTML;
         checkoutBtn.innerHTML = 'Processing...';
@@ -508,36 +509,48 @@ This is the shopping cart page. Proceed to review your items and place the order
         })
             .then((result) => {
                 console.log('Checkout response status:', result.status);
-                if (!result.ok) {
-                    throw new Error(`HTTP error! status: ${result.status}`);
+
+                // If user is not logged in, redirect to login page
+                if (result.status === 401) {
+                    return result.json().then(data => {
+                        window.location.href = data.login_url || '/accounts/login/?next=/cart/';
+                        throw new Error('Redirecting to login');
+                    });
                 }
-                return result.json();
+
+                return result.json().then(data => {
+                    if (!result.ok) {
+                        throw new Error(data.error || `Server error (${result.status})`);
+                    }
+                    return data;
+                });
             })
             .then((data) => {
                 console.log('Checkout data:', data);
 
                 if (!data.stripe_public_key || !data.session_id) {
-                    throw new Error('Missing Stripe data in response');
+                    throw new Error('Missing Stripe data in response. Please try again.');
                 }
 
                 const stripe = Stripe(data.stripe_public_key);
-                return stripe.redirectToCheckout({
-                    sessionId: data.session_id,
-                });
+                return stripe.redirectToCheckout({ sessionId: data.session_id });
             })
             .then(function (result) {
-                if (result.error) {
+                if (result && result.error) {
                     console.error('Stripe error:', result.error);
-                    alert('Checkout error: ' + result.error.message);
+                    alert('Payment error: ' + result.error.message);
+                    checkoutBtn.innerHTML = originalText;
+                    checkoutBtn.disabled = false;
                 }
             })
             .catch(function (error) {
                 console.error("Checkout Error:", error);
-                alert('Checkout failed: ' + error.message);
-
-                // Reset button state
-                checkoutBtn.innerHTML = originalText;
-                checkoutBtn.disabled = false;
+                // Don't show alert if we're just redirecting to login
+                if (error.message !== 'Redirecting to login') {
+                    alert('Checkout failed: ' + error.message);
+                    checkoutBtn.innerHTML = originalText;
+                    checkoutBtn.disabled = false;
+                }
             });
     }
 </script>
