@@ -195,10 +195,10 @@ This is the shopping cart page. Proceed to review your items and place the order
                     </p>
                 </div>
 
-                <div class="col-lg-1 col-12 pt-lg-5 d-flex">
-                    <p class="h6-home text-lg-center pr-1 d-flex d-lg-none">Fee</p>
-                    <p class="h6-home text-lg-center">
-                        ${{item.fee|floatformat:2 }}
+                <div class="col-lg-1 col-12 pt-lg-5 d-flex align-items-center">
+                    <p class="h6-home text-lg-center pr-1 d-flex d-lg-none mb-0">Fee</p>
+                    <p class="h6-home text-lg-center mb-0">
+                        <span class="ticket-fee">${{item.fee|floatformat:2 }}</span>
                     </p>
                 </div>
 
