@@ -54,7 +54,7 @@ jobs:
         
         # Run migrations and tests
         docker compose exec -T web python manage.py migrate --noinput
-        docker compose exec -T web python manage.py test --verbosity=2
+        docker compose exec -T -e DEBUG=True web python manage.py test --verbosity=2
         docker compose exec -T web python manage.py collectstatic --noinput --clear
         
         # Health check
