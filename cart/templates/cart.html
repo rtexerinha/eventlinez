@@ -142,10 +142,8 @@ This is the shopping cart page. Proceed to review your items and place the order
                 </div>
 
                 <aside class="col-lg-2 col-6 pt-lg-5 d-justy">
-                    {% if item.quantity < item.ticket.qty_available %}
-                    <div class="h6-home text-lg-center">
-                        <button
-                            onclick="controlQty({{item.ticket.id}}, 'decrease')"
+                    {% if item.quantity < item.ticket.qty_available %} <div class="h6-home text-lg-center">
+                        <button onclick="controlQty({{item.ticket.id}}, 'decrease')"
                             class="button-increment ml-2 pl-5px">
                             <i class="fas fa-minus"></i>
                         </button>&nbsp;
@@ -159,33 +157,31 @@ This is the shopping cart page. Proceed to review your items and place the order
                         </button>
                         <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
                         {% else %}
-                        <button
-                            onclick="controlQty({{item.ticket.id}}, 'increase')"
+                        <button onclick="controlQty({{item.ticket.id}}, 'increase')"
                             class="button-increment mr-2 pl-5px">
                             <i class="fas fa-plus"></i>
                         </button>
                         {% endif %}
-                    </div>
-                    {% else %}
-                    <div class="h6-home">
-                        <button
-                            onclick="controlQty({{item.ticket.id}}, 'decrease')"
-                            class="button-increment ml-2 pl-5px">
-                            <i class="fas fa-minus"></i>
-                        </button>&nbsp;
+                        </div>
+                        {% else %}
+                        <div class="h6-home">
+                            <button onclick="controlQty({{item.ticket.id}}, 'decrease')"
+                                class="button-increment ml-2 pl-5px">
+                                <i class="fas fa-minus"></i>
+                            </button>&nbsp;
 
-                        <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
+                            <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
 
-                        <button style="pointer-events: none; cursor: not-allowed; background: #909090" disabled
-                            class="button-increment mr-2 pl-5px">
-                            <i class="fas fa-plus" style="color: white; text-decoration: none"></i>
-                        </button>
+                            <button style="pointer-events: none; cursor: not-allowed; background: #909090" disabled
+                                class="button-increment mr-2 pl-5px">
+                                <i class="fas fa-plus" style="color: white; text-decoration: none"></i>
+                            </button>
 
-                        <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
-                            There are only {{item.quantity }} tickets available
-                        </p>
-                    </div>
-                    {% endif %}
+                            <p style="color: #d90075; margin-top: 5px; font-size: 0.8rem">
+                                There are only {{item.quantity }} tickets available
+                            </p>
+                        </div>
+                        {% endif %}
                 </aside>
 
                 <div class="col-lg-1 col-12 pt-lg-5 d-flex">
@@ -274,7 +270,8 @@ This is the shopping cart page. Proceed to review your items and place the order
                         <div class="d-flex justify-content-end text-success">
                             <span class="col-6 h6-home pt-1">Promo discount:</span>
                             <span class="col-6 h6-home d-flex justify-content-end p-0">
-                                {% if cart.promo_discount %}-${{ cart.promo_discount|floatformat:2 }}{% else %}-$0.00{% endif %}
+                                {% if cart.promo_discount %}-${{ cart.promo_discount|floatformat:2 }}{% else %}-$0.00{%
+                                endif %}
                             </span>
                         </div>
                     </div>
