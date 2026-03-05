@@ -6,17 +6,17 @@ This is the shopping cart page. Proceed to review your items and place the order
 {% block title %}Cart - Eventlinez{% endblock %}
 {% block body_attrs %}data-cart-page="true"{% endblock %}
 
-{% if messages %}
-{% for message in messages %}
-<div class="alert alert-warning">{{ message }}</div>
-{% endfor %}
-{% endif %}
-
 {% block content %}
 <!-- Add CSRF token as meta tag for JavaScript access -->
 <meta name="csrf-token" content="{{ csrf_token }}">
 <!-- Also include as hidden input for form compatibility -->
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-warning">{{ message }}</div>
+{% endfor %}
+{% endif %}
 
 {% if not cart_items %}
 <section class="container mt-4 mb-5" style="min-height: 70vh">
@@ -47,8 +47,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 n.callMethod.apply(n, arguments) : n.queue.push(arguments)
         };
         if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
-        n.queue = []; t = b.createElement(e); t.async = !0;
-        t.src = v; s = b.getElementsByTagName(e)[0];
+        n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t, s)
     }(window, document, 'script',
         'https://connect.facebook.net/en_US/fbevents.js');
