@@ -1,0 +1,288 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+
+{% block title %}Partners Management - Eventlinez{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .partners-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .partners-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .filters-bar {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .filters-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .partners-table-container {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .partners-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .partners-table thead {
+        background: #f8f9fa;
+    }
+
+    .partners-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .partners-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .partners-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .role-badge.business-partner {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .role-badge.doorman {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .status-badge.active {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.disabled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+    }
+
+    .quick-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .quick-action-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        text-decoration: none;
+    }
+
+    .no-partners {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+    }
+
+    .no-partners i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="partners-header">
+        <h1><i class="fas fa-user-tie"></i> Partners Management</h1>
+        <p>Manage Business Partners and Doormen for your events</p>
+    </div>
+
+    <div class="quick-actions">
+        <a href="{% url 'promoter:partner_create' %}" class="quick-action-btn btn-primary">
+            <i class="fas fa-user-plus"></i> Add Business Partner
+        </a>
+        <a href="{% url 'promoter:doorman_create' %}" class="quick-action-btn btn-success">
+            <i class="fas fa-user-check"></i> Add Doorman
+        </a>
+    </div>
+
+    <div class="filters-bar">
+        <form method="GET" class="filters-form">
+            <div>
+                <label>Filter by Role</label>
+                <select name="role" class="form-control" onchange="this.form.submit()">
+                    <option value="">All Roles</option>
+                    <option value="PARTNER" {% if role_filter == 'PARTNER' %}selected{% endif %}>Business Partner</option>
+                    <option value="DOORMAN" {% if role_filter == 'DOORMAN' %}selected{% endif %}>Doorman</option>
+                </select>
+            </div>
+            <div>
+                <label>Filter by Event</label>
+                <select name="event" class="form-control" onchange="this.form.submit()">
+                    <option value="">All Events</option>
+                    {% for event in events %}
+                    <option value="{{ event.id }}" {% if event_filter|stringformat:"s" == event.id|stringformat:"s" %}selected{% endif %}>
+                        {{ event.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if role_filter or event_filter %}
+            <div>
+                <label>&nbsp;</label>
+                <a href="{% url 'promoter:partners_list' %}" class="btn btn-secondary btn-block">
+                    <i class="fas fa-times"></i> Clear Filters
+                </a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if partners %}
+    <div class="partners-table-container">
+        <table class="partners-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Event</th>
+                    <th>Assigned Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for partner in partners %}
+                <tr>
+                    <td>
+                        <strong>{{ partner.email }}</strong>
+                        {% if partner.user %}
+                        <br><small class="text-muted">{{ partner.user.get_full_name|default:partner.user.username }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if partner.role == 'PARTNER' %}
+                        <span class="role-badge business-partner">
+                            <i class="fas fa-briefcase"></i> Business Partner
+                        </span>
+                        {% else %}
+                        <span class="role-badge doorman">
+                            <i class="fas fa-user-check"></i> Doorman
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ partner.event.name }}</strong>
+                        <br><small class="text-muted">{{ partner.event.event_date|date:"M d, Y" }}</small>
+                    </td>
+                    <td>{{ partner.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if partner.disable %}
+                        <span class="status-badge disabled">
+                            <i class="fas fa-times-circle"></i> Disabled
+                        </span>
+                        {% else %}
+                        <span class="status-badge active">
+                            <i class="fas fa-check-circle"></i> Active
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'promoter:partner_toggle_status' partner.id %}" 
+                               class="btn btn-sm {% if partner.disable %}btn-success{% else %}btn-warning{% endif %}"
+                               title="{% if partner.disable %}Enable{% else %}Disable{% endif %}">
+                                <i class="fas fa-{% if partner.disable %}check{% else %}ban{% endif %}"></i>
+                            </a>
+                            <a href="{% url 'promoter:partner_delete' partner.id %}" 
+                               class="btn btn-sm btn-danger"
+                               title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-partners">
+        <i class="fas fa-users"></i>
+        <h3>No Partners Found</h3>
+        <p>You haven't added any partners or doormen yet.</p>
+        <div class="quick-actions" style="justify-content: center; margin-top: 2rem;">
+            <a href="{% url 'promoter:partner_create' %}" class="quick-action-btn btn-primary">
+                <i class="fas fa-user-plus"></i> Add Business Partner
+            </a>
+            <a href="{% url 'promoter:doorman_create' %}" class="quick-action-btn btn-success">
+                <i class="fas fa-user-check"></i> Add Doorman
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

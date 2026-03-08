@@ -19,15 +19,17 @@
                     id="dashboardSubmenu" data-parent="#sidenavAccordion">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link {% if 'promoter_dashboard' in request.resolver_match.url_name %} active {% endif %}"
-                            href="{% url 'promoter:promoter_dashboard' %}">
+                            href="{% url 'promoter:promoter_dashboard' %}"
+                            title="View your dashboard overview">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-chart-line"></i>
                             </div>
                             Overview
                         </a>
-                        <a class="nav-link" href="{% url 'promoter:promoter_dashboard' %}#analytics">
+                        <a class="nav-link" href="{% url 'promoter:promoter_dashboard' %}#analytics"
+                            title="View detailed analytics">
                             <div class="sb-nav-link-icon">
-                                <i class="fas fa-analytics"></i>
+                                <i class="fas fa-chart-bar"></i>
                             </div>
                             Analytics
                         </a>
@@ -49,14 +51,16 @@
                     id="eventsSubmenu" data-parent="#sidenavAccordion">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link {% if 'events_promoter' in request.resolver_match.url_name %} active {% endif %}"
-                            href="{% url 'promoter:events_promoter' %}">
+                            href="{% url 'promoter:events_promoter' %}"
+                            title="View all events">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-list"></i>
                             </div>
                             All Events
                         </a>
                         <a class="nav-link {% if 'new_events' in request.resolver_match.url_name %} active {% endif %}"
-                            href="{% url 'promoter:new_events' %}">
+                            href="{% url 'promoter:new_events' %}"
+                            title="Create a new event">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-plus"></i>
                             </div>
@@ -99,6 +103,55 @@
                 <!-- Management Section -->
                 <div class="sb-sidenav-menu-heading">Management</div>
 
+                <!-- Partners with submenu -->
+                <a class="nav-link collapsed {% if 'partner' in request.resolver_match.url_name or 'doorman' in request.resolver_match.url_name %} active {% endif %}"
+                    href="#partnersSubmenu" data-toggle="collapse" aria-expanded="false">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    Partners
+                    <div class="sb-sidenav-collapse-arrow">
+                        <i class="fas fa-angle-down"></i>
+                    </div>
+                </a>
+                <div class="collapse {% if 'partner' in request.resolver_match.url_name or 'doorman' in request.resolver_match.url_name %} show {% endif %}"
+                    id="partnersSubmenu" data-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+                        <a class="nav-link {% if 'partners_list' in request.resolver_match.url_name %} active {% endif %}"
+                            href="{% url 'promoter:partners_list' %}"
+                            title="View all partners">
+                            <div class="sb-nav-link-icon">
+                                <i class="fas fa-list"></i>
+                            </div>
+                            All Partners
+                        </a>
+                        <a class="nav-link {% if 'partner_create' in request.resolver_match.url_name %} active {% endif %}"
+                            href="{% url 'promoter:partner_create' %}"
+                            title="Add a new business partner">
+                            <div class="sb-nav-link-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            Add Business Partner
+                        </a>
+                        <a class="nav-link {% if 'doorman_create' in request.resolver_match.url_name %} active {% endif %}"
+                            href="{% url 'promoter:doorman_create' %}"
+                            title="Add a new doorman">
+                            <div class="sb-nav-link-icon">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            Add Doorman
+                        </a>
+                        <a class="nav-link {% if 'doorman_dashboard' in request.resolver_match.url_name %} active {% endif %}"
+                            href="{% url 'promoter:doorman_dashboard' %}"
+                            title="Assign partners (doormen, vendors) to events">
+                            <div class="sb-nav-link-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            Assign to Events
+                        </a>
+                    </nav>
+                </div>
+
                 <a class="nav-link {% if 'promo_codes' in request.resolver_match.url_name %} active {% endif %}"
                     href="{% url 'promoter:promo_codes_list' %}">
                     <div class="sb-nav-link-icon">
@@ -130,7 +183,8 @@
                     id="reportsSubmenu" data-parent="#sidenavAccordion">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link {% if 'vendors_reports' in request.resolver_match.url_name %} active {% endif %}"
-                            href="{% url 'promoter:vendors_reports' %}">
+                            href="{% url 'promoter:vendors_reports' %}"
+                            title="View sales report by vendor">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-chart-pie"></i>
                             </div>
@@ -139,7 +193,8 @@
                         {% url 'promoter:revenue_report' as revenue_report_url %}
                         {% if revenue_report_url %}
                         <a class="nav-link {% if 'revenue_report' in request.resolver_match.url_name %} active {% endif %}"
-                            href="{% url 'promoter:revenue_report' %}">
+                            href="{% url 'promoter:revenue_report' %}"
+                            title="View revenue report">
                             <div class="sb-nav-link-icon">
                                 <i class="fas fa-chart-line"></i>
                             </div>

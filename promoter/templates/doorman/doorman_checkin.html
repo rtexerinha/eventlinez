@@ -1,0 +1,308 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+
+{% block title %}Check-In - {{ event.name }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .checkin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .checkin-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+        text-decoration: none;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+
+    .back-btn:hover {
+        opacity: 1;
+        color: white;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+
+    .search-box {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .tickets-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ticket-item {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    .ticket-item:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ticket-item.checked-in {
+        background: #d4edda;
+        border-color: #c3e6cb;
+    }
+
+    .ticket-info {
+        flex: 1;
+    }
+
+    .ticket-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    .ticket-type {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.3rem;
+    }
+
+    .ticket-id {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .status-badge.pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-badge.checked-in {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .no-tickets {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+
+    .no-tickets i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .ticket-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="checkin-header">
+        <a href="{% url 'promoter:doorman_dashboard' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <h1><i class="fas fa-qrcode"></i> {{ event.name }}</h1>
+        <p>{{ event.event_date|date:"M d, Y @ g:i A" }}</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.total_checked_in }}</div>
+            <div class="stat-label">Total Checked In</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.total_expected }}</div>
+            <div class="stat-label">Total Expected</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.paid_checked_in }}/{{ stats.paid_total }}</div>
+            <div class="stat-label">Paid Tickets</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.guest_checked_in }}/{{ stats.guest_total }}</div>
+            <div class="stat-label">Guest List</div>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-box">
+        <form method="GET" action="">
+            <input type="text" name="q" class="search-input" 
+                   placeholder="🔍 Search by name, email, or ticket ID..." 
+                   value="{{ search_query }}">
+        </form>
+    </div>
+
+    <!-- Paid Tickets -->
+    <div class="tickets-section mb-4">
+        <div class="section-title">
+            <i class="fas fa-ticket-alt"></i> Paid Tickets
+        </div>
+        {% if paid_tickets %}
+            {% for ticket in paid_tickets %}
+            <div class="ticket-item {% if ticket.checkin_date %}checked-in{% endif %}">
+                <div class="ticket-info">
+                    <div class="ticket-name">
+                        {% if ticket.guest_name %}
+                            {{ ticket.guest_name }}
+                        {% else %}
+                            {{ ticket.customer.first_name }} {{ ticket.customer.last_name }}
+                        {% endif %}
+                    </div>
+                    <div class="ticket-type">
+                        {{ ticket.event_ticket.name }}
+                    </div>
+                    <div class="ticket-id">Ticket #{{ ticket.id }}</div>
+                </div>
+                <div>
+                    {% if ticket.checkin_date %}
+                        <span class="status-badge checked-in">
+                            <i class="fas fa-check-circle"></i> Checked In
+                        </span>
+                        <div style="font-size: 0.8rem; color: #6c757d; margin-top: 0.3rem;">
+                            {{ ticket.checkin_date|date:"M d, g:i A" }}
+                        </div>
+                    {% else %}
+                        <span class="status-badge pending">
+                            <i class="fas fa-clock"></i> Pending
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-tickets">
+                <i class="fas fa-ticket-alt"></i>
+                <p>No paid tickets found</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Guest List -->
+    {% if guest_tickets %}
+    <div class="tickets-section">
+        <div class="section-title">
+            <i class="fas fa-list-ul"></i> Guest List / Complimentary
+        </div>
+        {% for ticket in guest_tickets %}
+        <div class="ticket-item {% if ticket.checkin_date %}checked-in{% endif %}">
+            <div class="ticket-info">
+                <div class="ticket-name">{{ ticket.guest_name }}</div>
+                <div class="ticket-type">
+                    {{ ticket.get_ticket_type_display }} - FREE
+                </div>
+                <div class="ticket-id">{{ ticket.guest_email }}</div>
+            </div>
+            <div>
+                {% if ticket.checkin_date %}
+                    <span class="status-badge checked-in">
+                        <i class="fas fa-check-circle"></i> Checked In
+                    </span>
+                    <div style="font-size: 0.8rem; color: #6c757d; margin-top: 0.3rem;">
+                        {{ ticket.checkin_date|date:"M d, g:i A" }}
+                    </div>
+                {% else %}
+                    <span class="status-badge pending">
+                        <i class="fas fa-clock"></i> Pending
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px; text-align: center;">
+        <p style="color: #6c757d; margin: 0;">
+            <i class="fas fa-info-circle"></i> 
+            Use the mobile app to scan QR codes for quick check-in
+        </p>
+    </div>
+</div>
+{% endblock %}

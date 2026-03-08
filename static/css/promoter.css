@@ -10088,11 +10088,64 @@ border-card{
 }
 
 .m-height{
-  min-height: 75vh!important;
+  max-height: 430px;
 }
 .m-height-50{
-  min-height: 50vh!important;
-  margin: 5rem auto;
+  max-height: 100px;
+}
+
+/* Enhanced Sidebar Submenu Styling */
+.sb-sidenav-menu-nested {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-left: 3px solid #d90075;
+  margin-left: 0 !important;
+  padding-left: 0;
+}
+
+.sb-sidenav-menu-nested .nav-link {
+  padding-left: 3rem !important;
+  font-size: 14px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.sb-sidenav-menu-nested .nav-link:hover {
+  background-color: rgba(217, 0, 117, 0.1);
+  padding-left: 3.25rem !important;
+}
+
+.sb-sidenav-menu-nested .nav-link.active {
+  background-color: rgba(217, 0, 117, 0.15);
+  font-weight: 600;
+  color: #d90075 !important;
+  border-left: 3px solid #d90075;
+}
+
+.sb-sidenav-menu-nested .nav-link .sb-nav-link-icon {
+  width: 20px;
+  font-size: 0.85rem;
+  margin-right: 0.75rem;
+}
+
+/* Improved collapse arrow animation */
+.sb-sidenav-collapse-arrow {
+  transition: transform 0.3s ease;
+}
+
+.nav-link.collapsed .sb-sidenav-collapse-arrow {
+  transform: rotate(-90deg);
+}
+
+/* Better visual separation for menu sections */
+.sb-sidenav-menu-heading {
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  margin-top: 0.5rem;
+}
+
+/* Hover effect for main menu items with submenus */
+.nav-link[data-toggle="collapse"]:hover {
+  background-color: rgba(217, 0, 117, 0.05);
 }
 
 

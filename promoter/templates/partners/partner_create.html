@@ -1,0 +1,317 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Add {{ partner_type }} - Eventlinez{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .form-header {
+        background: linear-gradient(135deg, #d90075 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px 12px 0 0;
+        text-align: center;
+    }
+
+    .form-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-container {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 0 0 12px 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+
+    .info-box.success {
+        background: #e8f5e9;
+        border-left-color: #4caf50;
+    }
+
+    .info-box h5 {
+        margin-bottom: 0.5rem;
+        color: #1976d2;
+    }
+
+    .info-box.success h5 {
+        color: #2e7d32;
+    }
+
+    .info-box ul {
+        margin-bottom: 0;
+        padding-left: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .role-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .role-card {
+        padding: 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .role-card.active {
+        border-color: #d90075;
+        background: #fdf2f8;
+    }
+
+    .role-card i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section h5 {
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #d90075;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    @media (max-width: 576px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 900px; margin: 2rem auto;">
+        <div class="form-header">
+            <h1><i class="fas fa-user-plus"></i> Add New {{ partner_type }}</h1>
+            <p>Create a new {{ partner_type|lower }} and assign them to an event</p>
+        </div>
+
+        <div class="form-container">
+            <div class="info-box success">
+                <h5><i class="fas fa-check-circle"></i> Easy Setup</h5>
+                <p>Simply fill in the person's details below. If they don't have an account yet, one will be created automatically and login credentials will be sent to their email.</p>
+            </div>
+
+            {% if partner_type == 'Doorman' %}
+            <div class="role-info">
+                <div class="role-card active">
+                    <i class="fas fa-user-check" style="color: #d90075;"></i>
+                    <h5>Doorman</h5>
+                    <p><strong>Check-in Access:</strong> Can check-in attendees at the door. No access to financial data or event management.</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="role-info">
+                <div class="role-card active">
+                    <i class="fas fa-briefcase" style="color: #d90075;"></i>
+                    <h5>Business Partner</h5>
+                    <p><strong>Full Access:</strong> Can manage events, view reports, and handle event operations.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST" id="partnerForm">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Please correct the following errors:</strong>
+                    <ul class="mb-0 mt-2">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-user"></i> Personal Information</h5>
+                    
+                    <div class="form-row">
+                        <div class="form-group mb-3">
+                            <label for="id_first_name">First Name <span class="text-danger">*</span></label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small">{{ form.first_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="id_last_name">Last Name <span class="text-danger">*</span></label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small">{{ form.last_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="id_email">Email Address <span class="text-danger">*</span></label>
+                        {{ form.email }}
+                        <small class="form-text text-muted">{{ form.email.help_text }}</small>
+                        {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="id_phone">Phone Number (Optional)</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="text-danger small">{{ form.phone.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Assignment Section -->
+                <div class="form-section">
+                    <h5><i class="fas fa-calendar-check"></i> Event Assignment</h5>
+
+                    {% if partner_type == 'Partner' %}
+                    <div class="form-group mb-3">
+                        <label for="id_role">Role <span class="text-danger">*</span></label>
+                        {{ form.role }}
+                        <small class="form-text text-muted">{{ form.role.help_text }}</small>
+                        {% if form.role.errors %}
+                            <div class="text-danger small">{{ form.role.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    {{ form.role }}
+                    {% endif %}
+
+                    <div class="form-group mb-3">
+                        <label for="id_event">Assign to Event <span class="text-danger">*</span></label>
+                        {{ form.event }}
+                        <small class="form-text text-muted">{{ form.event.help_text }}</small>
+                        {% if form.event.errors %}
+                            <div class="text-danger small">{{ form.event.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'promoter:partners_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary" style="background: #d90075; border-color: #d90075;">
+                        <i class="fas fa-check"></i> Create {{ partner_type }}
+                    </button>
+                </div>
+            </form>
+
+            <div class="info-box" style="margin-top: 2rem;">
+                <h5><i class="fas fa-info-circle"></i> What Happens Next?</h5>
+                <ul>
+                    <li>If this is a new user, they will receive an email with their login credentials</li>
+                    <li>They can log in at <code>/promoter/account/login/</code></li>
+                    <li>They will see the assigned event in their dashboard</li>
+                    {% if partner_type == 'Doorman' %}
+                    <li>Doormen can access the check-in page to scan tickets</li>
+                    <li>They will only see check-in data, no financial information</li>
+                    {% else %}
+                    <li>Partners have access to event management features based on their role</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $(document).ready(function() {
+        // Form validation
+        $('#partnerForm').on('submit', function(e) {
+            var firstName = $('#id_first_name').val().trim();
+            var lastName = $('#id_last_name').val().trim();
+            var email = $('#id_email').val().trim();
+            var eventId = $('#id_event').val();
+            
+            if (!firstName) {
+                e.preventDefault();
+                alert('Please enter the first name');
+                $('#id_first_name').focus();
+                return false;
+            }
+            
+            if (!lastName) {
+                e.preventDefault();
+                alert('Please enter the last name');
+                $('#id_last_name').focus();
+                return false;
+            }
+            
+            if (!email) {
+                e.preventDefault();
+                alert('Please enter an email address');
+                $('#id_email').focus();
+                return false;
+            }
+            
+            // Basic email validation
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('Please enter a valid email address');
+                $('#id_email').focus();
+                return false;
+            }
+            
+            if (!eventId) {
+                e.preventDefault();
+                alert('Please select an event');
+                $('#id_event').focus();
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}

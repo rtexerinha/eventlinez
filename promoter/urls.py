@@ -5,7 +5,8 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
     payment_list, payment_pdf_view, bank_account_list, bank_create, \
     bank_account_update, bank_remove, promo_codes_list, promo_code_create, \
     promo_code_update, promo_code_delete, promo_code_toggle_status, promoter_dashboard, \
-    revenue_report, revenue_report_export, guest_lists_overview
+    revenue_report, revenue_report_export, guest_lists_overview, doorman_dashboard, doorman_checkin_page, \
+    partners_list, partner_create, doorman_create, partner_toggle_status, partner_delete
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from ticket.views_complimentary import (
@@ -31,6 +32,17 @@ app_name = 'promoter'
 urlpatterns = [
     # Dashboard - Main promoter landing page
     path('dashboard/', promoter_dashboard, name='promoter_dashboard'),
+    
+    # Doorman Web Interface
+    path('doorman/', doorman_dashboard, name='doorman_dashboard'),
+    path('doorman/event/<int:event_id>/checkin/', doorman_checkin_page, name='doorman_checkin_page'),
+    
+    # Partners Management
+    path('partners/', partners_list, name='partners_list'),
+    path('partners/create/', partner_create, name='partner_create'),
+    path('partners/doorman/create/', doorman_create, name='doorman_create'),
+    path('partners/<int:partner_id>/toggle/', partner_toggle_status, name='partner_toggle_status'),
+    path('partners/<int:partner_id>/delete/', partner_delete, name='partner_delete'),
     
     # Account management
     path('account/create/', signup_view_promoter, name='signup_promoter'),

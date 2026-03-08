@@ -1210,3 +1210,407 @@ def guest_lists_overview(request):
 
 # End of views.py
 
+from promoter.models import Partner
+
+@login_required(login_url='/promoter/account/login/')
+def doorman_dashboard(request):
+    """
+    Doorman dashboard - shows assigned events for check-in
+    No financial information displayed
+    """
+    user = request.user
+    
+    # Check if user is a doorman
+    doorman_assignments = Partner.objects.filter(
+        user=user,
+        role='DOORMAN',
+        disable=False
+    ).select_related('event', 'event__city')
+    
+    if not doorman_assignments.exists() and not hasattr(user, 'promoter'):
+        messages.error(request, "You don't have doorman access.")
+        return redirect('shop:index')
+    
+    # Get events
+    if hasattr(user, 'promoter'):
+        # Promoter sees all their events
+        events = Event.objects.filter(promoter=user.promoter)
+        role = 'PROMOTER'
+    else:
+        # Doorman sees only assigned events
+        event_ids = doorman_assignments.values_list('event_id', flat=True)
+        events = Event.objects.filter(id__in=event_ids)
+        role = 'DOORMAN'
+    
+    # Filter to current/upcoming events
+    now = timezone.now()
+    events = events.filter(event_date__gte=now - timedelta(hours=12)).order_by('event_date')
+    
+    # Add check-in stats to each event (no financial data)
+    from ticket.models import Ticket
+    try:
+        from ticket.models_complimentary import ComplimentaryTicket
+    except ImportError:
+        ComplimentaryTicket = None
+    
+    events_data = []
+    for event in events:
+        # Paid tickets stats (no prices)
+        paid_total = Ticket.objects.filter(event_ticket__event=event).count()
+        paid_checked_in = Ticket.objects.filter(
+            event_ticket__event=event,
+            checkin_date__isnull=False
+        ).count()
+        
+        # Guest list stats
+        guest_total = 0
+        guest_checked_in = 0
+        if ComplimentaryTicket:
+            guest_total = ComplimentaryTicket.objects.filter(
+                event=event
+            ).exclude(status='CANCELLED').count()
+            guest_checked_in = ComplimentaryTicket.objects.filter(
+                event=event,
+                status='CHECKED_IN'
+            ).count()
+        
+        total_expected = paid_total + guest_total
+        total_checked_in = paid_checked_in + guest_checked_in
+        percentage = round((total_checked_in / total_expected * 100) if total_expected > 0 else 0, 1)
+        
+        events_data.append({
+            'event': event,
+            'paid_total': paid_total,
+            'paid_checked_in': paid_checked_in,
+            'guest_total': guest_total,
+            'guest_checked_in': guest_checked_in,
+            'total_expected': total_expected,
+            'total_checked_in': total_checked_in,
+            'percentage': percentage,
+        })
+    
+    context = {
+        'events_data': events_data,
+        'role': role,
+        'user': user,
+    }
+    
+    return render(request, 'doorman/doorman_dashboard.html', context)
+
+
+@login_required(login_url='/promoter/account/login/')
+def doorman_checkin_page(request, event_id):
+    """
+    Doorman check-in page for a specific event
+    Shows ticket list with check-in functionality
+    No financial information displayed
+    """
+    user = request.user
+    
+    # Verify access
+    try:
+        event = Event.objects.get(id=event_id)
+    except Event.DoesNotExist:
+        messages.error(request, "Event not found.")
+        return redirect('promoter:doorman_dashboard')
+    
+    # Check if user has access to this event
+    has_access = False
+    if hasattr(user, 'promoter') and event.promoter == user.promoter:
+        has_access = True
+    elif Partner.objects.filter(
+        user=user,
+        event=event,
+        role='DOORMAN',
+        disable=False
+    ).exists():
+        has_access = True
+    
+    if not has_access:
+        messages.error(request, "You don't have access to this event.")
+        return redirect('promoter:doorman_dashboard')
+    
+    # Get tickets
+    from ticket.models import Ticket
+    try:
+        from ticket.models_complimentary import ComplimentaryTicket
+    except ImportError:
+        ComplimentaryTicket = None
+    
+    # Search functionality
+    search_query = request.GET.get('q', '')
+    
+    # Paid tickets
+    paid_tickets = Ticket.objects.filter(
+        event_ticket__event=event
+    ).select_related('event_ticket', 'customer').order_by('-created_at')
+    
+    if search_query:
+        paid_tickets = paid_tickets.filter(
+            Q(guest_name__icontains=search_query) |
+            Q(customer__first_name__icontains=search_query) |
+            Q(customer__last_name__icontains=search_query) |
+            Q(id__icontains=search_query)
+        )
+    
+    # Guest list tickets
+    guest_tickets = []
+    if ComplimentaryTicket:
+        guest_tickets = ComplimentaryTicket.objects.filter(
+            event=event
+        ).exclude(status='CANCELLED').order_by('-created_at')
+        
+        if search_query:
+            guest_tickets = guest_tickets.filter(
+                Q(guest_name__icontains=search_query) |
+                Q(guest_email__icontains=search_query)
+            )
+    
+    # Stats
+    paid_total = Ticket.objects.filter(event_ticket__event=event).count()
+    paid_checked_in = Ticket.objects.filter(
+        event_ticket__event=event,
+        checkin_date__isnull=False
+    ).count()
+    
+    guest_total = 0
+    guest_checked_in = 0
+    if ComplimentaryTicket:
+        guest_total = ComplimentaryTicket.objects.filter(
+            event=event
+        ).exclude(status='CANCELLED').count()
+        guest_checked_in = ComplimentaryTicket.objects.filter(
+            event=event,
+            status='CHECKED_IN'
+        ).count()
+    
+    context = {
+        'event': event,
+        'paid_tickets': paid_tickets[:50],  # Limit to 50 for performance
+        'guest_tickets': guest_tickets[:50],
+        'search_query': search_query,
+        'stats': {
+            'paid_total': paid_total,
+            'paid_checked_in': paid_checked_in,
+            'guest_total': guest_total,
+            'guest_checked_in': guest_checked_in,
+            'total_expected': paid_total + guest_total,
+            'total_checked_in': paid_checked_in + guest_checked_in,
+        }
+    }
+    
+    return render(request, 'doorman/doorman_checkin.html', context)
+
+
+@login_required(login_url='/promoter/account/login/')
+def partners_list(request):
+    """
+    List all partners (Business Partners and Doormen) for the promoter
+    """
+    try:
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+        
+        promoter = request.user.promoter
+        
+        # Get all partners for events owned by this promoter
+        partners = Partner.objects.filter(
+            event__promoter=promoter
+        ).select_related('user', 'event').order_by('-created_at')
+        
+        # Filter by role if specified
+        role_filter = request.GET.get('role')
+        if role_filter:
+            partners = partners.filter(role=role_filter)
+        
+        # Filter by event if specified
+        event_filter = request.GET.get('event')
+        if event_filter:
+            partners = partners.filter(event_id=event_filter)
+        
+        # Get events for filter dropdown
+        events = Event.objects.filter(promoter=promoter).order_by('-event_date')
+        
+        context = {
+            'partners': partners,
+            'events': events,
+            'role_filter': role_filter,
+            'event_filter': event_filter,
+            'promoter': promoter,
+        }
+        
+        return render(request, 'partners/partners_list.html', context)
+        
+    except Exception as e:
+        logger.error(f"Error in partners_list: {e}")
+        messages.error(request, "An error occurred while loading partners.")
+        return redirect('promoter:promoter_dashboard')
+
+
+@login_required(login_url='/promoter/account/login/')
+def partner_create(request):
+    """
+    Create a new Business Partner - creates user account and assigns to event
+    """
+    try:
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+        
+        promoter = request.user.promoter
+        
+        if request.method == 'POST':
+            from promoter.forms import CreatePartnerWithUserForm
+            form = CreatePartnerWithUserForm(request.POST, promoter=promoter)
+            
+            if form.is_valid():
+                partner = form.save()
+                
+                role_name = partner.get_role_display()
+                messages.success(
+                    request, 
+                    f'{role_name} "{partner.user.get_full_name()}" ({partner.email}) has been created and assigned to event "{partner.event.name}"'
+                )
+                return redirect('promoter:partners_list')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{error}")
+        else:
+            from promoter.forms import CreatePartnerWithUserForm
+            form = CreatePartnerWithUserForm(promoter=promoter)
+        
+        return render(request, 'partners/partner_create.html', {
+            'form': form,
+            'promoter': promoter,
+            'partner_type': 'Partner'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in partner_create: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('promoter:partners_list')
+
+
+@login_required(login_url='/promoter/account/login/')
+def doorman_create(request):
+    """
+    Create a new Doorman - creates user account and assigns to event with DOORMAN role
+    """
+    try:
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+        
+        promoter = request.user.promoter
+        
+        if request.method == 'POST':
+            from promoter.forms import CreatePartnerWithUserForm
+            form = CreatePartnerWithUserForm(request.POST, promoter=promoter, role='DOORMAN')
+            
+            if form.is_valid():
+                partner = form.save()
+                
+                messages.success(
+                    request,
+                    f'Doorman "{partner.user.get_full_name()}" ({partner.email}) has been created and assigned to event "{partner.event.name}"'
+                )
+                return redirect('promoter:partners_list')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{error}")
+        else:
+            from promoter.forms import CreatePartnerWithUserForm
+            form = CreatePartnerWithUserForm(promoter=promoter, role='DOORMAN')
+        
+        return render(request, 'partners/partner_create.html', {
+            'form': form,
+            'promoter': promoter,
+            'partner_type': 'Doorman'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in doorman_create: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('promoter:partners_list')
+
+
+@login_required(login_url='/promoter/account/login/')
+def partner_toggle_status(request, partner_id):
+    """
+    Enable or disable a partner
+    """
+    try:
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+        
+        promoter = request.user.promoter
+        partner = get_object_or_404(
+            Partner,
+            id=partner_id,
+            event__promoter=promoter
+        )
+        
+        partner.disable = not partner.disable
+        partner.save()
+        
+        status = "disabled" if partner.disable else "enabled"
+        messages.success(
+            request,
+            f'{partner.get_role_display()} "{partner.email}" has been {status}'
+        )
+        
+        return redirect('promoter:partners_list')
+        
+    except Exception as e:
+        logger.error(f"Error in partner_toggle_status: {e}")
+        messages.error(request, "An error occurred while updating partner status.")
+        return redirect('promoter:partners_list')
+
+
+@login_required(login_url='/promoter/account/login/')
+def partner_delete(request, partner_id):
+    """
+    Delete a partner assignment
+    """
+    try:
+        if not hasattr(request.user, 'promoter') or not request.user.promoter:
+            messages.error(request, "You need to have a promoter profile to access this page.")
+            return redirect('promoter:signup_promoter')
+        
+        promoter = request.user.promoter
+        partner = get_object_or_404(
+            Partner,
+            id=partner_id,
+            event__promoter=promoter
+        )
+        
+        partner_email = partner.email
+        partner_role = partner.get_role_display()
+        event_name = partner.event.name
+        
+        if request.method == 'POST':
+            partner.delete()
+            messages.success(
+                request,
+                f'{partner_role} "{partner_email}" has been removed from event "{event_name}"'
+            )
+            return redirect('promoter:partners_list')
+        
+        return render(request, 'partners/partner_delete.html', {
+            'partner': partner,
+            'promoter': promoter
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in partner_delete: {e}")
+        messages.error(request, "An error occurred while deleting the partner.")
+        return redirect('promoter:partners_list')
+
