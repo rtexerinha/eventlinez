@@ -902,7 +902,7 @@ class DoormanScanPaidTicketAPIView(APIView):
             )
 
         # Already checked in?
-        if ticket.checkin_date:
+        if (ticket.checkin_date):
             return Response(
                 TicketScanResultSerializer({
                     'success': False,
@@ -1171,5 +1171,147 @@ class DoormanListAPIView(APIView):
             for p in qs
         ]
         return Response(data)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  EVENT DOORMEN API (for mobile app)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class EventDoormenAPIView(APIView):
+    """
+    GET /api/event-doormen/?event_id=<id>
+    Returns all doormen assigned to a specific event.
+    Promoter-only endpoint.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not hasattr(request.user, 'promoter'):
+            return Response({'error': 'Only promoters can view event doormen.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        event_id = request.query_params.get('event_id')
+        if not event_id:
+            return Response({'error': 'event_id query parameter is required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Verify event belongs to this promoter
+        try:
+            event = Event.objects.get(pk=event_id, promoter=request.user.promoter)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found or does not belong to you.'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        doormen = Partner.objects.filter(
+            event_id=event_id,
+            role='DOORMAN'
+        ).select_related('user')
+
+        result = [{
+            'id': d.id,
+            'user_id': d.user.id if d.user else None,
+            'user_name': d.user.get_full_name() if d.user else d.email,
+            'user_email': d.email,
+            'assigned_at': d.created_at.isoformat(),
+            'active': not d.disable,
+        } for d in doormen]
+
+        return Response(result)
+
+
+class AvailableDoormenAPIView(APIView):
+    """
+    GET /api/available-doormen/?event_id=<id>
+    Returns all users who have been assigned as doormen to ANY of the promoter's events,
+    excluding those already assigned to the specified event.
+    This helps promoters quickly re-assign doormen they've worked with before.
+    
+    Promoter-only endpoint.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from django.contrib.auth.models import User as DjangoUser
+
+        if not hasattr(request.user, 'promoter'):
+            return Response({'error': 'Only promoters can view available doormen.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        event_id = request.query_params.get('event_id')
+        
+        # Get all users who have been doormen for this promoter's events
+        promoter_events = Event.objects.filter(promoter=request.user.promoter)
+        
+        # Get all unique doorman emails from this promoter's events
+        all_doormen = Partner.objects.filter(
+            event__in=promoter_events,
+            role='DOORMAN'
+        ).select_related('user').values('email', 'user__id', 'user__first_name', 'user__last_name')
+
+        # If event_id provided, exclude doormen already assigned to that event
+        if event_id:
+            assigned_emails = Partner.objects.filter(
+                event_id=event_id,
+                role='DOORMAN',
+                disable=False
+            ).values_list('email', flat=True)
+            
+            all_doormen = all_doormen.exclude(email__in=assigned_emails)
+
+        # Remove duplicates and build response
+        seen_emails = set()
+        result = []
+        for d in all_doormen:
+            if d['email'] not in seen_emails:
+                seen_emails.add(d['email'])
+                name = f"{d['user__first_name'] or ''} {d['user__last_name'] or ''}".strip()
+                result.append({
+                    'id': d['user__id'],
+                    'name': name if name else d['email'],
+                    'email': d['email']
+                })
+
+        return Response(result)
+
+
+class SearchUsersForDoormanAPIView(APIView):
+    """
+    GET /api/search-doormen/?q=<search_term>
+    Search for users by email or name who can be assigned as doormen.
+    Returns users who have accounts but are not the current promoter.
+    
+    Promoter-only endpoint.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from django.contrib.auth.models import User as DjangoUser
+
+        if not hasattr(request.user, 'promoter'):
+            return Response({'error': 'Only promoters can search for doormen.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        search_term = request.query_params.get('q', '').strip()
+        if len(search_term) < 3:
+            return Response({'error': 'Search term must be at least 3 characters.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Search users by email or name, exclude the current user
+        users = DjangoUser.objects.filter(
+            Q(email__icontains=search_term) |
+            Q(first_name__icontains=search_term) |
+            Q(last_name__icontains=search_term) |
+            Q(username__icontains=search_term)
+        ).exclude(
+            id=request.user.id
+        )[:20]  # Limit to 20 results
+
+        result = [{
+            'id': u.id,
+            'name': u.get_full_name() if u.get_full_name() else u.username,
+            'email': u.email or u.username
+        } for u in users]
+
+        return Response(result)
 
 
