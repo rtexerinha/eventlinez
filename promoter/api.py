@@ -1315,3 +1315,214 @@ class SearchUsersForDoormanAPIView(APIView):
         return Response(result)
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  DOORMAN TICKET SEARCH & GUEST LIST API
+# ══════════════════════════════════════════════════════════════════════════════
+
+class DoormanTicketSearchAPIView(APIView):
+    """
+    GET /api/doorman/tickets/search?event_id=<id>&guest_name=<name>&guest_email=<email>
+    
+    Search for tickets (paid tickets only) for manual check-in by doorman.
+    This endpoint allows doormen to search for tickets by name or email when the
+    QR code is not available.
+    
+    Query params:
+      - event_id: int (required) - Event ID to search within
+      - guest_name: string (optional) - Search by guest name
+      - guest_email: string (optional) - Search by guest email
+    
+    Returns list of matching tickets with check-in status.
+    """
+    permission_classes = [IsAuthenticated, IsDoorman]
+
+    def get(self, request):
+        from ticket.models import Ticket as PaidTicket
+
+        event_id = request.query_params.get('event_id')
+        guest_name = request.query_params.get('guest_name', '').strip()
+        guest_email = request.query_params.get('guest_email', '').strip()
+
+        # Validate required parameters
+        if not event_id:
+            return Response(
+                {'error': 'event_id query parameter is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Verify event exists and doorman has access
+        try:
+            event = Event.objects.get(pk=event_id)
+        except Event.DoesNotExist:
+            return Response(
+                {'error': 'Event not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user = request.user
+        if not hasattr(user, 'promoter'):
+            has_access = Partner.objects.filter(
+                user=user, event=event, role='DOORMAN', disable=False
+            ).exists()
+            if not has_access:
+                return Response(
+                    {'error': 'You are not assigned as a Doorman for this event.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        elif event.promoter.user != user:
+            return Response(
+                {'error': 'You do not have access to this event.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Build query for paid tickets
+        tickets = PaidTicket.objects.filter(
+            event_ticket__event=event
+        ).select_related('event_ticket', 'customer', 'order_item')
+
+        # Apply search filters
+        if guest_name:
+            tickets = tickets.filter(
+                Q(guest_name__icontains=guest_name) |
+                Q(customer__first_name__icontains=guest_name) |
+                Q(customer__last_name__icontains=guest_name)
+            )
+
+        if guest_email:
+            tickets = tickets.filter(
+                Q(customer__email__icontains=guest_email) |
+                Q(customer__username__icontains=guest_email)
+            )
+
+        # Limit results to prevent overload
+        tickets = tickets[:50]
+
+        # Build response
+        results = []
+        for ticket in tickets:
+            customer_name = ticket.guest_name
+            if not customer_name and ticket.customer:
+                customer_name = ticket.customer.get_full_name()
+            
+            customer_email = ''
+            if ticket.customer:
+                customer_email = getattr(ticket.customer, 'email', '') or getattr(ticket.customer, 'username', '')
+
+            results.append({
+                'id': ticket.id,
+                'uuid': str(ticket.uuid),
+                'guest_name': customer_name or 'Unknown',
+                'guest_email': customer_email,
+                'event_ticket': {
+                    'name': ticket.event_ticket.name,
+                    'price': float(ticket.price) if ticket.price else 0.0
+                },
+                'checkin_date': ticket.checkin_date.isoformat() if ticket.checkin_date else None,
+                'created_at': ticket.created_at.isoformat() if ticket.created_at else None,
+                'is_checked_in': ticket.checkin_date is not None
+            })
+
+        return Response(results)
+
+
+class DoormanGuestListAPIView(APIView):
+    """
+    GET /api/doorman/events/<event_id>/guests?search=<term>&status=<status>
+    
+    View guest list (complimentary tickets) for an event with search and filter.
+    Read-only endpoint for doormen to view guest list details.
+    
+    Query params:
+      - search: string (optional) - Search by name or email
+      - status: string (optional) - Filter by status (PENDING, SENT, CHECKED_IN, CANCELLED)
+    
+    Returns:
+      {
+        "guests": [...],
+        "stats": { "total": 50, "pending": 10, "sent": 30, "checked_in": 5, "cancelled": 5 }
+      }
+    """
+    permission_classes = [IsAuthenticated, IsDoorman]
+
+    def get(self, request, event_id):
+        from ticket.models_complimentary import ComplimentaryTicket
+
+        # Verify event exists and doorman has access
+        try:
+            event = Event.objects.get(pk=event_id)
+        except Event.DoesNotExist:
+            return Response(
+                {'error': 'Event not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user = request.user
+        if not hasattr(user, 'promoter'):
+            has_access = Partner.objects.filter(
+                user=user, event=event, role='DOORMAN', disable=False
+            ).exists()
+            if not has_access:
+                return Response(
+                    {'error': 'You are not assigned as a Doorman for this event.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        elif event.promoter.user != user:
+            return Response(
+                {'error': 'You do not have access to this event.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Get all complimentary tickets for this event
+        guests = ComplimentaryTicket.objects.filter(event=event)
+
+        # Apply filters
+        search_term = request.query_params.get('search', '').strip()
+        if search_term:
+            guests = guests.filter(
+                Q(guest_name__icontains=search_term) |
+                Q(guest_email__icontains=search_term)
+            )
+
+        status_filter = request.query_params.get('status', '').strip().upper()
+        if status_filter and status_filter in ['PENDING', 'SENT', 'CHECKED_IN', 'CANCELLED']:
+            guests = guests.filter(status=status_filter)
+
+        # Calculate stats (on filtered queryset if search applied, otherwise all)
+        all_guests = ComplimentaryTicket.objects.filter(event=event)
+        stats = {
+            'total': all_guests.count(),
+            'pending': all_guests.filter(status='PENDING').count(),
+            'sent': all_guests.filter(status='SENT').count(),
+            'checked_in': all_guests.filter(status='CHECKED_IN').count(),
+            'cancelled': all_guests.filter(status='CANCELLED').count(),
+        }
+
+        # Build guest list response
+        guest_data = []
+        for guest in guests.order_by('-created_at'):
+            guest_data.append({
+                'id': guest.id,
+                'uuid': str(guest.uuid),
+                'guest_name': guest.guest_name,
+                'guest_email': guest.guest_email,
+                'guest_phone': guest.guest_phone or '',
+                'ticket_type': guest.ticket_type,
+                'ticket_type_display': guest.get_ticket_type_display(),
+                'status': guest.status,
+                'status_display': guest.get_status_display(),
+                'qr_code_url': guest.qr_code_url,
+                'checkin_date': guest.checkin_date.isoformat() if guest.checkin_date else None,
+                'sent_at': guest.sent_at.isoformat() if guest.sent_at else None,
+                'created_at': guest.created_at.isoformat() if guest.created_at else None,
+                'is_checked_in': guest.status == 'CHECKED_IN',
+                'is_cancelled': guest.status == 'CANCELLED',
+            })
+
+        return Response({
+            'guests': guest_data,
+            'stats': stats,
+            'event_name': event.name,
+            'event_date': event.event_date.isoformat()
+        })
+
+

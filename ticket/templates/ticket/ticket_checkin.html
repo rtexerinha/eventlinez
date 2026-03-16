@@ -1,193 +1,178 @@
 {% extends "base_promoter.html" %}
 {% load static %}
 {% block title %}
-    Checkin ticket listing
+Checkin ticket listing
 {% endblock %}
 
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-    <section>
-        <div class="container-fluid">
-            <h2 class="h3-promoter mt-4 pt-2 mb-4">Validated tickets</h2>
-            {% if tickets %}
+<section>
+    <div class="container-fluid">
+        <h2 class="h3-promoter mt-4 pt-2 mb-4">Validated tickets</h2>
+        {% if tickets %}
 
-                <header class="col-12 mb-4 p-0 d-block d-lg-flex">
+        <header class="col-12 mb-4 p-0 d-block d-lg-flex">
 
-                    <div class="col-12 col-lg-6 p-0">
-                        <form class="form-inline mr-auto" action="{% url 'search_guest' %}" method="get">
-                        {% csrf_token %}
-{#                            <input class="form-control col-11 col-lg-8 form-control-sm"#}
-{#                                   style="margin-top: 10px;height: 20px; margin-left: 10px"#}
-{#                                   type="search"#}
-{#                                   placeholder="Search per guest name or ticket number"#}
-{#                                   aria-label="Search" name="q">#}
+            <div class="col-12 col-lg-6 p-0">
+                <form class="form-inline mr-auto" action="{% url 'search_guest' %}" method="get">
+                    {% csrf_token %}
+                    {# <input class="form-control col-11 col-lg-8 form-control-sm" #} {#
+                        style="margin-top: 10px;height: 20px; margin-left: 10px" #} {# type="search" #} {#
+                        placeholder="Search per guest name or ticket number" #} {# aria-label="Search" name="q">#}
 
 
-                                <div class="input-group col-lg-8 col-12 p-0 p-lg-2">
-                                    <input class="form-control form-control-sm border-right-0 border col-12"
-                                           style="height: 24px;"
-                                           type="search"
-                                           placeholder="Search per guest name or ticket number"
-                                           aria-label="Search" name="q"
-                                           id="example-search-input">
+                    <div class="input-group col-lg-8 col-12 p-0 p-lg-2">
+                        <input class="form-control form-control-sm border-right-0 border col-12" style="height: 24px;"
+                            type="search" placeholder="Search per guest name or ticket number" aria-label="Search"
+                            name="q" id="example-search-input">
 
-                                    <span class="input-group-append form-control-sm p-0">
-                                        <button class="btn btn-outline-secondary border-left-0 border form-control-sm"
-                                                type="submit">
-                                            <i class="fa fa-search"></i>
-                                        </button>
-                                    </span>
-                                </div>
-
-
-                        </form>
-                    </div>
-
-
-                    <div class="col-12 col-lg-6 p-0">
-
-                         <form method="POST" style="display: flex">
-                            {% csrf_token %}
-{#                            <label for="eventsChoice" style="font-size: 16px; margin-top: 10px">Events</label>#}
-
-                            <select id="eventsChoice"
-                                    class="form-control form-control-sm col-md-11 col-10 col-lg-9 mt-2"
-                                    name="events_choice"
-                                    id="events_choice"
-                                    style="margin: 0 10px 0 0;">
-
-                            {% if selected_event %}
-                                <option value="{{selected_event.id}}" selected="selected">
-                                    {{ selected_event.name }}
-                                </option>
-                            {% endif %}
-                            <option value="" >All</option>
-
-                            {% for event in events %}
-                                <option value="{{event.id}}">{{event.name}}</option>
-                            {% endfor %}
-                            </select>
-
-                            <button action="submit"
-                                    id="button-adm"
-                                    class="btn btn-secondary"
-                                    style="margin-top: 8px;
-                                       background-color: #d90075">
-                                Filter
+                        <span class="input-group-append form-control-sm p-0">
+                            <button class="btn btn-outline-secondary border-left-0 border form-control-sm"
+                                type="submit">
+                                <i class="fa fa-search"></i>
                             </button>
-                        </form>
+                        </span>
                     </div>
-                </header>
 
 
-                <main class="card-checkin">
-                    {% for ticket in tickets %}
-                        <article class="card m-lg-2 m-0 mb-4"
-                             style="min-width: 20rem;
+                </form>
+            </div>
+
+
+            <div class="col-12 col-lg-6 p-0">
+
+                <form method="POST" style="display: flex">
+                    {% csrf_token %}
+                    {# <label for="eventsChoice" style="font-size: 16px; margin-top: 10px">Events</label>#}
+
+                    <select id="eventsChoice" class="form-control form-control-sm col-md-11 col-10 col-lg-9 mt-2"
+                        name="events_choice" id="events_choice" style="margin: 0 10px 0 0;">
+
+                        {% if selected_event %}
+                        <option value="{{selected_event.id}}" selected="selected">
+                            {{ selected_event.name }}
+                        </option>
+                        {% endif %}
+                        <option value="">All</option>
+
+                        {% for event in events %}
+                        <option value="{{event.id}}">{{event.name}}</option>
+                        {% endfor %}
+                    </select>
+
+                    <button action="submit" id="button-adm" class="btn btn-secondary" style="margin-top: 8px;
+                                       background-color: #d90075">
+                        Filter
+                    </button>
+                </form>
+            </div>
+        </header>
+
+
+        <main class="card-checkin">
+            {% for ticket in tickets %}
+            <article class="card m-lg-2 m-0 mb-4" style="min-width: 20rem;
                              max-width: 20rem; border-radius: 10px;">
 
-                            {% if ticket.checkin_date %}
-                                <section class="card-header card-promoter" style="background: forestgreen">
-                            {% else %}
-                                <section class="card-header card-promoter">
-                            {% endif %}
+                {% if ticket.checkin_date %}
+                <section class="card-header card-promoter" style="background: forestgreen">
+                    {% else %}
+                    <section class="card-header card-promoter">
+                        {% endif %}
 
-                                <div style="display: flex; justify-content: space-between;">
-                                    <p class="p-promoter">Ticket Number:</p>
-                                    <p class="p-promoter">{{ticket.id}}</p>
-                                </div>
-                            </section>
-
-
-                            <section class="card-body" style="padding-left: 0px; padding-bottom: 0">
-                                <div style="display: block; padding-right: 0; padding-left: 20px" >
-                                    <div style="display: flex; justify-content: flex-start;; flex-direction: row">
-                                        <i class="fas fa-user-circle mt-1"></i>
-
-                                        {% if ticket.guest_name is None%}
-                                            <h5 class="h6-promoter ml-2">{{ticket.customer}}</h5>
-                                        {% else %}
-                                            <h5 class="h6-promoter ml-2">
-                                                {{ticket.guest_name|default_if_none:''}}
-                                            </h5>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="d-flex align-items-start">
-                                        <img class="mt-2" src="{% static 'img/ticket_icon.svg' %}" alt="ticket icon"/>
-                                        <h6 class="h6-promoter ml-2 mt-1" style="color: #171717">
-                                            {{ticket.event_ticket}}
-                                        </h6>
-                                    </div>
-
-
-                                    <p class="p-promoter" style="color: #7B7B7B;">
-                                        <b style="color: #383838;">Checkin date: </b>
-                                        {{ticket.checkin_date| date:'Y-M-d H:i'}}
-                                    </p>
-                                </div>
-
-{#                                <div class="card-footer" style="background: transparent">#}
-{#                                    <h6 class="h5-promoter" style="color: #171717">#}
-{#                                         {{ticket.event_ticket.event.name}}#}
-{#                                    </h6>#}
-{#                                </div>#}
-                            </section>
-                        </article>
-                    {% endfor %}
-                </main>
-
-                <footer class="col-12 mb-5 mt-4">
-                    {% if tickets.paginator.num_pages > 1 %}
-                        <div class="row row-paginator">
-                        <div class="col-lg-3 col-5">
-                            <span class="text-table">
-                                Showing {{ tickets.number }} - {{ tickets.paginator.num_pages }}
-                            </span>
+                        <div style="display: flex; justify-content: space-between;">
+                            <p class="p-promoter">Ticket Number:</p>
+                            <p class="p-promoter">{{ticket.id}}</p>
                         </div>
+                    </section>
 
-                        <div class="col-lg-6"></div>
-                        <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
-                            {% if tickets.has_previous %}
-                                <a class="text-table text pr-3"
-                                   href="?page={{ tickets.previous_page_number }}">
-                                    <i class="fas fa-chevron-left fa-sm"
-                                       style="color: #d90075; height: 10px; width: 10px"></i>
-                                    Prev
-                                </a>
-                            {% endif %}
 
-                            {% if tickets.has_next %}
-                                <a class="text-table text"
-                                   href="?page={{ tickets.next_page_number }}">
-                                    Next
-                                    <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
-                                </a>
+                    <section class="card-body" style="padding-left: 0px; padding-bottom: 0">
+                        <div style="display: block; padding-right: 0; padding-left: 20px">
+                            <div style="display: flex; justify-content: flex-start;; flex-direction: row">
+                                <i class="fas fa-user-circle mt-1"></i>
+
+                                {% if ticket.guest_name is None%}
+                                <h5 class="h6-promoter ml-2">{{ticket.customer}}</h5>
+                                {% else %}
+                                <h5 class="h6-promoter ml-2">
+                                    {{ticket.guest_name|default_if_none:''}}
+                                </h5>
                                 {% endif %}
+                            </div>
+
+                            <div class="d-flex align-items-start">
+                                <img class="mt-2" src="{% static 'img/ticket_icon.svg' %}" alt="ticket icon" />
+                                <h6 class="h6-promoter ml-2 mt-1" style="color: #171717">
+                                    {{ticket.event_ticket}}
+                                </h6>
+                            </div>
+
+
+                            <p class="p-promoter" style="color: #7B7B7B;">
+                                <b style="color: #383838;">Checkin date: </b>
+                                {{ticket.checkin_date| date:'Y-M-d H:i'}}
+                            </p>
                         </div>
-                    {% endif %}
-                    </div>
-                </footer>
 
-            {% else %}
-                <div style="width: 100%; margin: auto">
-                    <article id="event-div" style="display: flex; flex-direction: column">
-                        <h4 class="h4-promoter centralized">No tickets</h4>
-                        <br>
-                        <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
+                        {# <div class="card-footer" style="background: transparent">#}
+                            {# <h6 class="h5-promoter" style="color: #171717">#}
+                                {# {{ticket.event_ticket.event.name}}#}
+                                {# </h6>#}
+                            {# </div>#}
+                    </section>
+            </article>
+            {% endfor %}
+        </main>
 
-                        <a href="{% url 'promoter:tickets_validate' %}" class="p-home btn btn-lg mt-4"
-                           style="background-color: #d90075; color: #FFFFFF">
-
-                            <i class="fas fa-chevron-left pr-2" style="font-size: 0.8rem"></i>
-                            Back
-
-                    </a>
-                    </article>
+        <footer class="col-12 mb-5 mt-4">
+            {% if tickets.paginator.num_pages > 1 %}
+            <div class="row row-paginator">
+                <div class="col-lg-3 col-5">
+                    <span class="text-table">
+                        Showing {{ tickets.number }} - {{ tickets.paginator.num_pages }}
+                    </span>
                 </div>
 
-            {% endif %}
+                <div class="col-lg-6"></div>
+                <div class="col-lg-3 col-5 text-lg-right pr-lg-5 pr-sm-0">
+                    {% if tickets.has_previous %}
+                    <a class="text-table text pr-3" href="?page={{ tickets.previous_page_number }}">
+                        <i class="fas fa-chevron-left fa-sm" style="color: #d90075; height: 10px; width: 10px"></i>
+                        Prev
+                    </a>
+                    {% endif %}
+
+                    {% if tickets.has_next %}
+                    <a class="text-table text" href="?page={{ tickets.next_page_number }}">
+                        Next
+                        <i class="fas fa-chevron-right fa-sm" style="color: #d90075"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </footer>
+
+        {% else %}
+        <div style="width: 100%; margin: auto">
+            <article id="event-div" style="display: flex; flex-direction: column">
+                <h4 class="h4-promoter centralized">No tickets</h4>
+                <br>
+                <i class="fas fa-ticket-alt fa-5x" style="color: #d90075;padding-bottom: 20px;"></i>
+
+                <a href="{% url 'promoter:tickets_validate' %}" class="p-home btn btn-lg mt-4"
+                    style="background-color: #d90075; color: #FFFFFF">
+
+                    <i class="fas fa-chevron-left pr-2" style="font-size: 0.8rem"></i>
+                    Back
+
+                </a>
+            </article>
         </div>
-    </section>
+
+        {% endif %}
+    </div>
+</section>
 {% endblock content %}

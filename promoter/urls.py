@@ -26,7 +26,8 @@ from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, Categor
     DoormanProfileAPIView, DoormanEventListAPIView, DoormanCheckinStatsAPIView, \
     DoormanScanPaidTicketAPIView, DoormanScanGuestTicketAPIView, \
     DoormanAssignAPIView, DoormanListAPIView, \
-    EventDoormenAPIView, AvailableDoormenAPIView, SearchUsersForDoormanAPIView
+    EventDoormenAPIView, AvailableDoormenAPIView, SearchUsersForDoormanAPIView, \
+    DoormanTicketSearchAPIView, DoormanGuestListAPIView
 
 app_name = 'promoter'
 
@@ -197,6 +198,10 @@ urlpatterns = [
     path('api/doorman/assign/<int:partner_id>/', DoormanAssignAPIView.as_view(), name='api_doorman_assign_remove'),
     # Promoter: list all doormen (?event_id=<id>)
     path('api/doorman/list/', DoormanListAPIView.as_view(), name='api_doorman_list'),
+    # Doorman: search tickets
+    path('api/doorman/ticket-search/', DoormanTicketSearchAPIView.as_view(), name='api_doorman_ticket_search'),
+    # Doorman: view guest list
+    path('api/doorman/guest-list/', DoormanGuestListAPIView.as_view(), name='api_doorman_guest_list'),
     
     # ── Event Doormen API (for mobile app) ────────────────────────────────────
     # Get all doormen assigned to a specific event
