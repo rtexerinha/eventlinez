@@ -692,6 +692,7 @@ class DoormanProfileAPIView(APIView):
             # Promoter sees all their own events
             events = Event.objects.filter(promoter__user=user)
             role = 'PROMOTER'
+            user_type = 'promoter'
             assignments = None
         else:
             # Doorman sees only assigned, active events
@@ -702,6 +703,7 @@ class DoormanProfileAPIView(APIView):
                 id__in=assignments.values_list('event_id', flat=True)
             )
             role = 'DOORMAN'
+            user_type = 'doorman'
 
         events_data = DoormanEventSerializer(events, many=True).data
 
@@ -710,6 +712,7 @@ class DoormanProfileAPIView(APIView):
             'name': user.get_full_name() or user.username,
             'email': user.email,
             'role': role,
+            'user_type': user_type,  # NEW: standardized field for mobile app
             'events': events_data,
         })
 
