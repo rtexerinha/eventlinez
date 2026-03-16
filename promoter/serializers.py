@@ -177,10 +177,18 @@ class TicketTypeSerializers(serializers.Serializer):
     quantity = serializers.IntegerField()
     price = serializers.DecimalField(decimal_places=2, max_digits=10)
     sold_out = serializers.BooleanField(default=False)
+    qty_sold = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Ticket
         fields = '__all__'
+
+    def get_qty_sold(self, obj):
+        """Get the number of tickets sold for this ticket type"""
+        try:
+            return obj.qty_sold()
+        except Exception:
+            return 0
 
     def create(self, validated_data):
 
