@@ -282,6 +282,94 @@
     <!-- Temporarily disabled old cart.js as it conflicts with current cart template -->
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    
+    <!-- Instagram In-App Browser Fix -->
+    <script>
+        (function() {
+            // Detect Instagram in-app browser
+            function isInstagramBrowser() {
+                var ua = navigator.userAgent || navigator.vendor || window.opera;
+                return (ua.indexOf('Instagram') > -1);
+            }
+            
+            // Detect any in-app browser (Instagram, Facebook, LinkedIn, etc.)
+            function isInAppBrowser() {
+                var ua = navigator.userAgent || navigator.vendor || window.opera;
+                return (ua.indexOf('Instagram') > -1 || 
+                        ua.indexOf('FBAN') > -1 || 
+                        ua.indexOf('FBAV') > -1 ||
+                        ua.indexOf('LinkedInApp') > -1 ||
+                        ua.indexOf('Twitter') > -1);
+            }
+            
+            if (isInAppBrowser()) {
+                console.log('In-app browser detected, applying scroll fixes');
+                
+                // Add class to body for CSS targeting
+                document.body.classList.add('in-app-browser');
+                if (isInstagramBrowser()) {
+                    document.body.classList.add('instagram-browser');
+                }
+                
+                // Force enable scrolling
+                document.documentElement.style.overflow = 'auto';
+                document.documentElement.style.overflowX = 'hidden';
+                document.documentElement.style.overflowY = 'auto';
+                document.body.style.overflow = 'auto';
+                document.body.style.overflowX = 'hidden';
+                document.body.style.overflowY = 'auto';
+                document.body.style.position = 'relative';
+                document.body.style.height = 'auto';
+                document.body.style.minHeight = '100vh';
+                
+                // Override touch-action on all elements
+                var style = document.createElement('style');
+                style.innerHTML = `
+                    .in-app-browser *, 
+                    .in-app-browser *::before, 
+                    .in-app-browser *::after {
+                        touch-action: auto !important;
+                        -ms-touch-action: auto !important;
+                    }
+                    
+                    .in-app-browser body,
+                    .in-app-browser html,
+                    .in-app-browser main,
+                    .in-app-browser .container {
+                        overflow-y: auto !important;
+                        overflow-x: hidden !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        position: relative !important;
+                    }
+                    
+                    .in-app-browser .card-details {
+                        overflow-y: auto !important;
+                        max-height: none !important;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Force reflow to apply styles
+                document.body.offsetHeight;
+                
+                // Re-enable scroll after a short delay
+                setTimeout(function() {
+                    window.scrollTo(0, 0);
+                    document.body.style.overflow = 'auto';
+                }, 100);
+                
+                // Add touch event listeners to ensure scrolling works
+                var touchStartY = 0;
+                document.addEventListener('touchstart', function(e) {
+                    touchStartY = e.touches[0].clientY;
+                }, { passive: true });
+                
+                document.addEventListener('touchmove', function(e) {
+                    // Allow scrolling
+                }, { passive: true });
+            }
+        })();
+    </script>
 </body>
 
 </html>
