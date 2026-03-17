@@ -470,7 +470,29 @@
     background: #FFFFFF;
     margin-left: 30px;
     padding: 0 !important;
-    height: 645px;
+    height: auto; /* Changed from fixed 645px to auto */
+    max-height: 645px; /* Add max-height for desktop */
+    overflow-y: auto; /* Enable scrolling when content overflows */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Custom scrollbar for desktop */
+.card-details::-webkit-scrollbar {
+    width: 8px;
+}
+
+.card-details::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.card-details::-webkit-scrollbar-thumb {
+    background: #d90075;
+    border-radius: 10px;
+}
+
+.card-details::-webkit-scrollbar-thumb:hover {
+    background: #b0005c;
 }
 
 .h1-banner-home {
@@ -503,6 +525,10 @@
 
     .card-details {
         margin-left: 0px !important;
+        height: auto !important; /* Remove fixed height on mobile */
+        max-height: none !important; /* Remove max-height restriction on mobile */
+        overflow-y: visible !important; /* Allow natural scrolling on mobile */
+        margin-bottom: 2rem; /* Add spacing at bottom for better UX */
     }
 
     h1-banner-home {
