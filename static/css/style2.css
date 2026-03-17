@@ -535,8 +535,9 @@
         font-size: 1.5rem !important;
     }
     
-    /* Fix touch scrolling on mobile - override jquery-ui touch-action restrictions */
-    body, html, main, .container, .row, article, aside, div {
+    /* UNIVERSAL MOBILE SCROLL FIX - Works for ALL mobile browsers */
+    /* Override jQuery UI and Swiper touch-action restrictions */
+    body, html, main, .container, .row, article, aside, div, section {
         touch-action: auto !important;
         -ms-touch-action: auto !important;
         -webkit-overflow-scrolling: touch !important;
@@ -546,10 +547,38 @@
     body {
         overflow-y: auto !important;
         position: relative !important;
+        height: auto !important;
+        min-height: 100vh !important;
+    }
+    
+    html {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        height: auto !important;
     }
     
     /* Prevent any overflow hidden on main containers */
-    main, .container {
+    main, .container, .container-fluid {
+        overflow: visible !important;
+        overflow-y: visible !important;
+    }
+    
+    /* Fix for Safari iOS specific issues */
+    @supports (-webkit-touch-callout: none) {
+        body {
+            -webkit-overflow-scrolling: touch !important;
+            overflow-y: scroll !important;
+        }
+    }
+    
+    /* Ensure cards and ticket selection areas are scrollable */
+    .m-card, .ticket-row, .card-body {
+        touch-action: auto !important;
+    }
+    
+    /* Fix for event detail page */
+    .mh-65 {
+        min-height: auto !important;
         overflow: visible !important;
     }
 }

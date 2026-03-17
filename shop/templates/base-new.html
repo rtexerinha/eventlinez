@@ -223,6 +223,136 @@
     <!-- <script src="https://www.google.com/recaptcha/enterprise.js?render=6Ld-66UpAAAAAPIy7RomMLxZm45TAv-3IT5szOo6"></script> -->
 
     <title>{% block title %}Eventlinez{% endblock %}</title>
+    
+    <!-- Instagram In-App Browser Fix - Load First -->
+    <script>
+        (function() {
+            'use strict';
+            
+            // Detect Instagram in-app browser
+            function isInstagramBrowser() {
+                try {
+                    var ua = navigator.userAgent || navigator.vendor || window.opera || '';
+                    return (ua.indexOf('Instagram') > -1);
+                } catch(e) {
+                    return false;
+                }
+            }
+            
+            // Detect any in-app browser (Instagram, Facebook, LinkedIn, etc.)
+            function isInAppBrowser() {
+                try {
+                    var ua = navigator.userAgent || navigator.vendor || window.opera || '';
+                    return (ua.indexOf('Instagram') > -1 || 
+                            ua.indexOf('FBAN') > -1 || 
+                            ua.indexOf('FBAV') > -1 ||
+                            ua.indexOf('LinkedInApp') > -1 ||
+                            ua.indexOf('Twitter') > -1);
+                } catch(e) {
+                    return false;
+                }
+            }
+            
+            // Apply fixes immediately if in-app browser detected
+            if (isInAppBrowser()) {
+                // Log for debugging
+                if (window.console && console.log) {
+                    console.log('In-app browser detected:', navigator.userAgent);
+                }
+                
+                // Apply fixes as early as possible
+                var applyScrollFixes = function() {
+                    try {
+                        var html = document.documentElement;
+                        var body = document.body;
+                        
+                        // Add browser classes
+                        if (body) {
+                            body.className += ' in-app-browser';
+                            if (isInstagramBrowser()) {
+                                body.className += ' instagram-browser';
+                            }
+                        }
+                        
+                        // Force enable scrolling on html
+                        if (html) {
+                            html.style.overflow = 'auto';
+                            html.style.overflowX = 'hidden';
+                            html.style.overflowY = 'auto';
+                            html.style.height = 'auto';
+                        }
+                        
+                        // Force enable scrolling on body
+                        if (body) {
+                            body.style.overflow = 'auto';
+                            body.style.overflowX = 'hidden';
+                            body.style.overflowY = 'auto';
+                            body.style.position = 'relative';
+                            body.style.height = 'auto';
+                            body.style.minHeight = '100vh';
+                        }
+                        
+                        // Inject critical CSS fixes
+                        var style = document.createElement('style');
+                        style.type = 'text/css';
+                        style.innerHTML = 
+                            '.in-app-browser *, ' +
+                            '.in-app-browser *::before, ' +
+                            '.in-app-browser *::after { ' +
+                            '  touch-action: auto !important; ' +
+                            '  -ms-touch-action: auto !important; ' +
+                            '  -webkit-touch-callout: default !important; ' +
+                            '} ' +
+                            '.in-app-browser body, ' +
+                            '.in-app-browser html, ' +
+                            '.in-app-browser main, ' +
+                            '.in-app-browser .container, ' +
+                            '.in-app-browser .container-fluid { ' +
+                            '  overflow-y: auto !important; ' +
+                            '  overflow-x: hidden !important; ' +
+                            '  -webkit-overflow-scrolling: touch !important; ' +
+                            '  position: relative !important; ' +
+                            '} ' +
+                            '.in-app-browser .card-details { ' +
+                            '  overflow-y: auto !important; ' +
+                            '  max-height: none !important; ' +
+                            '  height: auto !important; ' +
+                            '} ' +
+                            '.in-app-browser .row { ' +
+                            '  overflow: visible !important; ' +
+                            '}';
+                        
+                        var head = document.head || document.getElementsByTagName('head')[0];
+                        if (head) {
+                            head.appendChild(style);
+                        }
+                        
+                        // Force reflow
+                        if (body) {
+                            void(body.offsetHeight);
+                        }
+                        
+                    } catch(e) {
+                        if (window.console && console.error) {
+                            console.error('Error applying scroll fixes:', e);
+                        }
+                    }
+                };
+                
+                // Apply fixes immediately
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', applyScrollFixes);
+                } else {
+                    applyScrollFixes();
+                }
+                
+                // Also apply on window load as backup
+                if (window.addEventListener) {
+                    window.addEventListener('load', applyScrollFixes);
+                }
+            }
+        })();
+    </script>
 </head>
 
 <body class="container-body" {% block body_attrs %}{% endblock %}>
@@ -278,98 +408,9 @@
 
     {% block custom_js %}{% endblock %}
     {% block cart_js %}{% endblock %}
-    <!-- <script src="{% static 'js/cart.js' %}"></script> -->
     <!-- Temporarily disabled old cart.js as it conflicts with current cart template -->
-    <script src="{% static 'js/popper.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    
-    <!-- Instagram In-App Browser Fix -->
-    <script>
-        (function() {
-            // Detect Instagram in-app browser
-            function isInstagramBrowser() {
-                var ua = navigator.userAgent || navigator.vendor || window.opera;
-                return (ua.indexOf('Instagram') > -1);
-            }
-            
-            // Detect any in-app browser (Instagram, Facebook, LinkedIn, etc.)
-            function isInAppBrowser() {
-                var ua = navigator.userAgent || navigator.vendor || window.opera;
-                return (ua.indexOf('Instagram') > -1 || 
-                        ua.indexOf('FBAN') > -1 || 
-                        ua.indexOf('FBAV') > -1 ||
-                        ua.indexOf('LinkedInApp') > -1 ||
-                        ua.indexOf('Twitter') > -1);
-            }
-            
-            if (isInAppBrowser()) {
-                console.log('In-app browser detected, applying scroll fixes');
-                
-                // Add class to body for CSS targeting
-                document.body.classList.add('in-app-browser');
-                if (isInstagramBrowser()) {
-                    document.body.classList.add('instagram-browser');
-                }
-                
-                // Force enable scrolling
-                document.documentElement.style.overflow = 'auto';
-                document.documentElement.style.overflowX = 'hidden';
-                document.documentElement.style.overflowY = 'auto';
-                document.body.style.overflow = 'auto';
-                document.body.style.overflowX = 'hidden';
-                document.body.style.overflowY = 'auto';
-                document.body.style.position = 'relative';
-                document.body.style.height = 'auto';
-                document.body.style.minHeight = '100vh';
-                
-                // Override touch-action on all elements
-                var style = document.createElement('style');
-                style.innerHTML = `
-                    .in-app-browser *, 
-                    .in-app-browser *::before, 
-                    .in-app-browser *::after {
-                        touch-action: auto !important;
-                        -ms-touch-action: auto !important;
-                    }
-                    
-                    .in-app-browser body,
-                    .in-app-browser html,
-                    .in-app-browser main,
-                    .in-app-browser .container {
-                        overflow-y: auto !important;
-                        overflow-x: hidden !important;
-                        -webkit-overflow-scrolling: touch !important;
-                        position: relative !important;
-                    }
-                    
-                    .in-app-browser .card-details {
-                        overflow-y: auto !important;
-                        max-height: none !important;
-                    }
-                `;
-                document.head.appendChild(style);
-                
-                // Force reflow to apply styles
-                document.body.offsetHeight;
-                
-                // Re-enable scroll after a short delay
-                setTimeout(function() {
-                    window.scrollTo(0, 0);
-                    document.body.style.overflow = 'auto';
-                }, 100);
-                
-                // Add touch event listeners to ensure scrolling works
-                var touchStartY = 0;
-                document.addEventListener('touchstart', function(e) {
-                    touchStartY = e.touches[0].clientY;
-                }, { passive: true });
-                
-                document.addEventListener('touchmove', function(e) {
-                    // Allow scrolling
-                }, { passive: true });
-            }
-        })();
-    </script>
+    <script src="{% static 'js/popper.min.js' %}" onerror="console.warn('Failed to load popper.min.js')"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}" onerror="console.warn('Failed to load bootstrap.min.js')"></script>
 </body>
 
 </html>
