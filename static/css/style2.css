@@ -534,6 +534,24 @@
     h1-banner-home {
         font-size: 1.5rem !important;
     }
+    
+    /* Fix touch scrolling on mobile - override jquery-ui touch-action restrictions */
+    body, html, main, .container, .row, article, aside, div {
+        touch-action: auto !important;
+        -ms-touch-action: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    /* Ensure page content is scrollable */
+    body {
+        overflow-y: auto !important;
+        position: relative !important;
+    }
+    
+    /* Prevent any overflow hidden on main containers */
+    main, .container {
+        overflow: visible !important;
+    }
 }
 
 @media(max-width: 900px) {
