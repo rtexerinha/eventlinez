@@ -351,17 +351,16 @@
 /* ==========================================================================
    12. LOADING STATES AND ANIMATIONS
    ========================================================================== */
+/* Removed universal * animation-duration override — it forced style recalculation
+   on every element on every interaction, causing scroll jank on mobile. */
 @media (max-width: 768px) {
-
-    /* Reduce animation complexity on mobile for better performance */
-    * {
-        animation-duration: 0.2s !important;
+    /* Only target elements that actually animate */
+    .btn-save,
+    .buttons-primary,
+    .button-cart,
+    .m-card,
+    .organize-event-btn {
         transition-duration: 0.2s !important;
-    }
-
-    /* Prevent layout shift */
-    img {
-        aspect-ratio: attr(width) / attr(height);
     }
 }
 
