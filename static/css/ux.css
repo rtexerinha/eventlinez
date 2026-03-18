@@ -44,11 +44,24 @@
     font-size: 14px;
     text-transform: uppercase;
     color: #909090;
+    /* Ensure tap area is accessible */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
 @media(max-width:880px) {
     .w-10 {
         width: 100% !important;
+    }
+}
+
+@media (max-width: 800px) {
+    .button-increment {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 16px !important;
     }
 }
 
@@ -74,11 +87,26 @@
     border: 1px solid var(--gray-color-light);
 }
 
-
 .bg-gradient {
     background: linear-gradient(89.39deg, #E10087 -29.61%, #007AFF 135.34%);
     border-radius: 6px 6px 0 0;
     height: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 800px) {
+    .bg-gradient {
+        height: auto !important;
+        padding: 16px 12px !important;
+    }
+
+    .h3-detail-center {
+        padding-top: 0 !important;
+        font-size: 1.1rem !important;
+        text-align: center !important;
+    }
 }
 
 @media (min-width: 990px) {

@@ -223,49 +223,49 @@
     <!-- <script src="https://www.google.com/recaptcha/enterprise.js?render=6Ld-66UpAAAAAPIy7RomMLxZm45TAv-3IT5szOo6"></script> -->
 
     <title>{% block title %}Eventlinez{% endblock %}</title>
-    
+
     <!-- Instagram In-App Browser Fix - Load First -->
     <script>
-        (function() {
+        (function () {
             'use strict';
-            
+
             // Detect Instagram in-app browser
             function isInstagramBrowser() {
                 try {
                     var ua = navigator.userAgent || navigator.vendor || window.opera || '';
                     return (ua.indexOf('Instagram') > -1);
-                } catch(e) {
+                } catch (e) {
                     return false;
                 }
             }
-            
+
             // Detect any in-app browser (Instagram, Facebook, LinkedIn, etc.)
             function isInAppBrowser() {
                 try {
                     var ua = navigator.userAgent || navigator.vendor || window.opera || '';
-                    return (ua.indexOf('Instagram') > -1 || 
-                            ua.indexOf('FBAN') > -1 || 
-                            ua.indexOf('FBAV') > -1 ||
-                            ua.indexOf('LinkedInApp') > -1 ||
-                            ua.indexOf('Twitter') > -1);
-                } catch(e) {
+                    return (ua.indexOf('Instagram') > -1 ||
+                        ua.indexOf('FBAN') > -1 ||
+                        ua.indexOf('FBAV') > -1 ||
+                        ua.indexOf('LinkedInApp') > -1 ||
+                        ua.indexOf('Twitter') > -1);
+                } catch (e) {
                     return false;
                 }
             }
-            
+
             // Apply fixes immediately if in-app browser detected
             if (isInAppBrowser()) {
                 // Log for debugging
                 if (window.console && console.log) {
                     console.log('In-app browser detected:', navigator.userAgent);
                 }
-                
+
                 // Apply fixes as early as possible
-                var applyScrollFixes = function() {
+                var applyScrollFixes = function () {
                     try {
                         var html = document.documentElement;
                         var body = document.body;
-                        
+
                         // Add browser classes
                         if (body) {
                             body.className += ' in-app-browser';
@@ -273,7 +273,7 @@
                                 body.className += ' instagram-browser';
                             }
                         }
-                        
+
                         // Force enable scrolling on html
                         if (html) {
                             html.style.overflow = 'auto';
@@ -281,7 +281,7 @@
                             html.style.overflowY = 'auto';
                             html.style.height = 'auto';
                         }
-                        
+
                         // Force enable scrolling on body
                         if (body) {
                             body.style.overflow = 'auto';
@@ -291,11 +291,11 @@
                             body.style.height = 'auto';
                             body.style.minHeight = '100vh';
                         }
-                        
+
                         // Inject critical CSS fixes
                         var style = document.createElement('style');
                         style.type = 'text/css';
-                        style.innerHTML = 
+                        style.innerHTML =
                             '.in-app-browser *, ' +
                             '.in-app-browser *::before, ' +
                             '.in-app-browser *::after { ' +
@@ -321,31 +321,31 @@
                             '.in-app-browser .row { ' +
                             '  overflow: visible !important; ' +
                             '}';
-                        
+
                         var head = document.head || document.getElementsByTagName('head')[0];
                         if (head) {
                             head.appendChild(style);
                         }
-                        
+
                         // Force reflow
                         if (body) {
-                            void(body.offsetHeight);
+                            void (body.offsetHeight);
                         }
-                        
-                    } catch(e) {
+
+                    } catch (e) {
                         if (window.console && console.error) {
                             console.error('Error applying scroll fixes:', e);
                         }
                     }
                 };
-                
+
                 // Apply fixes immediately
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', applyScrollFixes);
                 } else {
                     applyScrollFixes();
                 }
-                
+
                 // Also apply on window load as backup
                 if (window.addEventListener) {
                     window.addEventListener('load', applyScrollFixes);

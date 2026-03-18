@@ -237,12 +237,14 @@
                 <div class="tab-pane fade show active" id="event-details" role="tabpanel">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
+                        {{ form.media }}
 
                         <div class="edit-event-card">
                             <h3 class="form-section-title">Basic Information</h3>
 
+                            <!-- Event Name -->
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-12">
                                     <div class="form-group mb-3">
                                         <label for="{{ form.name.id_for_label }}">Event Name *</label>
                                         {{ form.name }}
@@ -250,6 +252,12 @@
                                         <div class="text-danger">{{ form.name.errors }}</div>
                                         {% endif %}
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="row">
+                                <div class="col-12">
                                     <div class="form-group mb-3">
                                         <label for="{{ form.description.id_for_label }}">Description *</label>
                                         {{ form.description }}
@@ -258,15 +266,23 @@
                                         {% endif %}
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    {% if event.image %}
-                                    <div class="event-preview">
-                                        <label>Current Image</label>
-                                        <img src="{{ event.image.url }}" class="preview-image" alt="{{ event.name }}">
-                                    </div>
-                                    {% endif %}
-                                    <div class="form-group mb-3">
-                                        <label for="{{ form.image.id_for_label }}">Event Image</label>
+                            </div>
+
+                            <!-- Event Image -->
+                            <div class="row align-items-start mt-2">
+                                {% if event.image %}
+                                <div class="col-md-4 col-12 mb-3">
+                                    <label class="d-block mb-2">Current Image</label>
+                                    <img src="{{ event.image.url }}" id="image-preview" class="preview-image w-100"
+                                        style="max-height: 200px; object-fit: cover; border-radius: 8px;"
+                                        alt="{{ event.name }}">
+                                </div>
+                                <div class="col-md-8 col-12 mb-3">
+                                {% else %}
+                                <div class="col-12 mb-3">
+                                {% endif %}
+                                    <div class="form-group">
+                                        <label for="{{ form.image.id_for_label }}">Change Image</label>
                                         {{ form.image }}
                                         {% if form.image.errors %}
                                         <div class="text-danger">{{ form.image.errors }}</div>

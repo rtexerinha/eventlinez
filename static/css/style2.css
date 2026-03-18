@@ -470,10 +470,14 @@
     background: #FFFFFF;
     margin-left: 30px;
     padding: 0 !important;
-    height: auto; /* Changed from fixed 645px to auto */
-    max-height: 645px; /* Add max-height for desktop */
-    overflow-y: auto; /* Enable scrolling when content overflows */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    height: auto;
+    /* Changed from fixed 645px to auto */
+    max-height: 645px;
+    /* Add max-height for desktop */
+    overflow-y: auto;
+    /* Enable scrolling when content overflows */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
 }
 
 /* Custom scrollbar for desktop */
@@ -525,24 +529,36 @@
 
     .card-details {
         margin-left: 0px !important;
-        height: auto !important; /* Remove fixed height on mobile */
-        max-height: none !important; /* Remove max-height restriction on mobile */
-        overflow-y: visible !important; /* Allow natural scrolling on mobile */
-        margin-bottom: 2rem; /* Add spacing at bottom for better UX */
+        height: auto !important;
+        /* Remove fixed height on mobile */
+        max-height: none !important;
+        /* Remove max-height restriction on mobile */
+        overflow-y: visible !important;
+        /* Allow natural scrolling on mobile */
+        margin-bottom: 2rem;
+        /* Add spacing at bottom for better UX */
     }
 
     h1-banner-home {
         font-size: 1.5rem !important;
     }
-    
+
     /* UNIVERSAL MOBILE SCROLL FIX - Works for ALL mobile browsers */
     /* Override jQuery UI and Swiper touch-action restrictions */
-    body, html, main, .container, .row, article, aside, div, section {
+    body,
+    html,
+    main,
+    .container,
+    .row,
+    article,
+    aside,
+    div,
+    section {
         touch-action: auto !important;
         -ms-touch-action: auto !important;
         -webkit-overflow-scrolling: touch !important;
     }
-    
+
     /* Ensure page content is scrollable */
     body {
         overflow-y: auto !important;
@@ -550,19 +566,21 @@
         height: auto !important;
         min-height: 100vh !important;
     }
-    
+
     html {
         overflow-y: auto !important;
         overflow-x: hidden !important;
         height: auto !important;
     }
-    
+
     /* Prevent any overflow hidden on main containers */
-    main, .container, .container-fluid {
+    main,
+    .container,
+    .container-fluid {
         overflow: visible !important;
         overflow-y: visible !important;
     }
-    
+
     /* Fix for Safari iOS specific issues */
     @supports (-webkit-touch-callout: none) {
         body {
@@ -570,12 +588,14 @@
             overflow-y: scroll !important;
         }
     }
-    
+
     /* Ensure cards and ticket selection areas are scrollable */
-    .m-card, .ticket-row, .card-body {
+    .m-card,
+    .ticket-row,
+    .card-body {
         touch-action: auto !important;
     }
-    
+
     /* Fix for event detail page */
     .mh-65 {
         min-height: auto !important;

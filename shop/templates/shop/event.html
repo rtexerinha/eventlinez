@@ -34,7 +34,7 @@ your tickets on Eventlinez.{% endblock %}
                 <h6 class="h6-home p-dark">Back</h6>
             </a>
 
-            <ul class="d-flex mb-0">
+            <ul class="d-flex mb-0" style="list-style: none; padding-left: 0;">
                 <a class="decoration-none p-home pr-1" href="{% url 'index' %}">
                     Home
                 </a>
@@ -56,20 +56,20 @@ your tickets on Eventlinez.{% endblock %}
             </div>
             {% endif %}
 
-            <div class="col-lg-8">
+            <div class="col-12 col-lg-8">
                 <div style="display: none" id="events">{{event.id}}</div>
                 <h3 class="h3-home pt-2 pt-lg-5">{{event.name}}</h3>
                 <h4 class="height-21 h4-home p-date">{{event.event_date|date:"D, d M H:i"}}</h4>
                 <h6 class="height-21 h6-home">{{event.city}}</h6>
             </div>
 
-            <div class="col-12 mt-5 mb-5" style="font-family: Lato">
+            <div class="col-12 mt-3 mt-lg-5 mb-3 mb-lg-5" style="font-family: Lato">
                 {{ event.description|safe }}
             </div>
 
             {% if vendor != None %}
-            <section class="m-card col-12 p-3 mt-5 mb-5" style="font-family: Lato;">
-                <div class=row>
+            <section class="m-card col-12 p-3 mt-3 mt-lg-5 mb-3 mb-lg-5" style="font-family: Lato;">
+                <div class="row">
                     <div class="col-lg-1 col-2">
                         <i class="far fa-user-circle fa-3x" style="color: #F14CA5"></i>
                     </div>
@@ -77,18 +77,18 @@ your tickets on Eventlinez.{% endblock %}
                     <div class="col-lg-10 col-10">
                         <h4 class="h4-home pb-2" style="margin-left: 10px; color: #212529">Vendor Information</h4>
                         <div class="d-block d-lg-flex">
-                            <div class="col-6">
+                            <div class="col-12 col-md-6 mb-2">
                                 <h6 class="weight-height h6-home" style="font-weight: 500;font-size: 12px">
                                     Vendor:
                                 </h6>
                                 <p class="p-home p-vendor">{{ vendor.full_name}}</p>
                             </div>
 
-                            <div class="col-6">
+                            <div class="col-12 col-md-6 mb-2">
                                 <h6 class="weight-height h6-home" style="font-weight: 500;font-size: 12px">
                                     Email:
                                 </h6>
-                                <p class="p-home p-vendor">{{ vendor.email}}</p>
+                                <p class="p-home p-vendor" style="word-break: break-all;">{{ vendor.email}}</p>
                             </div>
 
                             <div class="col-4 d-none">
@@ -105,9 +105,9 @@ your tickets on Eventlinez.{% endblock %}
 
         </aside>
 
-        <article class="col-lg-4" style="padding: 0!important;">
-            <div class="col-lg-12 card-details">
-                <aside class="bg-gradient col-lg-12">
+        <article class="col-lg-4 mt-4 mt-lg-0" style="padding: 0!important;">
+            <div class="col-12 col-lg-12 card-details">
+                <aside class="bg-gradient col-12">
                     <h3 class="h3-home h3-detail-center">
                         Select the ticket type
                     </h3>
@@ -117,8 +117,8 @@ your tickets on Eventlinez.{% endblock %}
                     {% for ticket in event.tickets.all %}
                     {% if not ticket.sold_out %}
                     <aside class="col-12 mt-4">
-                        <div id="ticket-row-{{ ticket.id }}" class="ticket-row row">
-                            <div class="col-8" style="display: block">
+                        <div id="ticket-row-{{ ticket.id }}" class="ticket-row row align-items-center">
+                            <div class="col-7" style="display: block">
                                 <p class="ticket-id" id="ticket-id" style="display: none">{{ ticket.id }}</p>
                                 <h6 class="weight-height h6-home">
                                     {{ ticket.name }}
@@ -128,13 +128,12 @@ your tickets on Eventlinez.{% endblock %}
                                     {{ ticket.price }}
                                 </p>
                             </div>
-                            <div class="col-4 mt-2" style="display: flex">
-                                <!-- Quantity Buttons  -->
+                            <div class="col-5 d-flex align-items-center justify-content-end">
                                 <button onclick="controlQty({{ ticket.id }}, 'decrease')" type="button"
-                                    class="button-increment mr-2">-</button>
-                                <h6 id="ticket-{{ ticket.id }}-qty" class="ticket-qty h6-home">0</h6>
+                                    class="button-increment mr-2" style="min-width:36px;min-height:36px;">-</button>
+                                <h6 id="ticket-{{ ticket.id }}-qty" class="ticket-qty h6-home mx-1 mb-0">0</h6>
                                 <button onclick="controlQty({{ ticket.id }}, 'increase')" type="button"
-                                    class="plus button-increment ml-2">+</button>
+                                    class="plus button-increment ml-2" style="min-width:36px;min-height:36px;">+</button>
                             </div>
                         </div>
                     </aside>
@@ -145,44 +144,40 @@ your tickets on Eventlinez.{% endblock %}
 
                 </div>
 
-                {% if event.qty_available <= 0%} <p class="h2-home text-center p-date mt-5">
+                {% if event.qty_available <= 0%}
+                <p class="h2-home text-center p-date mt-5">
                     Sold Out
-                    </p>
-                    {% else %}
-                    <br>
-                    {# <div class="col-12">#}
-                        {# <label for="promo_code" class="h6-home">Promo code</label>#}
-                        {# <input id="promo_code" name="promo_code" type="text" #} {# class="col-12 input-subcribe" #}
-                            {# placeholder="Insert code" style="border: 1px solid #E9E9E9;border-radius: 6px;">#}
-                        {# </div>#}
+                </p>
+                {% else %}
+                <br>
 
-                    <article class="col-12 mt-4">
-                        <div class="row">
-                            <div class="col-6">
-                                <p class="weight-height h5-home p-dark mt-2">Total</p>
-                            </div>
-
-                            <div class="col-6 d-flex justify-content-end">
-                                <p id="total" class="h3-home p-dark">0.00</p>
-                            </div>
+                <article class="col-12 mt-4">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="weight-height h5-home p-dark mt-2">Total</p>
                         </div>
-                    </article>
 
-                    <div class="col-lg-12 mt-4">
-                        {% now "YmdHis" as todays_date %}
-                        {% if todays_date >= event.event_date|date:"YmdHis" %}
-                        <h6 class="h6-home d-flex justify-content-center"
-                            style="margin-top: 5%; font-size: 1rem; color: #E10087">
-                            The event date has passed
-                        </h6>
-                        <input disabled class="buttons-primary button-details-width h5-home" type="submit"
-                            value="Add to Cart">
-                        {% else %}
-                        <input onclick="addToCard()" id="addToCartBtn"
-                            class="buttons-primary button-details-width h5-home" type="submit" value="Add to Cart">
-                        {% endif %}
+                        <div class="col-6 d-flex justify-content-end">
+                            <p id="total" class="h3-home p-dark">0.00</p>
+                        </div>
                     </div>
+                </article>
+
+                <div class="col-12 mt-4 mb-3">
+                    {% now "YmdHis" as todays_date %}
+                    {% if todays_date >= event.event_date|date:"YmdHis" %}
+                    <h6 class="h6-home d-flex justify-content-center"
+                        style="margin-top: 5%; font-size: 1rem; color: #E10087">
+                        The event date has passed
+                    </h6>
+                    <input disabled class="buttons-primary button-details-width h5-home" type="submit"
+                        value="Add to Cart">
+                    {% else %}
+                    <input onclick="addToCard()" id="addToCartBtn"
+                        class="buttons-primary button-details-width h5-home" type="submit" value="Add to Cart">
                     {% endif %}
+                </div>
+                {% endif %}
 
             </div>
         </article>
