@@ -1865,6 +1865,22 @@ on Eventlinez.{% endblock %}
         }
     }
 
+    // Safety net for in-app browsers (Instagram/Facebook WebView):
+    // If the user navigates away while the lightbox is open, the closeLightbox()
+    // callback never fires and the next page inherits body{overflow:hidden}.
+    // pagehide fires reliably in all WebViews when the page is being unloaded.
+    window.addEventListener('pagehide', function () {
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+    });
+    // visibilitychange covers the case where the app goes to background
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        }
+    });
+
     function nextPhoto() {
         if (currentPhotoIndex < currentAlbumPhotos.length - 1) {
             currentPhotoIndex++;

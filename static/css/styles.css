@@ -372,7 +372,9 @@
 }
 
 #carousel {
-    overflow: auto;
+    overflow-x: auto;     /* horizontal scroll for cards */
+    overflow-y: visible;  /* do NOT trap vertical scroll — in-app browsers (Instagram iOS 17)
+                             treat overflow:auto as a scroll root and block page scroll */
     scroll-behavior: smooth;
     scrollbar-width: none;
     margin-left: 3px;
