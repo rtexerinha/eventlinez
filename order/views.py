@@ -13,6 +13,8 @@ from order.tasks import send_mail
 from ticket.models import Ticket
 from .models import Order
 from .models import OrderItem
+from promoter.models import PromoCode, PromoCodeUsage
+from django.db import transaction
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -332,6 +334,38 @@ def create(request):
             })
 
         print(f"Successfully created {order_items_created} order items")
+
+        # Track promo code usage — collect unique codes from the cart items
+        try:
+            promo_codes_used = set(
+                item.promo_code for item in items if item.promo_code
+            )
+            for code in promo_codes_used:
+                with transaction.atomic():
+                    promo = PromoCode.objects.select_for_update().get(code=code)
+                    # Avoid double-counting if order is somehow processed twice
+                    already_recorded = PromoCodeUsage.objects.filter(
+                        promo_code=promo,
+                        order_id=str(order.id)
+                    ).exists()
+                    if not already_recorded:
+                        PromoCodeUsage.objects.create(
+                            promo_code=promo,
+                            customer_email=customer.email,
+                            order_id=str(order.id),
+                            discount_amount=cart.promo_discount or 0,
+                        )
+                        # Use F() to avoid race condition on concurrent purchases
+                        from django.db.models import F
+                        PromoCode.objects.filter(pk=promo.pk).update(
+                            current_uses=F('current_uses') + 1
+                        )
+                        logger.info(f"Promo code '{code}' usage recorded for order {order.id}")
+        except PromoCode.DoesNotExist:
+            logger.warning(f"Promo code '{code}' not found during usage tracking")
+        except Exception as e:
+            logger.error(f"Failed to track promo code usage for order {order.id}: {e}")
+            # Non-critical — order is already created, don't block the customer
 
         # Delete cart
         try:
