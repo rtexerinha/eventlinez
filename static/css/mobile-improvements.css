@@ -303,16 +303,17 @@
         grid-gap: 16px !important;
     }
 
-    /* Remove horizontal scroll issues */
-    .row {
-        margin-left: -8px !important;
-        margin-right: -8px !important;
-    }
-
-    [class*="col-"] {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-    }
+    /* ── REMOVED ──────────────────────────────────────────────────────────────
+     * The previous rule set margin-left/right: -8px !important on .row and
+     * padding: 8px !important on [class*="col-"].
+     *
+     * Bootstrap's default row margins are already -15px / 15px.  Overriding
+     * them with -8px creates elements wider than the viewport which forces a
+     * horizontal scrollbar.  Safari iOS then assumes the page has horizontal
+     * overflow and can lock vertical scrolling.  Use Bootstrap's built-in
+     * .px-0 / .gx-2 utilities instead if tighter gutters are needed on
+     * specific pages.
+     * ─────────────────────────────────────────────────────────────────────── */
 }
 
 /* ==========================================================================

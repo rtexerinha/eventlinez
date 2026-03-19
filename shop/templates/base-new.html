@@ -71,25 +71,27 @@
 
     <style>
         html {
-            overflow-x: hidden;
+            /* Do NOT set overflow-x:hidden on html — Safari iOS treats it as
+               overflow:hidden on both axes and kills vertical scrolling.
+               Use a wrapper div instead (see .page-wrapper below). */
             width: 100%;
             -webkit-text-size-adjust: 100%;
         }
         body {
-            overflow-x: hidden;
+            overflow-x: clip; /* clip instead of hidden — doesn't create a scroll container */
             width: 100%;
             max-width: 100vw;
-            position: relative;
+            /* Remove position:relative — it creates a new scroll container on
+               some iOS versions which prevents the page from scrolling */
         }
         * { box-sizing: border-box; }
         img { max-width: 100%; height: auto; }
-        .container, .container-fluid { max-width: 100%; overflow-x: hidden; }
+        .container, .container-fluid { max-width: 100%; }
 
         /* Navbar */
         .navbar {
             padding: 0.5rem 1rem;
             min-height: 60px;
-            overflow-x: hidden;
         }
         .navbar-brand img { max-height: 40px; width: auto; }
         .navbar-nav { align-items: center; }
@@ -103,7 +105,14 @@
             .navbar-nav .nav-item { margin: 0.25rem 0; }
         }
         @media (max-width: 768px) {
-            html, body { position: relative; overflow-x: hidden; width: 100%; -webkit-overflow-scrolling: touch; }
+            /* Safe mobile overflow fix — only clip horizontal, never touch vertical */
+            body {
+                overflow-x: clip;
+                overflow-y: auto;
+                width: 100%;
+                /* -webkit-overflow-scrolling:touch is deprecated but harmless */
+                -webkit-overflow-scrolling: touch;
+            }
             .row { margin-left: 0; margin-right: 0; }
             [class*="col-"] { padding-left: 15px; padding-right: 15px; }
         }

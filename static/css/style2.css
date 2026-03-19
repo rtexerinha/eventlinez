@@ -471,51 +471,16 @@
     margin-left: 30px;
     padding: 0 !important;
     height: auto;
-    /* Changed from fixed 645px to auto */
     max-height: 645px;
-    /* Add max-height for desktop */
     overflow-y: auto;
-    /* Enable scrolling when content overflows */
     -webkit-overflow-scrolling: touch;
-    /* Smooth scrolling on iOS */
 }
 
 /* Custom scrollbar for desktop */
-.card-details::-webkit-scrollbar {
-    width: 8px;
-}
-
-.card-details::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.card-details::-webkit-scrollbar-thumb {
-    background: #d90075;
-    border-radius: 10px;
-}
-
-.card-details::-webkit-scrollbar-thumb:hover {
-    background: #b0005c;
-}
-
-.h1-banner-home {
-    width: 60%;
-    color: #FFFFFF !important;
-    /*background: linear-gradient(89.39deg, #E10087 -29.61%, #007AFF 135.34%);*/
-    background: linear-gradient(90deg, #E10087 -0.47%, rgba(96, 1, 98, 0.4));
-}
-
-@media (min-width: 1600px) {
-    .h1-banner-home {
-        margin-top: 5%;
-    }
-}
-
-.pl-5px {
-    padding: 5px !important;
-}
-
+.card-details::-webkit-scrollbar { width: 8px; }
+.card-details::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+.card-details::-webkit-scrollbar-thumb { background: #d90075; border-radius: 10px; }
+.card-details::-webkit-scrollbar-thumb:hover { background: #b0005c; }
 
 @media (max-width: 800px) {
     .d-justy {
@@ -523,83 +488,75 @@
         justify-content: flex-end;
     }
 
-    .pl-5px {
-        padding: 0;
-    }
+    .pl-5px { padding: 0; }
 
+    /* On mobile the ticket panel flows inline — no fixed height, no scroll trap */
     .card-details {
-        margin-left: 0px !important;
+        margin-left: 0 !important;
         height: auto !important;
-        /* Remove fixed height on mobile */
         max-height: none !important;
-        /* Remove max-height restriction on mobile */
         overflow-y: visible !important;
-        /* Allow natural scrolling on mobile */
         margin-bottom: 2rem;
-        /* Add spacing at bottom for better UX */
     }
 
-    h1-banner-home {
-        font-size: 1.5rem !important;
-    }
+    h1-banner-home { font-size: 1.5rem !important; }
 
-    /* UNIVERSAL MOBILE SCROLL FIX - Works for ALL mobile browsers */
-    /* Override jQuery UI and Swiper touch-action restrictions */
-    body,
-    html,
-    main,
-    .container,
-    .row,
-    article,
-    aside,
-    div,
-    section {
-        touch-action: auto !important;
-        -ms-touch-action: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
+    /*
+     * MOBILE SCROLL FIX
+     * ─────────────────
+     * The previous rule applied touch-action:auto and overflow overrides to
+     * EVERY element (body, html, main, .container, .row, article, aside, div,
+     * section). That caused two problems on Safari iOS / Chrome iOS:
+     *
+     *  1. Setting overflow-x:hidden on <html> makes Safari treat the whole
+     *     viewport as overflow:hidden — vertical scroll stops working.
+     *  2. Blasting touch-action:auto !important on every div prevents Swiper /
+     *     Bootstrap from ever setting touch-action:none on the carousel track,
+     *     causing erratic gesture conflicts.
+     *
+     * Fix: target only the specific elements that actually need it.
+     */
 
-    /* Ensure page content is scrollable */
-    body {
+    /* Page-level: allow scroll in both axes, only clip horizontal overflow */
+    html {
+        overflow-x: clip !important;   /* clip ≠ hidden — does NOT create a scroll container */
         overflow-y: auto !important;
-        position: relative !important;
+        height: auto !important;
+    }
+    body {
+        overflow-x: clip !important;
+        overflow-y: auto !important;
         height: auto !important;
         min-height: 100vh !important;
+        -webkit-overflow-scrolling: touch;
     }
 
-    html {
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        height: auto !important;
-    }
-
-    /* Prevent any overflow hidden on main containers */
+    /* Main content wrappers — must be visible, not scroll containers */
     main,
     .container,
     .container-fluid {
         overflow: visible !important;
-        overflow-y: visible !important;
     }
 
-    /* Fix for Safari iOS specific issues */
-    @supports (-webkit-touch-callout: none) {
-        body {
-            -webkit-overflow-scrolling: touch !important;
-            overflow-y: scroll !important;
-        }
-    }
-
-    /* Ensure cards and ticket selection areas are scrollable */
+    /* Only interactive/card elements need touch-action hint */
     .m-card,
     .ticket-row,
+    .card-details,
     .card-body {
-        touch-action: auto !important;
+        touch-action: pan-y !important;  /* allow vertical pan, don't block page scroll */
     }
 
-    /* Fix for event detail page */
+    /* Fix for event detail page min-height trap */
     .mh-65 {
         min-height: auto !important;
         overflow: visible !important;
+    }
+
+    /* Safari iOS extra safety */
+    @supports (-webkit-touch-callout: none) {
+        body {
+            -webkit-overflow-scrolling: touch;
+        }
     }
 }
 

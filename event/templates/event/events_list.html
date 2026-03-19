@@ -842,21 +842,27 @@
 
                 // Touch support for mobile
                 let startX = 0;
+                let startY = 0;
                 let scrollLeft = 0;
 
                 performanceContainer.addEventListener('touchstart', function (e) {
                     startX = e.touches[0].pageX - this.offsetLeft;
+                    startY = e.touches[0].pageY;
                     scrollLeft = this.scrollLeft;
-                });
+                }, { passive: true });
 
                 performanceContainer.addEventListener('touchmove', function (e) {
-                    if (!isScrolling) {
+                    const x = e.touches[0].pageX - this.offsetLeft;
+                    const diffX = Math.abs(x - startX);
+                    const diffY = Math.abs(e.touches[0].pageY - startY);
+
+                    // Only hijack the event for horizontal swipes
+                    if (diffX > diffY && diffX > 10) {
                         e.preventDefault();
-                        const x = e.touches[0].pageX - this.offsetLeft;
                         const walk = (x - startX) * 2;
                         this.scrollLeft = scrollLeft - walk;
                     }
-                });
+                }, { passive: false });
             }
 
             // Let action buttons work naturally - no JavaScript needed

@@ -1631,6 +1631,7 @@ on Eventlinez.{% endblock %}
             let currentSlide = 0;
             let isTouch = false;
             let startX = 0;
+            let startY = 0; // track Y so we can detect vertical scroll
             let currentX = 0;
 
             // Responsive slides calculation
@@ -1688,18 +1689,22 @@ on Eventlinez.{% endblock %}
             carousel.addEventListener('touchstart', (e) => {
                 isTouch = true;
                 startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;  // track Y so we can detect vertical scroll
                 carousel.style.transition = 'none';
-            });
+            }, { passive: true });  // passive:true — never blocks scroll during touchstart
 
             carousel.addEventListener('touchmove', (e) => {
                 if (!isTouch) return;
                 currentX = e.touches[0].clientX;
-                const diff = startX - currentX;
+                const diffX = startX - currentX;
+                const diffY = startY - e.touches[0].clientY;
 
-                if (Math.abs(diff) > 10) {
+                // Only hijack the event when the gesture is MORE horizontal than vertical.
+                // This lets the browser handle vertical scrolling naturally.
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
                     e.preventDefault();
                 }
-            });
+            }, { passive: false });  // passive:false required to be able to call preventDefault
 
             carousel.addEventListener('touchend', () => {
                 if (!isTouch) return;
