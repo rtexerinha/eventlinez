@@ -293,7 +293,8 @@
     /* Smooth scrolling for carousel */
     #carousel {
         scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
+        /* Removed -webkit-overflow-scrolling:touch — deprecated and conflicts
+           with overflow-x:clip on iOS 18, creating a broken scroll context */
         scrollbar-width: none;
         padding: 20px 16px !important;
     }

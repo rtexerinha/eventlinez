@@ -71,18 +71,22 @@
 
     <style>
         html {
-            /* Do NOT set overflow-x:hidden on html — Safari iOS treats it as
-               overflow:hidden on both axes and kills vertical scrolling.
-               Use a wrapper div instead (see .page-wrapper below). */
             width: 100%;
             -webkit-text-size-adjust: 100%;
+            /* iOS 18: overscroll-behavior on html prevents rubber-band bounce
+               from being misinterpreted as a scroll-lock by the engine */
+            overscroll-behavior-y: none;
         }
         body {
-            overflow-x: clip; /* clip instead of hidden — doesn't create a scroll container */
+            /* overflow-x:clip does NOT create a scroll container (unlike hidden)
+               so vertical scroll is never blocked — safe on all iOS versions */
+            overflow-x: clip;
+            overflow-y: auto;
             width: 100%;
             max-width: 100vw;
-            /* Remove position:relative — it creates a new scroll container on
-               some iOS versions which prevents the page from scrolling */
+            /* iOS 18 fix: do NOT combine -webkit-overflow-scrolling:touch with
+               overflow-x:clip — in iOS 18 it creates a conflicting scroll context.
+               The property is deprecated and a no-op on modern WebKit anyway. */
         }
         * { box-sizing: border-box; }
         img { max-width: 100%; height: auto; }
@@ -105,13 +109,10 @@
             .navbar-nav .nav-item { margin: 0.25rem 0; }
         }
         @media (max-width: 768px) {
-            /* Safe mobile overflow fix — only clip horizontal, never touch vertical */
             body {
                 overflow-x: clip;
                 overflow-y: auto;
                 width: 100%;
-                /* -webkit-overflow-scrolling:touch is deprecated but harmless */
-                -webkit-overflow-scrolling: touch;
             }
             .row { margin-left: 0; margin-right: 0; }
             [class*="col-"] { padding-left: 15px; padding-right: 15px; }

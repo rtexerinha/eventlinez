@@ -11,6 +11,10 @@ var swiper = new Swiper('.slider-banner', {
 		clickable: true,
 	},
     lazyLoading: true,
+    // iOS 18: prevent Swiper from calling preventDefault on touchstart,
+    // which blocks native page scroll on iPhone 16 / Safari 18
+    touchStartPreventDefault: false,
+    passiveListeners: true,
 });
 
 
@@ -36,5 +40,8 @@ var mySwiper = new Swiper ('.slider-card', {
 		920: {
 			slidesPerView: 4
 		}
-	}
+	},
+    // iOS 18: same fix — allow browser to handle vertical scroll natively
+    touchStartPreventDefault: false,
+    passiveListeners: true,
 });

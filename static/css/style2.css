@@ -473,7 +473,9 @@
     height: auto;
     max-height: 645px;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    /* iOS 18: do NOT use -webkit-overflow-scrolling:touch here —
+       it creates a second scroll context that traps page scroll on iPhone 16 */
+    overscroll-behavior: contain; /* prevent scroll chaining to page */
 }
 
 /* Custom scrollbar for desktop */
@@ -496,30 +498,15 @@
         height: auto !important;
         max-height: none !important;
         overflow-y: visible !important;
+        overscroll-behavior: auto !important;
         margin-bottom: 2rem;
     }
 
     h1-banner-home { font-size: 1.5rem !important; }
 
-    /*
-     * MOBILE SCROLL FIX
-     * ─────────────────
-     * The previous rule applied touch-action:auto and overflow overrides to
-     * EVERY element (body, html, main, .container, .row, article, aside, div,
-     * section). That caused two problems on Safari iOS / Chrome iOS:
-     *
-     *  1. Setting overflow-x:hidden on <html> makes Safari treat the whole
-     *     viewport as overflow:hidden — vertical scroll stops working.
-     *  2. Blasting touch-action:auto !important on every div prevents Swiper /
-     *     Bootstrap from ever setting touch-action:none on the carousel track,
-     *     causing erratic gesture conflicts.
-     *
-     * Fix: target only the specific elements that actually need it.
-     */
-
     /* Page-level: allow scroll in both axes, only clip horizontal overflow */
     html {
-        overflow-x: clip !important;   /* clip ≠ hidden — does NOT create a scroll container */
+        overflow-x: clip !important;
         overflow-y: auto !important;
         height: auto !important;
     }
@@ -527,11 +514,15 @@
         overflow-x: clip !important;
         overflow-y: auto !important;
         height: auto !important;
-        min-height: 100vh !important;
-        -webkit-overflow-scrolling: touch;
+        /* iOS 18: use 100dvh (dynamic viewport height) instead of 100vh.
+           100vh on iOS 18 resolves to the LARGE viewport (ignoring browser chrome),
+           making body taller than the screen and creating a phantom scroll layer. */
+        min-height: 100dvh;
+        /* Do NOT add -webkit-overflow-scrolling:touch — deprecated, and in iOS 18
+           it conflicts with overflow-x:clip to create a broken scroll context */
     }
 
-    /* Main content wrappers — must be visible, not scroll containers */
+    /* Main content wrappers — must not become scroll containers */
     main,
     .container,
     .container-fluid {
@@ -543,20 +534,13 @@
     .ticket-row,
     .card-details,
     .card-body {
-        touch-action: pan-y !important;  /* allow vertical pan, don't block page scroll */
+        touch-action: pan-y !important;
     }
 
     /* Fix for event detail page min-height trap */
     .mh-65 {
         min-height: auto !important;
         overflow: visible !important;
-    }
-
-    /* Safari iOS extra safety */
-    @supports (-webkit-touch-callout: none) {
-        body {
-            -webkit-overflow-scrolling: touch;
-        }
     }
 }
 

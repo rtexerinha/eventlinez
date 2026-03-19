@@ -16,21 +16,24 @@
     // on BOTH axes — that's the root cause of the "can't scroll" bug in in-app browsers.
     [html, body].forEach(function (el) {
         if (!el) return;
-        el.style.overflowX = 'clip';   // clip does NOT create a scroll container
+        el.style.overflowX = 'clip';
         el.style.overflowY = 'auto';
         el.style.height = 'auto';
-        el.style.position = '';        // never set position:fixed/relative on html/body
+        el.style.position = '';
+        // iOS 18: do NOT set -webkit-overflow-scrolling:touch —
+        // it conflicts with overflow-x:clip and creates a broken scroll context
+        // on iPhone 15/16 running iOS 18. The property is a no-op on modern WebKit.
     });
 
     var style = document.createElement('style');
     style.textContent =
-        // Allow touch gestures on all elements; individual carousels opt out via passive:false
+        // Allow vertical pan on all elements by default
         '.in-app-browser * { touch-action: pan-y !important; -ms-touch-action: pan-y !important; }' +
-        // Page-level containers must remain scrollable
-        '.in-app-browser body, .in-app-browser html { overflow-x: clip !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }' +
+        // Page-level containers must remain scrollable — NO -webkit-overflow-scrolling
+        '.in-app-browser body, .in-app-browser html { overflow-x: clip !important; overflow-y: auto !important; }' +
         // main/.container must NOT become independent scroll containers
         '.in-app-browser main, .in-app-browser .container { overflow: visible !important; }' +
         // Ticket panel on event page: no height cap, natural flow
-        '.in-app-browser .card-details { overflow-y: visible !important; max-height: none !important; height: auto !important; }';
+        '.in-app-browser .card-details { overflow-y: visible !important; max-height: none !important; height: auto !important; overscroll-behavior: auto !important; }';
     (document.head || document.getElementsByTagName('head')[0]).appendChild(style);
 })();
