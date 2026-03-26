@@ -46,7 +46,7 @@ class Cart(models.Model):
 class CartItem(models.Model):
 	ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
 	cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-	promo_code = models.CharField(max_length=10, null=True)
+	promo_code = models.CharField(max_length=20, null=True)
 	quantity = models.IntegerField(validators=[MinValueValidator(0)])
 	active = models.BooleanField(default=True)
 	vendor = models.ForeignKey("promoter.Vendor", on_delete=models.PROTECT, null=True)

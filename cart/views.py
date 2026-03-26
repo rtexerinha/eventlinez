@@ -314,7 +314,9 @@ def apply_promo_code(request):
                 customer_email = request.user.customer.email
         else:
             # For unauthenticated users, use session-based email or session ID
-            customer_email = request.session.session_key
+            if not request.session.session_key:
+                request.session.create()
+            customer_email = request.session.session_key or ''
             
         can_use, message = promo.can_be_used_by_customer(customer_email)
         if not can_use:
