@@ -52,7 +52,9 @@ on Eventlinez.{% endblock %}
         padding: 60px 0;
         text-align: center;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
+        clip-path: inset(0);
+        touch-action: pan-y;
     }
 
     .hero-section::before {
@@ -266,7 +268,9 @@ on Eventlinez.{% endblock %}
         background: linear-gradient(135deg, var(--light-color) 0%, #e9ecef 100%);
         margin: 60px 0;
         border-radius: var(--border-radius-lg);
-        overflow: hidden;
+        overflow: visible;
+        clip-path: inset(0 round var(--border-radius-lg));
+        touch-action: pan-y;
     }
 
     .partners-section::before {
@@ -284,6 +288,7 @@ on Eventlinez.{% endblock %}
         position: relative;
         overflow: hidden;
         padding: 0 60px;
+        touch-action: pan-y;
         max-width: 1200px;
         margin: 0 auto;
     }
@@ -732,7 +737,9 @@ on Eventlinez.{% endblock %}
         border: 1px solid #e0e0e0;
         border-radius: 16px;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
+        clip-path: inset(0 round 16px);
+        touch-action: pan-y;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     }
 
@@ -1599,15 +1606,16 @@ on Eventlinez.{% endblock %}
             });
 
             // Add touch feedback for mobile
+            // FIX: mutating transform on touchstart creates a new stacking
+            // context mid-gesture and blocks the iOS scroll compositor.
+            // Using opacity is visually equivalent and never blocks scroll.
             card.addEventListener('touchstart', function () {
-                this.style.transform = 'scale(0.98)';
-            });
+                this.style.opacity = '0.85';
+            }, { passive: true });
 
             card.addEventListener('touchend', function () {
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 100);
-            });
+                this.style.opacity = '';
+            }, { passive: true });
 
             // Preload images on hover (desktop only)
             if (window.matchMedia('(hover: hover)').matches) {
@@ -1950,8 +1958,13 @@ on Eventlinez.{% endblock %}
             showSlide(currentIndex);
         }
 
+        // FIX: only run the slideshow when there are actually multiple slides.
+        // If there is only 1 div (the {% else %} fallback), showSlide(1) would
+        // set display:none on it at the next tick, freezing the hero blank.
         showSlide(currentIndex);
-        setInterval(nextSlide, 3000); // Change slide every 3 seconds
+        if (slides.length > 1) {
+            setInterval(nextSlide, 3000); // Change slide every 3 seconds
+        }
     });
 </script>
 {% endblock %}

@@ -356,6 +356,7 @@
 /* Removed universal * animation-duration override — it forced style recalculation
    on every element on every interaction, causing scroll jank on mobile. */
 @media (max-width: 768px) {
+
     /* Only target elements that actually animate */
     .btn-save,
     .buttons-primary,

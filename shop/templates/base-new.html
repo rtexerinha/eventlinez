@@ -38,7 +38,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <!-- Single combined Google Fonts request instead of 4 separate ones -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&family=Open+Sans:wght@400;700&family=Nunito:wght@400;600;700&family=Poppins:wght@400;500;600&family=Lato:wght@400;700&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Roboto&family=Open+Sans:wght@400;700&family=Nunito:wght@400;600;700&family=Poppins:wght@400;500;600&family=Lato:wght@400;700&display=swap">
 
     <!-- Critical CSS: Bootstrap first so layout works immediately -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
@@ -51,7 +52,8 @@
     <!-- Non-critical CSS loaded async to unblock rendering -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="{% static 'css/styles-auxiliary-screen.css' %}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{% static 'css/styles-auxiliary-screen.css' %}" media="print"
+        onload="this.media='all'">
     <link rel="stylesheet" href="{% static 'css/swiper.css' %}" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="{% static 'css/mobile-improvements.css' %}" media="print" onload="this.media='all'">
 
@@ -77,6 +79,7 @@
                from being misinterpreted as a scroll-lock by the engine */
             overscroll-behavior-y: none;
         }
+
         body {
             /* overflow-x:clip does NOT create a scroll container (unlike hidden)
                so vertical scroll is never blocked — safe on all iOS versions */
@@ -88,41 +91,102 @@
                overflow-x:clip — in iOS 18 it creates a conflicting scroll context.
                The property is deprecated and a no-op on modern WebKit anyway. */
         }
-        * { box-sizing: border-box; }
-        img { max-width: 100%; height: auto; }
-        .container, .container-fluid { max-width: 100%; }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .container,
+        .container-fluid {
+            max-width: 100%;
+        }
 
         /* Navbar */
         .navbar {
             padding: 0.5rem 1rem;
             min-height: 60px;
         }
-        .navbar-brand img { max-height: 40px; width: auto; }
-        .navbar-nav { align-items: center; }
-        .navbar-nav .nav-item { margin: 0 0.25rem; }
-        .navbar-nav .nav-link { padding: 0.5rem 0.75rem; }
-        .nav-item .d-flex { align-items: center; gap: 0.5rem; }
-        .dropdown-menu { position: absolute; z-index: 1000; min-width: 160px; }
+
+        .navbar-brand img {
+            max-height: 40px;
+            width: auto;
+        }
+
+        .navbar-nav {
+            align-items: center;
+        }
+
+        .navbar-nav .nav-item {
+            margin: 0 0.25rem;
+        }
+
+        .navbar-nav .nav-link {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .nav-item .d-flex {
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            z-index: 1000;
+            min-width: 160px;
+        }
 
         @media (max-width: 991.98px) {
-            .navbar-collapse { padding-top: 1rem; }
-            .navbar-nav .nav-item { margin: 0.25rem 0; }
+            .navbar-collapse {
+                padding-top: 1rem;
+            }
+
+            .navbar-nav .nav-item {
+                margin: 0.25rem 0;
+            }
         }
+
         @media (max-width: 768px) {
             body {
                 overflow-x: clip;
                 overflow-y: auto;
                 width: 100%;
             }
-            .row { margin-left: 0; margin-right: 0; }
-            [class*="col-"] { padding-left: 15px; padding-right: 15px; }
+
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            [class*="col-"] {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
         }
+
         @media (hover: none) and (pointer: coarse) {
-            input[type="text"], input[type="email"], input[type="password"], textarea, select { font-size: 16px; }
+
+            input[type="text"],
+            input[type="email"],
+            input[type="password"],
+            textarea,
+            select {
+                font-size: 16px;
+            }
         }
 
         /* Prevent layout shift while FontAwesome loads */
-        .fas, .far, .fab, .fa { display: inline-block; min-width: 1em; }
+        .fas,
+        .far,
+        .fab,
+        .fa {
+            display: inline-block;
+            min-width: 1em;
+        }
     </style>
 
     <title>{% block title %}Eventlinez{% endblock %}</title>
@@ -149,16 +213,19 @@
     {% if PROD %}
     <!-- Facebook Pixel (async) -->
     <script>
-        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)
-        }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init','1384266455408952');
-        fbq('track','PageView');
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            }; if (!f._fbq) f._fbq = n;
+            n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s)
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1384266455408952');
+        fbq('track', 'PageView');
     </script>
     <noscript><img height="1" width="1" style="display:none"
-        src="https://www.facebook.com/tr?id=1384266455408952&ev=PageView&noscript=1"/></noscript>
+            src="https://www.facebook.com/tr?id=1384266455408952&ev=PageView&noscript=1" /></noscript>
     {% endif %}
 
     <!-- Core JS: slim minified jQuery (29KB vs 88KB full) + Bootstrap + Popper -->

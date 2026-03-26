@@ -278,127 +278,130 @@
                                         alt="{{ event.name }}">
                                 </div>
                                 <div class="col-md-8 col-12 mb-3">
-                                {% else %}
-                                <div class="col-12 mb-3">
-                                {% endif %}
-                                    <div class="form-group">
-                                        <label for="{{ form.image.id_for_label }}">Change Image</label>
-                                        {{ form.image }}
-                                        {% if form.image.errors %}
-                                        <div class="text-danger">{{ form.image.errors }}</div>
+                                    {% else %}
+                                    <div class="col-12 mb-3">
                                         {% endif %}
-                                        <small class="form-text text-muted">Recommended: 1600x838px</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="edit-event-card">
-                            <h3 class="form-section-title">Date & Location</h3>
-
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group mb-3">
-                                        <label for="id_event_date">Event Date & Time *</label>
-                                        <input type="text" name="event_date" id="datetimepicker" class="form-control"
-                                            value="{{ event.event_date|date:'d/m/Y H:i' }}" required>
-                                        {% if form.event_date.errors %}
-                                        <div class="text-danger">{{ form.event_date.errors }}</div>
-                                        {% endif %}
-                                        <small class="form-text text-muted">Format: DD/MM/YYYY HH:MM (e.g., 07/11/2025
-                                            17:29)</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="{{ form.address.id_for_label }}">Address *</label>
-                                        {{ form.address }}
-                                        {% if form.address.errors %}
-                                        <div class="text-danger">{{ form.address.errors }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="{{ form.city.id_for_label }}">City *</label>
-                                        {{ form.city }}
-                                        {% if form.city.errors %}
-                                        <div class="text-danger">{{ form.city.errors }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="edit-event-card">
-                            <h3 class="form-section-title">Event Settings</h3>
-
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group mb-3">
-                                        <label for="{{ form.category.id_for_label }}">Category *</label>
-                                        {{ form.category }}
-                                        {% if form.category.errors %}
-                                        <div class="text-danger">{{ form.category.errors }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="{{ form.available.id_for_label }}">Event Availability</label>
-                                        <div class="form-check">
-                                            {{ form.available }}
-                                            <label class="form-check-label" for="{{ form.available.id_for_label }}">
-                                                Make this event available for ticket sales
-                                            </label>
+                                        <div class="form-group">
+                                            <label for="{{ form.image.id_for_label }}">Change Image</label>
+                                            {{ form.image }}
+                                            {% if form.image.errors %}
+                                            <div class="text-danger">{{ form.image.errors }}</div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">Recommended: 1600x838px</small>
                                         </div>
-                                        {% if form.available.errors %}
-                                        <div class="text-danger">{{ form.available.errors }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="{{ form.is_free_event.id_for_label }}">Free Event</label>
-                                        <div class="form-check">
-                                            {{ form.is_free_event }}
-                                            <label class="form-check-label" for="{{ form.is_free_event.id_for_label }}">
-                                                Mark this as a free event (will display "Free" badge on event card)
-                                            </label>
-                                        </div>
-                                        {% if form.is_free_event.errors %}
-                                        <div class="text-danger">{{ form.is_free_event.errors }}</div>
-                                        {% endif %}
-                                        <small class="form-text text-muted">
-                                            When checked, the event card will show a "Free" badge instead of pricing
-                                            information.
-                                        </small>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Action Buttons -->
-                        <div class="action-buttons">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <a href="{% url 'promoter:events_promoter' %}" class="btn btn-cancel btn-lg">
-                                        <i class="fas fa-times me-2"></i>Cancel
-                                    </a>
+                            <div class="edit-event-card">
+                                <h3 class="form-section-title">Date & Location</h3>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group mb-3">
+                                            <label for="id_event_date">Event Date & Time *</label>
+                                            <input type="text" name="event_date" id="datetimepicker"
+                                                class="form-control" value="{{ event.event_date|date:'d/m/Y H:i' }}"
+                                                required>
+                                            {% if form.event_date.errors %}
+                                            <div class="text-danger">{{ form.event_date.errors }}</div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">Format: DD/MM/YYYY HH:MM (e.g.,
+                                                07/11/2025
+                                                17:29)</small>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-6 text-end">
-                                    <button type="submit" class="btn btn-save btn-lg">
-                                        <i class="fas fa-save me-2"></i>Save Changes
-                                    </button>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.address.id_for_label }}">Address *</label>
+                                            {{ form.address }}
+                                            {% if form.address.errors %}
+                                            <div class="text-danger">{{ form.address.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.city.id_for_label }}">City *</label>
+                                            {{ form.city }}
+                                            {% if form.city.errors %}
+                                            <div class="text-danger">{{ form.city.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+
+                            <div class="edit-event-card">
+                                <h3 class="form-section-title">Event Settings</h3>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.category.id_for_label }}">Category *</label>
+                                            {{ form.category }}
+                                            {% if form.category.errors %}
+                                            <div class="text-danger">{{ form.category.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.available.id_for_label }}">Event Availability</label>
+                                            <div class="form-check">
+                                                {{ form.available }}
+                                                <label class="form-check-label" for="{{ form.available.id_for_label }}">
+                                                    Make this event available for ticket sales
+                                                </label>
+                                            </div>
+                                            {% if form.available.errors %}
+                                            <div class="text-danger">{{ form.available.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.is_free_event.id_for_label }}">Free Event</label>
+                                            <div class="form-check">
+                                                {{ form.is_free_event }}
+                                                <label class="form-check-label"
+                                                    for="{{ form.is_free_event.id_for_label }}">
+                                                    Mark this as a free event (will display "Free" badge on event card)
+                                                </label>
+                                            </div>
+                                            {% if form.is_free_event.errors %}
+                                            <div class="text-danger">{{ form.is_free_event.errors }}</div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">
+                                                When checked, the event card will show a "Free" badge instead of pricing
+                                                information.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <a href="{% url 'promoter:events_promoter' %}" class="btn btn-cancel btn-lg">
+                                            <i class="fas fa-times me-2"></i>Cancel
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <button type="submit" class="btn btn-save btn-lg">
+                                            <i class="fas fa-save me-2"></i>Save Changes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                     </form>
                 </div>
 

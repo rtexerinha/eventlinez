@@ -48,8 +48,8 @@ your tickets on Eventlinez.{% endblock %}
             <img class="m-img-card-banner" style="border-radius: 6px;" src="{{event.image_sized.url}}"
                 alt="{{event.name}}" loading="lazy" decoding="async" />
             {% elif event.image %}
-            <img class="m-img-card-banner" style="border-radius: 6px;" src="{{event.image.url}}"
-                alt="{{event.name}}" loading="lazy" decoding="async" />
+            <img class="m-img-card-banner" style="border-radius: 6px;" src="{{event.image.url}}" alt="{{event.name}}"
+                loading="lazy" decoding="async" />
             {% else %}
             <div class="m-img-card-banner"
                 style="border-radius: 6px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 300px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
@@ -134,7 +134,8 @@ your tickets on Eventlinez.{% endblock %}
                                     class="button-increment mr-2" style="min-width:36px;min-height:36px;">-</button>
                                 <h6 id="ticket-{{ ticket.id }}-qty" class="ticket-qty h6-home mx-1 mb-0">0</h6>
                                 <button onclick="controlQty({{ ticket.id }}, 'increase')" type="button"
-                                    class="plus button-increment ml-2" style="min-width:36px;min-height:36px;">+</button>
+                                    class="plus button-increment ml-2"
+                                    style="min-width:36px;min-height:36px;">+</button>
                             </div>
                         </div>
                     </aside>
@@ -145,40 +146,39 @@ your tickets on Eventlinez.{% endblock %}
 
                 </div>
 
-                {% if event.qty_available <= 0%}
-                <p class="h2-home text-center p-date mt-5">
+                {% if event.qty_available <= 0%} <p class="h2-home text-center p-date mt-5">
                     Sold Out
-                </p>
-                {% else %}
-                <br>
-
-                <article class="col-12 mt-4">
-                    <div class="row">
-                        <div class="col-6">
-                            <p class="weight-height h5-home p-dark mt-2">Total</p>
-                        </div>
-
-                        <div class="col-6 d-flex justify-content-end">
-                            <p id="total" class="h3-home p-dark">0.00</p>
-                        </div>
-                    </div>
-                </article>
-
-                <div class="col-12 mt-4 mb-3">
-                    {% now "YmdHis" as todays_date %}
-                    {% if todays_date >= event.event_date|date:"YmdHis" %}
-                    <h6 class="h6-home d-flex justify-content-center"
-                        style="margin-top: 5%; font-size: 1rem; color: #E10087">
-                        The event date has passed
-                    </h6>
-                    <input disabled class="buttons-primary button-details-width h5-home" type="submit"
-                        value="Add to Cart">
+                    </p>
                     {% else %}
-                    <input onclick="addToCard()" id="addToCartBtn"
-                        class="buttons-primary button-details-width h5-home" type="submit" value="Add to Cart">
+                    <br>
+
+                    <article class="col-12 mt-4">
+                        <div class="row">
+                            <div class="col-6">
+                                <p class="weight-height h5-home p-dark mt-2">Total</p>
+                            </div>
+
+                            <div class="col-6 d-flex justify-content-end">
+                                <p id="total" class="h3-home p-dark">0.00</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <div class="col-12 mt-4 mb-3">
+                        {% now "YmdHis" as todays_date %}
+                        {% if todays_date >= event.event_date|date:"YmdHis" %}
+                        <h6 class="h6-home d-flex justify-content-center"
+                            style="margin-top: 5%; font-size: 1rem; color: #E10087">
+                            The event date has passed
+                        </h6>
+                        <input disabled class="buttons-primary button-details-width h5-home" type="submit"
+                            value="Add to Cart">
+                        {% else %}
+                        <input onclick="addToCard()" id="addToCartBtn"
+                            class="buttons-primary button-details-width h5-home" type="submit" value="Add to Cart">
+                        {% endif %}
+                    </div>
                     {% endif %}
-                </div>
-                {% endif %}
 
             </div>
         </article>
