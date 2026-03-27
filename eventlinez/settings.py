@@ -123,6 +123,8 @@ INSTALLED_APPS = [
     "account",
     "rest_framework.authtoken",
     "eventlinez",
+    "django.contrib.sitemaps",
+    "django.contrib.sites",
 ]
 
 # Conditionally add crispy_bootstrap4 if available
@@ -145,6 +147,7 @@ except ImportError:
     CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
     CRISPY_TEMPLATE_PACK = "bootstrap4"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -240,10 +243,13 @@ EVENTLINEZ_FEE = float(os.getenv("EVENTLINEZ_FEE", "0.12"))
 # Cache configuration for rate limiting
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        # File-based cache survives uWSGI worker restarts and works across
+        # multiple worker processes without requiring Redis/Memcached.
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, '.django_cache'),
+        'TIMEOUT': 300,
         'OPTIONS': {
-            'MAX_ENTRIES': 10000,
+            'MAX_ENTRIES': 5000,
         }
     }
 }

@@ -1,17 +1,91 @@
 {% extends "base-new.html" %}
 {% load static %}
 
-{% block title %}Eventlinez - Discover Amazing Events{% endblock %}
-{% block metadescription %}Discover and buy tickets for the best events near you. Concerts, festivals, parties and more
-on Eventlinez.{% endblock %}
+{% block title %}Eventlinez - Buy Event Tickets | Concerts, Festivals & Parties{% endblock %}
 
-{% block og_title %}Eventlinez - Discover Amazing Events{% endblock %}
-{% block og_description %}Discover and buy tickets for the best events near you. Concerts, festivals, parties and more
-on Eventlinez.{% endblock %}
+{% block metadescription %}Buy tickets for the best events near you on Eventlinez. Concerts, festivals, parties and more. Secure checkout, instant e-ticket delivery.{% endblock %}
+
+{% block og_title %}Eventlinez - Buy Event Tickets | Concerts, Festivals &amp; Parties{% endblock %}
+{% block og_description %}Buy tickets for the best events near you on Eventlinez. Concerts, festivals, parties and more. Secure checkout, instant e-ticket delivery.{% endblock %}
+{% block og_type %}website{% endblock %}
+{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static "img/logo_eventlinez_new.png" %}{% endblock %}
+
+{% block twitter_title %}Eventlinez - Buy Event Tickets | Concerts, Festivals &amp; Parties{% endblock %}
+{% block twitter_description %}Buy tickets for the best events near you. Concerts, festivals, parties and more on Eventlinez. Secure checkout, instant e-ticket delivery.{% endblock %}
+
+
+{% block extra_head %}
+{# ── Canonical URL ── #}
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="theme-color" content="#007bff">
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+{# ── JSON-LD: WebSite with SearchAction (enables Google Sitelinks Search Box) ── #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Eventlinez",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/",
+  "description": "Buy tickets for the best events near you. Concerts, festivals, parties and more.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "{{ request.scheme }}://{{ request.get_host }}{% url 'shop:search' %}?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+{# ── JSON-LD: ItemList of upcoming events for Google Events rich results ── #}
+{% if hero_events %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Featured Events on Eventlinez",
+  "itemListElement": [
+    {% for ev in hero_events %}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.counter }},
+      "item": {
+        "@type": "Event",
+        "name": "{{ ev.name|escapejs }}",
+        "startDate": "{{ ev.event_date|date:'c' }}",
+        "location": {
+          "@type": "Place",
+          "name": "{{ ev.city }}",
+          "address": "{{ ev.address|escapejs }}"
+        },
+        "url": "{{ request.scheme }}://{{ request.get_host }}{{ ev.get_url }}",
+        "organizer": {
+          "@type": "Organization",
+          "name": "Eventlinez",
+          "url": "{{ request.scheme }}://{{ request.get_host }}/"
+        }{% if ev.image %},
+        "image": "{{ request.scheme }}://{{ request.get_host }}{{ ev.image.url }}"{% endif %}
+      }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+
+{# ── Preload the first hero event image (LCP element) ── #}
+{% if hero_events %}{% with hero_events|first as first_ev %}
+{% if first_ev.image %}
+<link rel="preload" as="image" href="{{ first_ev.image.url }}" fetchpriority="high">
+{% endif %}
+{% endwith %}{% endif %}
+{% endblock %}
 
 {% block custom_css %}
 <style>
-    /* Modern Mobile-First Responsive Design */
+    /* ── Variables ── */
     :root {
         --primary-color: #007bff;
         --secondary-color: #6c757d;
@@ -22,30 +96,23 @@ on Eventlinez.{% endblock %}
         --dark-color: #2c3e50;
         --light-color: #f8f9fa;
         --border-color: #e0e0e0;
-        --shadow-light: 0 2px 12px rgba(0, 0, 0, 0.08);
-        --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.12);
-        --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.16);
+        --shadow-light: 0 2px 12px rgba(0,0,0,.08);
+        --shadow-medium: 0 4px 20px rgba(0,0,0,.12);
+        --shadow-heavy: 0 8px 32px rgba(0,0,0,.16);
         --border-radius: 12px;
         --border-radius-lg: 16px;
-        --transition-fast: 0.2s ease;
-        --transition-normal: 0.3s ease;
-        --transition-slow: 0.5s ease;
+        --transition-fast: .2s ease;
+        --transition-normal: .3s ease;
+        --transition-slow: .5s ease;
     }
 
-    /* Global Responsive Improvements */
-    .container-center {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-
+    /* ── Layout helpers ── */
+    .container-center { padding-left: 15px; padding-right: 15px; }
     @media (min-width: 768px) {
-        .container-center {
-            padding-left: 30px;
-            padding-right: 30px;
-        }
+        .container-center { padding-left: 30px; padding-right: 30px; }
     }
 
-    /* Hero Section Improvements */
+    /* ── Hero ── */
     .hero-section {
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
         color: white;
@@ -56,18 +123,14 @@ on Eventlinez.{% endblock %}
         clip-path: inset(0);
         touch-action: pan-y;
     }
-
     .hero-section::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        inset: 0;
         background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-        opacity: 0.3;
+        opacity: .3;
+        pointer-events: none;
     }
-
     .hero-content {
         position: relative;
         z-index: 2;
@@ -75,26 +138,23 @@ on Eventlinez.{% endblock %}
         margin: 0 auto;
         padding: 0 20px;
     }
-
     .hero-title {
         font-size: clamp(2rem, 5vw, 3.5rem);
         font-weight: 700;
         margin-bottom: 1.5rem;
         line-height: 1.2;
     }
-
     .hero-subtitle {
         font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-        opacity: 0.9;
+        opacity: .9;
         margin-bottom: 2rem;
         line-height: 1.5;
     }
-
     .hero-cta {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(255,255,255,.15);
         color: white;
         padding: 15px 30px;
         border-radius: 50px;
@@ -103,61 +163,62 @@ on Eventlinez.{% endblock %}
         font-size: 1.1rem;
         transition: var(--transition-normal);
         backdrop-filter: blur(10px);
-        border: 2px solid rgba(255, 255, 255, 0.3);
+        border: 2px solid rgba(255,255,255,.3);
     }
-
     .hero-cta:hover {
-        background: rgba(255, 255, 255, 0.25);
+        background: rgba(255,255,255,.25);
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 25px rgba(0,0,0,.2);
         color: white;
         text-decoration: none;
     }
+    .hero-slide-counter {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+    .hero-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.4);
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        transition: var(--transition-fast);
+    }
+    .hero-dot.active { background: white; transform: scale(1.3); }
 
-    /* Enhanced Event Cards */
+    /* ── Events section ── */
     .events-section {
         padding: 60px 0;
         background: white;
+        touch-action: pan-y;
     }
-
-    .section-header {
-        text-align: center;
-        margin-bottom: 50px;
-    }
-
+    .section-header { text-align: center; margin-bottom: 50px; }
     .section-title {
         font-size: clamp(2rem, 4vw, 2.5rem);
         font-weight: 700;
         color: var(--dark-color);
         margin-bottom: 15px;
     }
-
-    .section-subtitle {
-        color: var(--secondary-color);
-        font-size: 1.2rem;
-        margin-bottom: 0;
-    }
+    .section-subtitle { color: var(--secondary-color); font-size: 1.2rem; margin-bottom: 0; }
 
     .events-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 30px;
         margin-top: 40px;
+        touch-action: pan-y;
     }
-
     @media (max-width: 767px) {
-        .events-grid {
-            grid-template-columns: 1fr;
-            gap: 20px;
-            padding: 0 10px;
-        }
+        .events-grid { grid-template-columns: 1fr; gap: 20px; padding: 0 10px; }
     }
 
     .event-card {
         background: white;
         border-radius: var(--border-radius-lg);
-        /* FIX: overflow:hidden blocks iOS scroll compositor on touch elements.
-           clip-path gives identical corner clipping without blocking scroll. */
         overflow: visible;
         clip-path: inset(0 round var(--border-radius-lg));
         box-shadow: var(--shadow-light);
@@ -165,51 +226,25 @@ on Eventlinez.{% endblock %}
         cursor: pointer;
         border: 1px solid var(--border-color);
         position: relative;
-        /* FIX: tell the browser compositor scroll is always allowed vertically */
         touch-action: pan-y;
     }
-
-    .event-card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-heavy);
-        border-color: var(--primary-color);
-    }
-
-    .event-image {
-        position: relative;
-        height: 200px;
-        overflow: hidden;
-    }
-
-    .event-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform var(--transition-slow);
-    }
-
-    .event-card:hover .event-image img {
-        transform: scale(1.05);
-    }
-
+    .event-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-heavy); border-color: var(--primary-color); }
+    .event-image { position: relative; height: 200px; overflow: hidden; }
+    .event-image img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--transition-slow); }
+    .event-card:hover .event-image img { transform: scale(1.05); }
     .event-badge {
         position: absolute;
-        top: 15px;
-        right: 15px;
+        top: 15px; right: 15px;
         background: var(--accent-color);
         color: white;
         padding: 6px 12px;
         border-radius: 20px;
-        font-size: 0.8rem;
+        font-size: .8rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: .5px;
     }
-
-    .event-content {
-        padding: 25px;
-    }
-
+    .event-content { padding: 25px; }
     .event-title {
         font-size: 1.3rem;
         font-weight: 600;
@@ -222,59 +257,22 @@ on Eventlinez.{% endblock %}
         overflow: hidden;
         min-height: 50px;
     }
+    .event-details { margin-bottom: 20px; }
+    .event-detail { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; color: var(--secondary-color); font-size: .95rem; }
+    .event-detail i { color: var(--primary-color); width: 16px; text-align: center; }
+    .event-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #f1f3f4; }
+    .event-price { font-size: 1.2rem; font-weight: 700; color: var(--success-color); }
+    .event-arrow { color: var(--primary-color); font-size: 1.3rem; transition: transform var(--transition-fast); }
+    .event-card:hover .event-arrow { transform: translateX(5px); }
 
-    .event-details {
-        margin-bottom: 20px;
-    }
-
-    .event-detail {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
-        color: var(--secondary-color);
-        font-size: 0.95rem;
-    }
-
-    .event-detail i {
-        color: var(--primary-color);
-        width: 16px;
-        text-align: center;
-    }
-
-    .event-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 15px;
-        border-top: 1px solid #f1f3f4;
-    }
-
-    .event-price {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--success-color);
-    }
-
-    .event-arrow {
-        color: var(--primary-color);
-        font-size: 1.3rem;
-        transition: transform var(--transition-fast);
-    }
-
-    .event-card:hover .event-arrow {
-        transform: translateX(5px);
-    }
-
-    /* Safe touch press feedback — opacity is compositor-friendly, transform is not */
+    /* Touch-safe :active feedback — opacity is compositor-friendly */
     @media (hover: none) and (pointer: coarse) {
-        .event-card:active {
-            opacity: 0.88;
-            outline: none;
-        }
+        .event-card:hover, .partner-card:hover { transform: none; }
+        .event-card:active { opacity: .88; outline: none; }
+        .partner-card:active { outline: 2px solid var(--primary-color); }
     }
 
-    /* Business Partners Section - Improved */
+    /* ── Partners section ── */
     .partners-section {
         position: relative;
         padding: 60px 0;
@@ -285,984 +283,219 @@ on Eventlinez.{% endblock %}
         clip-path: inset(0 round var(--border-radius-lg));
         touch-action: pan-y;
     }
-
     .partners-section::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
+        top: 0; left: 0; right: 0;
         height: 4px;
         background: linear-gradient(90deg, var(--primary-color), #6610f2, var(--accent-color), var(--warning-color));
     }
+    .partners-section-title { font-size: 2.5rem; font-weight: 700; color: var(--dark-color); margin-bottom: 15px; }
+    .partners-section-subtitle { color: var(--secondary-color); font-size: 1.1rem; margin-bottom: 0; font-weight: 400; }
 
-    /* Mobile-Optimized Partners Carousel */
     .partners-carousel-container {
         position: relative;
         overflow: hidden;
-        padding: 0 60px;
-        touch-action: pan-y;
+        padding: 0 70px;
         max-width: 1200px;
         margin: 0 auto;
+        touch-action: pan-y;
     }
-
-    @media (max-width: 768px) {
-        .partners-carousel-container {
-            padding: 0 40px;
-        }
-    }
-
-    .partners-carousel {
-        display: flex;
-        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        gap: 20px;
-        align-items: center;
-    }
-
-    .partner-slide {
-        flex: 0 0 280px;
-        opacity: 0.8;
-        transform: scale(0.95);
-        transition: all 0.5s ease;
-    }
-
-    @media (max-width: 768px) {
-        .partner-slide {
-            flex: 0 0 250px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .partner-slide {
-            flex: 0 0 220px;
-        }
-    }
-
-    .partner-slide.active {
-        opacity: 1;
-        transform: scale(1);
-    }
+    .partners-carousel { display: flex; transition: transform .6s cubic-bezier(.25,.46,.45,.94); gap: 20px; align-items: center; }
+    .partner-slide { flex: 0 0 280px; opacity: .8; transform: scale(.95); transition: all .5s ease; }
+    .partner-slide.active { opacity: 1; transform: scale(1); }
 
     .partner-card {
         background: white;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow-light);
-        padding: 30px 20px;
+        padding: 35px 25px;
         text-align: center;
-        height: 200px;
+        height: 220px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        transition: all 0.5s ease;
+        transition: all .5s ease;
         border: 1px solid var(--border-color);
         position: relative;
         overflow: hidden;
     }
-
-    @media (max-width: 768px) {
-        .partner-card {
-            height: 180px;
-            padding: 25px 15px;
-        }
-    }
-
-    .partner-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-heavy);
-        border-color: var(--primary-color);
-    }
-
-    /* Search Section Improvements */
-    .search-section {
-        background: linear-gradient(135deg, #f8f9fa 0%, white 100%);
-        padding: 60px 0;
-        text-align: center;
-    }
-
-    .search-form {
-        max-width: 600px;
-        margin: 0 auto;
-        position: relative;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 20px 60px 20px 25px;
-        border: 2px solid var(--border-color);
-        border-radius: 50px;
-        font-size: 1.1rem;
-        outline: none;
-        transition: var(--transition-normal);
-        background: white;
-        box-shadow: var(--shadow-light);
-    }
-
-    .search-input:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-    }
-
-    .search-btn {
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 45px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: var(--transition-normal);
-    }
-
-    .search-btn:hover {
-        background: var(--accent-color);
-        transform: translateY(-50%) scale(1.05);
-    }
-
-    /* Loading States and Animations */
-    .loading-skeleton {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-    }
-
-    @keyframes loading {
-        0% {
-            background-position: 200% 0;
-        }
-
-        100% {
-            background-position: -200% 0;
-        }
-    }
-
-    .fade-in {
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeIn 0.6s ease forwards;
-    }
-
-    @keyframes fadeIn {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Enhanced Responsive Design */
-    @media (max-width: 576px) {
-        .hero-section {
-            padding: 40px 0;
-        }
-
-        .events-section {
-            padding: 40px 0;
-        }
-
-        .partners-section {
-            padding: 40px 0;
-            margin: 40px 0;
-        }
-
-        .search-section {
-            padding: 40px 0;
-        }
-
-        .search-input {
-            padding: 15px 50px 15px 20px;
-            font-size: 1rem;
-        }
-
-        .search-btn {
-            width: 40px;
-            height: 40px;
-        }
-    }
-
-    /* Accessibility Improvements */
-    @media (prefers-reduced-motion: reduce) {
-        * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-        }
-    }
-
-    /* Touch-friendly improvements */
-    @media (hover: none) and (pointer: coarse) {
-
-        .event-card:hover,
-        .partner-card:hover {
-            transform: none;
-        }
-
-        /* FIX: transform on :active during a scroll gesture stalls the iOS
-           compositor. Use outline instead — it's compositor-safe. */
-        .event-card:active,
-        .partner-card:active {
-            outline: 2px solid var(--primary-color);
-        }
-    }
-
-    /* Focus states for keyboard navigation */
-    .event-card:focus,
-    .partner-card:focus,
-    .hero-cta:focus,
-    .search-input:focus,
-    .search-btn:focus {
-        outline: 2px solid var(--primary-color);
-        outline-offset: 2px;
-    }
-
-    .partners-section-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin-bottom: 15px;
-        position: relative;
-    }
-
-    .partners-section-subtitle {
-        color: #6c757d;
-        font-size: 1.1rem;
-        margin-bottom: 0;
-        font-weight: 400;
-    }
-
-    .partners-carousel-container {
-        position: relative;
-        overflow: hidden;
-        padding: 0 100px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .partners-carousel {
-        display: flex;
-        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        gap: 30px;
-        align-items: center;
-    }
-
-    .partner-slide {
-        flex: 0 0 300px;
-        opacity: 0.7;
-        transform: scale(0.9);
-        transition: all 0.5s ease;
-    }
-
-    .partner-slide.active {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    .partner-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
-        padding: 40px 30px;
-        text-align: center;
-        height: 260px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.5s ease;
-        border: 1px solid #f0f0f0;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .partner-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-        border-color: #007bff;
-    }
-
     .partner-card::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, rgba(217, 0, 117, 0.05), rgba(255, 107, 157, 0.05));
+        inset: 0;
+        background: linear-gradient(45deg, rgba(217,0,117,.05), rgba(255,107,157,.05));
         opacity: 0;
-        transition: opacity 0.5s ease;
+        transition: opacity .5s ease;
     }
-
-    .partner-card:hover::before {
-        opacity: 1;
-    }
-
     .partner-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-        border-color: #d90075;
+        box-shadow: var(--shadow-heavy);
+        border-color: var(--accent-color);
     }
-
-    .partner-logo {
-        max-width: 140px;
-        max-height: 90px;
-        object-fit: contain;
-        margin-bottom: 20px;
-        filter: grayscale(60%) brightness(1.1);
-        transition: all 0.5s ease;
-        position: relative;
-        z-index: 2;
-    }
-
-    .partner-card:hover .partner-logo {
-        filter: grayscale(0%) brightness(1);
-        transform: scale(1.05);
-    }
-
-    .partner-placeholder {
-        width: 90px;
-        height: 90px;
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 20px;
-        color: #6c757d;
-        font-size: 2.2rem;
-        position: relative;
-        z-index: 2;
-        border: 1px solid #dee2e6;
-    }
-
-    .partner-name {
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 15px 0 12px;
-        font-size: 1.2rem;
-        position: relative;
-        z-index: 2;
-        line-height: 1.4;
-        text-align: center;
-    }
-
-    .partner-link {
-        color: #007bff;
-        text-decoration: none;
-        font-size: 0.95rem;
-        font-weight: 500;
-        transition: all 0.5s ease;
-        position: relative;
-        z-index: 2;
-        padding: 8px 16px;
-        border-radius: 25px;
-        background: rgba(0, 123, 255, 0.08);
-        border: 1px solid rgba(0, 123, 255, 0.2);
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .partner-link:hover {
-        color: white;
-        background: #007bff;
-        border-color: #007bff;
-        text-decoration: none;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-    }
+    .partner-card:hover::before { opacity: 1; }
+    .partner-logo { max-width: 140px; max-height: 90px; object-fit: contain; margin-bottom: 15px; filter: grayscale(60%) brightness(1.1); transition: all .5s ease; position: relative; z-index: 2; }
+    .partner-card:hover .partner-logo { filter: grayscale(0%) brightness(1); transform: scale(1.05); }
+    .partner-placeholder { width: 80px; height: 80px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; color: var(--secondary-color); font-size: 2rem; position: relative; z-index: 2; border: 1px solid var(--border-color); }
+    .partner-name { font-weight: 600; color: var(--dark-color); margin: 10px 0 10px; font-size: 1.1rem; position: relative; z-index: 2; line-height: 1.4; }
+    .partner-link { color: var(--primary-color); text-decoration: none; font-size: .9rem; font-weight: 500; transition: all .3s ease; position: relative; z-index: 2; padding: 6px 14px; border-radius: 25px; background: rgba(0,123,255,.08); border: 1px solid rgba(0,123,255,.2); display: inline-flex; align-items: center; gap: 6px; }
+    .partner-link:hover { color: white; background: var(--primary-color); border-color: var(--primary-color); text-decoration: none; }
 
     .carousel-nav {
         position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
+        top: 50%; transform: translateY(-50%);
         background: white;
-        border: 1px solid #e0e0e0;
+        border: 1px solid var(--border-color);
         border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.4rem;
-        color: #6c757d;
+        width: 50px; height: 50px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+        color: var(--secondary-color);
         cursor: pointer;
-        transition: all 0.5s ease;
+        transition: all .3s ease;
         z-index: 10;
     }
+    .carousel-nav:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); transform: translateY(-50%) scale(1.05); box-shadow: 0 4px 16px rgba(0,123,255,.3); }
+    .carousel-nav.disabled { opacity: .3; cursor: not-allowed; pointer-events: none; }
+    .carousel-nav.prev { left: 10px; }
+    .carousel-nav.next { right: 10px; }
 
-    .carousel-nav:hover {
-        background: #007bff;
-        color: white;
-        border-color: #007bff;
-        transform: translateY(-50%) scale(1.05);
-        box-shadow: 0 4px 16px rgba(0, 123, 255, 0.3);
-    }
+    .carousel-indicators { display: flex; justify-content: center; gap: 8px; margin-top: 25px; }
+    .carousel-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(217,0,117,.3); cursor: pointer; transition: all .3s ease; border: none; padding: 0; }
+    .carousel-dot.active { background: var(--accent-color); transform: scale(1.3); }
 
-    .carousel-nav.disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-    }
-
-    .carousel-nav.disabled:hover {
-        background: white;
-        color: #d90075;
-        transform: translateY(-50%) scale(1);
-    }
-
-    .carousel-nav.prev {
-        left: 15px;
-    }
-
-    .carousel-nav.next {
-        right: 15px;
-    }
-
-    .carousel-indicators {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 25px;
-    }
-
-    .carousel-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: rgba(217, 0, 117, 0.3);
-        cursor: pointer;
-        transition: all 0.5s ease;
-    }
-
-    .carousel-dot.active {
-        background: #d90075;
-        transform: scale(1.2);
-    }
-
-    /* Event Gallery Albums Styles - Professional & Clean */
+    /* ── Gallery section ── */
     .gallery-main-section {
-        background: #ffffff;
+        background: white;
         padding: 80px 0;
         margin: 60px 0;
-        border: 1px solid #e0e0e0;
-        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
         position: relative;
         overflow: visible;
-        clip-path: inset(0 round 16px);
+        clip-path: inset(0 round var(--border-radius-lg));
         touch-action: pan-y;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        box-shadow: var(--shadow-light);
     }
-
     .gallery-main-section::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
+        top: 0; left: 0; right: 0;
         height: 4px;
         background: linear-gradient(90deg, #17a2b8, #28a745, #ffc107, #dc3545);
         pointer-events: none;
     }
-
-    .gallery-albums-container {
-        margin-top: 40px;
-        position: relative;
-        z-index: 2;
-    }
-
-    .gallery-section-header {
-        text-align: center;
-        margin-bottom: 60px;
-        position: relative;
-        z-index: 2;
-    }
-
-    .gallery-main-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin-bottom: 15px;
-    }
-
-    .gallery-subtitle {
-        color: #6c757d;
-        font-size: 1.1rem;
-        margin-bottom: 30px;
-        font-weight: 400;
-    }
-
-    .gallery-view-all-btn {
-        display: inline-block;
-        background: #007bff;
-        color: white;
-        padding: 12px 30px;
-        border-radius: 30px;
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 0.95rem;
-        transition: all 0.5s ease;
-        border: 2px solid #007bff;
-    }
-
-    .gallery-view-all-btn:hover {
-        background: transparent;
-        color: #007bff;
-        text-decoration: none;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
-        border-color: rgba(255, 255, 255, 0.5);
-    }
+    .gallery-albums-container { margin-top: 40px; position: relative; z-index: 2; }
+    .gallery-section-header { text-align: center; margin-bottom: 60px; position: relative; z-index: 2; }
+    .gallery-main-title { font-size: 2.5rem; font-weight: 700; color: var(--dark-color); margin-bottom: 15px; }
+    .gallery-subtitle { color: var(--secondary-color); font-size: 1.1rem; margin-bottom: 30px; font-weight: 400; }
+    .gallery-view-all-btn { display: inline-block; background: var(--primary-color); color: white; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: 500; font-size: .95rem; transition: all .3s ease; border: 2px solid var(--primary-color); }
+    .gallery-view-all-btn:hover { background: transparent; color: var(--primary-color); text-decoration: none; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,123,255,.3); }
 
     .albums-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap: 30px;
-        margin-top: 20px;
+        margin: 20px auto 0;
         max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
     }
+    .event-album-card { background: white; border-radius: var(--border-radius-lg); overflow: hidden; box-shadow: var(--shadow-light); transition: all .4s ease; cursor: pointer; border: 1px solid var(--border-color); }
+    .event-album-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-heavy); border-color: var(--primary-color); }
+    .album-image-container { position: relative; height: 200px; overflow: hidden; }
+    .album-cover-image { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+    .event-album-card:hover .album-cover-image { transform: scale(1.08); }
+    .album-hover-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(217,0,117,.8) 0%, rgba(255,107,157,.6) 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity .4s ease; }
+    .event-album-card:hover .album-hover-overlay { opacity: 1; }
+    .view-gallery-btn { background: rgba(255,255,255,.95); color: var(--accent-color); padding: 12px 22px; border-radius: 50px; font-weight: 600; font-size: .95rem; display: flex; align-items: center; gap: 8px; transform: translateY(15px); transition: transform .4s ease; margin-bottom: 12px; }
+    .event-album-card:hover .view-gallery-btn { transform: translateY(0); }
+    .photo-count-badge { background: rgba(255,255,255,.9); color: #333; padding: 6px 14px; border-radius: 25px; font-size: .85rem; font-weight: 500; transform: translateY(15px); transition: transform .4s ease .08s; }
+    .event-album-card:hover .photo-count-badge { transform: translateY(0); }
+    .album-card-content { padding: 20px; background: white; }
+    .event-album-title { font-size: 1.2rem; font-weight: 600; color: var(--dark-color); margin-bottom: 12px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 45px; }
+    .event-album-details { margin-bottom: 15px; }
+    .album-location, .album-date { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; color: var(--secondary-color); font-size: .9rem; }
+    .album-location i, .album-date i { color: var(--primary-color); width: 16px; }
+    .album-action-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #f1f3f4; }
+    .latest-update { display: flex; align-items: center; gap: 6px; color: var(--secondary-color); font-size: .82rem; }
+    .latest-update i { color: var(--success-color); }
+    .view-arrow { color: var(--primary-color); font-size: 1.1rem; transition: transform .3s ease; }
+    .event-album-card:hover .view-arrow { transform: translateX(5px); }
 
-    .event-album-card {
-        background: white;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        transition: all 0.5s ease;
-        cursor: pointer;
-        border: 1px solid #e0e0e0;
-        position: relative;
-    }
+    /* ── Lightbox ── */
+    .lightbox-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.95); z-index: 9999; opacity: 0; transition: opacity .4s ease; }
+    .lightbox-modal.active { display: flex; opacity: 1; }
+    .lightbox-content { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .lightbox-image { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+    .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; background: rgba(255,255,255,.9); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #333; cursor: pointer; transition: all .3s ease; z-index: 10; }
+    .lightbox-nav:hover { background: white; transform: translateY(-50%) scale(1.1); }
+    .lightbox-prev { left: 20px; }
+    .lightbox-next { right: 20px; }
+    .lightbox-close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(255,255,255,.9); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #333; cursor: pointer; transition: all .3s ease; }
+    .lightbox-close:hover { background: white; transform: scale(1.1); }
+    .lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,.9); padding: 6px 14px; border-radius: 20px; font-size: 14px; color: #333; font-weight: 500; }
 
-    .event-album-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-        border-color: #007bff;
-    }
+    /* ── Search section ── */
+    .search-section { background: linear-gradient(135deg, #f8f9fa 0%, white 100%); padding: 60px 0; text-align: center; touch-action: pan-y; }
+    .search-form { max-width: 600px; margin: 0 auto; position: relative; }
+    .search-input { width: 100%; padding: 18px 56px 18px 24px; border: 2px solid var(--border-color); border-radius: 50px; font-size: 1.05rem; outline: none; transition: var(--transition-normal); background: white; box-shadow: var(--shadow-light); }
+    .search-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0,123,255,.1); }
+    .search-btn { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition-normal); }
+    .search-btn:hover { background: var(--accent-color); transform: translateY(-50%) scale(1.05); }
 
-    .album-image-container {
-        position: relative;
-        height: 220px;
-        overflow: hidden;
-    }
+    /* ── Animations ── */
+    .loading-skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.5s infinite; }
+    @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .fade-in { opacity: 0; transform: translateY(20px); animation: fadeInUp .6s ease forwards; }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-    .album-cover-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.6s ease;
-    }
-
-    .event-album-card:hover .album-cover-image {
-        transform: scale(1.08);
-    }
-
-    .album-hover-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg,
-                rgba(217, 0, 117, 0.8) 0%,
-                rgba(255, 107, 157, 0.6) 100%);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        opacity: 0;
-        transition: all 0.5s ease;
-    }
-
-    .event-album-card:hover .album-hover-overlay {
-        opacity: 1;
-    }
-
-    .view-gallery-btn {
-        background: rgba(255, 255, 255, 0.95);
-        color: #d90075;
-        padding: 15px 25px;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transform: translateY(20px);
-        transition: all 0.5s ease;
-        margin-bottom: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    }
-
-    .event-album-card:hover .view-gallery-btn {
-        transform: translateY(0);
-    }
-
-    .photo-count-badge {
-        background: rgba(255, 255, 255, 0.9);
-        color: #333;
-        padding: 8px 16px;
-        border-radius: 25px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        transform: translateY(20px);
-        transition: all 0.5s ease 0.1s;
-    }
-
-    .event-album-card:hover .photo-count-badge {
-        transform: translateY(0);
-    }
-
-    .album-card-content {
-        padding: 25px;
-        background: white;
-    }
-
-    .event-album-title {
-        font-size: 1.4rem;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 15px;
-        line-height: 1.3;
-        min-height: 50px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .event-album-details {
-        margin-bottom: 20px;
-    }
-
-    .album-location,
-    .album-date {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
-        color: #6c757d;
-        font-size: 0.95rem;
-    }
-
-    .album-location i,
-    .album-date i {
-        color: #007bff;
-        width: 16px;
-    }
-
-    .album-action-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 15px;
-        border-top: 1px solid #f1f3f4;
-    }
-
-    .latest-update {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: #6c757d;
-        font-size: 0.85rem;
-    }
-
-    .latest-update i {
-        color: #28a745;
-    }
-
-    .view-arrow {
-        color: #007bff;
-        font-size: 1.2rem;
-        transition: transform 0.5s ease;
-    }
-
-    .event-album-card:hover .view-arrow {
-        transform: translateX(5px);
-    }
-
-    /* Lightbox Modal Styles */
-    .lightbox-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.95);
-        z-index: 9999;
-        opacity: 0;
-        transition: opacity 0.5s ease;
-    }
-
-    .lightbox-modal.active {
-        display: flex;
-        opacity: 1;
-    }
-
-    .lightbox-content {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-
-    .lightbox-image {
-        max-width: 90%;
-        max-height: 90%;
-        object-fit: contain;
-        border-radius: 8px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .lightbox-nav {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 50px;
-        height: 50px;
-        background: rgba(255, 255, 255, 0.9);
-        border: none;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        color: #333;
-        cursor: pointer;
-        transition: all 0.5s ease;
-        z-index: 10;
-    }
-
-    .lightbox-nav:hover {
-        background: white;
-        transform: translateY(-50%) scale(1.1);
-    }
-
-    .lightbox-prev {
-        left: 30px;
-    }
-
-    .lightbox-next {
-        right: 30px;
-    }
-
-    .lightbox-close {
-        position: absolute;
-        top: 30px;
-        right: 30px;
-        width: 40px;
-        height: 40px;
-        background: rgba(255, 255, 255, 0.9);
-        border: none;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        color: #333;
-        cursor: pointer;
-        transition: all 0.5s ease;
-    }
-
-    .lightbox-close:hover {
-        background: white;
-        transform: scale(1.1);
-    }
-
-    .lightbox-counter {
-        position: absolute;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(255, 255, 255, 0.9);
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 14px;
-        color: #333;
-        font-weight: 500;
-    }
-
-    /* Responsive Design */
+    /* ── Responsive ── */
     @media (max-width: 768px) {
-        .partners-section {
-            padding: 40px 0;
-            margin: 30px 0;
-        }
-
-        .partners-carousel-container {
-            padding: 0 60px;
-        }
-
-        .partner-slide {
-            flex: 0 0 250px;
-        }
-
-        .partner-card {
-            height: 200px;
-            padding: 25px 20px;
-        }
-
-        .carousel-nav {
-            width: 50px;
-            height: 50px;
-            font-size: 1.2rem;
-        }
-
-        .carousel-nav.prev {
-            left: 10px;
-        }
-
-        .carousel-nav.next {
-            right: 10px;
-        }
-
-        .albums-grid {
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
-        }
-
-        .album-image-container {
-            height: 200px;
-        }
-
-        .event-album-title {
-            font-size: 1.3rem;
-            min-height: 45px;
-        }
-
-        .album-card-content {
-            padding: 20px;
-        }
-
-        .gallery-main-section {
-            padding: 50px 0;
-            margin: 40px 0;
-        }
-
-        .gallery-main-title {
-            font-size: 2.2rem;
-        }
-
-        .gallery-subtitle {
-            font-size: 1.1rem;
-        }
+        .partners-section { padding: 40px 0; margin: 30px 0; }
+        .partners-carousel-container { padding: 0 50px; }
+        .partner-slide { flex: 0 0 240px; }
+        .partner-card { height: 190px; padding: 20px 15px; }
+        .carousel-nav { width: 40px; height: 40px; font-size: 1rem; }
+        .albums-grid { gap: 20px; }
+        .album-image-container { height: 180px; }
+        .gallery-main-section { padding: 50px 0; margin: 40px 0; }
+        .gallery-main-title { font-size: 2rem; }
     }
-
     @media (max-width: 576px) {
-        .partners-carousel-container {
-            padding: 0 50px;
-        }
-
-        .partner-slide {
-            flex: 0 0 220px;
-        }
-
-        .partner-card {
-            height: 180px;
-            padding: 20px 15px;
-        }
-
-        .partner-logo,
-        .partner-placeholder {
-            width: 70px;
-            height: 55px;
-        }
-
-        .partner-name {
-            font-size: 0.9rem;
-        }
-
-        .partner-link {
-            font-size: 0.8rem;
-            padding: 5px 10px;
-        }
-
-        .carousel-nav {
-            width: 45px;
-            height: 45px;
-            font-size: 1.1rem;
-        }
-
-        .albums-grid {
-            grid-template-columns: 1fr;
-            gap: 20px;
-            padding: 0 10px;
-        }
-
-        .album-image-container {
-            height: 180px;
-        }
-
-        .event-album-title {
-            font-size: 1.2rem;
-            min-height: 40px;
-        }
-
-        .event-album-details {
-            margin-bottom: 15px;
-        }
-
-        .album-location,
-        .album-date {
-            font-size: 0.9rem;
-        }
-
-        .album-card-content {
-            padding: 18px;
-        }
-
-        .view-gallery-btn {
-            padding: 12px 20px;
-            font-size: 0.9rem;
-        }
-
-        .gallery-main-section {
-            padding: 40px 0;
-            margin: 30px 0;
-        }
-
-        .gallery-main-title {
-            font-size: 2rem;
-        }
-
-        .gallery-subtitle {
-            font-size: 1rem;
-        }
-
-        .gallery-view-all-btn {
-            padding: 10px 25px;
-            font-size: 0.9rem;
-        }
+        .hero-section { padding: 40px 0; }
+        .events-section, .search-section { padding: 40px 0; }
+        .partners-section { padding: 30px 0; margin: 25px 0; }
+        .partners-carousel-container { padding: 0 44px; }
+        .partner-slide { flex: 0 0 200px; }
+        .partner-card { height: 170px; padding: 15px 12px; }
+        .partner-name { font-size: .9rem; }
+        .partner-link { font-size: .8rem; padding: 5px 10px; }
+        .carousel-nav { width: 36px; height: 36px; font-size: .95rem; }
+        .albums-grid { grid-template-columns: 1fr; gap: 16px; padding: 0 8px; }
+        .album-image-container { height: 160px; }
+        .album-card-content { padding: 16px; }
+        .gallery-main-section { padding: 35px 0; margin: 25px 0; }
+        .gallery-main-title { font-size: 1.8rem; }
+        .gallery-subtitle { font-size: .95rem; }
+        .gallery-view-all-btn { padding: 10px 22px; font-size: .9rem; }
+        .search-input { padding: 14px 48px 14px 18px; font-size: .95rem; }
+        .search-btn { width: 38px; height: 38px; }
     }
 
-    /* Smooth scrolling for partners */
-    .partners-container::-webkit-scrollbar {
-        height: 6px;
+    /* ── Accessibility ── */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+    .event-card:focus, .partner-card:focus, .hero-cta:focus, .search-input:focus, .search-btn:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
     }
 
-    .partners-container::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
-
-    .partners-container::-webkit-scrollbar-thumb {
-        background: #d90075;
-        border-radius: 3px;
-    }
-
-    .partners-container::-webkit-scrollbar-thumb:hover {
-        background: #ff6b9d;
-    }
+    /* ── Scrollbar (partners) ── */
+    .partners-container::-webkit-scrollbar { height: 6px; }
+    .partners-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+    .partners-container::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 3px; }
+    .partners-container::-webkit-scrollbar-thumb:hover { background: #ff6b9d; }
 </style>
 {% endblock %}
 
@@ -1270,22 +503,19 @@ on Eventlinez.{% endblock %}
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="hero-content">
-        {% if detachs %}
-        {% for detach in detachs %}
-        {% for special_events in detach.event.all %}
-        {% if forloop.first %}
+        {% if hero_events %}
+        {% for ev in hero_events %}
         <div data-hero-slide>
-            <h1 class="hero-title">{{ special_events.name }}</h1>
+            <p class="hero-slide-count">{{ forloop.counter }} / {{ hero_events|length }}</p>
+            <h1 class="hero-title">{{ ev.name }}</h1>
             <p class="hero-subtitle">
-                {{ special_events.event_date|date:"l, F d, Y \a\t g:i A" }} • {{ special_events.city }}
+                {{ ev.event_date|date:"l, F d, Y \a\t g:i A" }} • {{ ev.city }}
             </p>
-            <a href="{{ special_events.get_url }}" class="hero-cta">
+            <a href="{{ ev.get_url }}" class="hero-cta">
                 <i class="fas fa-ticket-alt"></i>
                 Get Tickets Now
             </a>
         </div>
-        {% endif %}
-        {% endfor %}
         {% endfor %}
         {% else %}
         <div data-hero-slide>
@@ -1300,6 +530,23 @@ on Eventlinez.{% endblock %}
         </div>
         {% endif %}
     </div>
+
+    <!-- Hero navigation — only rendered when there are multiple slides -->
+    {% if hero_events|length > 1 %}
+    <button class="hero-arrow prev" id="heroPrev" aria-label="Previous event">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <button class="hero-arrow next" id="heroNext" aria-label="Next event">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+    <div class="hero-dots" id="heroDots">
+        {% for ev in hero_events %}
+        <button class="hero-dot{% if forloop.first %} active{% endif %}"
+                data-index="{{ forloop.counter0 }}"
+                aria-label="Go to slide {{ forloop.counter }}"></button>
+        {% endfor %}
+    </div>
+    {% endif %}
 </section>
 
 
@@ -1320,9 +567,13 @@ on Eventlinez.{% endblock %}
                 role="button" aria-label="View {{ event.name }} event details">
                 <div class="event-image">
                     {% if event.image and event.thumbnail %}
-                    <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}" loading="lazy">
+                    <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}"
+                         {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                         width="265" height="150">
                     {% elif event.image %}
-                    <img src="{{ event.image.url }}" alt="{{ event.name }}" loading="lazy">
+                    <img src="{{ event.image.url }}" alt="{{ event.name }}"
+                         {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                         width="265" height="150">
                     {% else %}
                     <div class="loading-skeleton"
                         style="height: 100%; border-radius: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
@@ -1380,9 +631,13 @@ on Eventlinez.{% endblock %}
                 role="button" aria-label="View {{ event.name }} event details">
                 <div class="event-image">
                     {% if event.image and event.thumbnail %}
-                    <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}" loading="lazy">
+                    <img src="{{ event.thumbnail.url }}" alt="{{ event.name }}"
+                         {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                         width="265" height="150">
                     {% elif event.image %}
-                    <img src="{{ event.image.url }}" alt="{{ event.name }}" loading="lazy">
+                    <img src="{{ event.image.url }}" alt="{{ event.name }}"
+                         {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                         width="265" height="150">
                     {% else %}
                     <div class="loading-skeleton"
                         style="height: 100%; border-radius: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
@@ -1442,7 +697,8 @@ on Eventlinez.{% endblock %}
                 <div class="partner-slide{% if forloop.first %} active{% endif %}">
                     <div class="partner-card">
                         {% if partner.logo %}
-                        <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="partner-logo">
+                        <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" class="partner-logo"
+                             width="140" height="90" loading="lazy">
                         {% else %}
                         <div class="partner-placeholder">
                             <i class="fas fa-building"></i>
@@ -1490,7 +746,8 @@ on Eventlinez.{% endblock %}
                     <div class="album-image-container">
                         {% if album.cover_photo %}
                         <img src="{% if album.cover_photo.thumbnail %}{{ album.cover_photo.thumbnail.url }}{% else %}{{ album.cover_photo.photo.url }}{% endif %}"
-                            alt="{{ album.event.name }}" class="album-cover-image">
+                            alt="{{ album.event.name }}" class="album-cover-image"
+                            width="350" height="220" loading="lazy">
                         {% else %}
                         <div class="album-cover-image"
                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
@@ -1590,12 +847,8 @@ on Eventlinez.{% endblock %}
     document.addEventListener('DOMContentLoaded', function () {
         // Modern Mobile-First JavaScript
 
-        // Fade-in animations on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
+        // Fade-in on scroll — 0px margin so items animate as soon as they
+        // enter the viewport (negative margin caused CLS on slow connections)
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -1604,12 +857,9 @@ on Eventlinez.{% endblock %}
                     observer.unobserve(entry.target);
                 }
             });
-        }, observerOptions);
+        }, { threshold: 0.05 });
 
-        // Observe all fade-in elements
-        document.querySelectorAll('.fade-in').forEach(el => {
-            observer.observe(el);
-        });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
         // Enhanced event card interactions
         document.querySelectorAll('.event-card').forEach(card => {
@@ -1772,10 +1022,7 @@ on Eventlinez.{% endblock %}
         const searchForm = document.querySelector('.search-form');
 
         if (searchInput) {
-            // Auto-focus on desktop (not mobile to avoid keyboard popup)
-            if (window.innerWidth > 768) {
-                searchInput.focus();
-            }
+            // No auto-focus — causes unwanted scroll-jump on mobile Safari
 
             // Live search suggestions (placeholder for future implementation)
             let searchTimeout;
@@ -1950,61 +1197,77 @@ on Eventlinez.{% endblock %}
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Use [data-hero-slide] so we only target the real top-level slide divs,
-        // never the inner nested divs (loading-skeleton, icon wrappers, etc.)
-        const slides = Array.from(
-            document.querySelectorAll('.hero-content [data-hero-slide]')
-        );
-
+        const slides = Array.from(document.querySelectorAll('.hero-content [data-hero-slide]'));
         if (slides.length === 0) return;
 
-        // CSS handles visibility — no display:none which creates ghost touch regions
-        // and triggers layout reflows that stall the iOS scroll compositor.
-        slides.forEach(function(s, i) {
-            s.style.position  = i === 0 ? 'relative' : 'absolute';
-            s.style.opacity   = i === 0 ? '1'        : '0';
-            s.style.pointerEvents = i === 0 ? ''     : 'none';
-            s.style.transition = 'opacity 0.6s ease';
-            // Absolutely positioned slides must not push the section height
-            if (i > 0) {
-                s.style.top   = '0';
-                s.style.left  = '0';
-                s.style.width = '100%';
-            }
-        });
+        const dots    = Array.from(document.querySelectorAll('#heroDots .hero-dot'));
+        const prevBtn = document.getElementById('heroPrev');
+        const nextBtn = document.getElementById('heroNext');
 
-        // Make .hero-content a positioning context for the absolute slides
+        // Initialise all slides with compositor-safe visibility (no display:none)
+        slides.forEach(function(s, i) {
+            s.style.transition    = 'opacity 0.6s ease';
+            s.style.position      = i === 0 ? 'relative' : 'absolute';
+            s.style.opacity       = i === 0 ? '1' : '0';
+            s.style.pointerEvents = i === 0 ? '' : 'none';
+            if (i > 0) { s.style.top = '0'; s.style.left = '0'; s.style.width = '100%'; }
+        });
         document.querySelector('.hero-content').style.position = 'relative';
 
-        if (slides.length === 1) return; // nothing to rotate
+        if (slides.length === 1) return;
 
         let current = 0;
         let timer   = null;
 
-        function showSlide(index) {
-            slides[current].style.opacity      = '0';
+        function goTo(index) {
+            // Hide current
+            slides[current].style.opacity       = '0';
             slides[current].style.pointerEvents = 'none';
-            slides[current].style.position     = 'absolute';
-            current = index;
-            slides[current].style.position     = 'relative';
-            slides[current].style.opacity      = '1';
+            slides[current].style.position      = 'absolute';
+            if (dots[current]) dots[current].classList.remove('active');
+
+            current = (index + slides.length) % slides.length;
+
+            // Show new
+            slides[current].style.position      = 'relative';
+            slides[current].style.opacity       = '1';
             slides[current].style.pointerEvents = '';
+            if (dots[current]) dots[current].classList.add('active');
         }
 
-        function advance() {
-            showSlide((current + 1) % slides.length);
-        }
-
-        function start() { if (!timer) timer = setInterval(advance, 4000); }
+        function start() { if (!timer) timer = setInterval(function(){ goTo(current + 1); }, 5000); }
         function stop()  { clearInterval(timer); timer = null; }
 
-        start();
+        // Arrows
+        if (prevBtn) prevBtn.addEventListener('click', function() { stop(); goTo(current - 1); start(); });
+        if (nextBtn) nextBtn.addEventListener('click', function() { stop(); goTo(current + 1); start(); });
 
-        // Pause while page is hidden — prevents layout reflows from stalling
-        // iOS scroll when the user comes back to the page mid-gesture
+        // Dots
+        dots.forEach(function(dot) {
+            dot.addEventListener('click', function() {
+                stop();
+                goTo(parseInt(this.dataset.index, 10));
+                start();
+            });
+        });
+
+        // Touch swipe on hero
+        var heroSection = document.querySelector('.hero-section');
+        var swipeStartX = 0;
+        heroSection.addEventListener('touchstart', function(e) {
+            swipeStartX = e.touches[0].clientX;
+        }, { passive: true });
+        heroSection.addEventListener('touchend', function(e) {
+            var diff = swipeStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) { stop(); goTo(diff > 0 ? current + 1 : current - 1); start(); }
+        }, { passive: true });
+
+        // Pause when page hidden — stops reflows stalling iOS scroll on return
         document.addEventListener('visibilitychange', function() {
             document.hidden ? stop() : start();
         });
+
+        start();
     });
 </script>
 {% endblock %}

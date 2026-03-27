@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include, re_path
 from django.views.static import serve
 import os
@@ -8,7 +9,13 @@ import os
 import shop
 from shop.views import index
 from customer.views import signin_view
-from shop.views import index
+from shop.sitemaps import EventSitemap, StaticSitemap, HomeSitemap
+
+sitemaps = {
+    'home':   HomeSitemap,
+    'events': EventSitemap,
+    'static': StaticSitemap,
+}
 
 urlpatterns = []
 
@@ -23,6 +30,8 @@ elif os.path.exists('/.dockerenv') or os.environ.get('IN_DOCKER', False):
 
 urlpatterns += [
     path('admin/', admin.site.urls),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('robots.txt', shop.views.robots_txt, name='robots_txt'),
     path('', index, name='index'),
     path('accounts/login/', signin_view, name='signin'),
     path('customer/', include('customer.urls')),

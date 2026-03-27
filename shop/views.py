@@ -9,7 +9,8 @@ from django.utils import timezone
 
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
-from django.db.models import Q
+from django.db.models import Count, Max, Prefetch, Q
+from django.core.cache import cache
 from django.http import BadHeaderError, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -33,65 +34,99 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+# Cache TTLs
+_HOME_CACHE_TTL    = 60 * 5   # 5 min — events / partners / hero
+_GALLERY_CACHE_TTL = 60 * 10  # 10 min — gallery albums change rarely
+
+
 def index(request, c_slug=None):
     c_page = None
     if c_slug is not None:
         c_page = get_object_or_404(Category, slug=c_slug)
-    lis = lists_events(c_slug)
-    page = pagination_home(request, lis)
-    detachs = SpecialEvents.objects.filter(active_list=True)
-    
-    # Get business partners and featured gallery photos
-    business_partners = BusinessPartner.objects.filter(is_active=True).order_by('display_order', 'name')[:8]
-    
-    # Get gallery albums (events with photos) instead of individual photos
-    from django.db.models import Count, Max, Q
-    gallery_albums = Event.objects.filter(
-        gallery_photos__is_public=True
-    ).annotate(
-        photo_count=Count('gallery_photos', filter=Q(gallery_photos__is_public=True)),
-        latest_upload=Max('gallery_photos__uploaded_at')
-    ).prefetch_related('gallery_photos').order_by('-latest_upload')[:6]
-    
-    # Add cover photo to each album and filter out albums without photos
-    albums_with_photos = []
-    for album in gallery_albums:
-        cover_photo = album.gallery_photos.filter(is_public=True).first()
-        if cover_photo:  # Only include albums that have at least one photo
-            album.cover_photo = cover_photo
-            albums_with_photos.append(album)
-    
-    gallery_albums = albums_with_photos
-    
-    return render(request, 'shop/home.html', {'detachs': detachs,
-                                              'category': c_page,
-                                              'events_futures': page[0],
-                                              'events_old': page[1],
-                                              'events_all': page[2],
-                                              'business_partners': business_partners,
-                                              'gallery_albums': gallery_albums,
-                                              'PROD': settings.PROD
-                                              })
+
+    # Cache key is per-category so /shop/concerts/ and / are independent
+    cache_key = f'home_ctx_{c_slug or "all"}'
+    ctx = cache.get(cache_key)
+
+    if ctx is None:
+        lis  = lists_events(c_slug)
+        page = pagination_home(request, lis)
+
+        # Hero events — single query with prefetch, fully deduplicated
+        detachs = SpecialEvents.objects.filter(active_list=True).prefetch_related(
+            Prefetch(
+                'event',
+                queryset=Event.objects.select_related('category', 'city')
+                               .filter(available=True),
+            )
+        )
+        hero_events = []
+        seen_ids = set()
+        for detach in detachs:
+            for ev in detach.event.all():
+                if ev.id not in seen_ids:
+                    seen_ids.add(ev.id)
+                    hero_events.append(ev)
+
+        # Business partners — one query
+        business_partners = BusinessPartner.objects.filter(
+            is_active=True
+        ).order_by('display_order', 'name')[:8]
+
+        # Gallery albums — one annotated query, cover via prefetch
+        gallery_qs = Event.objects.filter(
+            gallery_photos__is_public=True
+        ).select_related('category', 'city').annotate(
+            photo_count=Count('gallery_photos',
+                              filter=Q(gallery_photos__is_public=True), distinct=True),
+            latest_upload=Max('gallery_photos__uploaded_at'),
+        ).prefetch_related(
+            Prefetch(
+                'gallery_photos',
+                queryset=EventGallery.objects.filter(is_public=True)
+                                    .order_by('-is_featured', '-uploaded_at'),
+                to_attr='public_photos',
+            )
+        ).order_by('-latest_upload')[:12]
+
+        gallery_albums = []
+        for album in gallery_qs:
+            if album.public_photos:
+                album.cover_photo = album.public_photos[0]
+                gallery_albums.append(album)
+                if len(gallery_albums) == 6:
+                    break
+
+        ctx = {
+            'hero_events':       hero_events,
+            'events_futures':    page[0],
+            'events_old':        page[1],
+            'events_all':        page[2],
+            'business_partners': business_partners,
+            'gallery_albums':    gallery_albums,
+        }
+        cache.set(cache_key, ctx, _HOME_CACHE_TTL)
+
+    ctx['category'] = c_page
+    ctx['PROD']     = settings.PROD
+    return render(request, 'shop/home.html', ctx)
 
 
 def lists_events(slugs):
-    now = datetime.now()
+    now = timezone.now()
+    base_qs = Event.objects.select_related('category', 'city')
     if slugs is not None:
         c_page = get_object_or_404(Category, slug=slugs)
-        future_events = Event.objects.all().filter(category=c_page, available=True,
-                                                   event_date__gte=now).order_by('event_date')
-        old_events = Event.objects.all().filter(category=c_page, available=True,
-                                                event_date__lt=now).order_by('-event_date')
-        event_list = list(itertools.chain(future_events, old_events))
+        future_events = base_qs.filter(category=c_page, available=True,
+                                       event_date__gte=now).order_by('event_date')
+        old_events    = base_qs.filter(category=c_page, available=True,
+                                       event_date__lt=now).order_by('-event_date')
     else:
-        future_events = Event.objects.all().filter(available=True,
-                                                   event_date__gte=now).order_by('event_date')
-        old_events = Event.objects.all().filter(available=True,
-                                                event_date__lt=now).order_by('-event_date')
-        event_list = list(itertools.chain(future_events, old_events))
-
-    lists_of_lists_events = [future_events, old_events, event_list]
-    return lists_of_lists_events
+        future_events = base_qs.filter(available=True,
+                                       event_date__gte=now).order_by('event_date')
+        old_events    = base_qs.filter(available=True,
+                                       event_date__lt=now).order_by('-event_date')
+    return [future_events, old_events, list(itertools.chain(future_events, old_events))]
 
 
 def pagination_home(request, lists):
@@ -288,6 +323,22 @@ def contact(request):
         'RECAPTCHA_PUBLIC_KEY': settings.RECAPTCHA_PUBLIC_KEY
     })
 
+
+
+def robots_txt(request):
+    """Serve robots.txt dynamically so it can reference the correct domain."""
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin/",
+        "Disallow: /cart/",
+        "Disallow: /order/",
+        "Disallow: /customer/",
+        "Disallow: /account/",
+        "",
+        f"Sitemap: {request.build_absolute_uri('/sitemap.xml')}",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
 
 def handler404(request, exception):
     return render(request, 'pages/error.html')
