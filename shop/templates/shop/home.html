@@ -1274,7 +1274,7 @@ on Eventlinez.{% endblock %}
         {% for detach in detachs %}
         {% for special_events in detach.event.all %}
         {% if forloop.first %}
-        <div>
+        <div data-hero-slide>
             <h1 class="hero-title">{{ special_events.name }}</h1>
             <p class="hero-subtitle">
                 {{ special_events.event_date|date:"l, F d, Y \a\t g:i A" }} • {{ special_events.city }}
@@ -1288,7 +1288,7 @@ on Eventlinez.{% endblock %}
         {% endfor %}
         {% endfor %}
         {% else %}
-        <div>
+        <div data-hero-slide>
             <h1 class="hero-title">It's more than a ticket, it's an Experience!</h1>
             <p class="hero-subtitle">
                 Discover amazing events, connect with your community, and create unforgettable memories.
@@ -1950,29 +1950,61 @@ on Eventlinez.{% endblock %}
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const heroContent = document.querySelector('.hero-content');
-        const slides = heroContent.querySelectorAll('div');
+        // Use [data-hero-slide] so we only target the real top-level slide divs,
+        // never the inner nested divs (loading-skeleton, icon wrappers, etc.)
+        const slides = Array.from(
+            document.querySelectorAll('.hero-content [data-hero-slide]')
+        );
 
-        let currentIndex = 0;
+        if (slides.length === 0) return;
+
+        // CSS handles visibility — no display:none which creates ghost touch regions
+        // and triggers layout reflows that stall the iOS scroll compositor.
+        slides.forEach(function(s, i) {
+            s.style.position  = i === 0 ? 'relative' : 'absolute';
+            s.style.opacity   = i === 0 ? '1'        : '0';
+            s.style.pointerEvents = i === 0 ? ''     : 'none';
+            s.style.transition = 'opacity 0.6s ease';
+            // Absolutely positioned slides must not push the section height
+            if (i > 0) {
+                s.style.top   = '0';
+                s.style.left  = '0';
+                s.style.width = '100%';
+            }
+        });
+
+        // Make .hero-content a positioning context for the absolute slides
+        document.querySelector('.hero-content').style.position = 'relative';
+
+        if (slides.length === 1) return; // nothing to rotate
+
+        let current = 0;
+        let timer   = null;
 
         function showSlide(index) {
-            slides.forEach((slide, i) => {
-                slide.style.display = i === index ? 'block' : 'none';
-            });
+            slides[current].style.opacity      = '0';
+            slides[current].style.pointerEvents = 'none';
+            slides[current].style.position     = 'absolute';
+            current = index;
+            slides[current].style.position     = 'relative';
+            slides[current].style.opacity      = '1';
+            slides[current].style.pointerEvents = '';
         }
 
-        function nextSlide() {
-            currentIndex = (currentIndex + 1) % slides.length;
-            showSlide(currentIndex);
+        function advance() {
+            showSlide((current + 1) % slides.length);
         }
 
-        // FIX: only run the slideshow when there are actually multiple slides.
-        // If there is only 1 div (the  else allback), showSlide(1) would
-        // set display:none on it at the next tick, freezing the hero blank.
-        showSlide(currentIndex);
-        if (slides.length > 1) {
-            setInterval(nextSlide, 3000); // Change slide every 3 seconds
-        }
+        function start() { if (!timer) timer = setInterval(advance, 4000); }
+        function stop()  { clearInterval(timer); timer = null; }
+
+        start();
+
+        // Pause while page is hidden — prevents layout reflows from stalling
+        // iOS scroll when the user comes back to the page mid-gesture
+        document.addEventListener('visibilitychange', function() {
+            document.hidden ? stop() : start();
+        });
     });
 </script>
 {% endblock %}
