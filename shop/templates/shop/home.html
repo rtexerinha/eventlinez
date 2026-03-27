@@ -1536,6 +1536,7 @@ on Eventlinez.{% endblock %}
                 {% endfor %}
             </div>
         </div>
+    </div>
 </section>
 
 <!-- Lightbox Modal for Photo Navigation -->
@@ -1966,7 +1967,7 @@ on Eventlinez.{% endblock %}
         }
 
         // FIX: only run the slideshow when there are actually multiple slides.
-        // If there is only 1 div (the {% else %} fallback), showSlide(1) would
+        // If there is only 1 div (the  else allback), showSlide(1) would
         // set display:none on it at the next tick, freezing the hero blank.
         showSlide(currentIndex);
         if (slides.length > 1) {
