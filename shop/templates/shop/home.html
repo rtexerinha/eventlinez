@@ -156,12 +156,17 @@ on Eventlinez.{% endblock %}
     .event-card {
         background: white;
         border-radius: var(--border-radius-lg);
-        overflow: hidden;
+        /* FIX: overflow:hidden blocks iOS scroll compositor on touch elements.
+           clip-path gives identical corner clipping without blocking scroll. */
+        overflow: visible;
+        clip-path: inset(0 round var(--border-radius-lg));
         box-shadow: var(--shadow-light);
         transition: var(--transition-normal);
         cursor: pointer;
         border: 1px solid var(--border-color);
         position: relative;
+        /* FIX: tell the browser compositor scroll is always allowed vertically */
+        touch-action: pan-y;
     }
 
     .event-card:hover {
@@ -259,6 +264,14 @@ on Eventlinez.{% endblock %}
 
     .event-card:hover .event-arrow {
         transform: translateX(5px);
+    }
+
+    /* Safe touch press feedback — opacity is compositor-friendly, transform is not */
+    @media (hover: none) and (pointer: coarse) {
+        .event-card:active {
+            opacity: 0.88;
+            outline: none;
+        }
     }
 
     /* Business Partners Section - Improved */
@@ -490,9 +503,11 @@ on Eventlinez.{% endblock %}
             transform: none;
         }
 
+        /* FIX: transform on :active during a scroll gesture stalls the iOS
+           compositor. Use outline instead — it's compositor-safe. */
         .event-card:active,
         .partner-card:active {
-            transform: scale(0.98);
+            outline: 2px solid var(--primary-color);
         }
     }
 
@@ -1605,17 +1620,9 @@ on Eventlinez.{% endblock %}
                 }
             });
 
-            // Add touch feedback for mobile
-            // FIX: mutating transform on touchstart creates a new stacking
-            // context mid-gesture and blocks the iOS scroll compositor.
-            // Using opacity is visually equivalent and never blocks scroll.
-            card.addEventListener('touchstart', function () {
-                this.style.opacity = '0.85';
-            }, { passive: true });
-
-            card.addEventListener('touchend', function () {
-                this.style.opacity = '';
-            }, { passive: true });
+            // Touch feedback is handled entirely in CSS via :active
+            // (no JS touch listeners on cards — even passive ones cause WebKit
+            //  to delay scroll confirmation on the touched element itself)
 
             // Preload images on hover (desktop only)
             if (window.matchMedia('(hover: hover)').matches) {
