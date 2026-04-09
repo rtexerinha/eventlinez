@@ -1,0 +1,418 @@
+{% extends "admin/base_site.html" %}
+{% load static i18n %}
+
+{% block title %}Payout Report | Eventlinez Admin{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* ── Page layout ─────────────────────────────────────────── */
+    .payout-wrap { max-width: 960px; margin: 0 auto; }
+
+    /* ── Filter card ─────────────────────────────────────────── */
+    .filter-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+    }
+    .filter-card h2 {
+        margin: 0 0 16px;
+        font-size: 15px;
+        color: #333;
+        border-bottom: 2px solid #d90075;
+        padding-bottom: 8px;
+    }
+    .filter-row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+    .filter-field { flex: 1; min-width: 200px; }
+    .filter-field label { display: block; font-weight: bold; font-size: 13px; margin-bottom: 4px; color: #555; }
+    .filter-field select {
+        width: 100%; padding: 8px 10px; border: 1px solid #ccc;
+        border-radius: 3px; font-size: 14px; background: #fafafa;
+    }
+    .filter-field select:focus { outline: none; border-color: #d90075; box-shadow: 0 0 0 2px #ffd6ec; }
+    .btn-generate {
+        background: #d90075; color: #fff; border: none;
+        padding: 9px 20px; border-radius: 3px; font-size: 14px;
+        cursor: pointer; white-space: nowrap;
+    }
+    .btn-generate:hover { background: #b3005e; }
+
+    /* ── Summary banner ──────────────────────────────────────── */
+    .summary-banner {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    .summary-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 16px;
+        text-align: center;
+    }
+    .summary-card .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .5px; }
+    .summary-card .value { font-size: 22px; font-weight: bold; color: #222; margin-top: 4px; }
+    .summary-card.highlight { border-color: #007AFF; background: #f0f7ff; }
+    .summary-card.highlight .value { color: #007AFF; }
+    .summary-card.danger .value { color: #d90075; }
+
+    /* ── Tables ──────────────────────────────────────────────── */
+    .section-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+    .section-card h3 {
+        margin: 0;
+        padding: 12px 18px;
+        font-size: 14px;
+        background: #444;
+        color: #fff;
+    }
+    .section-card h3 i { margin-right: 7px; }
+    .section-card table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .section-card th {
+        background: #f5f5f5;
+        padding: 9px 14px;
+        text-align: left;
+        font-weight: bold;
+        border-bottom: 2px solid #ddd;
+        color: #444;
+    }
+    .section-card td { padding: 8px 14px; border-bottom: 1px solid #eee; color: #333; }
+    .section-card tr:last-child td { border-bottom: none; }
+    .section-card tr:hover td { background: #fafafa; }
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+
+    /* ── Bank info ───────────────────────────────────────────── */
+    .bank-info { display: flex; gap: 24px; padding: 14px 18px; flex-wrap: wrap; }
+    .bank-info dt { font-size: 11px; color: #888; text-transform: uppercase; }
+    .bank-info dd { font-weight: bold; font-size: 14px; margin: 2px 0 0; }
+
+    /* ── Action buttons ──────────────────────────────────────── */
+    .action-bar { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    .btn-excel {
+        background: #217346; color: #fff; border: none;
+        padding: 9px 18px; border-radius: 3px; font-size: 14px;
+        text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-excel:hover { background: #185c39; color: #fff; }
+    .btn-email {
+        background: #007AFF; color: #fff; border: none;
+        padding: 9px 18px; border-radius: 3px; font-size: 14px;
+        cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-email:hover { background: #005ec2; }
+
+    /* ── Empty state ─────────────────────────────────────────── */
+    .empty-state {
+        text-align: center; padding: 48px 24px;
+        color: #888; background: #fff; border: 1px solid #ddd; border-radius: 4px;
+    }
+    .empty-state i { font-size: 48px; color: #ddd; display: block; margin-bottom: 12px; }
+    .badge-active { color: #217346; font-weight: bold; }
+    .badge-past { color: #888; }
+
+    /* ── Totals row ──────────────────────────────────────────── */
+    .totals-row td { font-weight: bold; background: #f5f5f5; border-top: 2px solid #ddd !important; }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; Payout Report
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="payout-wrap">
+    <h1><i class="fas fa-file-invoice-dollar"></i> Payout Report</h1>
+
+    {% if messages %}
+    <ul class="messagelist">
+        {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <!-- ── Filter form ─────────────────────────────────────── -->
+    <div class="filter-card">
+        <h2><i class="fas fa-filter"></i> Select Promoter &amp; Event</h2>
+        <form method="get" id="filter-form">
+            <div class="filter-row">
+                <div class="filter-field">
+                    <label for="promoter_id">Promoter / Organizer</label>
+                    <select name="promoter_id" id="promoter_id">
+                        <option value="">— Select a promoter —</option>
+                        {% for p in promoters %}
+                        <option value="{{ p.id }}"
+                            {% if selected_promoter.id == p.id %}selected{% endif %}>
+                            {{ p.name }} ({{ p.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="event_id">Event</label>
+                    <select name="event_id" id="event_id">
+                        <option value="">— Select an event —</option>
+                        {% for e in events %}
+                        <option value="{{ e.id }}"
+                            {% if selected_event.id == e.id %}selected{% endif %}>
+                            {{ e.name }} — {{ e.event_date|date:"M j, Y" }}
+                            {% if e.available %} ✓{% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="btn-generate">
+                        <i class="fas fa-chart-bar"></i> Generate Report
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% if report_data %}
+    <!-- ── Action bar ──────────────────────────────────────── -->
+    <div class="action-bar">
+        <a href="{% url 'admin_payout_export' selected_event.id %}" class="btn-excel">
+            <i class="fas fa-file-excel"></i> Export Excel
+        </a>
+        <form method="post" action="{% url 'admin_payout_send_email' selected_event.id %}" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn-email"
+                onclick="return confirm('Send payout report to {{ report_data.promoter.email }}?')">
+                <i class="fas fa-envelope"></i> Email to Promoter
+            </button>
+        </form>
+    </div>
+
+    <!-- ── Summary banner ─────────────────────────────────── -->
+    <div class="summary-banner">
+        <div class="summary-card">
+            <div class="label">Gross Revenue</div>
+            <div class="value">${{ report_data.gross_revenue|floatformat:2 }}</div>
+        </div>
+        <div class="summary-card danger">
+            <div class="label">Promo Discounts</div>
+            <div class="value">–${{ report_data.total_promo_discount|floatformat:2 }}</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">Net Revenue</div>
+            <div class="value">${{ report_data.net_revenue|floatformat:2 }}</div>
+        </div>
+        <div class="summary-card danger">
+            <div class="label">Platform Fee ({{ report_data.fee_rate_pct }}%)</div>
+            <div class="value">–${{ report_data.platform_fee|floatformat:2 }}</div>
+        </div>
+        <div class="summary-card highlight">
+            <div class="label">Payout to Promoter</div>
+            <div class="value">${{ report_data.payout_amount|floatformat:2 }}</div>
+        </div>
+    </div>
+
+    <!-- ── Promoter & Bank info ───────────────────────────── -->
+    <div class="section-card">
+        <h3><i class="fas fa-user-tie"></i> Promoter Details</h3>
+        <dl class="bank-info">
+            <div>
+                <dt>Name</dt>
+                <dd>{{ report_data.promoter.name }}</dd>
+            </div>
+            <div>
+                <dt>Email</dt>
+                <dd>{{ report_data.promoter.email }}</dd>
+            </div>
+            <div>
+                <dt>Phone</dt>
+                <dd>{{ report_data.promoter.phone|default:"—" }}</dd>
+            </div>
+            {% if report_data.bank %}
+            <div>
+                <dt>Bank</dt>
+                <dd>{{ report_data.bank.bank_name }}</dd>
+            </div>
+            <div>
+                <dt>Routing #</dt>
+                <dd>{{ report_data.bank.routing_number }}</dd>
+            </div>
+            <div>
+                <dt>Account #</dt>
+                <dd>{{ report_data.bank.account_number }}</dd>
+            </div>
+            {% else %}
+            <div>
+                <dt>Bank Info</dt>
+                <dd style="color:#c00;">Not on file</dd>
+            </div>
+            {% endif %}
+        </dl>
+    </div>
+
+    <!-- ── Ticket Breakdown ────────────────────────────────── -->
+    <div class="section-card">
+        <h3><i class="fas fa-ticket-alt"></i> Ticket Sales Breakdown</h3>
+        {% if report_data.ticket_breakdown %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Ticket Type</th>
+                    <th class="text-center">Qty Sold</th>
+                    <th class="text-right">Unit Price</th>
+                    <th class="text-right">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tb in report_data.ticket_breakdown %}
+                <tr>
+                    <td>{{ tb.name }}</td>
+                    <td class="text-center">{{ tb.qty }}</td>
+                    <td class="text-right">${{ tb.unit_price|floatformat:2 }}</td>
+                    <td class="text-right">${{ tb.subtotal|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="totals-row">
+                    <td colspan="2">Total</td>
+                    <td></td>
+                    <td class="text-right">${{ report_data.gross_revenue|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        {% else %}
+        <p style="padding:14px 18px;color:#888;">No tickets sold for this event.</p>
+        {% endif %}
+    </div>
+
+    <!-- ── Promo Codes ─────────────────────────────────────── -->
+    <div class="section-card">
+        <h3><i class="fas fa-tags"></i> Promo Codes Used</h3>
+        {% if report_data.promo_breakdown %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Type</th>
+                    <th class="text-right">Discount Value</th>
+                    <th class="text-center">Times Used</th>
+                    <th class="text-right">Total Discount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pb in report_data.promo_breakdown %}
+                <tr>
+                    <td><code>{{ pb.code }}</code></td>
+                    <td>{{ pb.discount_type|title }}</td>
+                    <td class="text-right">
+                        {% if pb.discount_type == 'percentage' %}
+                            {{ pb.discount_value|floatformat:0 }}%
+                        {% else %}
+                            ${{ pb.discount_value|floatformat:2 }}
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ pb.uses }}</td>
+                    <td class="text-right">–${{ pb.total_discount|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="totals-row">
+                    <td colspan="4">Total Discounts Given</td>
+                    <td class="text-right">–${{ report_data.total_promo_discount|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        {% else %}
+        <p style="padding:14px 18px;color:#888;">No promo codes were used for this event.</p>
+        {% endif %}
+    </div>
+
+    <!-- ── Payout Calculation ──────────────────────────────── -->
+    <div class="section-card">
+        <h3><i class="fas fa-calculator"></i> Payout Calculation</h3>
+        <table>
+            <tbody>
+                <tr>
+                    <td>Gross Revenue</td>
+                    <td class="text-right">${{ report_data.gross_revenue|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>Less: Promo Code Discounts</td>
+                    <td class="text-right" style="color:#d90075;">–${{ report_data.total_promo_discount|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Net Revenue</strong></td>
+                    <td class="text-right"><strong>${{ report_data.net_revenue|floatformat:2 }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Less: Platform Fee ({{ report_data.fee_rate_pct }}%)</td>
+                    <td class="text-right" style="color:#d90075;">–${{ report_data.platform_fee|floatformat:2 }}</td>
+                </tr>
+                <tr class="totals-row">
+                    <td><i class="fas fa-hand-holding-usd"></i> <strong>PAYOUT TO PROMOTER</strong></td>
+                    <td class="text-right" style="color:#007AFF;font-size:16px;">${{ report_data.payout_amount|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p style="color:#aaa;font-size:12px;text-align:right;">
+        Generated {{ report_data.generated_at|date:"F j, Y H:i" }}
+    </p>
+
+    {% elif selected_promoter and not selected_event %}
+    <div class="empty-state">
+        <i class="fas fa-hand-point-up"></i>
+        <p>Select an event above to generate the payout report.</p>
+    </div>
+
+    {% elif not selected_promoter %}
+    <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <p>Select a promoter to get started.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+/* Reload events dropdown when promoter changes */
+document.getElementById('promoter_id').addEventListener('change', function () {
+    var promoterId = this.value;
+    var eventSelect = document.getElementById('event_id');
+
+    // Clear events
+    eventSelect.innerHTML = '<option value="">— loading… —</option>';
+
+    if (!promoterId) {
+        eventSelect.innerHTML = '<option value="">— Select an event —</option>';
+        return;
+    }
+
+    fetch('/admin/payout-report/events/?promoter_id=' + promoterId)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            eventSelect.innerHTML = '<option value="">— Select an event —</option>';
+            data.events.forEach(function (e) {
+                var opt = document.createElement('option');
+                opt.value = e.id;
+                opt.textContent = e.name + ' — ' + e.event_date + (e.available ? ' ✓' : '');
+                eventSelect.appendChild(opt);
+            });
+        })
+        .catch(function () {
+            eventSelect.innerHTML = '<option value="">— Error loading events —</option>';
+        });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; background: #f5f5f5; }
+  .wrapper { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+  .header { background: linear-gradient(135deg, #d90075, #007AFF); color: #fff; padding: 28px 32px; }
+  .header h1 { margin: 0; font-size: 22px; }
+  .header p { margin: 6px 0 0; opacity: .85; font-size: 14px; }
+  .body { padding: 28px 32px; }
+  h2 { font-size: 15px; color: #d90075; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }
+  th { background: #444; color: #fff; padding: 8px 12px; text-align: left; }
+  td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+  .summary-row td { font-weight: bold; background: #fafafa; }
+  .payout-row td { font-weight: bold; color: #007AFF; font-size: 16px; background: #f0f7ff; border-top: 2px solid #007AFF; }
+  .footer { background: #f5f5f5; padding: 16px 32px; font-size: 12px; color: #999; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <h1>Payout Report</h1>
+    <p>{{ event.name }} &mdash; {{ event.event_date|date:"F j, Y" }}</p>
+  </div>
+  <div class="body">
+    <p>Hi {{ promoter.name }},</p>
+    <p>Please find your payout summary for <strong>{{ event.name }}</strong> below.</p>
+
+    <h2>Ticket Sales</h2>
+    {% if ticket_breakdown %}
+    <table>
+      <thead><tr><th>Ticket Type</th><th>Qty</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        {% for tb in ticket_breakdown %}
+        <tr><td>{{ tb.name }}</td><td>{{ tb.qty }}</td><td>${{ tb.subtotal|floatformat:2 }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No tickets sold.</p>
+    {% endif %}
+
+    {% if promo_breakdown %}
+    <h2>Promo Codes Used</h2>
+    <table>
+      <thead><tr><th>Code</th><th>Uses</th><th>Total Discount</th></tr></thead>
+      <tbody>
+        {% for pb in promo_breakdown %}
+        <tr><td>{{ pb.code }}</td><td>{{ pb.uses }}</td><td>–${{ pb.total_discount|floatformat:2 }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    <h2>Payout Summary</h2>
+    <table>
+      <tbody>
+        <tr class="summary-row"><td>Gross Revenue</td><td>${{ gross_revenue|floatformat:2 }}</td></tr>
+        <tr><td>Less: Promo Discounts</td><td>–${{ total_promo_discount|floatformat:2 }}</td></tr>
+        <tr class="summary-row"><td>Net Revenue</td><td>${{ net_revenue|floatformat:2 }}</td></tr>
+        <tr><td>Less: Platform Fee ({{ fee_rate_pct }}%)</td><td>–${{ platform_fee|floatformat:2 }}</td></tr>
+        <tr class="payout-row"><td>YOUR PAYOUT</td><td>${{ payout_amount|floatformat:2 }}</td></tr>
+      </tbody>
+    </table>
+
+    {% if bank %}
+    <h2>Payment Will Be Sent To</h2>
+    <table>
+      <tbody>
+        <tr><td><strong>Bank</strong></td><td>{{ bank.bank_name }}</td></tr>
+        <tr><td><strong>Routing #</strong></td><td>{{ bank.routing_number }}</td></tr>
+        <tr><td><strong>Account #</strong></td><td>{{ bank.account_number }}</td></tr>
+      </tbody>
+    </table>
+    {% endif %}
+
+    <p>If you have any questions, please contact us at <a href="mailto:support@eventlinez.com">support@eventlinez.com</a>.</p>
+    <p>Thank you,<br>The Eventlinez Team</p>
+  </div>
+  <div class="footer">
+    This report was generated on {{ generated_at|date:"F j, Y H:i" }} &mdash; Eventlinez &copy; 2024
+  </div>
+</div>
+</body>
+</html>
