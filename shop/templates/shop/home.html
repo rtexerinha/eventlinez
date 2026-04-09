@@ -962,15 +962,11 @@
             carousel.addEventListener('touchmove', (e) => {
                 if (!isTouch) return;
                 currentX = e.touches[0].clientX;
-                const diffX = startX - currentX;
-                const diffY = startY - e.touches[0].clientY;
-
-                // Only hijack the event when the gesture is MORE horizontal than vertical.
-                // This lets the browser handle vertical scrolling naturally.
-                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
-                    e.preventDefault();
-                }
-            }, { passive: false });  // passive:false required to be able to call preventDefault
+                // NOTE: body already has overflow-x:clip so horizontal page scroll
+                // is impossible — no preventDefault() needed. Keeping this passive
+                // lets the browser start vertical scrolling immediately without
+                // waiting for JS, eliminating scroll jank on mobile.
+            }, { passive: true });
 
             carousel.addEventListener('touchend', () => {
                 if (!isTouch) return;

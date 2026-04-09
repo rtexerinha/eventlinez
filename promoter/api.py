@@ -857,12 +857,17 @@ class DoormanScanPaidTicketAPIView(APIView):
             return Response({'success': False, 'message': 'uuid is required.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # Fetch ticket
+        # QR codes encode the full check-in URL; extract just the UUID segment
+        # so the API works whether the app sends the raw UUID or the full URL.
+        if '/' in uuid_str:
+            uuid_str = uuid_str.rstrip('/').split('/')[-1]
+
+        # Fetch ticket — also catch ValueError for malformed UUID strings
         try:
             ticket = PaidTicket.objects.select_related(
                 'event_ticket__event', 'customer'
             ).get(uuid=uuid_str)
-        except PaidTicket.DoesNotExist:
+        except (PaidTicket.DoesNotExist, ValueError):
             return Response(
                 TicketScanResultSerializer({
                     'success': False,
@@ -957,9 +962,15 @@ class DoormanScanGuestTicketAPIView(APIView):
             return Response({'success': False, 'message': 'uuid is required.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
+        # QR codes encode the full check-in URL; extract just the UUID segment
+        # so the API works whether the app sends the raw UUID or the full URL.
+        if '/' in uuid_str:
+            uuid_str = uuid_str.rstrip('/').split('/')[-1]
+
+        # Also catch ValueError for malformed UUID strings
         try:
             ticket = ComplimentaryTicket.objects.select_related('event').get(uuid=uuid_str)
-        except ComplimentaryTicket.DoesNotExist:
+        except (ComplimentaryTicket.DoesNotExist, ValueError):
             return Response(
                 GuestScanResultSerializer({
                     'success': False,

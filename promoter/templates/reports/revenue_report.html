@@ -156,7 +156,7 @@
             </div>
             {% if selected_event %}
             <a href="{% url 'promoter:revenue_report_export' selected_event.id %}" class="export-btn">
-                <i class="fas fa-file-excel"></i>
+                <i class="fas fa-file-excel mr-1"></i>
                 Export Excel
             </a>
             {% endif %}
@@ -165,26 +165,26 @@
         <!-- Event Selection -->
         <div class="dashboard-card">
             <div class="revenue-header">
-                <h3 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Select Event for Financial Report</h3>
-                <p class="mb-0 mt-2 opacity-75">Choose an event to view sales details and revenue breakdown</p>
+                <h3 class="mb-0"><i class="fas fa-calendar-alt mr-2"></i>Select Event for Financial Report</h3>
+                <p class="mb-0 mt-2" style="opacity:.75;">Choose an event to view sales details and revenue breakdown</p>
             </div>
 
             <form method="POST" class="row align-items-end">
                 {% csrf_token %}
                 <div class="col-md-9">
-                    <label for="eventsChoice" class="form-label fw-bold">Event</label>
+                    <label for="eventsChoice" class="font-weight-bold">Event</label>
                     <select id="eventsChoice" class="form-control" name="events_choice" required>
                         <option value="">-- Select an Event --</option>
                         {% for event in events %}
-                        <option value="{{ event.id }}" {% ifequal selected_event.id event.id %}selected{% endifequal %}>
+                        <option value="{{ event.id }}" {% if selected_event.id == event.id %}selected{% endif %}>
                             {{ event.name }} - {{ event.event_date|date:"M d, Y" }}
-                            {% if event.event_date|date:"Y-m-d" < today|date:"Y-m-d" %}(Past Event){% endif %} </option>
-                                {% endfor %}
+                            {% if event.event_date|date:"Y-m-d" < today|date:"Y-m-d" %}(Past Event){% endif %}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search me-1"></i>
+                        <i class="fas fa-search mr-1"></i>
                         View Report
                     </button>
                 </div>
@@ -195,7 +195,7 @@
         <!-- Financial Summary -->
         <div class="dashboard-card">
             <h4 class="mb-3">
-                <i class="fas fa-money-bill-wave me-2"></i>
+                <i class="fas fa-money-bill-wave mr-2"></i>
                 {{ selected_event.name }} - Financial Summary
             </h4>
 
@@ -223,7 +223,7 @@
         <!-- Sales Details Table -->
         <div class="dashboard-card">
             <h4 class="mb-3">
-                <i class="fas fa-table me-2"></i>
+                <i class="fas fa-table mr-2"></i>
                 Sales Details ({{ revenue_data.total_tickets_sold }} tickets)
             </h4>
 

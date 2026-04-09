@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/fontawesome-all.min.css' %}">
+<style>
+    /* Eventlinez admin brand colors */
+    #header {
+        background: linear-gradient(135deg, #d90075, #007AFF);
+    }
+    #header a:link, #header a:visited {
+        color: #fff;
+    }
+    div.breadcrumbs {
+        background: #e8004f;
+        color: #fff;
+    }
+    div.breadcrumbs a {
+        color: #ffcce8;
+    }
+    a.section:link, a.section:visited {
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <i class="fas fa-ticket-alt" style="margin-right:6px;"></i>
+        {{ site_header|default:_('Django administration') }}
+    </a>
+</h1>
+{% endblock %}

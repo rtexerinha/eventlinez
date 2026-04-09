@@ -479,6 +479,18 @@
     /* prevent scroll chaining to page */
 }
 
+/* Match Bootstrap's lg breakpoint — below 992px the event detail page is
+   single-column, so the ticket panel must flow naturally (no scroll trap). */
+@media (max-width: 991px) {
+    .card-details {
+        margin-left: 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: visible !important;
+        overscroll-behavior: auto !important;
+    }
+}
+
 /* Custom scrollbar for desktop */
 .card-details::-webkit-scrollbar {
     width: 8px;

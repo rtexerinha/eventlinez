@@ -936,9 +936,10 @@ def revenue_report(request):
             'events': events,
             'selected_event': selected_event,
             'revenue_data': revenue_data,
-            'promoter': promoter
+            'promoter': promoter,
+            'today': timezone.now().date(),
         }
-        
+
         return render(request, 'reports/revenue_report.html', context)
         
     except Exception as e:
