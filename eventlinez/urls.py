@@ -33,12 +33,12 @@ elif os.path.exists('/.dockerenv') or os.environ.get('IN_DOCKER', False):
     ]
 
 urlpatterns += [
-    path('admin/', admin.site.urls),
-    # Payout report — admin-only (staff_member_required inside the view)
+    # Payout report — MUST be before admin.site.urls so it isn't swallowed by the admin include
     path('admin/payout-report/', payout_report, name='admin_payout_report'),
     path('admin/payout-report/events/', payout_report_events_ajax, name='admin_payout_events_ajax'),
     path('admin/payout-report/export/<int:event_id>/', payout_report_export, name='admin_payout_export'),
     path('admin/payout-report/email/<int:event_id>/', payout_report_send_email, name='admin_payout_send_email'),
+    path('admin/', admin.site.urls),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', shop.views.robots_txt, name='robots_txt'),
     path('', index, name='index'),
