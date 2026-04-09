@@ -105,7 +105,10 @@ def index(request, c_slug=None):
             'business_partners': business_partners,
             'gallery_albums':    gallery_albums,
         }
-        cache.set(cache_key, ctx, _HOME_CACHE_TTL)
+        try:
+            cache.set(cache_key, ctx, _HOME_CACHE_TTL)
+        except Exception:
+            pass  # Cache failure is non-fatal; page still renders correctly
 
     ctx['category'] = c_page
     ctx['PROD']     = settings.PROD
