@@ -46,7 +46,10 @@ def index(request, c_slug=None):
 
     # Cache key is per-category so /shop/concerts/ and / are independent
     cache_key = f'home_ctx_{c_slug or "all"}'
-    ctx = cache.get(cache_key)
+    try:
+        ctx = cache.get(cache_key)
+    except Exception:
+        ctx = None
 
     if ctx is None:
         lis  = lists_events(c_slug)
