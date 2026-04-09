@@ -234,7 +234,9 @@
     <script src="{% static 'js/popper.min.js' %}" defer></script>
     <script src="{% static 'js/bootstrap.min.js' %}" defer></script>
 
-    <!-- Swiper: single local copy, deferred -->
+    <!-- Swiper library v6.7.0 (must load before swiper.js init script) -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@6.7.0/swiper-bundle.min.js" defer></script>
+    <!-- Swiper init: local config, deferred -->
     <script src="{% static 'js/swiper.js' %}" defer></script>
 
     <!-- In-app browser scroll fix (deferred — not layout critical) -->
