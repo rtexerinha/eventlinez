@@ -66,11 +66,20 @@ def ticket_checkin(request, checkin):
     ticket.save()
 
     if is_promoter:
-        tickets = Ticket.objects.filter(
-            event_ticket__event__promoter=user.promoter,
-            event_ticket=ticket.event_ticket,
-            checkin_date__isnull=False,
-        ).order_by('-checkin_date')
+        if ticket.day_event:
+            # Full Pass: only show tickets checked in for this specific day event
+            tickets = Ticket.objects.filter(
+                day_event=ticket.day_event,
+                checkin_date__isnull=False,
+            ).order_by('-checkin_date')
+        else:
+            # Regular ticket: show all checked-in tickets for this ticket type
+            tickets = Ticket.objects.filter(
+                event_ticket__event__promoter=user.promoter,
+                event_ticket=ticket.event_ticket,
+                day_number__isnull=True,
+                checkin_date__isnull=False,
+            ).order_by('-checkin_date')
         return render(request, 'ticket/ticket_checkin.html', {'tickets': tickets})
     else:
         # Doormen see a simple confirmation and go back to their event checkin page
@@ -116,7 +125,8 @@ def tickets_validate(request):
         if event_id:
             selected_event = Event.objects.get(pk=event_id)
             tickets = tickets.filter(
-                Q(event_ticket__event=selected_event) | Q(day_event=selected_event)
+                Q(event_ticket__event=selected_event, day_number__isnull=True) |
+                Q(day_event=selected_event)
             )
     paginator = Paginator(tickets, 9)
     page = int(request.GET.get('page', '1'))

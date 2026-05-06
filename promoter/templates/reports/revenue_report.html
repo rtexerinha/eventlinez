@@ -279,14 +279,12 @@
                             <td class="text-center">-</td>
                             <td class="text-end">
                                 {% if revenue_data.total_promo_discount > 0 %}
-                                <strong class="revenue-negative">-${{ revenue_data.total_promo_discount|floatformat:2
-                                    }}</strong>
+                                <strong class="revenue-negative">-${{ revenue_data.total_promo_discount|floatformat:2 }}</strong>
                                 {% else %}
                                 <strong class="text-muted">$0.00</strong>
                                 {% endif %}
                             </td>
-                            <td class="text-end"><strong class="revenue-positive">${{
-                                    revenue_data.net_revenue|floatformat:2 }}</strong></td>
+                            <td class="text-end"><strong class="revenue-positive">${{ revenue_data.net_revenue|floatformat:2 }}</strong></td>
                             <td class="text-center"><strong>{{ revenue_data.total_tickets_sold }}</strong></td>
                         </tr>
                     </tbody>

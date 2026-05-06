@@ -849,35 +849,39 @@ def revenue_report(request):
             try:
                 selected_event = Event.objects.get(pk=event_id, promoter=promoter)
                 
-                # Get all tickets sold for this event
+                # Regular (non-Full Pass) tickets for this event + Full Pass tickets for this
+                # specific day. Full Pass tickets are matched only via day_event so selecting
+                # the Day-1 event never shows Day-2 or Day-3 tickets.
+                from django.db.models import Q as _Q
                 tickets_sold = Ticket.objects.filter(
-                    event_ticket__event=selected_event
-                ).select_related('order_item', 'event_ticket', 'customer').order_by('-created_at')
-                
+                    _Q(event_ticket__event=selected_event, day_number__isnull=True) |
+                    _Q(day_event=selected_event)
+                ).select_related('order_item', 'event_ticket', 'customer', 'day_event').order_by('-created_at')
+
                 # Calculate totals
                 gross_revenue = Decimal('0.00')
                 total_promo_discount = Decimal('0.00')
-                
+
                 # Build detailed ticket information
                 ticket_details = []
                 for ticket in tickets_sold:
-                    # Get basic ticket info
+                    # ticket.price is already the correct value: full price for regular tickets,
+                    # or the per-day split amount for Full Pass tickets.
                     ticket_price = ticket.price or Decimal('0.00')
                     gross_revenue += ticket_price
-                    
+
                     # Get promo code and discount info
                     promo_code_used = ''
                     discount_amount = Decimal('0.00')
-                    
+
                     if hasattr(ticket, 'order_item') and ticket.order_item:
                         promo_code_used = ticket.order_item.promo_code or ''
-                        
-                        # Calculate discount (difference between unit_price and actual price paid)
-                        if hasattr(ticket.order_item, 'unit_price') and ticket.order_item.unit_price:
-                            original_price = ticket.order_item.unit_price
-                            if original_price > ticket_price:
-                                discount_amount = original_price - ticket_price
-                                total_promo_discount += discount_amount
+
+                        # Discount only applies when a promo code was actually used and the
+                        # unit_price (original face value) exceeds what the customer paid.
+                        if promo_code_used and ticket.order_item.unit_price and ticket.order_item.unit_price > ticket_price:
+                            discount_amount = ticket.order_item.unit_price - ticket_price
+                            total_promo_discount += discount_amount
                     
                     # Get customer information
                     customer_name = 'Guest'
@@ -995,8 +999,13 @@ def revenue_report_export(request, event_id):
         summary_sheet.set_column('A:A', 25)
         summary_sheet.set_column('B:B', 15)
         
-        # Get data
-        tickets_sold = Ticket.objects.filter(event_ticket__event=selected_event)
+        # Same filter as the HTML report: regular tickets + Full Pass for this specific day only.
+        from django.db.models import Q as _Q
+        tickets_sold = Ticket.objects.filter(
+            _Q(event_ticket__event=selected_event, day_number__isnull=True) |
+            _Q(day_event=selected_event)
+        ).select_related('order_item', 'customer', 'event_ticket')
+
         gross_revenue = tickets_sold.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
         
         # Use conditional check for PromoCodeUsage
@@ -1058,10 +1067,10 @@ def revenue_report_export(request, event_id):
         
         # Data
         row = 1
-        for ticket in tickets_sold.select_related('order_item', 'customer', 'event_ticket'):
+        for ticket in tickets_sold:
             details_sheet.write(row, 0, ticket.id, number_format)
             details_sheet.write(row, 1, ticket.event_ticket.name, text_format)
-            details_sheet.write(row, 2, float(ticket.price), money_format)
+            details_sheet.write(row, 2, float(ticket.price or Decimal('0.00')), money_format)
             
             # Safe access to order_item promo_code
             promo_code = ''
