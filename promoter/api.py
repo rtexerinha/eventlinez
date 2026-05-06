@@ -766,8 +766,10 @@ class DoormanCheckinStatsAPIView(APIView):
         except Event.DoesNotExist:
             return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Paid ticket stats
-        paid_qs = PaidTicket.objects.filter(event_ticket__event=event)
+        # Paid ticket stats — regular tickets by their event; Full Pass tickets by day_event
+        paid_qs = PaidTicket.objects.filter(
+            Q(event_ticket__event=event, day_event__isnull=True) | Q(day_event=event)
+        )
         paid_total = paid_qs.count()
         paid_checked_in = paid_qs.filter(checkin_date__isnull=False).count()
         paid_pending = paid_total - paid_checked_in
@@ -865,7 +867,7 @@ class DoormanScanPaidTicketAPIView(APIView):
         # Fetch ticket — also catch ValueError for malformed UUID strings
         try:
             ticket = PaidTicket.objects.select_related(
-                'event_ticket__event', 'customer'
+                'event_ticket__event__promoter', 'day_event', 'customer'
             ).get(uuid=uuid_str)
         except (PaidTicket.DoesNotExist, ValueError):
             return Response(
@@ -877,40 +879,41 @@ class DoormanScanPaidTicketAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        event = ticket.event_ticket.event
+        # For Full Pass tickets use day_event as the effective event; fall back to parent event
+        effective_event = ticket.day_event if ticket.day_event else ticket.event_ticket.event
 
-        # Verify doorman has access to this event
+        # Verify doorman has access to the effective event for this ticket
         user = request.user
         if not hasattr(user, 'promoter'):
             has_access = Partner.objects.filter(
-                user=user, event=event, role='DOORMAN', disable=False
+                user=user, event=effective_event, role='DOORMAN', disable=False
             ).exists()
             if not has_access:
                 return Response(
                     {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
-        elif event.promoter.user != user:
+        elif effective_event.promoter.user != user:
             return Response(
                 {'success': False, 'message': 'This ticket does not belong to your event.'},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Check check-in deadline (event date + 6 hours)
-        deadline = event.event_date + timedelta(hours=6)
+        # Check check-in deadline (effective event date + 6 hours)
+        deadline = effective_event.event_date + timedelta(hours=6)
         if timezone.now() > deadline:
             return Response(
                 TicketScanResultSerializer({
                     'success': False,
                     'message': f'Check-in period has ended. Deadline was {deadline.strftime("%b %d %H:%M")}.',
                     'already_checked_in': False,
-                    'event_name': event.name,
+                    'event_name': effective_event.name,
                 }).data,
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Already checked in?
-        if (ticket.checkin_date):
+        if ticket.checkin_date:
             return Response(
                 TicketScanResultSerializer({
                     'success': False,
@@ -918,7 +921,7 @@ class DoormanScanPaidTicketAPIView(APIView):
                     'already_checked_in': True,
                     'ticket_id': ticket.id,
                     'guest_name': ticket.guest_name or str(ticket.customer),
-                    'event_name': event.name,
+                    'event_name': effective_event.name,
                     'ticket_type': ticket.event_ticket.name,
                     'first_checkin_at': ticket.checkin_date,
                     'checked_in_at': ticket.checkin_date,
@@ -936,7 +939,7 @@ class DoormanScanPaidTicketAPIView(APIView):
                 'already_checked_in': False,
                 'ticket_id': ticket.id,
                 'guest_name': ticket.guest_name or str(ticket.customer),
-                'event_name': event.name,
+                'event_name': effective_event.name,
                 'ticket_type': ticket.event_ticket.name,
                 'checked_in_at': ticket.checkin_date,
                 'first_checkin_at': None,
@@ -1389,9 +1392,9 @@ class DoormanTicketSearchAPIView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Build query for paid tickets
+        # Build query — regular tickets by their event; Full Pass tickets by day_event
         tickets = PaidTicket.objects.filter(
-            event_ticket__event=event
+            Q(event_ticket__event=event, day_event__isnull=True) | Q(day_event=event)
         ).select_related('event_ticket', 'customer', 'order_item')
 
         # Apply search filters

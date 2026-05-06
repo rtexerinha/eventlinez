@@ -47,8 +47,10 @@ class TicketSoldCheckinAPIView(UpdateAPIView):
             )
 
         if Partner.objects.filter(user=user, role='DOORMAN').exists():
+            from django.db.models import Q
             return self.model.objects.filter(
-                event_ticket__event__partner__user=user,
+                Q(event_ticket__event__partner__user=user, day_event__isnull=True) |
+                Q(day_event__partner__user=user),
                 id=pk
             )
 
@@ -73,6 +75,7 @@ class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
     lookup_field = 'uuid'
 
     def get_queryset(self):
+        from django.db.models import Q
         user = self.request.user
         uuid = self.kwargs['uuid']
 
@@ -83,8 +86,10 @@ class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
             )
 
         if Partner.objects.filter(user=user, role='DOORMAN').exists():
+            # For Full Pass tickets the authoritative event is day_event, not the parent event
             return self.model.objects.filter(
-                event_ticket__event__partner__user=user,
+                Q(event_ticket__event__partner__user=user, day_event__isnull=True) |
+                Q(day_event__partner__user=user),
                 uuid=uuid
             )
 
