@@ -43,17 +43,21 @@ class Ticket(models.Model):
     )
 
     def as_qrcode(self):
-        # content = host + '/qrcode/?tkt=' + str(self.uuid)
-        host = settings.APP_HOST
-        content = host + '/promoter/ticket/checkin/' + str(self.uuid)
-        img = qrcode.make(content, image_factory=qrcode.image.svg.SvgImage, box_size=20)
+        import re as _re
+        host = settings.APP_HOST.rstrip('/')
+        content = host + '/promoter/ticket/checkin/' + str(self.uuid) + '/'
+        # SvgPathImage produces a viewBox-aware SVG; strip fixed mm dimensions so
+        # CSS can scale it freely without the inline width/height overriding max-width.
+        img = qrcode.make(content, image_factory=qrcode.image.svg.SvgPathImage, box_size=10)
         stream = BytesIO()
         img.save(stream)
-        svg = mark_safe(stream.getvalue().decode())
-        return svg
+        svg = stream.getvalue().decode()
+        svg = _re.sub(r'\s+width="[^"]+"', '', svg)
+        svg = _re.sub(r'\s+height="[^"]+"', '', svg)
+        return mark_safe(svg)
 
     def _qrcode_reportlab(self):
-        content = settings.APP_HOST + '/promoter/ticket/checkin/' + str(self.uuid)
+        content = settings.APP_HOST.rstrip('/') + '/promoter/ticket/checkin/' + str(self.uuid) + '/'
         qr_code = qr.QrCodeWidget(content)
         bounds = qr_code.getBounds()
         width = bounds[2] - bounds[0]
