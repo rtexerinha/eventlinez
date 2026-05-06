@@ -1,0 +1,44 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% block title %}Check-in Successful - Eventlinez{% endblock %}
+
+{% block content %}
+<section class="container mt-5 mb-5" style="min-height: 75vh; margin: auto;">
+    <div class="d-block text-center">
+        <aside class="col-lg-3 mt-lg-5 mb-4 mt-0" style="margin: auto;">
+            <i class="fas fa-check-circle" style="font-size: 6rem; color: forestgreen;"></i>
+        </aside>
+
+        <article class="col-lg-8 m-auto">
+            <h3 class="h3-promoter pt-4 pb-1 text-center" style="color: forestgreen;">Check-in Successful!</h3>
+            <h4 class="h4-promoter text-center pb-2">{{ event.name }}</h4>
+
+            <div class="card mt-4 mb-4" style="max-width: 400px; margin: auto !important; border-radius: 10px;">
+                <div class="card-header card-promoter" style="background: forestgreen; border-radius: 10px 10px 0 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <p class="p-promoter">Ticket #{{ ticket.id }}</p>
+                        {% if ticket.day_number %}
+                        <p class="p-promoter">Day {{ ticket.day_number }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Guest:</strong>
+                        {{ ticket.guest_name|default:ticket.customer }}</p>
+                    <p class="mb-1"><strong>Ticket type:</strong>
+                        {{ ticket.event_ticket.name }}</p>
+                    <p class="mb-0"><strong>Event:</strong>
+                        {{ event.name }}</p>
+                </div>
+            </div>
+
+            <a href="{% url 'promoter:doorman_checkin_page' event.id %}"
+               class="btn btn-lg mt-3"
+               style="background-color: #d90075; color: #fff; border-radius: 8px;">
+                <i class="fas fa-chevron-left pr-2" style="font-size: 0.8rem;"></i>
+                Back to Check-in
+            </a>
+        </article>
+    </div>
+</section>
+{% endblock %}

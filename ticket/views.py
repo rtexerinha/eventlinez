@@ -18,29 +18,66 @@ from ticket.models import Ticket
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_checkin(request, checkin):
-    # host = request.get_raw_uri().replace(request.get_full_path(), "")
-    if not hasattr(request.user, "promoter"):
-        error_msg = "You are not authorized to validate this ticket!"
-        return render(request, 'pages/error401.html', {'error_msg': error_msg})
+    from promoter.models import Partner
+    user = request.user
     errors = []
 
-    ticket = Ticket.objects.get(event_ticket__event__promoter=request.user.promoter, uuid=checkin)
-    if not ticket:
-        errors.append('Ticket does not belong to this promoter.')
-    ticket_date_event = (ticket.day_event.event_date if ticket.day_event else ticket.event_ticket.event.event_date)
+    is_promoter = hasattr(user, 'promoter') and user.promoter is not None
+
+    # Resolve the ticket first (lookup by UUID only; we authorize below)
+    try:
+        ticket = Ticket.objects.select_related(
+            'event_ticket__event__promoter', 'day_event', 'customer'
+        ).get(uuid=checkin)
+    except Ticket.DoesNotExist:
+        errors.append('Ticket not found.')
+        return render(request, 'ticket/ticket_checkin_error.html', {'errors': errors})
+
+    # The "effective" event for this ticket (day_event for Full Pass, otherwise the parent event)
+    effective_event = ticket.day_event if ticket.day_event else ticket.event_ticket.event
+
+    if is_promoter:
+        # Promoter must own the parent event
+        if ticket.event_ticket.event.promoter != user.promoter:
+            error_msg = "You are not authorized to validate this ticket!"
+            return render(request, 'pages/error401.html', {'error_msg': error_msg})
+    else:
+        # Check if user is an active doorman assigned to the effective event
+        doorman_qs = Partner.objects.filter(
+            user=user,
+            role='DOORMAN',
+            disable=False,
+            event=effective_event,
+        )
+        if not doorman_qs.exists():
+            error_msg = "You are not authorized to validate this ticket!"
+            return render(request, 'pages/error401.html', {'error_msg': error_msg})
+
+    ticket_date_event = effective_event.event_date
     deadline = (ticket_date_event + timedelta(hours=6)).strftime("%Y-%m-%d %H:%M:%S")
     if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > deadline:
         errors.append('Deadline to check in is over')
     if ticket.checkin_date is not None:
         errors.append('Ticket has already been validated!')
-    if errors is not None and len(errors):
+    if errors:
         return render(request, 'ticket/ticket_checkin_error.html', {'errors': errors})
+
     ticket.checkin_date = datetime.now()
     ticket.save()
-    tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter,
-                                    event_ticket=ticket.event_ticket,
-                                    checkin_date__isnull=False).order_by('-checkin_date')
-    return render(request, 'ticket/ticket_checkin.html', {'tickets': tickets})
+
+    if is_promoter:
+        tickets = Ticket.objects.filter(
+            event_ticket__event__promoter=user.promoter,
+            event_ticket=ticket.event_ticket,
+            checkin_date__isnull=False,
+        ).order_by('-checkin_date')
+        return render(request, 'ticket/ticket_checkin.html', {'tickets': tickets})
+    else:
+        # Doormen see a simple confirmation and go back to their event checkin page
+        return render(request, 'ticket/ticket_checkin_success.html', {
+            'ticket': ticket,
+            'event': effective_event,
+        })
 
 
 @login_required(login_url='/promoter/account/login/')
