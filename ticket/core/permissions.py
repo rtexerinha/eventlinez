@@ -13,8 +13,11 @@ class IsDoormanAndAssignedToEvent(BasePermission):
         if Promoter.objects.filter(user=user).exists():
             return True  
 
+        # Allow if doorman is assigned to the ticket's specific day event (Full Pass)
+        # or to the ticket type's parent event (regular ticket)
+        ticket_event = obj.day_event if obj.day_event else obj.event_ticket.event
         return Partner.objects.filter(
             user=user,
             role='DOORMAN',
-            event=obj.event_ticket.event
+            event=ticket_event
         ).exists()

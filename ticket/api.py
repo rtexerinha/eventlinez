@@ -20,8 +20,9 @@ class TicketSoldListAPIView(ListAPIView):
         guest_name = self.request.query_params.get('guest_name', None)
 
         queryset = Ticket.objects.filter(
-            event_ticket__event__promoter__user=user,
-            event_ticket__event__id=event_id
+            event_ticket__event__promoter__user=user
+        ).filter(
+            Q(event_ticket__event__id=event_id) | Q(day_event__id=event_id)
         )
 
         if guest_name:

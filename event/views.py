@@ -261,9 +261,11 @@ def ticket_type_list_per_event(request, event_id):
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_create(request, event_id):
     import logging
+    from event.models import FullPassEvent
     logger = logging.getLogger(__name__)
 
     try:
+        promoter = request.user.promoter
         event = get_object_or_404(Event, id=event_id)
     except Exception as e:
         logger.error(f"Error getting event {event_id}: {e}")
@@ -274,50 +276,59 @@ def ticket_type_create(request, event_id):
 
     if request.method == 'POST':
         try:
-            form = TicketForm(request.POST, event_id=event_id)
-            logger.info(f"POST data received for event {event_id}")
-
+            form = TicketForm(request.POST, event_id=event_id, promoter=promoter)
             if form.is_valid():
                 try:
                     ticket = form.save(commit=False)
                     ticket.event = event
                     ticket.save()
+
+                    # Save full-pass event assignments
+                    days = ticket.days or 1
+                    if days > 1:
+                        FullPassEvent.objects.filter(ticket=ticket).delete()
+                        for day in range(1, days + 1):
+                            day_event = form.cleaned_data.get(f'full_pass_event_day_{day}')
+                            if day_event:
+                                FullPassEvent.objects.create(
+                                    ticket=ticket,
+                                    event=day_event,
+                                    day_number=day
+                                )
+
                     logger.info(f"Ticket created successfully for event {event_id}")
                     return redirect('promoter:ticket_type_list_per_event', event_id=event_id)
                 except Exception as save_error:
                     logger.error(f"Error saving ticket: {save_error}")
                     form.add_error(None, f"Error saving ticket: {save_error}")
-
             else:
                 logger.error(f"Form validation failed: {form.errors}")
-
         except Exception as form_error:
             logger.error(f"Error constructing ticket form: {form_error}")
-            form = TicketForm(event_id=event_id)
+            form = TicketForm(event_id=event_id, promoter=promoter)
             form.add_error(None, f"Error processing form: {form_error}")
-
     else:
-        try:
-            logger.info(f"Rendering empty ticket form for event {event_id}")
-            form = TicketForm(event_id=event_id)
-        except Exception as e:
-            logger.error(f"Error rendering form: {e}")
-            form = TicketForm(event_id=event_id)
-            form.add_error(None, f"Error creating form: {e}")
+        form = TicketForm(event_id=event_id, promoter=promoter)
+
+    # Pass all promoter events for the JS-driven dynamic dropdowns
+    all_promoter_events = Event.objects.filter(promoter=promoter).order_by('-event_date')
 
     return render(request, 'ticket_type/ticket_type_create.html', {
         'form': form,
         'event': event,
-        'event_id': event_id
+        'event_id': event_id,
+        'all_promoter_events': all_promoter_events,
     })
 
 
 @login_required(login_url='/promoter/account/login/')
 def ticket_type_update(request, ticket_id):
     import logging
+    from event.models import FullPassEvent
     logger = logging.getLogger(__name__)
 
     try:
+        promoter = request.user.promoter
         instance = get_object_or_404(Ticket, id=ticket_id)
     except Exception as e:
         logger.error(f"Error retrieving ticket {ticket_id}: {e}")
@@ -328,12 +339,36 @@ def ticket_type_update(request, ticket_id):
 
     if request.method == 'POST':
         try:
-            form = TicketUpdateForm(request.POST, instance=instance)
-            logger.info(f"POST data received for ticket {ticket_id}")
-
+            form = TicketUpdateForm(request.POST, instance=instance, promoter=promoter)
             if form.is_valid():
                 try:
-                    form.save()
+                    ticket = form.save()
+
+                    # Save full-pass event assignments
+                    days = ticket.days or 1
+                    if days > 1:
+                        FullPassEvent.objects.filter(ticket=ticket).delete()
+                        fp_map = {}
+                        for day in range(1, days + 1):
+                            day_event = form.cleaned_data.get(f'full_pass_event_day_{day}')
+                            if day_event:
+                                FullPassEvent.objects.create(
+                                    ticket=ticket,
+                                    event=day_event,
+                                    day_number=day
+                                )
+                                fp_map[day] = day_event
+
+                        # Backfill day_event on already-purchased tickets that have no assignment yet
+                        if fp_map:
+                            from ticket.models import Ticket as PurchasedTicket
+                            for purchased in PurchasedTicket.objects.filter(
+                                event_ticket=ticket, day_event__isnull=True, day_number__isnull=False
+                            ):
+                                if purchased.day_number in fp_map:
+                                    purchased.day_event = fp_map[purchased.day_number]
+                                    purchased.save(update_fields=['day_event'])
+
                     logger.info(f"Ticket {ticket_id} updated successfully")
                     return redirect('promoter:ticket_type_list_per_event', event_id=instance.event_id)
                 except Exception as save_error:
@@ -341,22 +376,18 @@ def ticket_type_update(request, ticket_id):
                     form.add_error(None, f"Error saving ticket: {save_error}")
             else:
                 logger.error(f"Validation failed: {form.errors}")
-
         except Exception as form_error:
             logger.error(f"Error building update form: {form_error}")
-            form = TicketUpdateForm(instance=instance)
+            form = TicketUpdateForm(instance=instance, promoter=promoter)
             form.add_error(None, f"Error processing form: {form_error}")
-
     else:
-        try:
-            form = TicketUpdateForm(instance=instance)
-        except Exception as e:
-            logger.error(f"Error displaying GET form: {e}")
-            form = TicketUpdateForm(instance=instance)
-            form.add_error(None, f"Error creating form: {e}")
+        form = TicketUpdateForm(instance=instance, promoter=promoter)
+
+    all_promoter_events = Event.objects.filter(promoter=promoter).order_by('-event_date')
 
     return render(request, 'ticket_type/ticket_type_create.html', {
         'form': form,
         'event': instance.event,
-        'event_id': instance.event_id
+        'event_id': instance.event_id,
+        'all_promoter_events': all_promoter_events,
     })

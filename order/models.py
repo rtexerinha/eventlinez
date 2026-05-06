@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.template.loader import render_to_string
@@ -87,16 +88,39 @@ class OrderItem(models.Model):
 
 @receiver(post_save, sender=OrderItem)
 def create_tickets(sender, instance, **kwargs):
+    days = getattr(instance.event_ticket, 'days', 1) or 1
+    price_per_day = (instance.unit_price / days).quantize(instance.unit_price)
+
     for i in range(0, instance.quantity):
         guest_name = None
         if instance.quantity == 1:
             guest_name = instance.order.customer.first_name + " " + instance.order.customer.last_name
 
-        Ticket.objects.create(
-            event_ticket=instance.event_ticket,
-            customer=instance.order.customer,
-            order_item=instance,
-            price=instance.unit_price,
-            guest_name=guest_name,
-            vendor=instance.vendor
-        )
+        if days > 1:
+            # Full-pass: generate one ticket per day, linked to its specific event
+            from event.models import FullPassEvent
+            full_pass_events = {
+                fp.day_number: fp.event
+                for fp in FullPassEvent.objects.filter(ticket=instance.event_ticket)
+            }
+            for day in range(1, days + 1):
+                Ticket.objects.create(
+                    event_ticket=instance.event_ticket,
+                    customer=instance.order.customer,
+                    order_item=instance,
+                    price=price_per_day,
+                    guest_name=guest_name,
+                    vendor=instance.vendor,
+                    day_number=day,
+                    day_event=full_pass_events.get(day),
+                )
+        else:
+            Ticket.objects.create(
+                event_ticket=instance.event_ticket,
+                customer=instance.order.customer,
+                order_item=instance,
+                price=instance.unit_price,
+                guest_name=guest_name,
+                vendor=instance.vendor,
+                day_number=None,
+            )

@@ -33,6 +33,19 @@
             overflow: hidden;
         }
 
+        .day-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #d90075, #ff6b9d);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 4px 18px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
         .qr-container::before {
             content: '';
             position: absolute;
@@ -240,6 +253,11 @@
                 EVENTLINEZ
             </div>
             <div class="ticket-subtitle">Your Event Ticket QR Code</div>
+            {% if ticket.day_number %}
+            <div class="day-badge">
+                &#128197; Day {{ ticket.day_number }} of {{ ticket.event_ticket.days }}
+            </div>
+            {% endif %}
         </div>
 
         <div class="qr-section">
@@ -271,20 +289,40 @@
                 <div class="info-label">Price</div>
                 <div class="info-value">${{ ticket.price }}</div>
             </div>
+            {% if ticket.day_number %}
+            <div class="info-item">
+                <div class="info-label">Day</div>
+                <div class="info-value" style="color: #d90075;">Day {{ ticket.day_number }} / {{ ticket.event_ticket.days }}</div>
+            </div>
+            {% endif %}
             <div class="info-item">
                 <div class="info-label">Date</div>
-                <div class="info-value">{{ ticket.event_ticket.event.event_date|date:"M d, Y" }}</div>
+                <div class="info-value">
+                    {% if ticket.day_event %}
+                        {{ ticket.day_event.event_date|date:"M d, Y" }}
+                    {% else %}
+                        {{ ticket.event_ticket.event.event_date|date:"M d, Y" }}
+                    {% endif %}
+                </div>
             </div>
         </div>
 
         <div class="event-details">
-            <div class="event-name">{{ ticket.event_ticket.event.name }}</div>
+            <div class="event-name">
+                {% if ticket.day_event %}{{ ticket.day_event.name }}{% else %}{{ ticket.event_ticket.event.name }}{% endif %}
+            </div>
             <div class="event-location">
                 <i class="fas fa-map-marker-alt"></i>
                 <span>
-                    {{ ticket.event_ticket.event.address }},
-                    {{ ticket.event_ticket.event.city }},
-                    {{ ticket.event_ticket.event.city.state }}
+                    {% if ticket.day_event %}
+                        {{ ticket.day_event.address }},
+                        {{ ticket.day_event.city }},
+                        {{ ticket.day_event.city.state }}
+                    {% else %}
+                        {{ ticket.event_ticket.event.address }},
+                        {{ ticket.event_ticket.event.city }},
+                        {{ ticket.event_ticket.event.city.state }}
+                    {% endif %}
                 </span>
             </div>
         </div>

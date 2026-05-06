@@ -58,7 +58,12 @@
 
 {#                                        <div class="col-lg-5 col-10">#}
                                         <p class="h6-home text-left p-dark pl-2 pl-lg-0">
-                                            {{ tickets.event_ticket }}
+                                            {% if tickets.day_event %}
+                                                {{ tickets.day_event.name }}/{{ tickets.event_ticket.name }}
+                                                {% if tickets.day_number %}– Day {{ tickets.day_number }}{% endif %}
+                                            {% else %}
+                                                {{ tickets.event_ticket }}
+                                            {% endif %}
                                         </p>
 {#                                        </div>#}
                                     </div>

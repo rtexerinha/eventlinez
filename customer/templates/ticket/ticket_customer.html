@@ -476,34 +476,37 @@
         <!-- Tickets Grid -->
         <div class="tickets-grid" id="ticketsGrid">
             {% for ticket in page_obj.object_list %}
-            <div class="ticket-card" data-event="{{ ticket.event_ticket.event.name|lower }}"
-                data-status="{% if ticket.event_ticket.event.event_date >= now %}upcoming{% else %}past{% endif %}">
+            {% with display_event=ticket.day_event|default:ticket.event_ticket.event %}
+            <div class="ticket-card" data-event="{{ display_event.name|lower }}"
+                data-status="{% if display_event.event_date >= now %}upcoming{% else %}past{% endif %}">
 
                 <!-- Status Indicator -->
                 <div
-                    class="ticket-status {% if ticket.event_ticket.event.event_date >= now %}status-upcoming{% else %}status-past{% endif %}">
-                    {% if ticket.event_ticket.event.event_date >= now %}Upcoming{% else %}Past Event{% endif %}
+                    class="ticket-status {% if display_event.event_date >= now %}status-upcoming{% else %}status-past{% endif %}">
+                    {% if display_event.event_date >= now %}Upcoming{% else %}Past Event{% endif %}
                 </div>
 
                 <div class="ticket-header">
                     <div class="ticket-id">Ticket #{{ ticket.id }}</div>
-                    <div class="ticket-event-name">{{ ticket.event_ticket.event.name|truncatechars:30 }}</div>
-                    <div class="ticket-type">{{ ticket.event_ticket.name }}</div>
+                    <div class="ticket-event-name">{{ display_event.name|truncatechars:30 }}</div>
+                    <div class="ticket-type">
+                        {{ ticket.event_ticket.name }}{% if ticket.day_number %} — Day {{ ticket.day_number }}{% endif %}
+                    </div>
                 </div>
 
                 <div class="ticket-body">
                     <div class="ticket-info">
                         <div class="info-item">
                             <i class="fas fa-calendar"></i>
-                            <span>{{ ticket.event_ticket.event.event_date|date:"M d, Y" }}</span>
+                            <span>{{ display_event.event_date|date:"M d, Y" }}</span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-clock"></i>
-                            <span>{{ ticket.event_ticket.event.event_date|date:"H:i" }}</span>
+                            <span>{{ display_event.event_date|date:"H:i" }}</span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>{{ ticket.event_ticket.event.city.name|truncatechars:15 }}</span>
+                            <span>{{ display_event.city.name|truncatechars:15 }}</span>
                         </div>
                         <div class="info-item">
                             <i class="fas fa-dollar-sign"></i>
@@ -530,6 +533,7 @@
                     </div>
                 </div>
             </div>
+            {% endwith %}
             {% endfor %}
         </div>
 

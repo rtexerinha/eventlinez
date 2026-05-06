@@ -220,6 +220,10 @@ class Ticket(models.Model):
         validators=[MinValueValidator(Decimal(0))]
     )
     sold_out = models.BooleanField(default=False)
+    days = models.PositiveSmallIntegerField(
+        default=1,
+        help_text='Number of days this ticket covers. E.g. 3 for a Full Pass (3-day ticket).'
+    )
 
     def qty_available(self):
         try:
@@ -230,10 +234,42 @@ class Ticket(models.Model):
 
     def qty_sold(self):
         try:
-            _qty_sold = self.ticket_set.count()
+            # For multi-day passes, count only day 1 tickets so each pass
+            # is counted as one sold unit, not one per day.
+            from django.db.models import Q
+            _qty_sold = self.ticket_set.filter(
+                Q(day_number__isnull=True) | Q(day_number=1)
+            ).count()
             return _qty_sold
         except Exception:
             return 0
 
     def __str__(self):
         return "%s/%s" % (self.event.name, self.name)
+
+
+class FullPassEvent(models.Model):
+    """
+    Links each day of a multi-day (Full Pass) ticket type to a specific event.
+    E.g. Full Pass (3 days) -> Day 1: Event A, Day 2: Event B, Day 3: Event C
+    """
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name='full_pass_events'
+    )
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='full_pass_ticket_days'
+    )
+    day_number = models.PositiveSmallIntegerField(
+        help_text='Which day this event corresponds to (1, 2, 3...)'
+    )
+
+    class Meta:
+        ordering = ['day_number']
+        unique_together = [['ticket', 'day_number']]
+
+    def __str__(self):
+        return "%s — Day %d: %s" % (self.ticket.name, self.day_number, self.event.name)

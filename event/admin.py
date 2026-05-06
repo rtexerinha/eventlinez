@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Event, Promoter, Ticket
+from .models import Category, Event, FullPassEvent, Promoter, Ticket
 
 
 @admin.register(Category)
@@ -24,5 +24,13 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ['name', 'quantity', 'price', 'event']
+    list_display = ['name', 'quantity', 'price', 'days', 'event']
     search_fields = ['name']
+    list_filter = ['days']
+
+
+@admin.register(FullPassEvent)
+class FullPassEventAdmin(admin.ModelAdmin):
+    list_display = ['ticket', 'day_number', 'event']
+    list_filter = ['day_number']
+    search_fields = ['ticket__name', 'event__name']

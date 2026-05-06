@@ -16,7 +16,6 @@ from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
 
 from customer.models import Customer
-from event.models import Event
 from eventlinez import settings
 from django.utils import timezone
 
@@ -31,6 +30,17 @@ class Ticket(models.Model):
     checkin_date = models.DateTimeField(blank=True, null=True)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     vendor = models.ForeignKey("promoter.Vendor", blank=True, null=True, on_delete=models.SET_NULL)
+    day_number = models.PositiveSmallIntegerField(
+        null=True, blank=True,
+        help_text='For multi-day passes: which day this ticket is valid for (1, 2, 3...).'
+    )
+    day_event = models.ForeignKey(
+        'event.Event',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='day_tickets',
+        help_text='For multi-day passes: the specific event this day ticket is valid for.'
+    )
 
     def as_qrcode(self):
         # content = host + '/qrcode/?tkt=' + str(self.uuid)
@@ -81,13 +91,14 @@ class Ticket(models.Model):
             p.drawString(150, 755, str(self.guest_name))
         p.drawString(380, 755, str(self.id))
 
-        month = timezone.localtime(self.event_ticket.event.event_date).strftime("%B %Y")
-        day = timezone.localtime(self.event_ticket.event.event_date).strftime("%d")
-        hour = timezone.localtime(self.event_ticket.event.event_date).strftime("%H:%M")
+        display_event = self.day_event if self.day_event else self.event_ticket.event
+        month = timezone.localtime(display_event.event_date).strftime("%B %Y")
+        day = timezone.localtime(display_event.event_date).strftime("%d")
+        hour = timezone.localtime(display_event.event_date).strftime("%H:%M")
 
-        location = self.event_ticket.event.address + ', ' + \
-                   self.event_ticket.event.city.name + ', ' + \
-                   self.event_ticket.event.city.state.name
+        location = display_event.address + ', ' + \
+                   display_event.city.name + ', ' + \
+                   display_event.city.state.name
 
         p.setFont("Helvetica-Bold", 18)
         p.setFillColor(HexColor('#FF0054'))
@@ -109,8 +120,16 @@ class Ticket(models.Model):
         p.setFont("Helvetica", 10)
         p.drawString(150, 430, str(self.event_ticket.name))
 
-        p.setFont("Helvetica", 10)
-        p.drawString(150, 410, location)
+        if self.day_number:
+            p.setFont("Helvetica-Bold", 10)
+            p.setFillColor(HexColor('#d90075'))
+            p.drawString(150, 415, 'Day %d of %d' % (self.day_number, self.event_ticket.days))
+            p.setFillColor(HexColor('#565454'))
+            p.setFont("Helvetica", 10)
+            p.drawString(150, 400, location)
+        else:
+            p.setFont("Helvetica", 10)
+            p.drawString(150, 410, location)
 
         renderPDF.draw(qrcodec, p, 180, 550)
         p.showPage()
@@ -121,4 +140,6 @@ class Ticket(models.Model):
         return pdf
 
     def __str__(self):
+        if self.day_number:
+            return "%s/%s/Day %s" % (self.event_ticket.event.name, self.event_ticket.name, self.day_number)
         return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)

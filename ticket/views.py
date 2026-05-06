@@ -27,7 +27,7 @@ def ticket_checkin(request, checkin):
     ticket = Ticket.objects.get(event_ticket__event__promoter=request.user.promoter, uuid=checkin)
     if not ticket:
         errors.append('Ticket does not belong to this promoter.')
-    ticket_date_event = ticket.event_ticket.event.event_date
+    ticket_date_event = (ticket.day_event.event_date if ticket.day_event else ticket.event_ticket.event.event_date)
     deadline = (ticket_date_event + timedelta(hours=6)).strftime("%Y-%m-%d %H:%M:%S")
     if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > deadline:
         errors.append('Deadline to check in is over')
@@ -78,7 +78,9 @@ def tickets_validate(request):
         event_id = request.POST.get('events_choice')
         if event_id:
             selected_event = Event.objects.get(pk=event_id)
-            tickets = tickets.filter(event_ticket__event=selected_event)
+            tickets = tickets.filter(
+                Q(event_ticket__event=selected_event) | Q(day_event=selected_event)
+            )
     paginator = Paginator(tickets, 9)
     page = int(request.GET.get('page', '1'))
     try:

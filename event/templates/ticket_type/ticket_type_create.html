@@ -1,5 +1,6 @@
 {% extends "base_promoter.html" %}
 {% load static %}
+{% load form_extras %}
 
 {% block title %}Create Ticket Type - {{ event.name|default:"Event" }}{% endblock %}
 
@@ -387,6 +388,227 @@
         }
     }
 
+    /* Full Pass Section */
+    .full-pass-section {
+        display: none;
+        margin-top: 24px;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .full-pass-section.visible {
+        display: block;
+    }
+
+    .full-pass-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .full-pass-badge {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 5px 14px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .full-pass-header h3 {
+        margin: 0;
+        color: #e65100;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+    .full-pass-info-box {
+        background: #e3f2fd;
+        border: 1px solid #90caf9;
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        font-size: 0.875rem;
+        color: #1565c0;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        line-height: 1.5;
+    }
+
+    /* Day cards grid */
+    #dayEventRows {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .day-event-row {
+        background: white;
+        border: 2px solid #ffe0b2;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.06);
+    }
+
+    .day-event-row:hover {
+        border-color: #ff9800;
+        box-shadow: 0 4px 16px rgba(255, 152, 0, 0.14);
+    }
+
+    .day-event-row.has-selection {
+        border-color: #ff9800;
+    }
+
+    .day-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px 0 18px;
+    }
+
+    .day-badge-circle {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1rem;
+        box-shadow: 0 2px 6px rgba(255, 152, 0, 0.35);
+    }
+
+    .day-card-title {
+        font-weight: 700;
+        color: #e65100;
+        font-size: 0.95rem;
+        letter-spacing: 0.2px;
+    }
+
+    .day-card-subtitle {
+        font-size: 0.78rem;
+        color: #999;
+        margin-top: 1px;
+    }
+
+    .day-card-body {
+        padding: 12px 18px 16px 18px;
+    }
+
+    /* Custom select wrapper */
+    .fp-select-wrapper {
+        position: relative;
+    }
+
+    .fp-select-wrapper::after {
+        content: '\f078';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ff9800;
+        pointer-events: none;
+        font-size: 0.8rem;
+    }
+
+    .full-pass-event-select {
+        width: 100%;
+        padding: 11px 38px 11px 14px;
+        border: 2px solid #ffe0b2;
+        border-radius: 9px;
+        font-size: 0.95rem;
+        color: #2c3e50;
+        background: #fffaf5;
+        appearance: none;
+        -webkit-appearance: none;
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        outline: none;
+    }
+
+    .full-pass-event-select:focus {
+        border-color: #ff9800;
+        box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.15);
+        background: white;
+    }
+
+    .full-pass-event-select.selected {
+        border-color: #ff9800;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    /* Selection preview chip */
+    .day-selection-preview {
+        display: none;
+        margin-top: 10px;
+        padding: 10px 14px;
+        background: linear-gradient(135deg, #fff3e0, #fff8f0);
+        border: 1px solid #ffcc80;
+        border-radius: 8px;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .day-selection-preview.visible {
+        display: flex;
+    }
+
+    .day-selection-preview .preview-icon {
+        color: #ff9800;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .day-selection-preview .preview-event-name {
+        font-weight: 700;
+        color: #bf360c;
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+
+    .day-selection-preview .preview-event-date {
+        font-size: 0.78rem;
+        color: #e65100;
+        margin-top: 2px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Days input toggle row */
+    .days-toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        margin-top: 16px;
+        transition: border-color 0.3s;
+    }
+
+    .days-toggle-row.active {
+        border-color: #ff9800;
+        background: #fff8f0;
+    }
+
+    /* Loading States */
     /* Loading States */
     .btn-save:disabled {
         opacity: 0.6;
@@ -608,7 +830,75 @@
                     {% endif %}
                 </div>
 
+                <!-- Full Pass / Multi-Day Section -->
+                <div class="form-group" style="margin-top: 24px;">
+                    <div class="days-toggle-row" id="daysToggleRow">
+                        <div style="flex:1;">
+                            <label for="{{ form.days.id_for_label }}" style="font-weight:600; color:#2c3e50; margin-bottom:4px; display:block;">
+                                <i class="fas fa-calendar-week" style="margin-right:8px; color:#ff9800;"></i>
+                                Number of Days
+                            </label>
+                            <div class="form-text" style="margin-top:0;">
+                                <i class="fas fa-info-circle"></i>
+                                Set to 1 for a regular ticket. Set to 3 (or more) for a Full Pass.
+                            </div>
+                        </div>
+                        {{ form.days }}
+                    </div>
+                    {% if form.days.errors %}
+                    <div class="text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {% for error in form.days.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Full Pass Event Selectors (shown when days > 1) -->
+                <div class="full-pass-section" id="fullPassSection">
+                    <div class="full-pass-header">
+                        <span class="full-pass-badge"><i class="fas fa-star" style="margin-right:5px;"></i>Full Pass</span>
+                        <h3>Assign an Event to Each Day</h3>
+                    </div>
+                    <div class="full-pass-info-box">
+                        <i class="fas fa-info-circle" style="margin-top:2px; flex-shrink:0;"></i>
+                        <span>Each day of this Full Pass must be linked to a specific event. When purchased, the customer will receive <strong>one QR code per day</strong>, each valid for the event assigned to that day.</span>
+                    </div>
+
+                    <div id="dayEventRows">
+                        {% for field_name, field in form.full_pass_event_fields %}
+                        {% with form|getitem:field_name as bound_field %}
+                        <div class="day-event-row{% if bound_field.value %} has-selection{% endif %}">
+                            <div class="day-card-header">
+                                <div class="day-badge-circle">{{ forloop.counter }}</div>
+                                <div>
+                                    <div class="day-card-title">Day {{ forloop.counter }}</div>
+                                    <div class="day-card-subtitle">Select the event for this day</div>
+                                </div>
+                            </div>
+                            <div class="day-card-body">
+                                <div class="fp-select-wrapper">
+                                    {{ bound_field }}
+                                </div>
+                                {% for error in bound_field.errors %}
+                                <div class="text-danger" style="margin-top:6px;"><i class="fas fa-exclamation-circle"></i> {{ error }}</div>
+                                {% endfor %}
+                                <div class="day-selection-preview{% if bound_field.value %} visible{% endif %}">
+                                    <i class="fas fa-check-circle preview-icon"></i>
+                                    <div>
+                                        <div class="preview-event-name">{{ bound_field.value }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                        {% empty %}
+                        <!-- JS will populate rows dynamically when days > 1 -->
+                        {% endfor %}
+                    </div>
+                </div>
+
                 <!-- Live Preview -->
+
                 <div class="ticket-preview" id="ticketPreview">
                     <h4>
                         <i class="fas fa-eye" style="margin-right: 10px;"></i>
@@ -629,6 +919,10 @@
                     <div class="preview-item">
                         <span>Status:</span>
                         <span id="previewStatus">Available</span>
+                    </div>
+                    <div class="preview-item" id="previewDaysRow" style="display:none;">
+                        <span>Days:</span>
+                        <span id="previewDays" style="color:#ff9800; font-weight:700;"></span>
                     </div>
                 </div>
             </div>
@@ -829,5 +1123,172 @@
 
         console.log('✅ Ticket form JavaScript initialization complete');
     });
+</script>
+
+<!-- Full Pass JavaScript -->
+<script>
+(function () {
+    'use strict';
+
+    // All events available to this promoter (passed from view context)
+    var ALL_EVENTS = [
+        {% for ev in all_promoter_events %}
+        { id: {{ ev.id }}, name: "{{ ev.name|escapejs }}", date: "{{ ev.event_date|date:'M d, Y' }}" }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    var daysInput      = document.getElementById('id_days');
+    var fullPassSection = document.getElementById('fullPassSection');
+    var daysToggleRow  = document.getElementById('daysToggleRow');
+    var dayEventRows   = document.getElementById('dayEventRows');
+    var previewDaysRow = document.getElementById('previewDaysRow');
+    var previewDays    = document.getElementById('previewDays');
+
+    if (!daysInput) { console.warn('Days input not found'); return; }
+
+    // Style the days input
+    daysInput.style.cssText = 'width:90px; text-align:center; font-size:1.3rem; font-weight:700; border:2px solid #e9ecef; border-radius:8px; padding:8px 12px;';
+
+    function buildEventOptions(selectedId) {
+        var opts = '<option value="">— Choose an event —</option>';
+        ALL_EVENTS.forEach(function (ev) {
+            var sel = (selectedId && String(selectedId) === String(ev.id)) ? ' selected' : '';
+            opts += '<option value="' + ev.id + '"' + sel + '>' + ev.name + ' · ' + ev.date + '</option>';
+        });
+        return opts;
+    }
+
+    function attachSelectBehaviour(select, preview) {
+        function refresh() {
+            var sel = select.options[select.selectedIndex];
+            if (sel && sel.value) {
+                var parts = sel.text.split(' · ');
+                var name = parts[0];
+                var date = parts[1] || '';
+                preview.querySelector('.preview-event-name').textContent = name;
+                var dateEl = preview.querySelector('.preview-event-date');
+                if (dateEl) dateEl.textContent = date;
+                preview.classList.add('visible');
+                select.classList.add('selected');
+                select.closest('.day-event-row').classList.add('has-selection');
+            } else {
+                preview.classList.remove('visible');
+                select.classList.remove('selected');
+                select.closest('.day-event-row').classList.remove('has-selection');
+            }
+        }
+        select.addEventListener('change', refresh);
+        refresh();
+    }
+
+    function rebuildDayRows(days) {
+        var existing = {};
+        dayEventRows.querySelectorAll('select[data-day]').forEach(function (sel) {
+            existing[sel.dataset.day] = sel.value;
+        });
+
+        dayEventRows.innerHTML = '';
+        for (var d = 1; d <= days; d++) {
+            var selectedId = existing[d] || '';
+            var row = document.createElement('div');
+            row.className = 'day-event-row';
+
+            var previewId = 'preview-day-' + d;
+            row.innerHTML =
+                '<div class="day-card-header">' +
+                    '<div class="day-badge-circle">' + d + '</div>' +
+                    '<div>' +
+                        '<div class="day-card-title">Day ' + d + '</div>' +
+                        '<div class="day-card-subtitle">Select the event for this day</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="day-card-body">' +
+                    '<div class="fp-select-wrapper">' +
+                        '<select name="full_pass_event_day_' + d + '" data-day="' + d + '" required ' +
+                            'class="full-pass-event-select">' +
+                            buildEventOptions(selectedId) +
+                        '</select>' +
+                    '</div>' +
+                    '<div class="day-selection-preview" id="' + previewId + '">' +
+                        '<i class="fas fa-check-circle preview-icon"></i>' +
+                        '<div>' +
+                            '<div class="preview-event-name"></div>' +
+                            '<div class="preview-event-date"></div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+            dayEventRows.appendChild(row);
+            attachSelectBehaviour(
+                row.querySelector('select'),
+                row.querySelector('.day-selection-preview')
+            );
+        }
+    }
+
+    function onDaysChange() {
+        var days = parseInt(daysInput.value, 10) || 1;
+
+        if (days > 1) {
+            fullPassSection.classList.add('visible');
+            daysToggleRow.classList.add('active');
+            daysInput.style.borderColor = '#ff9800';
+            // Only rebuild if the number of rows differs from requested days
+            var currentRows = dayEventRows.querySelectorAll('.day-event-row').length;
+            if (currentRows !== days) {
+                rebuildDayRows(days);
+            }
+            if (previewDaysRow) {
+                previewDaysRow.style.display = '';
+                previewDays.textContent = days + '-Day Full Pass';
+            }
+        } else {
+            fullPassSection.classList.remove('visible');
+            daysToggleRow.classList.remove('active');
+            daysInput.style.borderColor = '#e9ecef';
+            if (previewDaysRow) previewDaysRow.style.display = 'none';
+        }
+    }
+
+    // Run on input and on page load (handles edit mode where days > 1 already)
+    daysInput.addEventListener('input', onDaysChange);
+    daysInput.addEventListener('change', onDaysChange);
+
+    // On page load: if form was submitted with errors OR we are in edit mode,
+    // the Django-rendered rows already exist — just show the section.
+    document.addEventListener('DOMContentLoaded', function () {
+        var initialDays = parseInt(daysInput.value, 10) || 1;
+        if (initialDays > 1) {
+            fullPassSection.classList.add('visible');
+            daysToggleRow.classList.add('active');
+            daysInput.style.borderColor = '#ff9800';
+            var existingRows = dayEventRows.querySelectorAll('.day-event-row').length;
+            if (existingRows === 0) {
+                rebuildDayRows(initialDays);
+            } else {
+                // Wire up behaviour on Django-rendered rows (edit / validation-error re-display)
+                dayEventRows.querySelectorAll('.day-event-row').forEach(function (row) {
+                    var sel = row.querySelector('select');
+                    var preview = row.querySelector('.day-selection-preview');
+                    if (sel && preview) {
+                        // Ensure preview markup has the two text nodes
+                        if (!preview.querySelector('.preview-event-name')) {
+                            preview.innerHTML =
+                                '<i class="fas fa-check-circle preview-icon"></i>' +
+                                '<div><div class="preview-event-name"></div><div class="preview-event-date"></div></div>';
+                        }
+                        attachSelectBehaviour(sel, preview);
+                    }
+                });
+            }
+            if (previewDaysRow) {
+                previewDaysRow.style.display = '';
+                previewDays.textContent = initialDays + '-Day Full Pass';
+            }
+        }
+    });
+
+    console.log('✅ Full Pass JS loaded. Events available:', ALL_EVENTS.length);
+})();
 </script>
 {% endblock content %}

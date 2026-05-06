@@ -1341,9 +1341,9 @@ def doorman_checkin_page(request, event_id):
     # Search functionality
     search_query = request.GET.get('q', '')
     
-    # Paid tickets
+    # Paid tickets — include Full Pass tickets whose day_event matches this event
     paid_tickets = Ticket.objects.filter(
-        event_ticket__event=event
+        Q(event_ticket__event=event) | Q(day_event=event)
     ).select_related('event_ticket', 'customer').order_by('-created_at')
     
     if search_query:
@@ -1368,9 +1368,11 @@ def doorman_checkin_page(request, event_id):
             )
     
     # Stats
-    paid_total = Ticket.objects.filter(event_ticket__event=event).count()
+    paid_total = Ticket.objects.filter(
+        Q(event_ticket__event=event) | Q(day_event=event)
+    ).count()
     paid_checked_in = Ticket.objects.filter(
-        event_ticket__event=event,
+        Q(event_ticket__event=event) | Q(day_event=event),
         checkin_date__isnull=False
     ).count()
     
