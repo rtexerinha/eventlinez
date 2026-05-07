@@ -124,7 +124,15 @@
               <div class="form-group col-md-12 mb-0">
                 {{ form.media }}
                 {{ form.description | as_crispy_field }}
-                <input type="file" id="ck-image-file" accept="image/*" style="display:none;">
+              </div>
+
+              <div class="form-group col-md-12 mb-3">
+                <label class="form-label" style="font-weight:600;">Insert Image into Description</label>
+                <div class="custom-file">
+                  <input type="file" class="custom-file-input" id="ck-image-file" accept="image/*">
+                  <label class="custom-file-label" for="ck-image-file">Choose file</label>
+                </div>
+                <small class="form-text text-muted">Select an image to insert at the cursor position in the description above.</small>
               </div>
 
               <div class="form-group col-md-6 mb-0">
@@ -528,8 +536,6 @@
 
 <script>
 (function () {
-  var activeEditor = null;
-
   function embedImage(editor, file) {
     if (!file || !file.type.startsWith('image/')) return;
     var reader = new FileReader();
@@ -540,8 +546,14 @@
   }
 
   var fileInput = document.getElementById('ck-image-file');
+  var fileLabel = document.querySelector('label[for="ck-image-file"]');
+
   fileInput.addEventListener('change', function () {
-    if (activeEditor && this.files[0]) embedImage(activeEditor, this.files[0]);
+    var editor = CKEDITOR.instances['id_description'];
+    if (editor && this.files[0]) {
+      embedImage(editor, this.files[0]);
+      if (fileLabel) fileLabel.textContent = this.files[0].name;
+    }
     this.value = '';
   });
 
@@ -549,33 +561,16 @@
     CKEDITOR.on('instanceReady', function (ev) {
       if (ev.editor.name !== 'id_description') return;
       var editor = ev.editor;
-      activeEditor = editor;
 
-      // Override the toolbar image button to open a file picker instead of dialog
-      if (editor.commands['image']) {
-        editor.commands['image'].exec = function () {
-          activeEditor = editor;
+      // Intercept the toolbar image button — cancel the dialog, open file picker instead
+      editor.on('beforeCommandExec', function (ev2) {
+        if (ev2.data.name === 'image') {
+          ev2.cancel();
           fileInput.click();
-        };
-      }
-
-      // Inject a visible "Insert Image" bar below the editor
-      var wrap = editor.container.$;
-      var bar = document.createElement('div');
-      bar.style.cssText = 'margin-top:-1px;padding:8px 14px;border:1px solid #ccc;border-top:none;background:#fafafa;display:flex;align-items:center;gap:14px;border-radius:0 0 4px 4px;';
-      bar.innerHTML =
-        '<button type="button" id="ck-img-btn" style="display:flex;align-items:center;gap:6px;background:#d90075;color:#fff;border:none;border-radius:4px;padding:6px 16px;font-size:13px;font-weight:600;cursor:pointer;">' +
-        '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>' +
-        'Insert Image</button>' +
-        '<span style="font-size:12px;color:#888;">Click the button or drag &amp; drop an image into the editor above</span>';
-      wrap.appendChild(bar);
-
-      document.getElementById('ck-img-btn').addEventListener('click', function () {
-        activeEditor = editor;
-        fileInput.click();
+        }
       });
 
-      // Drag & drop on the editor body
+      // Drag & drop onto the editor body
       var body = editor.document.getBody().$;
       body.addEventListener('dragover', function (e) { e.preventDefault(); });
       body.addEventListener('drop', function (e) {
