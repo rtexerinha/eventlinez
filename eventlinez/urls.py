@@ -53,7 +53,8 @@ urlpatterns += [
     path('contact/', shop.views.contact, name='contact'),
     path('terms-of-service/', shop.views.terms, name='terms'),
     path('account/',  include('account.urls'), name='account'),
-    path('address/', include('address.urls'))
+    path('address/', include('address.urls')),
+    path('ckeditor/', include('ckeditor_uploader.urls')),
 ]
 
 admin.site.site_header = 'Eventlinez'
