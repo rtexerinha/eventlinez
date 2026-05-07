@@ -162,6 +162,10 @@ jobs:
         # Extract the deployment archive directly to /home/sunset/eventlinez
         echo "📥 Extracting deployment files..."
         if [ -f /tmp/eventlinez-deploy.tar.gz ]; then
+          # Remove old backups to free disk space, keep only the most recent one
+          echo "🧹 Cleaning up old backups..."
+          ls -dt /home/sunset/eventlinez_backup_* 2>/dev/null | tail -n +2 | xargs rm -rf || echo "No old backups to remove"
+
           # Create backup if directory exists
           if [ -d "/home/sunset/eventlinez" ]; then
             echo "💾 Creating backup..."
@@ -172,6 +176,7 @@ jobs:
           mkdir -p /home/sunset/eventlinez
           cd /home/sunset/eventlinez
           tar -xzf /tmp/eventlinez-deploy.tar.gz
+          rm -f /tmp/eventlinez-deploy.tar.gz
           echo "✅ Code extracted successfully to /home/sunset/eventlinez"
         else
           echo "❌ Deployment archive not found"
