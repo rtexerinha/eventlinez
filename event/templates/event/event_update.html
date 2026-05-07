@@ -123,6 +123,14 @@
 
               <div class="form-group col-md-12 mb-0">
                 {{ form.media }}
+                <label class="requiredField">Description<span class="asteriskField">*</span></label>
+                <div class="ck-image-toolbar mb-1" style="display:flex;align-items:center;gap:10px;">
+                  <label class="btn btn-sm btn-outline-secondary mb-0" style="cursor:pointer;">
+                    <i class="fas fa-image"></i> Insert Image
+                    <input type="file" id="ck-image-file" accept="image/*" style="display:none;">
+                  </label>
+                  <small class="text-muted">or drag &amp; drop an image into the editor below</small>
+                </div>
                 {{ form.description | as_crispy_field }}
               </div>
 
@@ -524,4 +532,48 @@
       <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     </div>
   </main>
+
+<script>
+(function () {
+  function getEditor() {
+    if (typeof CKEDITOR === 'undefined') return null;
+    return CKEDITOR.instances['id_description'] || null;
+  }
+
+  function insertBase64Image(editor, file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      editor.insertHtml('<img src="' + e.target.result + '" style="max-width:100%;" alt="' + file.name + '">');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // "Insert Image" button
+  document.getElementById('ck-image-file').addEventListener('change', function () {
+    var editor = getEditor();
+    if (!editor) return;
+    insertBase64Image(editor, this.files[0]);
+    this.value = '';
+  });
+
+  // Drag & drop onto the editor iframe
+  if (typeof CKEDITOR !== 'undefined') {
+    CKEDITOR.on('instanceReady', function (ev) {
+      if (ev.editor.name !== 'id_description') return;
+      var editor = ev.editor;
+      var body = editor.document.getBody().$;
+
+      body.addEventListener('dragover', function (e) { e.preventDefault(); });
+      body.addEventListener('drop', function (e) {
+        e.preventDefault();
+        var files = e.dataTransfer.files;
+        for (var i = 0; i < files.length; i++) {
+          insertBase64Image(editor, files[i]);
+        }
+      });
+    });
+  }
+})();
+</script>
 {% endblock content %}

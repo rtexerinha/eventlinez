@@ -111,7 +111,6 @@ INSTALLED_APPS = [
     "crispy_forms",
     "bootstrap_datepicker_plus",
     "ckeditor",
-    "ckeditor_uploader",
     "address",
     "customer",
     "promoter",
@@ -219,12 +218,9 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-CKEDITOR_UPLOAD_PATH = "event_description_images/"
-CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'full',
-        'extraPlugins': 'uploadimage',
     },
 }
 

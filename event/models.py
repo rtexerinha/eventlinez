@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from ckeditor_uploader.fields import RichTextUploadingField
+from ckeditor.fields import RichTextField
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -60,7 +60,7 @@ class Event(models.Model):
     name = models.CharField(max_length=250, unique=True)
     slug = models.SlugField(max_length=250, unique=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
-    description = RichTextUploadingField(blank=False)
+    description = RichTextField(blank=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     event_date = models.DateTimeField()
