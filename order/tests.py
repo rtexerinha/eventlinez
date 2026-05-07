@@ -10,7 +10,7 @@ from .models import OrderItem
 class OrderModel(TestCase):
 
     def setUp(self):
-        event = baker.make('event.Event', description="foo")
+        event = baker.make('event.Event', description="foo", available=False)
         self.event_ticket1 = baker.make('event.Ticket', event=event, quantity=10, price=100)
         self.event_ticket2 = baker.make('event.Ticket', event=event, quantity=5, price=200)
 
@@ -32,8 +32,8 @@ class OrderModel(TestCase):
         tiket1 = Ticket.objects.get(order_item=item1)
         self.assertEqual(tiket1.guest_name, order.customer.first_name + " " + order.customer.last_name)
 
-        event2 = baker.make('event.Event', description="foo2")
-        event3 = baker.make('event.Event', description="foo3")
+        event2 = baker.make('event.Event', description="foo2", available=False)
+        event3 = baker.make('event.Event', description="foo3", available=False)
         order2 = baker.make('order.Order', emailAddress="me@gmail.com")
         item1 = baker.make(OrderItem, event_ticket=self.event_ticket1, quantity=1, order=order2)
         item2 = baker.make(OrderItem, event_ticket=self.event_ticket2, quantity=1, order=order2)
@@ -47,7 +47,7 @@ class OrderModel(TestCase):
 class OrderMailTest(TestCase):
 
     def test_send_mail(self):
-        event = baker.make('event.Event', description="foo")
+        event = baker.make('event.Event', description="foo", available=False)
         event_ticket1 = baker.make('event.Ticket', event=event, quantity=10, price=100)
 
         self.order = baker.make('order.Order', emailAddress="me@gmail.com")
@@ -69,7 +69,7 @@ class OrderMailTest(TestCase):
 class OrderTicketGeneration(TestCase):
 
     def test_create_order_item_should_create_a_ticket(self):
-        event = baker.make('event.Event', description="foo")
+        event = baker.make('event.Event', description="foo", available=False)
         event_ticket = baker.make('event.Ticket', event=event, quantity=10, price=100)
         order = baker.make('order.Order')
 
@@ -81,7 +81,7 @@ class OrderTicketGeneration(TestCase):
         self.assertEqual(Ticket.objects.count(), 2)
 
     def test_create_order_should_decrease_ticket_quantity(self):
-        event = baker.make('event.Event', description="foo")
+        event = baker.make('event.Event', description="foo", available=False)
         event_ticket = baker.make('event.Ticket', event=event, quantity=1)
         order = baker.make('order.Order')
 

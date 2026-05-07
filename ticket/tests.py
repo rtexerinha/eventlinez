@@ -14,7 +14,7 @@ class TicketTest(TestCase):
     def setUp(self) -> None:
         self.event_date = timezone.make_aware(datetime(year=2023, month=3, day=31, hour=23))
 
-        ticket_type = baker.make("event.Ticket", event__description="foo", event__event_date=self.event_date)
+        ticket_type = baker.make("event.Ticket", event__description="foo", event__event_date=self.event_date, event__available=False)
         order = baker.make("order.Order")
         order_item = OrderItem.objects.create(order=order, quantity=2, unit_price=50, fee=2, amount=100,
                                               event_ticket=ticket_type)

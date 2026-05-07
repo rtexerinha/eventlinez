@@ -12,13 +12,13 @@ from .models import Ticket as EventTicket
 class EventModelTest(TestCase):
 
     def test_qty_available(self):
-        event = baker.make(Event, description="foo")
+        event = baker.make(Event, description="foo", available=False)
         baker.make(EventTicket, name="Camarote", event=event, quantity=10)
         baker.make(EventTicket, name="Camarote", event=event, quantity=10)
         self.assertEqual(event.qty_available(), 20)
 
     def test_quantity(self):
-        event = baker.make(Event, description="foo")
+        event = baker.make(Event, description="foo", available=False)
         baker.make(EventTicket, name="Camarote", event=event, quantity=10)
         baker.make(EventTicket, name="Camarote", event=event, quantity=10)
         self.assertEqual(event.quantity(), 20)
@@ -27,7 +27,7 @@ class EventModelTest(TestCase):
 class EventTicketTest(TestCase):
 
     def setUp(self):
-        event = baker.make(Event, description="foo")
+        event = baker.make(Event, description="foo", available=False)
         self.camarote = baker.make(EventTicket, name="Camarote", event=event, quantity=10)
         self.frontstage = baker.make(EventTicket, name="Camarote", event=event, quantity=20)
         self.pista = baker.make(EventTicket, name="Camarote", event=event, quantity=40)
@@ -70,7 +70,7 @@ class EventTicketTest(TestCase):
 class EventTicketFormTest(TestCase):
 
     def test_quantidade_de_tickets_ofertados_nao_pode_ser_menor_que_a_quantidade_de_tickets_vendidos(self):
-        event = baker.make(Event, description="foo")
+        event = baker.make(Event, description="foo", available=False)
         camarote = baker.make(EventTicket, event=event, quantity=10)
 
         order = baker.make(Order)

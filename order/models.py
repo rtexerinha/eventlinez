@@ -88,8 +88,10 @@ class OrderItem(models.Model):
 
 @receiver(post_save, sender=OrderItem)
 def create_tickets(sender, instance, **kwargs):
+    from decimal import Decimal as _Decimal
     days = getattr(instance.event_ticket, 'days', 1) or 1
-    price_per_day = (instance.unit_price / days).quantize(instance.unit_price)
+    unit_price = _Decimal(str(instance.unit_price))
+    price_per_day = (unit_price / days).quantize(_Decimal('0.01'))
 
     for i in range(0, instance.quantity):
         guest_name = None
