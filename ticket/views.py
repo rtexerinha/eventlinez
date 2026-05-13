@@ -150,13 +150,21 @@ def ticket_qrcode(request):
 def tickets_sold_list(request):
     from ticket.models import Ticket
     events = Event.objects.filter(promoter=request.user.promoter).order_by('-created')
-    tickets = Ticket.objects.filter(event_ticket__event__promoter=request.user.promoter).order_by('-id')
+    # Exclude Full Pass per-day sub-tickets from the default listing
+    tickets = Ticket.objects.filter(
+        Q(event_ticket__event__promoter=request.user.promoter, day_number__isnull=True) |
+        Q(day_event__promoter=request.user.promoter)
+    ).order_by('-id')
     selected_event = None
     if request.method == "POST":
         event_id = request.POST.get('events_choice')
         if event_id:
             selected_event = Event.objects.get(pk=event_id)
-            tickets = tickets.filter(event_ticket__event=selected_event)
+            # Same approach as revenue report: regular tickets + Full Pass day-event tickets
+            tickets = Ticket.objects.filter(
+                Q(event_ticket__event=selected_event, day_number__isnull=True) |
+                Q(day_event=selected_event)
+            ).order_by('-id')
     paginator = Paginator(tickets, 20)
     page = int(request.GET.get('page', '1'))
     try:
