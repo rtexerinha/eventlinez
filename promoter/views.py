@@ -856,7 +856,19 @@ def revenue_report(request):
                 tickets_sold = Ticket.objects.filter(
                     _Q(event_ticket__event=selected_event, day_number__isnull=True) |
                     _Q(day_event=selected_event)
-                ).select_related('order_item', 'event_ticket', 'customer', 'day_event').order_by('-created_at')
+                ).select_related('order_item', 'order_item__order', 'event_ticket', 'customer', 'day_event').order_by('-created_at')
+
+                # Pre-fetch PromoCodeUsage records keyed by order_id so we can attribute
+                # per-ticket discounts. The discount is stored per-order, not per-ticket.
+                promo_usage_by_order = {}
+                if PromoCodeUsage:
+                    order_ids = set()
+                    for _t in tickets_sold:
+                        if hasattr(_t, 'order_item') and _t.order_item:
+                            order_ids.add(str(_t.order_item.order_id))
+                    if order_ids:
+                        for _u in PromoCodeUsage.objects.filter(order_id__in=order_ids):
+                            promo_usage_by_order[_u.order_id] = _u
 
                 # Calculate totals
                 gross_revenue = Decimal('0.00')
@@ -877,11 +889,13 @@ def revenue_report(request):
                     if hasattr(ticket, 'order_item') and ticket.order_item:
                         promo_code_used = ticket.order_item.promo_code or ''
 
-                        # Discount only applies when a promo code was actually used and the
-                        # unit_price (original face value) exceeds what the customer paid.
-                        if promo_code_used and ticket.order_item.unit_price and ticket.order_item.unit_price > ticket_price:
-                            discount_amount = ticket.order_item.unit_price - ticket_price
-                            total_promo_discount += discount_amount
+                        if promo_code_used:
+                            oid = str(ticket.order_item.order_id)
+                            usage = promo_usage_by_order.get(oid)
+                            if usage and usage.discount_amount:
+                                qty = max(ticket.order_item.quantity, 1)
+                                discount_amount = (usage.discount_amount / qty).quantize(Decimal('0.01'))
+                                total_promo_discount += discount_amount
                     
                     # Get customer information
                     customer_name = 'Guest'
@@ -905,16 +919,14 @@ def revenue_report(request):
                     if not customer_name or customer_name.strip() in ['', 'Customer']:
                         customer_name = ticket.guest_name or 'Guest'
                     
-                    original_price = ticket_price + discount_amount
-                    
                     ticket_details.append({
                         'customer_name': customer_name,
                         'customer_email': customer_email,
                         'ticket_type': ticket.event_ticket.name,
-                        'original_price': original_price,
+                        'original_price': ticket_price,
                         'promo_code': promo_code_used,
                         'discount_amount': discount_amount,
-                        'final_price': ticket_price,
+                        'final_price': ticket_price - discount_amount,
                         'purchase_date': ticket.created_at
                     })
                 
