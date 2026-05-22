@@ -23,14 +23,14 @@ class Cart(models.Model):
 
 	def amount(self):
 		total = 0
-		for item in self.cartitem_set.all():
+		for item in self.cartitem_set.filter(active=True):
 			total += item.price_total()
 		return total
 
 	def subtotal(self):
 		"""Calculate subtotal before promo discount"""
 		total = 0
-		for item in self.cartitem_set.all():
+		for item in self.cartitem_set.filter(active=True):
 			total += item.price_total()
 		return total
 	
