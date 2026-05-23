@@ -34,6 +34,22 @@ def _cart_id(request):
         return f"fallback_{request.META.get('REMOTE_ADDR', 'unknown')}"
 
 
+def _clear_cart_promo(cart):
+    """
+    Clear any applied promo code from the cart and all its items.
+    Returns True if a promo was actually cleared, False if there was nothing to clear.
+    Must be called whenever the cart contents change so the discount is never based
+    on a stale subtotal.
+    """
+    if not cart.applied_promo_code:
+        return False
+    cart.applied_promo_code = None
+    cart.promo_discount = 0
+    cart.save(update_fields=['applied_promo_code', 'promo_discount'])
+    CartItem.objects.filter(cart=cart).update(promo_code=None)
+    return True
+
+
 def track_promo_usage(promo_code, customer_email, order_id, discount_amount):
     """
     Track promo code usage and update usage count
@@ -154,10 +170,12 @@ def cart_add(request):
         if items_added == 0:
             return JsonResponse({"error": "No valid tickets were added to cart"}, status=400)
 
+        promo_cleared = _clear_cart_promo(cart)
         return JsonResponse({
-            "status": "success", 
+            "status": "success",
             "message": f"Added {items_added} item{'s' if items_added != 1 else ''} to cart",
-            "cart_id": cart.id
+            "cart_id": cart.id,
+            "promo_cleared": promo_cleared,
         }, status=201)
 
     except Exception as e:
@@ -186,6 +204,12 @@ def change_quantity(request, item_id, operation):
             item.quantity -= 1
 
     item.save()
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        if _clear_cart_promo(cart):
+            messages.info(request, "Promo code removed — please re-apply to recalculate your discount.")
+    except Cart.DoesNotExist:
+        pass
     return redirect('cart:detail')
 
 
@@ -260,7 +284,10 @@ def remove_item(request, item_id):
     :return:
     """
     item = get_object_or_404(CartItem, id=item_id)
+    cart = item.cart
     item.delete()
+    if _clear_cart_promo(cart):
+        messages.info(request, "Promo code removed — please re-apply to recalculate your discount.")
     return redirect('cart:detail')
 
 
