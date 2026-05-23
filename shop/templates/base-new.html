@@ -37,9 +37,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Single combined Google Fonts request instead of 4 separate ones -->
+    <!-- Google Fonts: Roboto omitted — it only appears in Bootstrap's system-font fallback
+         and is never rendered on iPhones, so loading it wastes ~30 KB per visit. -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Roboto&family=Open+Sans:wght@400;700&family=Nunito:wght@400;600;700&family=Poppins:wght@400;500;600&family=Lato:wght@400;700&display=swap">
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Nunito:wght@400;600;700&family=Poppins:wght@400;500;600&family=Lato:wght@400;700&display=swap">
 
     <!-- Critical CSS: Bootstrap first so layout works immediately -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
@@ -71,6 +72,37 @@
     {% block extra_head %}{% endblock %}
     <!-- Custom CSS block for page-specific styles -->
     {% block custom_css %}{% endblock %}
+
+    <!-- Inlined in <head> so the scroll/overflow fix applies before the first paint.
+         Inlining also saves one HTTP round-trip — critical for Instagram's in-app browser
+         which opens with no warm connection. -->
+    <script>
+    (function(){
+        'use strict';
+        var ua=navigator.userAgent||'';
+        var isInApp=ua.indexOf('Instagram')>-1||ua.indexOf('FBAN')>-1||
+            ua.indexOf('FBAV')>-1||ua.indexOf('LinkedInApp')>-1||ua.indexOf('Twitter')>-1;
+        if(!isInApp)return;
+        var html=document.documentElement;
+        var body=document.body;
+        if(body)body.classList.add('in-app-browser');
+        if(ua.indexOf('Instagram')>-1&&body)body.classList.add('instagram-browser');
+        [html,body].forEach(function(el){
+            if(!el)return;
+            el.style.overflowX='clip';
+            el.style.overflowY='auto';
+            el.style.height='auto';
+            el.style.position='';
+        });
+        var style=document.createElement('style');
+        style.textContent=
+            '.in-app-browser *{touch-action:pan-y !important;-ms-touch-action:pan-y !important;}'+
+            '.in-app-browser body,.in-app-browser html{overflow-x:clip !important;overflow-y:auto !important;}'+
+            '.in-app-browser main,.in-app-browser .container{overflow:visible !important;}'+
+            '.in-app-browser .card-details{overflow-y:visible !important;max-height:none !important;height:auto !important;overscroll-behavior:auto !important;}';
+        (document.head||document.getElementsByTagName('head')[0]).appendChild(style);
+    })();
+    </script>
 
     <style>
         html {
@@ -238,9 +270,6 @@
     <script src="{% static 'js/swiper-bundle.min.js' %}" defer></script>
     <!-- Swiper init: local config, deferred -->
     <script src="{% static 'js/swiper.js' %}" defer></script>
-
-    <!-- In-app browser scroll fix (deferred — not layout critical) -->
-    <script defer src="{% static 'js/inapp-fix.js' %}"></script>
 
     {% block custom_js %}{% endblock %}
     {% block cart_js %}{% endblock %}

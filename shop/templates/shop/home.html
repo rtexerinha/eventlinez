@@ -911,30 +911,22 @@
             const slidesToShow = Math.min(getSlidesToShow(), slides.length);
             const maxSlide = Math.max(0, slides.length - slidesToShow);
 
+            // Cached slide width — reading offsetWidth forces a layout reflow.
+            // We read it once and only invalidate on resize.
+            let cachedSlideWidth = 0;
+
             function updateCarousel() {
-                const slideWidth = slides[0].offsetWidth;
-                const gap = 20;
-                const translateX = -(currentSlide * (slideWidth + gap));
+                if (!cachedSlideWidth) cachedSlideWidth = slides[0].offsetWidth;
+                const translateX = -(currentSlide * (cachedSlideWidth + 20));
+
+                // Batch the single read above before all DOM writes below
                 carousel.style.transform = `translateX(${translateX}px)`;
-
-                // Update active states
-                slides.forEach((slide, index) => {
-                    slide.classList.remove('active');
-                    if (index >= currentSlide && index < currentSlide + slidesToShow) {
-                        slide.classList.add('active');
-                    }
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i >= currentSlide && i < currentSlide + slidesToShow);
                 });
-
-                // Update dots
-                dots.forEach((dot, index) => {
-                    dot.classList.toggle('active', index === currentSlide);
-                });
-
-                // Update navigation buttons
-                if (prevBtn && nextBtn) {
-                    prevBtn.classList.toggle('disabled', currentSlide === 0);
-                    nextBtn.classList.toggle('disabled', currentSlide >= maxSlide);
-                }
+                dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+                if (prevBtn) prevBtn.classList.toggle('disabled', currentSlide === 0);
+                if (nextBtn) nextBtn.classList.toggle('disabled', currentSlide >= maxSlide);
             }
 
             function nextSlide() {
@@ -1004,9 +996,15 @@
                 });
             }
 
-            // Responsive updates
+            // Debounced resize — iOS fires many resize events as the URL bar
+            // shows/hides; without debounce each fires a forced reflow via offsetWidth.
+            let resizeTimer;
             window.addEventListener('resize', () => {
-                updateCarousel();
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    cachedSlideWidth = 0; // invalidate so next updateCarousel re-reads
+                    updateCarousel();
+                }, 150);
             });
 
             // Initialize
@@ -1029,7 +1027,6 @@
                 if (query.length > 2) {
                     searchTimeout = setTimeout(() => {
                         // Future: Implement live search suggestions
-                        console.log('Search query:', query);
                     }, 300);
                 }
             });
@@ -1074,27 +1071,8 @@
     let currentPhotoIndex = 0;
 
     function openGalleryAlbum(eventSlug) {
-        console.log('openGalleryAlbum called with:', eventSlug, 'Type:', typeof eventSlug);
-
-        // Check if eventSlug is valid before navigating
-        if (!eventSlug || eventSlug.trim() === '') {
-            console.error('Invalid event slug provided:', eventSlug);
-            // For development, let's make this less intrusive
-            console.warn('Gallery album click ignored due to invalid slug');
-            return;
-        }
-
-        // Additional validation for slug format
-        const slugPattern = /^[a-z0-9-]+$/;
-        if (!slugPattern.test(eventSlug)) {
-            console.error('Invalid event slug format:', eventSlug);
-            console.warn('Gallery album click ignored due to invalid slug format');
-            return;
-        }
-
-        console.log('Navigating to gallery:', `/shop/gallery/${eventSlug}/`);
-
-        // Navigate to the event gallery page
+        if (!eventSlug || eventSlug.trim() === '') return;
+        if (!/^[a-z0-9-]+$/.test(eventSlug)) return;
         window.location.href = `/shop/gallery/${eventSlug}/`;
     }
 
@@ -1190,9 +1168,9 @@
             closeLightbox();
         }
     });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Hero slideshow (merged into single DOMContentLoaded) ──
+    (function () {
         const slides = Array.from(document.querySelectorAll('.hero-content [data-hero-slide]'));
         if (slides.length === 0) return;
 
@@ -1264,6 +1242,7 @@
         });
 
         start();
-    });
+    }());
+});
 </script>
 {% endblock %}
