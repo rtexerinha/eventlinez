@@ -207,17 +207,9 @@
             <div class="label">Promo Discounts</div>
             <div class="value">–${{ report_data.total_promo_discount|floatformat:2 }}</div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card highlight">
             <div class="label">Net Revenue</div>
             <div class="value">${{ report_data.net_revenue|floatformat:2 }}</div>
-        </div>
-        <div class="summary-card danger">
-            <div class="label">Platform Fee ({{ report_data.fee_rate_pct }}%)</div>
-            <div class="value">–${{ report_data.platform_fee|floatformat:2 }}</div>
-        </div>
-        <div class="summary-card highlight">
-            <div class="label">Payout to Promoter</div>
-            <div class="value">${{ report_data.payout_amount|floatformat:2 }}</div>
         </div>
     </div>
 
@@ -351,17 +343,9 @@
                     <td>Less: Promo Code Discounts</td>
                     <td class="text-right" style="color:#d90075;">–${{ report_data.total_promo_discount|floatformat:2 }}</td>
                 </tr>
-                <tr>
-                    <td><strong>Net Revenue</strong></td>
-                    <td class="text-right"><strong>${{ report_data.net_revenue|floatformat:2 }}</strong></td>
-                </tr>
-                <tr>
-                    <td>Less: Platform Fee ({{ report_data.fee_rate_pct }}%)</td>
-                    <td class="text-right" style="color:#d90075;">–${{ report_data.platform_fee|floatformat:2 }}</td>
-                </tr>
                 <tr class="totals-row">
-                    <td><i class="fas fa-hand-holding-usd"></i> <strong>PAYOUT TO PROMOTER</strong></td>
-                    <td class="text-right" style="color:#007AFF;font-size:16px;">${{ report_data.payout_amount|floatformat:2 }}</td>
+                    <td><i class="fas fa-hand-holding-usd"></i> <strong>Net Revenue</strong></td>
+                    <td class="text-right" style="color:#007AFF;font-size:16px;">${{ report_data.net_revenue|floatformat:2 }}</td>
                 </tr>
             </tbody>
         </table>

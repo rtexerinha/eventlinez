@@ -40,6 +40,7 @@ def _build_report_data(event):
     fee_rate = Decimal(str(getattr(settings, 'EVENTLINEZ_FEE', 0.12)))
 
     # ── Tickets by type ──────────────────────────────────────────────────────
+    from django.db.models import Q as _Q
     tickets_qs = Ticket.objects.filter(
         event_ticket__event=event
     ).select_related('event_ticket', 'order_item', 'customer')
@@ -51,9 +52,19 @@ def _build_report_data(event):
     gross_revenue = Decimal('0.00')
 
     for tt in ticket_types:
-        sold = tickets_qs.filter(event_ticket=tt)
+        days = getattr(tt, 'days', 1) or 1
+        # Multi-day (Full Pass) tickets create one Ticket row per day per purchase.
+        # Filter to day_number=1 (or NULL for regular tickets) so we count passes sold,
+        # not individual day-slots.
+        sold = tickets_qs.filter(event_ticket=tt).filter(
+            _Q(day_number__isnull=True) | _Q(day_number=1)
+        )
         qty = sold.count()
-        subtotal = sold.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
+        if days > 1:
+            # ticket.price holds the per-day split; order_item.unit_price is the full pass price
+            subtotal = sold.aggregate(total=Sum('order_item__unit_price'))['total'] or Decimal('0.00')
+        else:
+            subtotal = sold.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
         gross_revenue += subtotal
         if qty > 0:
             ticket_breakdown.append({
