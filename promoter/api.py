@@ -1461,8 +1461,15 @@ class DoormanGuestListAPIView(APIView):
     """
     permission_classes = [IsAuthenticated, IsDoorman]
 
-    def get(self, request, event_id):
+    def get(self, request):
         from ticket.models_complimentary import ComplimentaryTicket
+
+        event_id = request.query_params.get('event_id')
+        if not event_id:
+            return Response(
+                {'error': 'event_id query parameter is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Verify event exists and doorman has access
         try:

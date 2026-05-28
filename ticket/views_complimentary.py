@@ -236,33 +236,26 @@ def cancel_complimentary_ticket(request, ticket_id):
 
 def complimentary_ticket_checkin(request, uuid):
     """
-    Check-in a complimentary ticket (can be accessed without login for QR scanning)
+    Check-in a complimentary ticket via QR scan (no login required).
+    Check-in is performed immediately on page load — consistent with the
+    paid-ticket ticket_checkin view — so scanning the QR code in a browser
+    or WebView is enough; no extra button click is needed.
     """
     ticket = get_object_or_404(ComplimentaryTicket, uuid=uuid)
-    
-    if request.method == 'POST':
-        if ticket.checkin_date:
-            return JsonResponse({
-                'success': False,
-                'message': 'Ticket already checked in',
-                'checked_in_at': ticket.checkin_date.isoformat()
-            })
-        
-        success, message = ticket.check_in()
-        
-        return JsonResponse({
-            'success': success,
-            'message': message,
-            'guest_name': ticket.guest_name,
-            'ticket_type': ticket.get_ticket_type_display(),
-            'event_name': ticket.event.name,
-        })
-    
-    # GET request - show check-in page
-    context = {
+
+    if ticket.status == 'CANCELLED':
+        return render(request, 'ticket/complimentary_checkin.html', {'ticket': ticket})
+
+    if ticket.checkin_date:
+        # Already checked in — show duplicate warning, do not re-check-in
+        return render(request, 'ticket/complimentary_checkin.html', {'ticket': ticket})
+
+    # Perform check-in on first visit (GET or POST)
+    ticket.check_in()
+    return render(request, 'ticket/complimentary_checkin.html', {
         'ticket': ticket,
-    }
-    return render(request, 'ticket/complimentary_checkin.html', context)
+        'just_checked_in': True,
+    })
 
 
 @login_required(login_url='/promoter/account/login/')
