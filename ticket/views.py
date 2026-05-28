@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 from datetime import timedelta
+from django.utils import timezone
 from io import BytesIO
 from os import path
 
@@ -62,7 +63,7 @@ def ticket_checkin(request, checkin):
     if errors:
         return render(request, 'ticket/ticket_checkin_error.html', {'errors': errors})
 
-    ticket.checkin_date = datetime.now()
+    ticket.checkin_date = timezone.now()
     ticket.save()
 
     if is_promoter:

@@ -174,15 +174,19 @@
         </div>
 
         {% else %}
-        <!-- Valid Ticket - Ready to Check In -->
-        <div class="checkin-header">
+        <!-- Checked In Successfully (just_checked_in=True) -->
+        <div class="checkin-header success">
             <div class="checkin-icon">
-                <i class="fas fa-ticket-alt"></i>
+                <i class="fas fa-check-circle"></i>
             </div>
-            <div class="checkin-title">Valid Ticket</div>
-            <p class="mb-0">Ready for check-in</p>
+            <div class="checkin-title">Checked In Successfully!</div>
+            <p class="mb-0">Welcome to {{ ticket.event.name }}</p>
         </div>
         <div class="checkin-body">
+            <div class="alert alert-success">
+                <h5><i class="fas fa-check-circle me-2"></i>Check-In Successful!</h5>
+                <p class="mb-0">{{ ticket.guest_name }} has been checked in.</p>
+            </div>
             <div class="guest-info">
                 <div class="info-row">
                     <span class="info-label">Guest:</span>
@@ -203,24 +207,10 @@
                     <span class="info-value">{{ ticket.event.name }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Date:</span>
-                    <span class="info-value">{{ ticket.event.event_date|date:"M d, Y" }}</span>
+                    <span class="info-label">Checked in at:</span>
+                    <span class="info-value">{{ ticket.checkin_date|date:"F d, Y at g:i A" }}</span>
                 </div>
             </div>
-
-            <div class="text-center">
-                <span class="badge-large bg-success text-white">
-                    <i class="fas fa-check-circle me-2"></i>
-                    FREE TICKET - {{ ticket.get_ticket_type_display|upper }}
-                </span>
-            </div>
-
-            <button type="button" class="btn btn-success checkin-button" onclick="checkInTicket()">
-                <i class="fas fa-check-circle me-2"></i>
-                Check In Guest
-            </button>
-
-            <div id="checkin-result" class="mt-3"></div>
         </div>
         {% endif %}
 
@@ -233,66 +223,4 @@
     </div>
 </div>
 
-<script>
-    function checkInTicket() {
-        const button = event.target;
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-
-        fetch('', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                const resultDiv = document.getElementById('checkin-result');
-
-                if (data.success) {
-                    resultDiv.innerHTML = `
-                <div class="alert alert-success">
-                    <h5><i class="fas fa-check-circle me-2"></i>Check-In Successful!</h5>
-                    <p class="mb-0">${data.guest_name} has been checked in.</p>
-                </div>
-            `;
-
-                    // Update header
-                    const header = document.querySelector('.checkin-header');
-                    header.classList.add('success');
-                    header.innerHTML = `
-                <div class="checkin-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="checkin-title">Checked In Successfully!</div>
-                <p class="mb-0">Welcome to ${data.event_name}</p>
-            `;
-
-                    button.remove();
-                } else {
-                    resultDiv.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    ${data.message}
-                </div>
-            `;
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Check In Guest';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                const resultDiv = document.getElementById('checkin-result');
-                resultDiv.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                An error occurred. Please try again.
-            </div>
-        `;
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-check-circle me-2"></i>Check In Guest';
-            });
-    }
-</script>
 {% endblock %}
