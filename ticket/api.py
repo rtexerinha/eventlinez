@@ -1,12 +1,18 @@
-from django.db.models import Q
-from rest_framework.generics import ListAPIView, UpdateAPIView
-from rest_framework.permissions import IsAuthenticated
-from .serializers import TicketSoldSerializers
-from .models import Ticket
-from event.models import Promoter
+from datetime import timedelta
 
-from .core.permissions import IsDoormanAndAssignedToEvent
-from promoter.models import Partner 
+from django.db import transaction
+from django.db.models import Q
+from django.utils import timezone
+from rest_framework import status
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from promoter.core.permissions import IsDoorman
+from promoter.models import Partner
+from .models import Ticket
+from .serializers import TicketSoldSerializers
 
 
 class TicketSoldListAPIView(ListAPIView):
@@ -19,11 +25,18 @@ class TicketSoldListAPIView(ListAPIView):
         event_id = self.request.query_params.get('event_id')
         guest_name = self.request.query_params.get('guest_name', None)
 
-        queryset = Ticket.objects.filter(
-            event_ticket__event__promoter__user=user
-        ).filter(
-            Q(event_ticket__event__id=event_id) | Q(day_event__id=event_id)
-        )
+        if hasattr(user, 'promoter'):
+            queryset = Ticket.objects.filter(event_ticket__event__promoter__user=user)
+        else:
+            queryset = Ticket.objects.filter(
+                Q(event_ticket__event__partner__user=user, day_event__isnull=True) |
+                Q(day_event__partner__user=user)
+            )
+
+        if event_id:
+            queryset = queryset.filter(
+                Q(event_ticket__event__id=event_id) | Q(day_event__id=event_id)
+            )
 
         if guest_name:
             queryset = queryset.filter(guest_name__icontains=guest_name)
@@ -31,36 +44,10 @@ class TicketSoldListAPIView(ListAPIView):
         return queryset.order_by('guest_name')
 
 
-class TicketSoldCheckinAPIView(UpdateAPIView):
-    permission_classes = (IsAuthenticated, IsDoormanAndAssignedToEvent)
-    serializer_class = TicketSoldSerializers
-    model = serializer_class.Meta.model
-
-    def get_queryset(self):
-        user = self.request.user
-        pk = self.kwargs['pk']
-
-        if Promoter.objects.filter(user=user).exists():
-            return self.model.objects.filter(
-                event_ticket__event__promoter__user=user,
-                id=pk
-            )
-
-        if Partner.objects.filter(user=user, role='DOORMAN').exists():
-            from django.db.models import Q
-            return self.model.objects.filter(
-                Q(event_ticket__event__partner__user=user, day_event__isnull=True) |
-                Q(day_event__partner__user=user),
-                id=pk
-            )
-
-        return self.model.objects.none()
-
-
 class TicketSoldDetailsAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = TicketSoldSerializers
-    model = serializer_class.Meta.model
+    model = Ticket
 
     def get_queryset(self):
         user = self.request.user
@@ -68,29 +55,164 @@ class TicketSoldDetailsAPIView(ListAPIView):
         return self.model.objects.filter(event_ticket__event__promoter__user=user, id=pk)
 
 
-class TicketSoldCheckinQrcodeAPIView(UpdateAPIView):
-    permission_classes = (IsAuthenticated, IsDoormanAndAssignedToEvent)
-    serializer_class = TicketSoldSerializers
-    model = serializer_class.Meta.model
-    lookup_field = 'uuid'
+class TicketSoldCheckinAPIView(APIView):
+    """
+    POST /ticket/api/checkin/<pk>
+    Manual check-in by ticket ID. Same pattern as DoormanManualCheckinAPIView.
+    """
+    permission_classes = [IsAuthenticated, IsDoorman]
 
-    def get_queryset(self):
-        from django.db.models import Q
-        user = self.request.user
-        uuid = self.kwargs['uuid']
+    def post(self, request, pk):
+        try:
+            ticket = Ticket.objects.select_related(
+                'event_ticket__event__promoter', 'day_event', 'customer'
+            ).get(pk=pk)
+        except Ticket.DoesNotExist:
+            return Response({'success': False, 'message': 'Ticket not found.'},
+                            status=status.HTTP_404_NOT_FOUND)
 
-        if Promoter.objects.filter(user=user).exists():
-            return self.model.objects.filter(
-                event_ticket__event__promoter__user=user,
-                uuid=uuid
+        effective_event = ticket.day_event if ticket.day_event else ticket.event_ticket.event
+
+        user = request.user
+        if not hasattr(user, 'promoter'):
+            if not Partner.objects.filter(
+                user=user, event=effective_event, role='DOORMAN', disable=False
+            ).exists():
+                return Response(
+                    {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        elif effective_event.promoter.user != user:
+            return Response(
+                {'success': False, 'message': 'This ticket does not belong to your event.'},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
-        if Partner.objects.filter(user=user, role='DOORMAN').exists():
-            # For Full Pass tickets the authoritative event is day_event, not the parent event
-            return self.model.objects.filter(
-                Q(event_ticket__event__partner__user=user, day_event__isnull=True) |
-                Q(day_event__partner__user=user),
-                uuid=uuid
+        deadline = effective_event.event_date + timedelta(hours=6)
+        if timezone.now() > deadline:
+            return Response(
+                {'success': False, 'message': f'Check-in period has ended. Deadline was {deadline.strftime("%b %d %H:%M")}.'},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        return self.model.objects.none()
+        try:
+            with transaction.atomic():
+                ticket = Ticket.objects.select_for_update().get(pk=pk)
+
+                if ticket.checkin_date:
+                    return Response({
+                        'success': False,
+                        'message': 'This ticket has already been checked in.',
+                        'already_checked_in': True,
+                        'ticket_id': ticket.id,
+                        'guest_name': ticket.guest_name or str(ticket.customer),
+                        'event_name': effective_event.name,
+                        'ticket_type': ticket.event_ticket.name,
+                        'first_checkin_at': ticket.checkin_date,
+                        'checked_in_at': ticket.checkin_date,
+                    })
+
+                ticket.checkin_date = timezone.now()
+                ticket.save(update_fields=['checkin_date'])
+        except Exception:
+            return Response(
+                {'success': False, 'message': 'Check-in failed due to a server error. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response({
+            'success': True,
+            'message': 'Check-in successful! Welcome!',
+            'already_checked_in': False,
+            'ticket_id': ticket.id,
+            'guest_name': ticket.guest_name or str(ticket.customer),
+            'event_name': effective_event.name,
+            'ticket_type': ticket.event_ticket.name,
+            'checked_in_at': ticket.checkin_date,
+            'first_checkin_at': None,
+        })
+
+
+class TicketSoldCheckinQrcodeAPIView(APIView):
+    """
+    POST /ticket/api/checkin/qrcode/<uuid>
+    QR scan check-in by UUID. Same pattern as DoormanScanPaidTicketAPIView.
+    """
+    permission_classes = [IsAuthenticated, IsDoorman]
+
+    def post(self, request, uuid):
+        try:
+            ticket = Ticket.objects.select_related(
+                'event_ticket__event__promoter', 'day_event', 'customer'
+            ).get(uuid=uuid)
+        except (Ticket.DoesNotExist, ValueError):
+            return Response(
+                {'success': False, 'message': 'Ticket not found. Please check the QR code.', 'already_checked_in': False},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        effective_event = ticket.day_event if ticket.day_event else ticket.event_ticket.event
+
+        user = request.user
+        if not hasattr(user, 'promoter'):
+            if not Partner.objects.filter(
+                user=user, event=effective_event, role='DOORMAN', disable=False
+            ).exists():
+                return Response(
+                    {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        elif effective_event.promoter.user != user:
+            return Response(
+                {'success': False, 'message': 'This ticket does not belong to your event.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        deadline = effective_event.event_date + timedelta(hours=6)
+        if timezone.now() > deadline:
+            return Response(
+                {
+                    'success': False,
+                    'message': f'Check-in period has ended. Deadline was {deadline.strftime("%b %d %H:%M")}.',
+                    'already_checked_in': False,
+                    'event_name': effective_event.name,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            with transaction.atomic():
+                ticket = Ticket.objects.select_for_update().get(pk=ticket.pk)
+
+                if ticket.checkin_date:
+                    return Response({
+                        'success': False,
+                        'message': 'This ticket has already been checked in.',
+                        'already_checked_in': True,
+                        'ticket_id': ticket.id,
+                        'guest_name': ticket.guest_name or str(ticket.customer),
+                        'event_name': effective_event.name,
+                        'ticket_type': ticket.event_ticket.name,
+                        'first_checkin_at': ticket.checkin_date,
+                        'checked_in_at': ticket.checkin_date,
+                    })
+
+                ticket.checkin_date = timezone.now()
+                ticket.save(update_fields=['checkin_date'])
+        except Exception:
+            return Response(
+                {'success': False, 'message': 'Check-in failed due to a server error. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response({
+            'success': True,
+            'message': 'Check-in successful! Welcome!',
+            'already_checked_in': False,
+            'ticket_id': ticket.id,
+            'guest_name': ticket.guest_name or str(ticket.customer),
+            'event_name': effective_event.name,
+            'ticket_type': ticket.event_ticket.name,
+            'checked_in_at': ticket.checkin_date,
+            'first_checkin_at': None,
+        })

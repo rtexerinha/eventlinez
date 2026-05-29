@@ -1,5 +1,5 @@
-from datetime import datetime
 from datetime import timedelta
+from django.utils import timezone
 from rest_framework import serializers
 from .models import Ticket
 
@@ -23,11 +23,12 @@ class TicketSoldSerializers(serializers.Serializer):
             raise serializers.ValidationError({'error':
                                                'Ticket does not belong to this promoter.'})
 
-        ticket_date_event = instance.event_ticket.event.event_date
-        deadline = (ticket_date_event + timedelta(hours=6)
-                    ).strftime("%Y-%m-%d %H:%M:%S")
+        # Use day_event date for Full Pass tickets; fall back to parent event date
+        effective_event = instance.day_event if instance.day_event else instance.event_ticket.event
+        deadline = effective_event.event_date + timedelta(hours=6)
 
-        if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > deadline:
+        # Both sides are timezone-aware — safe comparison
+        if timezone.now() > deadline:
             raise serializers.ValidationError(
                 {'error': 'Deadline to check in is over'})
 
