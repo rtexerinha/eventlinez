@@ -27,7 +27,7 @@ from .api import CustomAuthToken, PromoterListAPIView, EventListAPIView, Categor
     DoormanScanPaidTicketAPIView, DoormanScanGuestTicketAPIView, \
     DoormanAssignAPIView, DoormanListAPIView, \
     EventDoormenAPIView, AvailableDoormenAPIView, SearchUsersForDoormanAPIView, \
-    DoormanTicketSearchAPIView, DoormanGuestListAPIView
+    DoormanTicketSearchAPIView, DoormanGuestListAPIView, DoormanManualCheckinAPIView
 
 app_name = 'promoter'
 
@@ -200,6 +200,8 @@ urlpatterns = [
     path('api/doorman/list/', DoormanListAPIView.as_view(), name='api_doorman_list'),
     # Doorman: search tickets
     path('api/doorman/ticket-search/', DoormanTicketSearchAPIView.as_view(), name='api_doorman_ticket_search'),
+    # Doorman: manual check-in by ticket ID (from search list)
+    path('api/doorman/tickets/<int:ticket_id>/checkin/', DoormanManualCheckinAPIView.as_view(), name='api_doorman_manual_checkin'),
     # Doorman: view guest list
     path('api/doorman/guest-list/', DoormanGuestListAPIView.as_view(), name='api_doorman_guest_list'),
     

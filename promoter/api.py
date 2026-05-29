@@ -912,25 +912,34 @@ class DoormanScanPaidTicketAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Already checked in?
-        if ticket.checkin_date:
-            return Response(
-                TicketScanResultSerializer({
-                    'success': False,
-                    'message': 'This ticket has already been checked in.',
-                    'already_checked_in': True,
-                    'ticket_id': ticket.id,
-                    'guest_name': ticket.guest_name or str(ticket.customer),
-                    'event_name': effective_event.name,
-                    'ticket_type': ticket.event_ticket.name,
-                    'first_checkin_at': ticket.checkin_date,
-                    'checked_in_at': ticket.checkin_date,
-                }).data,
-            )
+        # Perform check-in inside a transaction to prevent double-scan races
+        from django.db import transaction
+        try:
+            with transaction.atomic():
+                ticket = PaidTicket.objects.select_for_update().get(pk=ticket.pk)
 
-        # Perform check-in
-        ticket.checkin_date = timezone.now()
-        ticket.save(update_fields=['checkin_date'])
+                if ticket.checkin_date:
+                    return Response(
+                        TicketScanResultSerializer({
+                            'success': False,
+                            'message': 'This ticket has already been checked in.',
+                            'already_checked_in': True,
+                            'ticket_id': ticket.id,
+                            'guest_name': ticket.guest_name or str(ticket.customer),
+                            'event_name': effective_event.name,
+                            'ticket_type': ticket.event_ticket.name,
+                            'first_checkin_at': ticket.checkin_date,
+                            'checked_in_at': ticket.checkin_date,
+                        }).data,
+                    )
+
+                ticket.checkin_date = timezone.now()
+                ticket.save(update_fields=['checkin_date'])
+        except Exception:
+            return Response(
+                {'success': False, 'message': 'Check-in failed due to a server error. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(
             TicketScanResultSerializer({
@@ -1440,6 +1449,93 @@ class DoormanTicketSearchAPIView(APIView):
             })
 
         return Response(results)
+
+
+class DoormanManualCheckinAPIView(APIView):
+    """
+    POST /api/doorman/tickets/<ticket_id>/checkin/
+    Manual check-in for a paid ticket by its database ID (used from the search list).
+    """
+    permission_classes = [IsAuthenticated, IsDoorman]
+
+    def post(self, request, ticket_id):
+        from ticket.models import Ticket as PaidTicket
+        from django.db import transaction
+
+        try:
+            ticket = PaidTicket.objects.select_related(
+                'event_ticket__event__promoter', 'day_event', 'customer'
+            ).get(pk=ticket_id)
+        except PaidTicket.DoesNotExist:
+            return Response({'success': False, 'message': 'Ticket not found.'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        effective_event = ticket.day_event if ticket.day_event else ticket.event_ticket.event
+
+        user = request.user
+        if not hasattr(user, 'promoter'):
+            has_access = Partner.objects.filter(
+                user=user, event=effective_event, role='DOORMAN', disable=False
+            ).exists()
+            if not has_access:
+                return Response(
+                    {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        elif effective_event.promoter.user != user:
+            return Response(
+                {'success': False, 'message': 'This ticket does not belong to your event.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        from datetime import timedelta
+        deadline = effective_event.event_date + timedelta(hours=6)
+        if timezone.now() > deadline:
+            return Response(
+                {'success': False, 'message': f'Check-in period has ended. Deadline was {deadline.strftime("%b %d %H:%M")}.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            with transaction.atomic():
+                ticket = PaidTicket.objects.select_for_update().get(pk=ticket_id)
+
+                if ticket.checkin_date:
+                    return Response(
+                        TicketScanResultSerializer({
+                            'success': False,
+                            'message': 'This ticket has already been checked in.',
+                            'already_checked_in': True,
+                            'ticket_id': ticket.id,
+                            'guest_name': ticket.guest_name or str(ticket.customer),
+                            'event_name': effective_event.name,
+                            'ticket_type': ticket.event_ticket.name,
+                            'first_checkin_at': ticket.checkin_date,
+                            'checked_in_at': ticket.checkin_date,
+                        }).data,
+                    )
+
+                ticket.checkin_date = timezone.now()
+                ticket.save(update_fields=['checkin_date'])
+        except Exception:
+            return Response(
+                {'success': False, 'message': 'Check-in failed due to a server error. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            TicketScanResultSerializer({
+                'success': True,
+                'message': 'Check-in successful! Welcome!',
+                'already_checked_in': False,
+                'ticket_id': ticket.id,
+                'guest_name': ticket.guest_name or str(ticket.customer),
+                'event_name': effective_event.name,
+                'ticket_type': ticket.event_ticket.name,
+                'checked_in_at': ticket.checkin_date,
+                'first_checkin_at': None,
+            }).data,
+        )
 
 
 class DoormanGuestListAPIView(APIView):
