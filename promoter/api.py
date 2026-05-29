@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError
 from django.db.models import F, Sum, Q
 from django.db.models.functions import ExtractMonth, TruncDate, ExtractYear
 from django.utils import timezone
@@ -869,7 +870,7 @@ class DoormanScanPaidTicketAPIView(APIView):
             ticket = PaidTicket.objects.select_related(
                 'event_ticket__event__promoter', 'day_event', 'customer'
             ).get(uuid=uuid_str)
-        except (PaidTicket.DoesNotExist, ValueError):
+        except (PaidTicket.DoesNotExist, ValueError, ValidationError):
             return Response(
                 TicketScanResultSerializer({
                     'success': False,
@@ -893,11 +894,15 @@ class DoormanScanPaidTicketAPIView(APIView):
                     {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
-        elif effective_event.promoter.user != user:
-            return Response(
-                {'success': False, 'message': 'This ticket does not belong to your event.'},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        else:
+            # Promoter: verify they own this event via a single DB check (avoids
+            # multi-hop .promoter.user attribute chain that can silently fail)
+            from event.models import Event as _Event
+            if not _Event.objects.filter(pk=effective_event.pk, promoter__user=user).exists():
+                return Response(
+                    {'success': False, 'message': 'This ticket does not belong to your event.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
         # Check check-in deadline (effective event date + 6 hours)
         deadline = effective_event.event_date + timedelta(hours=6)
@@ -982,7 +987,7 @@ class DoormanScanGuestTicketAPIView(APIView):
         # Also catch ValueError for malformed UUID strings
         try:
             ticket = ComplimentaryTicket.objects.select_related('event').get(uuid=uuid_str)
-        except (ComplimentaryTicket.DoesNotExist, ValueError):
+        except (ComplimentaryTicket.DoesNotExist, ValueError, ValidationError):
             return Response(
                 GuestScanResultSerializer({
                     'success': False,
@@ -1482,11 +1487,13 @@ class DoormanManualCheckinAPIView(APIView):
                     {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
-        elif effective_event.promoter.user != user:
-            return Response(
-                {'success': False, 'message': 'This ticket does not belong to your event.'},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        else:
+            from event.models import Event as _Event
+            if not _Event.objects.filter(pk=effective_event.pk, promoter__user=user).exists():
+                return Response(
+                    {'success': False, 'message': 'This ticket does not belong to your event.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
         from datetime import timedelta
         deadline = effective_event.event_date + timedelta(hours=6)

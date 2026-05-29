@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -57,10 +58,13 @@ class TicketSoldDetailsAPIView(ListAPIView):
 
 class TicketSoldCheckinAPIView(APIView):
     """
-    POST /ticket/api/checkin/<pk>
+    POST/PATCH /ticket/api/checkin/<pk>
     Manual check-in by ticket ID. Same pattern as DoormanManualCheckinAPIView.
     """
     permission_classes = [IsAuthenticated, IsDoorman]
+
+    def patch(self, request, pk):
+        return self.post(request, pk)
 
     def post(self, request, pk):
         try:
@@ -135,17 +139,20 @@ class TicketSoldCheckinAPIView(APIView):
 
 class TicketSoldCheckinQrcodeAPIView(APIView):
     """
-    POST /ticket/api/checkin/qrcode/<uuid>
+    POST/PATCH /ticket/api/checkin/qrcode/<uuid>
     QR scan check-in by UUID. Same pattern as DoormanScanPaidTicketAPIView.
     """
     permission_classes = [IsAuthenticated, IsDoorman]
+
+    def patch(self, request, uuid):
+        return self.post(request, uuid)
 
     def post(self, request, uuid):
         try:
             ticket = Ticket.objects.select_related(
                 'event_ticket__event__promoter', 'day_event', 'customer'
             ).get(uuid=uuid)
-        except (Ticket.DoesNotExist, ValueError):
+        except (Ticket.DoesNotExist, ValueError, ValidationError):
             return Response(
                 {'success': False, 'message': 'Ticket not found. Please check the QR code.', 'already_checked_in': False},
                 status=status.HTTP_404_NOT_FOUND,
