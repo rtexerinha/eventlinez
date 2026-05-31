@@ -1,4 +1,5 @@
 from decimal import Decimal
+import logging
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.template.loader import render_to_string
@@ -12,6 +13,8 @@ from customer.models import Customer
 from event.models import Event
 from promoter.models import Vendor
 from ticket.models import Ticket
+
+logger = logging.getLogger(__name__)
 
 
 class Order(models.Model):
@@ -78,7 +81,18 @@ class Order(models.Model):
             to=[self.emailAddress],
         )
         email.content_subtype = "html"
-        email.send()
+        try:
+            email.send()
+        except Exception as e:
+            logger.error(
+                'Refund notification email failed for order %s '
+                '(stripe_refund_id=%s): %s',
+                self.id,
+                getattr(refund, 'stripe_refund_id', refund),
+                e,
+            )
+            return False
+        return True
 
     def ticket_qty(self):
         """
