@@ -1,7 +1,7 @@
 # Python 3.9+ Compatible Requirements for Eventlinez
 # This file contains package versions that work with Python 3.9+
 
-django==4.2.25
+django==3.2.25
 djangorestframework==3.14.0
 
 # PostgreSQL adapter
