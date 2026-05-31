@@ -1,0 +1,221 @@
+{% extends "base_promoter.html" %}
+{% load static %}
+{% block title %}Order Refunds{% endblock %}
+
+{% block stylesheets %}
+<style>
+  .refund-wrap { max-width: 960px; margin: 0 auto; }
+
+  .filter-card {
+    background: #fff; border: 1px solid #ddd; border-radius: 6px;
+    padding: 20px 24px; margin-bottom: 24px;
+  }
+  .filter-card h2 { font-size: 15px; margin: 0 0 14px; border-bottom: 2px solid #d90075; padding-bottom: 8px; }
+  .filter-row { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+  .filter-field { flex: 1; min-width: 220px; }
+  .filter-field label { display: block; font-weight: bold; font-size: 13px; margin-bottom: 4px; color: #555; }
+  .filter-field select {
+    width: 100%; padding: 8px 10px; border: 1px solid #ccc;
+    border-radius: 3px; font-size: 14px; background: #fafafa;
+  }
+  .btn-filter {
+    background: #d90075; color: #fff; border: none;
+    padding: 9px 20px; border-radius: 3px; font-size: 14px; cursor: pointer;
+  }
+  .btn-filter:hover { background: #b3005e; }
+
+  .order-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .order-table th {
+    background: #444; color: #fff; padding: 10px 14px;
+    text-align: left; font-size: 12px; text-transform: uppercase;
+  }
+  .order-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: middle; }
+  .order-table tr:last-child td { border-bottom: none; }
+  .order-table tr:hover td { background: #fafafa; }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; font-weight: bold; text-transform: uppercase;
+  }
+  .badge-paid { background: #e6f9ee; color: #217346; }
+  .badge-refunded { background: #fff0f6; color: #d90075; }
+  .badge-cancelled { background: #f5f5f5; color: #888; }
+
+  .btn-refund {
+    background: #d90075; color: #fff; border: none;
+    padding: 6px 14px; border-radius: 3px; font-size: 13px; cursor: pointer;
+  }
+  .btn-refund:hover { background: #b3005e; }
+  .btn-refund:disabled { background: #ccc; cursor: default; }
+
+  .empty-state { text-align: center; padding: 40px; color: #aaa; }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.5); z-index: 1000; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 6px; padding: 28px 32px;
+    max-width: 460px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,.2);
+  }
+  .modal-box h3 { margin: 0 0 12px; font-size: 16px; }
+  .modal-box p { font-size: 13px; color: #555; margin-bottom: 16px; }
+  .modal-box textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid #ccc;
+    border-radius: 3px; font-size: 13px; resize: vertical; min-height: 70px;
+    box-sizing: border-box;
+  }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+  .btn-cancel-modal {
+    background: #f5f5f5; color: #333; border: 1px solid #ccc;
+    padding: 7px 16px; border-radius: 3px; font-size: 13px; cursor: pointer;
+  }
+  .btn-confirm-refund {
+    background: #d90075; color: #fff; border: none;
+    padding: 7px 16px; border-radius: 3px; font-size: 13px; cursor: pointer;
+  }
+  .btn-confirm-refund:hover { background: #b3005e; }
+  .text-right { text-align: right; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="refund-wrap">
+  <h1><i class="fas fa-undo-alt"></i> Order Refunds</h1>
+
+  {% if messages %}
+  <ul class="messagelist">
+    {% for message in messages %}
+    <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <!-- Event filter -->
+  <div class="filter-card">
+    <h2><i class="fas fa-filter"></i> Select Event</h2>
+    <form method="get">
+      <div class="filter-row">
+        <div class="filter-field">
+          <label for="event_id">Event</label>
+          <select name="event_id" id="event_id">
+            <option value="">— Select an event —</option>
+            {% for e in events %}
+            <option value="{{ e.id }}" {% if selected_event.id == e.id %}selected{% endif %}>
+              {{ e.name }} — {{ e.event_date|date:"M j, Y" }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <button type="submit" class="btn-filter">
+            <i class="fas fa-search"></i> Load Orders
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% if orders is not None %}
+  <!-- Orders table -->
+  {% if orders %}
+  <table class="order-table">
+    <thead>
+      <tr>
+        <th>Order #</th>
+        <th>Customer</th>
+        <th>Tickets</th>
+        <th>Date</th>
+        <th class="text-right">Amount</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td><strong>#{{ order.id }}</strong></td>
+        <td>
+          {{ order.billingName|default:order.emailAddress }}<br>
+          <small style="color:#888;">{{ order.emailAddress }}</small>
+        </td>
+        <td>
+          {% for item in order.orderitem_set.all %}
+          <div>{{ item.quantity }}× {{ item.event_ticket.name }}</div>
+          {% endfor %}
+        </td>
+        <td>{{ order.created|date:"M j, Y H:i" }}</td>
+        <td class="text-right"><strong>${{ order.total|floatformat:2 }}</strong></td>
+        <td>
+          {% if order.status == 'REFUNDED' %}
+            <span class="badge badge-refunded">Refunded</span>
+          {% elif order.status == 'CANCELLED' %}
+            <span class="badge badge-cancelled">Cancelled</span>
+          {% else %}
+            <span class="badge badge-paid">Paid</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if order.status == 'PAID' %}
+          <button class="btn-refund"
+            onclick="openRefundModal({{ order.id }}, '{{ order.emailAddress|escapejs }}', '{{ order.total|floatformat:2 }}')">
+            <i class="fas fa-undo-alt"></i> Refund
+          </button>
+          {% else %}
+          <button class="btn-refund" disabled>Refunded</button>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-receipt" style="font-size:40px;color:#ddd;display:block;margin-bottom:12px;"></i>
+    <p>No orders found for this event.</p>
+  </div>
+  {% endif %}
+  {% elif not selected_event %}
+  <div class="empty-state">
+    <i class="fas fa-hand-point-up" style="font-size:40px;color:#ddd;display:block;margin-bottom:12px;"></i>
+    <p>Select an event above to view its orders.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Refund confirmation modal -->
+<div class="modal-overlay" id="refundModal">
+  <div class="modal-box">
+    <h3><i class="fas fa-exclamation-triangle" style="color:#d90075;"></i> Confirm Refund</h3>
+    <p id="modal-desc"></p>
+    <form method="post" id="refundForm">
+      {% csrf_token %}
+      <label style="font-size:13px;font-weight:bold;color:#555;">Reason (optional)</label>
+      <textarea name="reason" placeholder="e.g. Event cancelled"></textarea>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel-modal" onclick="closeRefundModal()">Cancel</button>
+        <button type="submit" class="btn-confirm-refund">
+          <i class="fas fa-undo-alt"></i> Confirm Refund
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openRefundModal(orderId, email, amount) {
+  document.getElementById('modal-desc').textContent =
+    'Refund $' + amount + ' to ' + email + ' for Order #' + orderId + '? This action cannot be undone.';
+  document.getElementById('refundForm').action =
+    '{% url "promoter:issue_refund" 0 %}'.replace('/0/', '/' + orderId + '/');
+  document.getElementById('refundModal').classList.add('open');
+}
+function closeRefundModal() {
+  document.getElementById('refundModal').classList.remove('open');
+}
+document.getElementById('refundModal').addEventListener('click', function(e) {
+  if (e.target === this) closeRefundModal();
+});
+</script>
+{% endblock %}

@@ -1636,3 +1636,196 @@ def partner_delete(request, partner_id):
         messages.error(request, "An error occurred while deleting the partner.")
         return redirect('promoter:partners_list')
 
+
+# ── Refunds ───────────────────────────────────────────────────────────────────
+
+@login_required(login_url='/promoter/account/login/')
+def order_refunds(request):
+    """
+    Refund management page.
+    Promoter selects an event, sees all paid orders, and can issue full refunds.
+    """
+    import stripe
+    from django.conf import settings
+    from order.models import Order, OrderItem
+
+    promoter = request.user.promoter
+    events = Event.objects.filter(promoter=promoter).order_by('-event_date')
+    selected_event = None
+    orders = None
+
+    event_id = request.GET.get('event_id')
+    if event_id:
+        selected_event = get_object_or_404(Event, pk=event_id, promoter=promoter)
+        orders = (
+            Order.objects
+            .filter(orderitem__event_ticket__event=selected_event)
+            .distinct()
+            .select_related('customer')
+            .prefetch_related('orderitem_set__event_ticket', 'refund')
+            .order_by('-created')
+        )
+
+    return render(request, 'promoter/order_refunds.html', {
+        'events': events,
+        'selected_event': selected_event,
+        'orders': orders,
+    })
+
+
+@login_required(login_url='/promoter/account/login/')
+def issue_refund(request, order_id):
+    """
+    POST: issue a full Stripe refund for an order, cancel its tickets,
+    and record the refund.
+
+    Execution order:
+      1. Validate ownership and guard against double-refund (optimistic read).
+      2. Call Stripe OUTSIDE any DB transaction — Stripe is irreversible;
+         keeping it inside atomic() would leave the DB un-updated if the
+         DB write fails after Stripe succeeds.
+      3. Re-fetch the order with select_for_update() inside atomic() to close
+         the race window between step 1 and step 3.
+      4. Write all DB changes atomically.
+    """
+    if request.method != 'POST':
+        return redirect('promoter:order_refunds')
+
+    import stripe
+    from django.conf import settings
+    from django.db import transaction
+    from order.models import Order, OrderItem, TicketRefund
+
+    promoter = request.user.promoter
+
+    # Scope the order to this promoter — must exist AND all items must belong to
+    # this promoter (prevents a promoter from refunding another promoter's items).
+    order = get_object_or_404(Order, pk=order_id)
+    if OrderItem.objects.filter(order=order).exclude(
+        event_ticket__event__promoter=promoter
+    ).exists():
+        messages.error(request, 'This order contains tickets from events you do not own.')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    # Optimistic guard (race-safe re-check happens inside atomic below)
+    if order.status == Order.STATUS_REFUNDED:
+        messages.warning(request, f'Order #{order.id} has already been refunded.')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    if not order.payment_code:
+        messages.error(request, f'Order #{order.id} has no payment record — cannot refund.')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    # ── Step 1: Call Stripe BEFORE opening a DB transaction ─────────────────
+    # If the DB write fails after this point, the refund_id is logged so
+    # support can reconcile manually. Never call Stripe inside atomic().
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    try:
+        stripe_refund = stripe.Refund.create(
+            payment_intent=order.payment_code,
+            reason='requested_by_customer',
+        )
+    except stripe.error.InvalidRequestError as e:
+        messages.error(request, f'Stripe error: {e.user_message or str(e)}')
+        logger.error(f'Stripe refund failed for order {order.id}: {e}')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+    except Exception as e:
+        messages.error(request, f'Could not connect to payment provider. Please try again.')
+        logger.error(f'Stripe refund error for order {order.id}: {e}')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    # ── Step 2: Write DB changes atomically with row lock ───────────────────
+    # select_for_update() closes the race window: a second concurrent request
+    # that also passed the optimistic guard above will block here until we
+    # commit, then see status=REFUNDED and skip the write.
+    from ticket.models import CancelledTicket
+    ticket_refund = None
+    try:
+        with transaction.atomic():
+            order_locked = Order.objects.select_for_update().get(pk=order.pk)
+
+            if order_locked.status == Order.STATUS_REFUNDED:
+                # Another request won the race — Stripe has issued a duplicate
+                # refund. Log for manual reconciliation; inform the user.
+                logger.warning(
+                    f'Duplicate Stripe refund race: order={order.pk} '
+                    f'stripe_refund={stripe_refund.id} — order was already marked '
+                    f'REFUNDED by a concurrent request.'
+                )
+                messages.warning(
+                    request,
+                    f'Order #{order.pk} was already refunded by a concurrent request. '
+                    f'Stripe refund {stripe_refund.id} may be a duplicate — please check '
+                    f'your Stripe dashboard.'
+                )
+                return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+            tickets_to_cancel = list(
+                Ticket.objects.filter(order_item__order=order_locked).select_related('order_item')
+            )
+            # ignore_conflicts=True: safe guard so a UUID collision on a partial
+            # retry never aborts the whole transaction.
+            CancelledTicket.objects.bulk_create([
+                CancelledTicket(
+                    original_ticket_id=t.id,
+                    uuid=t.uuid,
+                    event_ticket=t.event_ticket,
+                    customer=t.customer,
+                    order_item=t.order_item,
+                    price=t.price,
+                    guest_name=t.guest_name,
+                    day_number=t.day_number,
+                    day_event=t.day_event,
+                    vendor=t.vendor,
+                    original_checkin_date=t.checkin_date,
+                    cancelled_reason=CancelledTicket.REASON_REFUNDED,
+                )
+                for t in tickets_to_cancel
+            ], ignore_conflicts=True)
+            Ticket.objects.filter(order_item__order=order_locked).delete()
+
+            order_locked.status = Order.STATUS_REFUNDED
+            order_locked.save(update_fields=['status'])
+
+            ticket_refund = TicketRefund.objects.create(
+                order=order_locked,
+                stripe_refund_id=stripe_refund.id,
+                amount=order_locked.total,
+                reason=request.POST.get('reason', ''),
+                refunded_by=request.user,
+            )
+
+    except Exception as db_exc:
+        # Stripe refund succeeded but DB write failed.
+        # Log the Stripe refund ID so support can reconcile.
+        logger.error(
+            f'DB error after Stripe refund {stripe_refund.id} for order {order.pk}: '
+            f'{db_exc} — manual reconciliation required.'
+        )
+        messages.error(
+            request,
+            f'Payment was refunded in Stripe (ID: {stripe_refund.id}) but our '
+            f'database could not be updated. Please contact support with this '
+            f'reference: {stripe_refund.id}'
+        )
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    # ── Step 3: Send email (outside transaction — failure never rolls back) ──
+    if ticket_refund:
+        try:
+            order_locked.send_refund_notification(ticket_refund)
+        except Exception as email_exc:
+            logger.warning(f'Refund email failed for order {order.pk}: {email_exc}')
+
+    messages.success(
+        request,
+        f'Order #{order.pk} refunded successfully. '
+        f'${order_locked.total} will be returned to {order_locked.emailAddress}. '
+        f'Stripe refund ID: {stripe_refund.id}'
+    )
+    logger.info(
+        f'Refund issued: order={order.pk} stripe={stripe_refund.id} '
+        f'amount={order_locked.total} by={request.user.email}'
+    )
+    return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+

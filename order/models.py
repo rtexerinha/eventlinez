@@ -15,6 +15,15 @@ from ticket.models import Ticket
 
 
 class Order(models.Model):
+    STATUS_PAID = 'PAID'
+    STATUS_REFUNDED = 'REFUNDED'
+    STATUS_CANCELLED = 'CANCELLED'
+    STATUS_CHOICES = [
+        (STATUS_PAID, 'Paid'),
+        (STATUS_REFUNDED, 'Refunded'),
+        (STATUS_CANCELLED, 'Cancelled'),
+    ]
+
     token = models.CharField(max_length=250, blank=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     emailAddress = models.EmailField(max_length=250, blank=True)
@@ -31,6 +40,7 @@ class Order(models.Model):
     shippingCountry = models.CharField(max_length=200, blank=True)
     payment_code = models.CharField(max_length=200)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PAID)
 
     class Meta:
         ordering = ['-created']
@@ -53,6 +63,21 @@ class Order(models.Model):
             for ticket in item.ticket_set.all():
                 output_pdf = ticket.as_pdf()
                 email.attach('ticket_{}.pdf'.format(ticket.id), output_pdf, 'application/pdf')
+        email.send()
+
+    def send_refund_notification(self, refund):
+        subject = "Eventlinez – Refund Confirmation for Order #%s" % self.id
+        message = render_to_string('order/email/refund_email.html', {
+            'order': self,
+            'refund': refund,
+        })
+        email = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email="noreply@eventlinez.com",
+            to=[self.emailAddress],
+        )
+        email.content_subtype = "html"
         email.send()
 
     def ticket_qty(self):
@@ -84,6 +109,20 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return str(self.event_ticket)
+
+
+class TicketRefund(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='refund')
+    stripe_refund_id = models.CharField(max_length=100, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    reason = models.TextField(blank=True)
+    refunded_at = models.DateTimeField(auto_now_add=True)
+    refunded_by = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, related_name='issued_refunds'
+    )
+
+    def __str__(self):
+        return f'Refund #{self.id} — Order #{self.order_id} (${self.amount})'
 
 
 @receiver(post_save, sender=OrderItem)

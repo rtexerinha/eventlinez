@@ -147,3 +147,46 @@ class Ticket(models.Model):
         if self.day_number:
             return "%s/%s/Day %s" % (self.event_ticket.event.name, self.event_ticket.name, self.day_number)
         return "%s/%s" % (self.event_ticket.event.name, self.event_ticket.name)
+
+
+class CancelledTicket(models.Model):
+    """
+    Tickets moved here when an order is refunded or manually cancelled.
+    Removed from the main Ticket table so they never appear in check-in
+    lists or ticket management views. The QR scanner checks this table
+    when a UUID is not found in Ticket, and returns the appropriate alert.
+    """
+    REASON_REFUNDED = 'REFUNDED'
+    REASON_CANCELLED = 'CANCELLED'
+    REASON_CHOICES = [
+        (REASON_REFUNDED, 'Refunded'),
+        (REASON_CANCELLED, 'Cancelled'),
+    ]
+
+    original_ticket_id = models.IntegerField()
+    uuid = models.UUIDField(unique=True, db_index=True)
+    event_ticket = models.ForeignKey(
+        'event.Ticket', on_delete=models.SET_NULL, null=True, related_name='cancelled_tickets'
+    )
+    customer = models.ForeignKey(
+        'customer.Customer', on_delete=models.SET_NULL, null=True, related_name='cancelled_tickets'
+    )
+    order_item = models.ForeignKey(
+        'order.OrderItem', on_delete=models.SET_NULL, null=True, related_name='cancelled_tickets'
+    )
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    guest_name = models.CharField(max_length=161, blank=True, null=True)
+    day_number = models.PositiveSmallIntegerField(null=True, blank=True)
+    day_event = models.ForeignKey(
+        'event.Event', null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='cancelled_day_tickets'
+    )
+    vendor = models.ForeignKey(
+        'promoter.Vendor', blank=True, null=True, on_delete=models.SET_NULL
+    )
+    original_checkin_date = models.DateTimeField(null=True, blank=True)
+    cancelled_reason = models.CharField(max_length=20, choices=REASON_CHOICES, default=REASON_REFUNDED)
+    cancelled_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return "Cancelled Ticket #%s (%s)" % (self.original_ticket_id, self.cancelled_reason)

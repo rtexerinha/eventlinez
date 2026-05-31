@@ -150,9 +150,19 @@ class TicketSoldCheckinQrcodeAPIView(APIView):
     def post(self, request, uuid):
         try:
             ticket = Ticket.objects.select_related(
-                'event_ticket__event__promoter', 'day_event', 'customer'
+                'event_ticket__event__promoter', 'day_event', 'customer',
             ).get(uuid=uuid)
         except (Ticket.DoesNotExist, ValueError, ValidationError):
+            from ticket.models import CancelledTicket
+            cancelled = CancelledTicket.objects.filter(uuid=uuid).first()
+            if cancelled:
+                reason_label = 'refunded' if cancelled.cancelled_reason == CancelledTicket.REASON_REFUNDED else 'cancelled'
+                return Response(
+                    {'success': False,
+                     'message': f'This ticket has been {reason_label} and is no longer valid.',
+                     'already_checked_in': False},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             return Response(
                 {'success': False, 'message': 'Ticket not found. Please check the QR code.', 'already_checked_in': False},
                 status=status.HTTP_404_NOT_FOUND,

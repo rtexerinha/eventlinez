@@ -88,6 +88,14 @@
                     Validated Tickets
                 </a>
 
+                <a class="nav-link {% if 'order_refunds' in request.resolver_match.url_name or 'issue_refund' in request.resolver_match.url_name %} active {% endif %}"
+                    href="{% url 'promoter:order_refunds' %}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-undo-alt"></i>
+                    </div>
+                    Refunds
+                </a>
+
                 <!-- Guest Lists - Direct link to overview (if available) -->
                 {% url 'promoter:guest_lists_overview' as guest_lists_url %}
                 {% if guest_lists_url %}

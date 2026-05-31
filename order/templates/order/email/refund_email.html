@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refund Confirmation – Order #{{ order.id }}</title>
+    <style type="text/css">
+        #title-message { color: #d90075; }
+        .tg  { border-collapse: collapse; border-spacing: 0; }
+        .tg td { border-color: black; border-style: solid; border-width: 1px;
+                 font-family: Arial, sans-serif; font-size: 14px;
+                 overflow: hidden; padding: 10px 5px; word-break: normal; }
+        .tg th { border-color: black; border-style: solid; border-width: 1px;
+                 font-family: Arial, sans-serif; font-size: 14px; font-weight: normal;
+                 overflow: hidden; padding: 10px 5px; word-break: normal; }
+        .tg .header-pink  { background-color: #d90075; border-color: inherit; color: #fff;
+                            font-size: 14px; text-align: center; vertical-align: top; }
+        .tg .header-dark  { background-color: #d90075; border-color: inherit; color: #fff;
+                            text-align: center; vertical-align: top; }
+        .tg .bold-center  { border-color: inherit; font-size: 16px; font-weight: bold;
+                            text-align: center; vertical-align: top; }
+        .tg .center       { border-color: inherit; text-align: center; vertical-align: top; }
+        .tg .title-large  { border-color: inherit; color: #e10087; font-size: 32px;
+                            text-align: center; vertical-align: top; }
+        .tg .left         { border-color: #000; text-align: left; vertical-align: top; }
+        .tg .center-dark  { border-color: #000; color: #212529; text-align: center; vertical-align: top; }
+        .tg .footer-row   { background-color: #D90075; border-color: inherit; color: #FFF;
+                            font-weight: bold; text-align: center; vertical-align: top; }
+        a { color: #d90075; text-decoration: none; }
+        #mensage { padding-right: 50px; padding-left: 50px; }
+    </style>
+</head>
+<body>
+    <div style="width: 80%; margin: auto">
+        <div style="text-align: center">
+            <h1 id="title-message">Your Refund Has Been Processed</h1>
+            <p>
+                We're sorry to hear your event didn't go ahead.<br>
+                A full refund of <strong>${{ refund.amount }}</strong> has been issued
+                and will appear on your original payment method within <strong>5–10 business days</strong>.
+            </p>
+        </div>
+        <br>
+
+        <table class="tg" style="margin: auto">
+            <thead>
+                <tr>
+                    <th class="title-large" colspan="4">
+                        <span style="font-weight: 700;">Eventlinez</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="header-pink" colspan="2">
+                        <b>Order</b>: #{{ order.id }}
+                    </td>
+                    <td class="header-dark" colspan="2">
+                        <b>Refund Date:</b> {{ refund.refunded_at|date:"d M Y" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <strong>Name:</strong><br><br>
+                        {{ order.billingName }}
+                    </td>
+                    <td colspan="2">
+                        <strong>Tickets Refunded:</strong><br><br>
+                        {{ order.ticket_qty }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="left"><strong>Event / Ticket</strong></td>
+                    <td class="left"><strong>Qty</strong></td>
+                    <td class="left"><strong>Unit Price</strong></td>
+                    <td class="left"><strong>Sub-Total</strong></td>
+                </tr>
+                {% for item in order.orderitem_set.all %}
+                <tr>
+                    <td class="left">{{ item.event_ticket }}</td>
+                    <td class="center-dark">{{ item.quantity }}</td>
+                    <td class="left">${{ item.unit_price }}</td>
+                    <td class="center-dark">${{ item.sub_total }}</td>
+                </tr>
+                {% endfor %}
+
+                <tr>
+                    <td class="bold-center" colspan="2">Total Refunded</td>
+                    <td class="center" colspan="2">${{ refund.amount }}</td>
+                </tr>
+
+                <tr>
+                    <td class="footer-row" colspan="4">
+                        <strong>Refund Reference:</strong><br><br>
+                        {{ refund.stripe_refund_id }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+        {% if refund.reason %}
+        <p style="text-align: center; color: #555;">
+            <em>Reason: {{ refund.reason }}</em>
+        </p>
+        {% endif %}
+        <p id="mensage" style="text-align: center">
+            Any questions? Contact us at eventlinez.adm@gmail.com
+        </p>
+    </div>
+</body>
+</html>

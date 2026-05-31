@@ -868,9 +868,21 @@ class DoormanScanPaidTicketAPIView(APIView):
         # Fetch ticket — also catch ValueError for malformed UUID strings
         try:
             ticket = PaidTicket.objects.select_related(
-                'event_ticket__event__promoter', 'day_event', 'customer'
+                'event_ticket__event__promoter', 'day_event', 'customer',
             ).get(uuid=uuid_str)
         except (PaidTicket.DoesNotExist, ValueError, ValidationError):
+            from ticket.models import CancelledTicket
+            cancelled = CancelledTicket.objects.filter(uuid=uuid_str).first()
+            if cancelled:
+                reason_label = 'refunded' if cancelled.cancelled_reason == CancelledTicket.REASON_REFUNDED else 'cancelled'
+                return Response(
+                    TicketScanResultSerializer({
+                        'success': False,
+                        'message': f'This ticket has been {reason_label} and is no longer valid.',
+                        'already_checked_in': False,
+                    }).data,
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             return Response(
                 TicketScanResultSerializer({
                     'success': False,
@@ -1469,7 +1481,7 @@ class DoormanManualCheckinAPIView(APIView):
 
         try:
             ticket = PaidTicket.objects.select_related(
-                'event_ticket__event__promoter', 'day_event', 'customer'
+                'event_ticket__event__promoter', 'day_event', 'customer',
             ).get(pk=ticket_id)
         except PaidTicket.DoesNotExist:
             return Response({'success': False, 'message': 'Ticket not found.'},
