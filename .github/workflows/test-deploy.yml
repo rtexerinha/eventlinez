@@ -36,12 +36,11 @@ jobs:
         SEED_DATA=true
         EOF
 
-    - name: Build and test
+    - name: Build Docker images and start database
       run: |
         docker compose build --no-cache
         docker compose up -d db
-        
-        # Wait for database
+
         RETRIES=30
         while ! docker compose exec -T db pg_isready -U eventlinez -d eventlinez > /dev/null 2>&1; do
           RETRIES=$((RETRIES - 1))
@@ -54,16 +53,30 @@ jobs:
           sleep 2
         done
 
-        # Run migrations and tests in a fresh one-shot container (no cached loader state)
+    - name: Run migrations
+      run: |
         docker compose run --rm -e DEBUG=True web python manage.py migrate --noinput
+
+    - name: Cart reservation timer tests
+      run: |
+        docker compose run --rm -e DEBUG=True web python manage.py test \
+          cart.tests.CartReservationModelTest \
+          cart.tests.CartAddReservationTimerTest \
+          cart.tests.CartDetailExpiryTest \
+          cart.tests.CartCheckoutExpiryTest \
+          cart.tests.CartExpireEndpointTest \
+          --verbosity=2
+
+    - name: Full test suite
+      run: |
         docker compose run --rm -e DEBUG=True web python manage.py test --verbosity=2
 
-        # Start the full stack for the health check
+    - name: Start full stack and run health check
+      run: |
         docker compose up -d
         sleep 10
         docker compose exec -T web python manage.py collectstatic --noinput --clear
 
-        # Health check
         sleep 10
         if curl -f -s http://localhost:8000/admin/ > /dev/null; then
           echo "✅ Application health check passed"

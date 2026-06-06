@@ -112,6 +112,15 @@
         .container-center { padding-left: 30px; padding-right: 30px; }
     }
 
+    /* Hide hero slides 2+ before JS runs so they don't stack on slow connections */
+    .hero-content [data-hero-slide] ~ [data-hero-slide] {
+        opacity: 0;
+        position: absolute;
+        top: 0; left: 0; width: 100%;
+        pointer-events: none;
+    }
+    .hero-content { position: relative; }
+
     /* ── Hero ── */
     .hero-section {
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
@@ -1243,6 +1252,5 @@
 
         start();
     }());
-});
 </script>
 {% endblock %}

@@ -66,10 +66,22 @@ function getCSRFToken() {
   return getCookie('csrftoken');
 }
 
+function showCartError(msg) {
+  var el = document.getElementById('cart-error-msg');
+  if (!el) { alert(msg); return; }
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(el._hideTimer);
+  el._hideTimer = setTimeout(function () { el.style.display = 'none'; }, 6000);
+}
+
 function addToCard() {
   var addButton = document.getElementById('addToCartBtn');
   var originalValue = addButton ? addButton.value : '';
   if (addButton) { addButton.value = 'Adding...'; addButton.disabled = true; }
+
+  var errorEl = document.getElementById('cart-error-msg');
+  if (errorEl) errorEl.style.display = 'none';
 
   var linhas = document.getElementsByClassName("ticket-row");
   var tickets = [];
@@ -83,7 +95,7 @@ function addToCard() {
   }
 
   if (!hasValidTickets) {
-    alert('Please select at least one ticket before adding to cart.');
+    showCartError('Please select at least one ticket before adding to cart.');
     if (addButton) { addButton.value = originalValue; addButton.disabled = false; }
     return;
   }
@@ -102,7 +114,7 @@ function addToCard() {
       if (response.status === 429) {
         return response.json().then(function (data) {
           var minutes = Math.ceil(((data.reset_time || Date.now() / 1000 + 300) - Date.now() / 1000) / 60);
-          alert('Too many requests. Please wait ' + minutes + ' minute(s) before trying again.');
+          showCartError('Too many requests. Please wait ' + minutes + ' minute(s) before trying again.');
           throw new Error('Rate limited');
         });
       }
@@ -111,7 +123,7 @@ function addToCard() {
     })
     .then(function () { window.location.href = "/cart/"; })
     .catch(function (error) {
-      if (error.message !== 'Rate limited') alert(error.message || 'Failed to add items to cart. Please try again.');
+      if (error.message !== 'Rate limited') showCartError(error.error || error.message || 'Failed to add items to cart. Please try again.');
     })
     .finally(function () {
       if (addButton) { addButton.value = originalValue; addButton.disabled = false; }
@@ -146,7 +158,7 @@ function doCheckout() {
       if (result && result.error) alert('Checkout error: ' + result.error.message);
     })
     .catch(function (error) {
-      if (error.message !== 'Rate limited') alert(error.message || 'Checkout failed. Please try again.');
+      if (error.message !== 'Rate limited') alert(error.error || error.message || 'Checkout failed. Please try again.');
     })
     .finally(function () {
       if (checkoutBtn) { checkoutBtn.innerHTML = originalText; checkoutBtn.disabled = false; }

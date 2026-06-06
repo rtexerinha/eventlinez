@@ -46,10 +46,10 @@ your tickets on Eventlinez.{% endblock %}
         <aside class="col-lg-8" style="padding: 0!important;">
             {% if event.image and event.image_sized %}
             <img class="m-img-card-banner" style="border-radius: 6px;" src="{{event.image_sized.url}}"
-                alt="{{event.name}}" loading="lazy" decoding="async" />
+                alt="{{event.name}}" width="800" height="450" fetchpriority="high" decoding="async" />
             {% elif event.image %}
             <img class="m-img-card-banner" style="border-radius: 6px;" src="{{event.image.url}}" alt="{{event.name}}"
-                loading="lazy" decoding="async" />
+                width="800" height="450" fetchpriority="high" decoding="async" />
             {% else %}
             <div class="m-img-card-banner"
                 style="border-radius: 6px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 300px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
@@ -177,6 +177,7 @@ your tickets on Eventlinez.{% endblock %}
                         <input onclick="addToCard()" id="addToCartBtn"
                             class="buttons-primary button-details-width h5-home" type="submit" value="Add to Cart">
                         {% endif %}
+                        <div id="cart-error-msg" style="display:none; margin-top:12px; padding:10px 14px; background:#fde8ef; border-left:4px solid #E10087; border-radius:4px; font-size:0.875rem; color:#7b0040;"></div>
                     </div>
                     {% endif %}
 

@@ -5,8 +5,8 @@ import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 
@@ -170,12 +170,17 @@ def cart_add(request):
         if items_added == 0:
             return JsonResponse({"error": "No valid tickets were added to cart"}, status=400)
 
+        # Start / reset the 5-minute reservation timer every time items are added
+        cart.reserved_at = timezone.now()
+        cart.save(update_fields=['reserved_at'])
+
         promo_cleared = _clear_cart_promo(cart)
         return JsonResponse({
             "status": "success",
             "message": f"Added {items_added} item{'s' if items_added != 1 else ''} to cart",
             "cart_id": cart.id,
             "promo_cleared": promo_cleared,
+            "reservation_seconds": Cart.RESERVATION_MINUTES * 60,
         }, status=201)
 
     except Exception as e:
@@ -216,7 +221,12 @@ def change_quantity(request, item_id, operation):
 def cart_detail(request, cart_items=None):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
-        
+
+        if cart.is_expired():
+            cart.clear_items()
+            from django.contrib import messages as _messages
+            _messages.warning(request, 'Your reservation expired. Please add tickets again.')
+
         all_items = CartItem.objects.filter(cart=cart, active=True)
         sold_out_items = all_items.filter(ticket__sold_out=True)
 
@@ -247,6 +257,7 @@ def cart_detail(request, cart_items=None):
         subtotal = Decimal('0.00')
         total = Decimal('0.00')
         cart = None
+        seconds_remaining = 0
 
     # Track cart abandonment if user has items in cart
     if cart_items and request.user.is_authenticated:
@@ -263,12 +274,15 @@ def cart_detail(request, cart_items=None):
         except Exception as e:
             logger.warning(f"Failed to track cart abandonment: {e}")
 
+    seconds_remaining = cart.seconds_remaining if cart else 0
+
     context = {
         'total': total,
         'subtotal': subtotal,
         'cart_items': cart_items,
         'promo_code': promo_code,
         'cart': cart,
+        'reservation_seconds': seconds_remaining,
         'PROD': settings.PROD,
     }
     
@@ -437,6 +451,13 @@ def checkout(request):
     if not items.exists():
         return JsonResponse({'error': 'Your cart is empty.'}, status=400)
 
+    if cart.is_expired():
+        cart.clear_items()
+        return JsonResponse({
+            'error': 'cart_expired',
+            'message': 'Your reservation expired. Please add tickets again.',
+        }, status=400)
+
     invalid_items = items.filter(ticket__sold_out=True)
     if invalid_items.exists():
         names = [item.ticket.name for item in invalid_items]
@@ -527,3 +548,16 @@ def checkout(request):
         'session_id': session.id,
         'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY
     })
+
+
+@csrf_exempt
+def expire_cart(request):
+    """Called by the frontend countdown timer when the reservation window closes."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart.clear_items()
+        return JsonResponse({'status': 'expired'})
+    except Cart.DoesNotExist:
+        return JsonResponse({'status': 'already_empty'})

@@ -84,6 +84,35 @@ This is the shopping cart page. Proceed to review your items and place the order
         <h3 class="mt-2 h3-home p-light">Cart summary</h3>
     </header>
 
+    {% if reservation_seconds > 0 %}
+    <div id="reservation-banner" class="alert d-flex align-items-center justify-content-between mt-3 mb-0 px-3 py-2"
+         style="background:#fff3cd; border:1px solid #ffc107; border-radius:8px;">
+        <span style="font-size:0.95rem;">
+            <i class="fas fa-clock mr-2" style="color:#d90075;"></i>
+            <strong>Your tickets are reserved for</strong>
+        </span>
+        <span id="reservation-countdown"
+              style="font-size:1.3rem; font-weight:700; color:#d90075; letter-spacing:2px; min-width:55px; text-align:right;">
+            05:00
+        </span>
+    </div>
+    {% endif %}
+
+    <!-- Expiry Modal -->
+    <div id="expiry-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:12px; padding:2rem; max-width:380px; width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            <i class="fas fa-clock" style="font-size:2.5rem; color:#d90075; margin-bottom:1rem;"></i>
+            <h4 style="margin-bottom:0.5rem;">Reservation Expired</h4>
+            <p style="color:#666; margin-bottom:1.5rem;">
+                Your 5-minute reservation window has ended. Please add tickets again to continue.
+            </p>
+            <a href="{% url 'shop:index' %}" class="buttons-primary h6-home center-text-button"
+               style="display:inline-block; text-decoration:none;">
+                Browse Events
+            </a>
+        </div>
+    </div>
+
     <main class="col-12 p-0">
         <article class="d-lg-flex d-none mt-4 border-b">
             <div class="col-5">
@@ -484,6 +513,57 @@ This is the shopping cart page. Proceed to review your items and place the order
 </script>
 
 <script>
+    // Cart reservation countdown timer
+    (function () {
+        var secondsLeft = {{ reservation_seconds|default:0 }};
+        if (secondsLeft <= 0) return;
+
+        var display = document.getElementById('reservation-countdown');
+        var banner = document.getElementById('reservation-banner');
+        var modal = document.getElementById('expiry-modal');
+        var expired = false;
+
+        function fmt(s) {
+            var m = Math.floor(s / 60);
+            var sec = s % 60;
+            return (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+
+        function tick() {
+            if (expired) return;
+            display.textContent = fmt(secondsLeft);
+
+            if (secondsLeft <= 60) {
+                banner.style.background = '#fde8ef';
+                banner.style.borderColor = '#d90075';
+            }
+
+            if (secondsLeft <= 0) {
+                expired = true;
+                clearInterval(timer);
+                // Tell the backend to clear the cart
+                fetch('{% url "cart:expire" %}', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCSRFToken() },
+                });
+                // Block the page and show the modal
+                banner.style.display = 'none';
+                modal.style.display = 'flex';
+                // Disable checkout button so they can't race past it
+                var btn = document.getElementById('checkout-btn');
+                if (btn) { btn.disabled = true; btn.textContent = 'Session expired'; }
+                return;
+            }
+
+            secondsLeft--;
+        }
+
+        tick();
+        var timer = setInterval(tick, 1000);
+    })();
+</script>
+
+<script>
     // Enhanced doCheckout function with better error handling
     function doCheckout() {
         console.log('Checkout button clicked');
@@ -513,6 +593,14 @@ This is the shopping cart page. Proceed to review your items and place the order
 
                 return result.json().then(data => {
                     if (!result.ok) {
+                        if (data.error === 'cart_expired') {
+                            // Show the expiry modal instead of a generic alert
+                            var modal = document.getElementById('expiry-modal');
+                            if (modal) modal.style.display = 'flex';
+                            checkoutBtn.innerHTML = originalText;
+                            checkoutBtn.disabled = false;
+                            throw new Error('cart_expired');
+                        }
                         throw new Error(data.error || `Server error (${result.status})`);
                     }
                     return data;
@@ -538,8 +626,7 @@ This is the shopping cart page. Proceed to review your items and place the order
             })
             .catch(function (error) {
                 console.error("Checkout Error:", error);
-                // Don't show alert if we're just redirecting to login
-                if (error.message !== 'Redirecting to login') {
+                if (error.message !== 'Redirecting to login' && error.message !== 'cart_expired') {
                     alert('Checkout failed: ' + error.message);
                     checkoutBtn.innerHTML = originalText;
                     checkoutBtn.disabled = false;

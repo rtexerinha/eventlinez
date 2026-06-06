@@ -1,7 +1,11 @@
+import json
 import tempfile
+from datetime import timedelta
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.test import TestCase, override_settings
+from django.utils import timezone
 from model_bakery import baker
 from django.urls import reverse
 from django.contrib.auth.models import User
@@ -279,3 +283,249 @@ class CardChangeQuantityViewTest(TestCase):
         self.client.post(reverse('cart:change-quantity', args=[item.id, 'decrement']))
         item.refresh_from_db()
         self.assertEqual(item.quantity, 1)
+
+
+# ---------------------------------------------------------------------------
+# Cart reservation timer tests
+# ---------------------------------------------------------------------------
+
+class CartReservationModelTest(TestCase):
+    """Unit tests for Cart.is_expired / seconds_remaining / clear_items."""
+
+    def _make_cart(self, reserved_at=None):
+        cart = baker.make(Cart)
+        if reserved_at is not None:
+            cart.reserved_at = reserved_at
+            cart.save(update_fields=['reserved_at'])
+        return cart
+
+    def test_is_expired_false_when_no_reserved_at(self):
+        cart = self._make_cart()
+        self.assertFalse(cart.is_expired())
+
+    def test_is_expired_false_within_window(self):
+        cart = self._make_cart(reserved_at=timezone.now() - timedelta(minutes=3))
+        self.assertFalse(cart.is_expired())
+
+    def test_is_expired_true_after_window(self):
+        cart = self._make_cart(reserved_at=timezone.now() - timedelta(minutes=6))
+        self.assertTrue(cart.is_expired())
+
+    def test_is_expired_boundary_exactly_at_limit(self):
+        # exactly 5 minutes ago is NOT yet expired (> not >=)
+        # Pin timezone.now() so there's no timing gap between setup and assertion
+        fixed_now = timezone.now()
+        cart = self._make_cart(reserved_at=fixed_now - timedelta(minutes=5))
+        with patch('django.utils.timezone.now', return_value=fixed_now):
+            self.assertFalse(cart.is_expired())
+
+    def test_seconds_remaining_zero_when_no_reserved_at(self):
+        cart = self._make_cart()
+        self.assertEqual(cart.seconds_remaining, 0)
+
+    def test_seconds_remaining_positive_within_window(self):
+        cart = self._make_cart(reserved_at=timezone.now() - timedelta(minutes=2))
+        remaining = cart.seconds_remaining
+        # Should be around 180s (3 min left); allow ±2s for test execution time
+        self.assertGreater(remaining, 175)
+        self.assertLessEqual(remaining, 180)
+
+    def test_seconds_remaining_zero_when_expired(self):
+        cart = self._make_cart(reserved_at=timezone.now() - timedelta(minutes=6))
+        self.assertEqual(cart.seconds_remaining, 0)
+
+    def test_clear_items_removes_all_cart_items(self):
+        event = baker.make(Event, description='x')
+        ticket = baker.make(Ticket, event=event, quantity=10)
+        cart = self._make_cart(reserved_at=timezone.now())
+        CartItem.objects.create(cart=cart, ticket=ticket, quantity=2)
+        CartItem.objects.create(cart=cart, ticket=ticket, quantity=1)
+        self.assertEqual(cart.cartitem_set.count(), 2)
+
+        cart.clear_items()
+
+        self.assertEqual(cart.cartitem_set.count(), 0)
+
+    def test_clear_items_resets_timer_and_promo(self):
+        cart = self._make_cart(reserved_at=timezone.now())
+        cart.applied_promo_code = 'SAVE10'
+        cart.promo_discount = 5
+        cart.save()
+
+        cart.clear_items()
+        cart.refresh_from_db()
+
+        self.assertIsNone(cart.reserved_at)
+        self.assertIsNone(cart.applied_promo_code)
+        self.assertEqual(cart.promo_discount, 0)
+
+
+class CartAddReservationTimerTest(TestCase):
+    """cart_add should set reserved_at and return reservation_seconds."""
+
+    def setUp(self):
+        event = baker.make(Event, description='x')
+        self.ticket = baker.make(Ticket, event=event, quantity=20, price=50)
+
+    def _add(self, qty=1):
+        payload = json.dumps({'tickets': [{'id': self.ticket.id, 'quantity': qty}]})
+        return self.client.post(reverse('cart:add_cart'), payload, content_type='application/json')
+
+    def test_cart_add_sets_reserved_at(self):
+        before = timezone.now()
+        self._add()
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+        self.assertIsNotNone(cart.reserved_at)
+        self.assertGreaterEqual(cart.reserved_at, before)
+
+    def test_cart_add_resets_timer_on_second_add(self):
+        # First add — set reserved_at to something old
+        self._add()
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+        old_time = timezone.now() - timedelta(minutes=4)
+        cart.reserved_at = old_time
+        cart.save(update_fields=['reserved_at'])
+
+        # Second add should push reserved_at forward
+        before_second = timezone.now()
+        self._add()
+        cart.refresh_from_db()
+        self.assertGreaterEqual(cart.reserved_at, before_second)
+
+    def test_cart_add_response_includes_reservation_seconds(self):
+        response = self._add()
+        data = response.json()
+        self.assertIn('reservation_seconds', data)
+        self.assertEqual(data['reservation_seconds'], Cart.RESERVATION_MINUTES * 60)
+
+
+class CartDetailExpiryTest(TestCase):
+    """cart_detail should auto-clear expired carts."""
+
+    def setUp(self):
+        event = baker.make(Event, description='x')
+        self.ticket = baker.make(Ticket, event=event, quantity=20, price=50)
+
+    def test_expired_cart_is_cleared_on_page_load(self):
+        # Add an item so the cart exists
+        payload = json.dumps({'tickets': [{'id': self.ticket.id, 'quantity': 1}]})
+        self.client.post(reverse('cart:add_cart'), payload, content_type='application/json')
+
+        # Manually expire the cart
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+        cart.reserved_at = timezone.now() - timedelta(minutes=6)
+        cart.save(update_fields=['reserved_at'])
+
+        self.client.get(reverse('cart:detail'))
+
+        cart.refresh_from_db()
+        self.assertIsNone(cart.reserved_at)
+        self.assertEqual(cart.cartitem_set.count(), 0)
+
+    def test_active_cart_is_not_cleared_on_page_load(self):
+        payload = json.dumps({'tickets': [{'id': self.ticket.id, 'quantity': 1}]})
+        self.client.post(reverse('cart:add_cart'), payload, content_type='application/json')
+
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+        self.assertEqual(cart.cartitem_set.count(), 1)
+
+        self.client.get(reverse('cart:detail'))
+
+        cart.refresh_from_db()
+        self.assertEqual(cart.cartitem_set.count(), 1)
+
+    def test_expired_cart_shows_warning_message(self):
+        payload = json.dumps({'tickets': [{'id': self.ticket.id, 'quantity': 1}]})
+        self.client.post(reverse('cart:add_cart'), payload, content_type='application/json')
+
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+        cart.reserved_at = timezone.now() - timedelta(minutes=6)
+        cart.save(update_fields=['reserved_at'])
+
+        response = self.client.get(reverse('cart:detail'))
+        messages = [str(m) for m in response.context['messages']]
+        self.assertTrue(any('expired' in m.lower() for m in messages))
+
+
+class CartCheckoutExpiryTest(TestCase):
+    """checkout view should reject expired carts before hitting Stripe."""
+
+    def setUp(self):
+        event = baker.make(Event, description='x')
+        self.ticket = baker.make(Ticket, event=event, quantity=20, price=50)
+        self.user = User.objects.create_user('testuser', 'test@test.com', 'password')
+
+    def _add_item(self):
+        payload = json.dumps({'tickets': [{'id': self.ticket.id, 'quantity': 1}]})
+        self.client.post(reverse('cart:add_cart'), payload, content_type='application/json')
+
+    def test_checkout_blocked_when_cart_expired(self):
+        self.client.login(username='testuser', password='password')
+        self._add_item()
+
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+        cart.reserved_at = timezone.now() - timedelta(minutes=6)
+        cart.save(update_fields=['reserved_at'])
+
+        response = self.client.post(reverse('cart:checkout'),
+                                    content_type='application/json',
+                                    HTTP_X_CSRFTOKEN='test')
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertEqual(data['error'], 'cart_expired')
+
+    def test_checkout_clears_cart_when_expired(self):
+        self.client.login(username='testuser', password='password')
+        self._add_item()
+
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+        cart.reserved_at = timezone.now() - timedelta(minutes=6)
+        cart.save(update_fields=['reserved_at'])
+
+        self.client.post(reverse('cart:checkout'),
+                         content_type='application/json',
+                         HTTP_X_CSRFTOKEN='test')
+
+        cart.refresh_from_db()
+        self.assertIsNone(cart.reserved_at)
+        self.assertEqual(cart.cartitem_set.count(), 0)
+
+    def test_checkout_unauthenticated_returns_401(self):
+        self._add_item()
+        response = self.client.post(reverse('cart:checkout'),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+
+
+class CartExpireEndpointTest(TestCase):
+    """POST /cart/expire/ clears the cart immediately."""
+
+    def setUp(self):
+        event = baker.make(Event, description='x')
+        self.ticket = baker.make(Ticket, event=event, quantity=20, price=50)
+
+    def _add_item(self):
+        payload = json.dumps({'tickets': [{'id': self.ticket.id, 'quantity': 1}]})
+        self.client.post(reverse('cart:add_cart'), payload, content_type='application/json')
+
+    def test_expire_clears_cart_items(self):
+        self._add_item()
+        cart = Cart.objects.get(cart_id=self.client.session.session_key)
+        self.assertEqual(cart.cartitem_set.count(), 1)
+
+        response = self.client.post(reverse('cart:expire'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'expired')
+
+        cart.refresh_from_db()
+        self.assertEqual(cart.cartitem_set.count(), 0)
+        self.assertIsNone(cart.reserved_at)
+
+    def test_expire_returns_already_empty_when_no_cart(self):
+        response = self.client.post(reverse('cart:expire'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'already_empty')
+
+    def test_expire_get_not_allowed(self):
+        response = self.client.get(reverse('cart:expire'))
+        self.assertEqual(response.status_code, 405)

@@ -54,7 +54,17 @@ jobs:
       run: |
         python manage.py migrate
 
-    - name: Run tests
+    - name: Cart reservation timer tests
+      run: |
+        python manage.py test \
+          cart.tests.CartReservationModelTest \
+          cart.tests.CartAddReservationTimerTest \
+          cart.tests.CartDetailExpiryTest \
+          cart.tests.CartCheckoutExpiryTest \
+          cart.tests.CartExpireEndpointTest \
+          --verbosity=2
+
+    - name: Full test suite with coverage
       run: |
         coverage run --source='.' manage.py test
         coverage report

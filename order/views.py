@@ -15,6 +15,7 @@ from .models import Order
 from .models import OrderItem
 from promoter.models import PromoCode, PromoCodeUsage
 from django.db import transaction
+from decimal import Decimal
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -37,23 +38,115 @@ def stripe_webhook(request):
         logger.error(f"Invalid signature: {e}")
         return JsonResponse({'error': 'Invalid signature'}, status=400)
 
-    # Handle the event
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        logger.info(f"Checkout session completed: {session}")
-        # Add your logic here (e.g., update order status, send email)
+    try:
+        if event['type'] == 'checkout.session.completed':
+            _webhook_recover_order(event['data']['object'])
 
-    elif event['type'] == 'checkout.session.async_payment_succeeded':
-        session = event['data']['object']
-        logger.info(f"Async payment succeeded: {session}")
-        # Add your logic here
+        elif event['type'] == 'checkout.session.async_payment_succeeded':
+            logger.info(f"Async payment succeeded: {event['data']['object'].get('id')}")
 
-    elif event['type'] == 'checkout.session.async_payment_failed':
-        session = event['data']['object']
-        logger.warning(f"Async payment failed: {session}")
-        # Add your logic here
+        elif event['type'] == 'checkout.session.async_payment_failed':
+            logger.warning(f"Async payment failed: {event['data']['object'].get('id')}")
+
+    except Exception as e:
+        logger.error(f"Webhook handler error for {event.get('type')}: {e}", exc_info=True)
+        return JsonResponse({'error': 'handler_error'}, status=500)
 
     return JsonResponse({'status': 'success'})
+
+
+def _webhook_recover_order(session):
+    """
+    Called from the stripe_webhook when checkout.session.completed fires.
+    Creates the order if the success-URL redirect never completed (closed browser,
+    lost session cookie, etc.).  Idempotent: if the redirect already created the
+    order we skip silently.
+    """
+    session_id = session.get('id', '')
+
+    # Idempotency — success URL already created the order
+    if Order.objects.filter(token=session_id).exists():
+        logger.info(f"Webhook: order already exists for session {session_id}, skipping")
+        return
+
+    if session.get('payment_status') != 'paid':
+        logger.warning(
+            f"Webhook: session {session_id} payment_status={session.get('payment_status')}, skipping"
+        )
+        return
+
+    cart_id = session.get('client_reference_id')
+    if not cart_id:
+        logger.error(f"Webhook: no client_reference_id in session {session_id}")
+        return
+
+    try:
+        cart = Cart.objects.get(id=cart_id)
+    except Cart.DoesNotExist:
+        logger.error(
+            f"Webhook RECOVERY FAILED: cart {cart_id} already deleted for paid session "
+            f"{session_id} (payment_intent={session.get('payment_intent')}) — manual recovery required"
+        )
+        return
+
+    # Customer lookup by email from Stripe
+    customer_details = session.get('customer_details') or {}
+    customer_email = customer_details.get('email') or session.get('customer_email') or ''
+    if not customer_email:
+        logger.error(f"Webhook: no customer email in session {session_id}")
+        return
+
+    from customer.models import Customer as _Customer
+    try:
+        customer = _Customer.objects.get(email=customer_email)
+    except _Customer.DoesNotExist:
+        logger.error(
+            f"Webhook: customer with email '{customer_email}' not found for session {session_id}"
+        )
+        return
+
+    items = cart.cartitem_set.filter(active=True)
+    if not items.exists():
+        logger.error(f"Webhook: cart {cart_id} has no active items for session {session_id}")
+        return
+
+    # Use the actual amount Stripe charged (in cents → dollars)
+    stripe_total = Decimal(session.get('amount_total', 0)) / 100
+
+    try:
+        with transaction.atomic():
+            order = Order.objects.create(
+                total=stripe_total,
+                emailAddress=customer.email,
+                customer=customer,
+                token=session_id,
+                payment_code=session.get('payment_intent', ''),
+            )
+            for item in items:
+                OrderItem.objects.create(
+                    event_ticket=item.ticket,
+                    quantity=item.quantity,
+                    unit_price=item.ticket.price,
+                    amount=item.price_total(),
+                    fee=item.fee(),
+                    promo_code=item.promo_code,
+                    order=order,
+                    vendor=item.vendor,
+                )
+            cart.delete()
+
+        logger.info(
+            f"Webhook: recovered order {order.id} for session {session_id}, customer={customer_email}"
+        )
+
+        try:
+            send_mail(order.id)
+        except Exception as e:
+            logger.error(f"Webhook: email failed for recovered order {order.id}: {e}")
+
+    except Exception as e:
+        logger.error(f"Webhook: failed to create order for session {session_id}: {e}", exc_info=True)
+        raise  # re-raise so the webhook view returns 500 → Stripe retries
 
 
 @login_required()

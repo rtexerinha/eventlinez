@@ -13,13 +13,36 @@ EVENTLINEZ_FEE = getattr(settings, "EVENTLINEZ_FEE", 0.12)
 
 
 class Cart(models.Model):
+	RESERVATION_MINUTES = 5
+
 	cart_id = models.CharField(max_length=250, blank=True)
 	date_added = models.DateField(auto_now_add=True)
 	applied_promo_code = models.CharField(max_length=20, null=True, blank=True)
 	promo_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+	reserved_at = models.DateTimeField(null=True, blank=True)
 
 	class Meta:
 		ordering = ['date_added']
+
+	def is_expired(self):
+		if not self.reserved_at:
+			return False
+		return timezone.now() > self.reserved_at + timedelta(minutes=self.RESERVATION_MINUTES)
+
+	@property
+	def seconds_remaining(self):
+		if not self.reserved_at:
+			return 0
+		expiry = self.reserved_at + timedelta(minutes=self.RESERVATION_MINUTES)
+		remaining = (expiry - timezone.now()).total_seconds()
+		return max(0, int(remaining))
+
+	def clear_items(self):
+		self.cartitem_set.all().delete()
+		self.reserved_at = None
+		self.applied_promo_code = None
+		self.promo_discount = 0
+		self.save(update_fields=['reserved_at', 'applied_promo_code', 'promo_discount'])
 
 	def amount(self):
 		total = 0
