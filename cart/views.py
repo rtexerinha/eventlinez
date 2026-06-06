@@ -224,8 +224,7 @@ def cart_detail(request, cart_items=None):
 
         if cart.is_expired():
             cart.clear_items()
-            from django.contrib import messages as _messages
-            _messages.warning(request, 'Your reservation expired. Please add tickets again.')
+            messages.warning(request, 'Your reservation expired. Please add tickets again.')
 
         all_items = CartItem.objects.filter(cart=cart, active=True)
         sold_out_items = all_items.filter(ticket__sold_out=True)

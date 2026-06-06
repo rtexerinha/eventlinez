@@ -545,8 +545,22 @@ This is the shopping cart page. Proceed to review your items and place the order
                 fetch('{% url "cart:expire" %}', {
                     method: 'POST',
                     headers: { 'X-CSRFToken': getCSRFToken() },
+                })
+                .then(function(response) {
+                    if (!response.ok) {
+                        console.error('Cart expiry request failed with status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.error) {
+                        console.error('Cart expiry error:', data.error);
+                    }
+                })
+                .catch(function(err) {
+                    console.error('Cart expiry network error:', err);
                 });
-                // Block the page and show the modal
+                // Block the page and show the modal regardless of server response
                 banner.style.display = 'none';
                 modal.style.display = 'flex';
                 // Disable checkout button so they can't race past it

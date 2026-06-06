@@ -98,7 +98,7 @@ def _webhook_recover_order(session):
 
     from customer.models import Customer as _Customer
     try:
-        customer = _Customer.objects.get(email=customer_email)
+        customer = _Customer.objects.get(email__iexact=customer_email.strip())
     except _Customer.DoesNotExist:
         logger.error(
             f"Webhook: customer with email '{customer_email}' not found for session {session_id}"
@@ -133,6 +133,32 @@ def _webhook_recover_order(session):
                     order=order,
                     vendor=item.vendor,
                 )
+            # Track promo code usage — mirror the logic in the create view
+            from django.db.models import F as _F
+            promo_codes_used = set(
+                item.promo_code for item in items if item.promo_code
+            )
+            for code in promo_codes_used:
+                try:
+                    promo = PromoCode.objects.select_for_update().get(code=code)
+                    already_recorded = PromoCodeUsage.objects.filter(
+                        promo_code=promo,
+                        order_id=str(order.id)
+                    ).exists()
+                    if not already_recorded:
+                        PromoCodeUsage.objects.create(
+                            promo_code=promo,
+                            customer_email=customer.email,
+                            order_id=str(order.id),
+                            discount_amount=Decimal(str(session.get('amount_discount') or 0)) / 100,
+                        )
+                        PromoCode.objects.filter(pk=promo.pk).update(
+                            current_uses=_F('current_uses') + 1
+                        )
+                        logger.info(f"Webhook: promo code '{code}' usage recorded for order {order.id}")
+                except PromoCode.DoesNotExist:
+                    logger.warning(f"Webhook: promo code '{code}' not found during usage tracking")
+
             cart.delete()
 
         logger.info(
