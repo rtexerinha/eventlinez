@@ -853,10 +853,19 @@ def revenue_report(request):
                 # specific day. Full Pass tickets are matched only via day_event so selecting
                 # the Day-1 event never shows Day-2 or Day-3 tickets.
                 from django.db.models import Q as _Q
+                from ticket.models import CancelledTicket as _CancelledTicket
                 tickets_sold = Ticket.objects.filter(
                     _Q(event_ticket__event=selected_event, day_number__isnull=True) |
                     _Q(day_event=selected_event)
                 ).select_related('order_item', 'order_item__order', 'event_ticket', 'customer', 'day_event').order_by('-created_at')
+
+                # Refunded tickets for this event (moved out of Ticket into CancelledTicket)
+                refunded_tickets = _CancelledTicket.objects.filter(
+                    cancelled_reason=_CancelledTicket.REASON_REFUNDED
+                ).filter(
+                    _Q(event_ticket__event=selected_event, day_number__isnull=True) |
+                    _Q(day_event=selected_event)
+                ).select_related('event_ticket', 'customer', 'order_item').order_by('-cancelled_at')
 
                 # Pre-fetch PromoCodeUsage records keyed by order_id so we can attribute
                 # per-ticket discounts. The discount is stored per-order, not per-ticket.
@@ -870,25 +879,39 @@ def revenue_report(request):
                         for _u in PromoCodeUsage.objects.filter(order_id__in=order_ids):
                             promo_usage_by_order[_u.order_id] = _u
 
-                # Calculate totals
+                # ── Helper to extract customer display info ──
+                def _customer_info(obj):
+                    name, email = 'Guest', ''
+                    cust = getattr(obj, 'customer', None)
+                    if cust:
+                        try:
+                            if hasattr(cust, 'get_full_name'):
+                                name = cust.get_full_name()
+                            elif hasattr(cust, 'first_name'):
+                                name = f"{getattr(cust, 'first_name', '')} {getattr(cust, 'last_name', '')}".strip()
+                            if not name:
+                                name = str(cust)
+                            email = getattr(cust, 'email', '')
+                        except Exception:
+                            name = 'Customer'
+                    guest = getattr(obj, 'guest_name', None)
+                    if not name or name.strip() in ('', 'Customer'):
+                        name = guest or 'Guest'
+                    return name, email
+
+                # ── Active tickets ──
                 gross_revenue = Decimal('0.00')
                 total_promo_discount = Decimal('0.00')
-
-                # Build detailed ticket information
                 ticket_details = []
+
                 for ticket in tickets_sold:
-                    # ticket.price is already the correct value: full price for regular tickets,
-                    # or the per-day split amount for Full Pass tickets.
                     ticket_price = ticket.price or Decimal('0.00')
                     gross_revenue += ticket_price
 
-                    # Get promo code and discount info
                     promo_code_used = ''
                     discount_amount = Decimal('0.00')
-
                     if hasattr(ticket, 'order_item') and ticket.order_item:
                         promo_code_used = ticket.order_item.promo_code or ''
-
                         if promo_code_used:
                             oid = str(ticket.order_item.order_id)
                             usage = promo_usage_by_order.get(oid)
@@ -896,29 +919,8 @@ def revenue_report(request):
                                 qty = max(ticket.order_item.quantity, 1)
                                 discount_amount = (usage.discount_amount / qty).quantize(Decimal('0.01'))
                                 total_promo_discount += discount_amount
-                    
-                    # Get customer information
-                    customer_name = 'Guest'
-                    customer_email = ''
-                    
-                    if ticket.customer:
-                        try:
-                            if hasattr(ticket.customer, 'get_full_name'):
-                                customer_name = ticket.customer.get_full_name()
-                            elif hasattr(ticket.customer, 'first_name'):
-                                customer_name = f"{getattr(ticket.customer, 'first_name', '')} {getattr(ticket.customer, 'last_name', '')}".strip()
-                            
-                            if not customer_name:
-                                customer_name = str(ticket.customer)
-                                
-                            customer_email = getattr(ticket.customer, 'email', '')
-                        except:
-                            customer_name = 'Customer'
-                    
-                    # Use guest name if available
-                    if not customer_name or customer_name.strip() in ['', 'Customer']:
-                        customer_name = ticket.guest_name or 'Guest'
-                    
+
+                    customer_name, customer_email = _customer_info(ticket)
                     ticket_details.append({
                         'customer_name': customer_name,
                         'customer_email': customer_email,
@@ -927,19 +929,48 @@ def revenue_report(request):
                         'promo_code': promo_code_used,
                         'discount_amount': discount_amount,
                         'final_price': ticket_price - discount_amount,
-                        'purchase_date': ticket.created_at
+                        'purchase_date': ticket.created_at,
+                        'is_refunded': False,
+                        'refund_date': None,
                     })
-                
-                # Calculate net revenue
+
+                # ── Refunded tickets ──
+                total_refunds = Decimal('0.00')
+                refunded_details = []
+
+                for rt in refunded_tickets:
+                    rt_price = rt.price or Decimal('0.00')
+                    total_refunds += rt_price
+                    customer_name, customer_email = _customer_info(rt)
+                    refunded_details.append({
+                        'customer_name': customer_name,
+                        'customer_email': customer_email,
+                        'ticket_type': rt.event_ticket.name if rt.event_ticket else '—',
+                        'original_price': rt_price,
+                        'promo_code': '',
+                        'discount_amount': Decimal('0.00'),
+                        'final_price': -rt_price,
+                        'purchase_date': rt.cancelled_at,
+                        'is_refunded': True,
+                        'refund_date': rt.cancelled_at,
+                    })
+
+                # ── Totals ──
+                # gross_revenue = active tickets only (what we actually kept)
+                # total_refunds  = what was sent back to customers
+                # net_revenue    = gross (active) − discounts  (refunds are shown separately)
                 net_revenue = gross_revenue - total_promo_discount
                 total_tickets_sold = len(ticket_details)
-                
+                total_tickets_refunded = len(refunded_details)
+
                 revenue_data = {
                     'gross_revenue': gross_revenue,
                     'total_promo_discount': total_promo_discount,
+                    'total_refunds': total_refunds,
                     'net_revenue': net_revenue,
                     'total_tickets_sold': total_tickets_sold,
-                    'ticket_details': ticket_details
+                    'total_tickets_refunded': total_tickets_refunded,
+                    'ticket_details': ticket_details + refunded_details,
                 }
                 
             except Event.DoesNotExist:
@@ -1013,13 +1044,22 @@ def revenue_report_export(request, event_id):
         
         # Same filter as the HTML report: regular tickets + Full Pass for this specific day only.
         from django.db.models import Q as _Q
+        from ticket.models import CancelledTicket as _CancelledTicket
         tickets_sold = Ticket.objects.filter(
             _Q(event_ticket__event=selected_event, day_number__isnull=True) |
             _Q(day_event=selected_event)
         ).select_related('order_item', 'customer', 'event_ticket')
 
+        refunded_tickets_export = _CancelledTicket.objects.filter(
+            cancelled_reason=_CancelledTicket.REASON_REFUNDED
+        ).filter(
+            _Q(event_ticket__event=selected_event, day_number__isnull=True) |
+            _Q(day_event=selected_event)
+        ).select_related('event_ticket', 'customer', 'order_item')
+
         gross_revenue = tickets_sold.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
-        
+        total_refunds_export = refunded_tickets_export.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
+
         # Use conditional check for PromoCodeUsage
         if PromoCodeUsage:
             promo_usage = PromoCodeUsage.objects.filter(promo_code__event=selected_event)
@@ -1027,40 +1067,49 @@ def revenue_report_export(request, event_id):
         else:
             promo_usage = []
             total_promo_discount = Decimal('0.00')
-            
+
         net_revenue = gross_revenue - total_promo_discount
-        
+
         # Write summary
         row = 0
         summary_sheet.write(row, 0, f'Revenue Report - {selected_event.name}', title_format)
         row += 2
-        
+
         summary_sheet.write(row, 0, 'Event Name:', header_format)
         summary_sheet.write(row, 1, selected_event.name, text_format)
         row += 1
-        
+
         summary_sheet.write(row, 0, 'Event Date:', header_format)
         summary_sheet.write(row, 1, selected_event.event_date.strftime('%Y-%m-%d %H:%M'), text_format)
         row += 1
-        
+
         summary_sheet.write(row, 0, 'Report Generated:', header_format)
         summary_sheet.write(row, 1, timezone.now().strftime('%Y-%m-%d %H:%M'), text_format)
         row += 2
-        
-        summary_sheet.write(row, 0, 'Gross Revenue:', header_format)
+
+        summary_sheet.write(row, 0, 'Gross Revenue (active tickets):', header_format)
         summary_sheet.write(row, 1, float(gross_revenue), money_format)
         row += 1
-        
+
         summary_sheet.write(row, 0, 'Total Promo Discounts:', header_format)
-        summary_sheet.write(row, 1, float(total_promo_discount), money_format)
+        summary_sheet.write(row, 1, -float(total_promo_discount), money_format)
         row += 1
-        
+
+        refund_format = workbook.add_format({'num_format': '$#,##0.00', 'align': 'right', 'border': 1, 'font_color': '#C00000'})
+        summary_sheet.write(row, 0, 'Total Refunds:', header_format)
+        summary_sheet.write(row, 1, -float(total_refunds_export), refund_format)
+        row += 1
+
         summary_sheet.write(row, 0, 'Net Revenue:', header_format)
         summary_sheet.write(row, 1, float(net_revenue), money_format)
         row += 1
-        
-        summary_sheet.write(row, 0, 'Total Tickets Sold:', header_format)
+
+        summary_sheet.write(row, 0, 'Active Tickets:', header_format)
         summary_sheet.write(row, 1, tickets_sold.count(), number_format)
+        row += 1
+
+        summary_sheet.write(row, 0, 'Refunded Tickets:', header_format)
+        summary_sheet.write(row, 1, refunded_tickets_export.count(), number_format)
         row += 1
         
         # Ticket Details Sheet
@@ -1094,6 +1143,26 @@ def revenue_report_export(request, event_id):
             details_sheet.write(row, 5, str(ticket.customer), text_format)
             row += 1
         
+        # Refunds Sheet
+        if refunded_tickets_export.exists():
+            refund_sheet = workbook.add_worksheet('Refunded Tickets')
+            refund_sheet.set_column('A:A', 15)
+            refund_sheet.set_column('B:B', 30)
+            refund_sheet.set_column('C:C', 15)
+            refund_sheet.set_column('D:D', 30)
+            refund_sheet.set_column('E:E', 20)
+            refund_headers = ['Ticket ID', 'Ticket Type', 'Refunded Amount', 'Customer', 'Refunded At']
+            for col, header in enumerate(refund_headers):
+                refund_sheet.write(0, col, header, header_format)
+            row = 1
+            for rt in refunded_tickets_export:
+                refund_sheet.write(row, 0, rt.original_ticket_id, number_format)
+                refund_sheet.write(row, 1, rt.event_ticket.name if rt.event_ticket else '—', text_format)
+                refund_sheet.write(row, 2, -float(rt.price or 0), refund_format)
+                refund_sheet.write(row, 3, str(rt.customer) if rt.customer else '—', text_format)
+                refund_sheet.write(row, 4, rt.cancelled_at.strftime('%Y-%m-%d %H:%M'), text_format)
+                row += 1
+
         # Promo Codes Sheet - only if PromoCodeUsage is available
         if PromoCodeUsage and promo_usage:
             promo_sheet = workbook.add_worksheet('Promo Code Usage')

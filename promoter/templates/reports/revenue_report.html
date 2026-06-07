@@ -143,6 +143,29 @@
         color: #666;
         margin-top: 2px;
     }
+
+    .badge-refunded-row {
+        background: #fff5f5;
+    }
+    .badge-refunded-row td {
+        color: #c0392b;
+    }
+    .refund-badge {
+        display: inline-block;
+        background: #e74c3c;
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-left: 5px;
+        vertical-align: middle;
+    }
+    .total-card.refund-card {
+        border-left-color: #e74c3c;
+    }
 </style>
 {% endblock %}
 
@@ -205,17 +228,22 @@
                     <div class="total-label">Gross Revenue</div>
                 </div>
                 <div class="total-card">
-                    <div class="total-value revenue-negative">-${{ revenue_data.total_promo_discount|floatformat:2 }}
-                    </div>
+                    <div class="total-value revenue-negative">-${{ revenue_data.total_promo_discount|floatformat:2 }}</div>
                     <div class="total-label">Promo Discounts</div>
                 </div>
+                {% if revenue_data.total_refunds > 0 %}
+                <div class="total-card refund-card">
+                    <div class="total-value revenue-negative">-${{ revenue_data.total_refunds|floatformat:2 }}</div>
+                    <div class="total-label">Refunds ({{ revenue_data.total_tickets_refunded }} ticket{{ revenue_data.total_tickets_refunded|pluralize }})</div>
+                </div>
+                {% endif %}
                 <div class="total-card">
                     <div class="total-value revenue-positive">${{ revenue_data.net_revenue|floatformat:2 }}</div>
                     <div class="total-label">Net Revenue</div>
                 </div>
                 <div class="total-card">
                     <div class="total-value">{{ revenue_data.total_tickets_sold }}</div>
-                    <div class="total-label">Tickets Sold</div>
+                    <div class="total-label">Tickets Active</div>
                 </div>
             </div>
         </div>
@@ -236,15 +264,18 @@
                             <th width="12%">Ticket Value</th>
                             <th width="12%">Promo Code</th>
                             <th width="12%">Discount</th>
-                            <th width="12%">Final Price</th>
+                            <th width="12%">Amount</th>
                             <th width="7%">Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for ticket in revenue_data.ticket_details %}
-                        <tr>
+                        <tr {% if ticket.is_refunded %}class="badge-refunded-row"{% endif %}>
                             <td>
-                                <div class="customer-info">{{ ticket.customer_name }}</div>
+                                <div class="customer-info">
+                                    {{ ticket.customer_name }}
+                                    {% if ticket.is_refunded %}<span class="refund-badge">Refunded</span>{% endif %}
+                                </div>
                                 {% if ticket.customer_email %}
                                 <div class="customer-email">{{ ticket.customer_email }}</div>
                                 {% endif %}
@@ -266,7 +297,11 @@
                                 {% endif %}
                             </td>
                             <td class="text-end">
+                                {% if ticket.is_refunded %}
+                                <strong class="revenue-negative">-${{ ticket.original_price|floatformat:2 }}</strong>
+                                {% else %}
                                 <strong class="revenue-positive">${{ ticket.final_price|floatformat:2 }}</strong>
+                                {% endif %}
                             </td>
                             <td class="text-center text-muted">{{ ticket.purchase_date|date:"m/d" }}</td>
                         </tr>
@@ -274,7 +309,15 @@
 
                         <!-- Total Row -->
                         <tr class="total-row">
-                            <td colspan="2"><strong>TOTAL REVENUE</strong></td>
+                            <td colspan="2">
+                                <strong>NET REVENUE</strong>
+                                <div style="font-size:0.75rem;font-weight:400;color:#666;margin-top:2px;">
+                                    {{ revenue_data.total_tickets_sold }} active
+                                    {% if revenue_data.total_tickets_refunded > 0 %}
+                                    · {{ revenue_data.total_tickets_refunded }} refunded
+                                    {% endif %}
+                                </div>
+                            </td>
                             <td class="text-end"><strong>${{ revenue_data.gross_revenue|floatformat:2 }}</strong></td>
                             <td class="text-center">-</td>
                             <td class="text-end">
@@ -284,8 +327,15 @@
                                 <strong class="text-muted">$0.00</strong>
                                 {% endif %}
                             </td>
-                            <td class="text-end"><strong class="revenue-positive">${{ revenue_data.net_revenue|floatformat:2 }}</strong></td>
-                            <td class="text-center"><strong>{{ revenue_data.total_tickets_sold }}</strong></td>
+                            <td class="text-end">
+                                <strong class="revenue-positive">${{ revenue_data.net_revenue|floatformat:2 }}</strong>
+                                {% if revenue_data.total_refunds > 0 %}
+                                <div style="font-size:0.75rem;color:#e74c3c;font-weight:600;">
+                                    -${{ revenue_data.total_refunds|floatformat:2 }} refunded
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td></td>
                         </tr>
                     </tbody>
                 </table>
