@@ -1744,9 +1744,33 @@ def issue_refund(request, order_id):
                     reason='requested_by_customer',
                 )
             except stripe.error.InvalidRequestError as e:
-                messages.error(request, f'Stripe error: {e.user_message or str(e)}')
-                logger.error(f'Stripe refund failed for order {order_locked.id}: {e}')
-                raise  # rolls back the transaction (lock released), no DB changes
+                error_code = getattr(e, 'code', '') or ''
+                if error_code == 'charge_already_refunded':
+                    # Refund was issued directly in Stripe — retrieve the existing
+                    # refund record so we can still sync our DB.
+                    try:
+                        charges = stripe.Charge.list(
+                            payment_intent=order_locked.payment_code, limit=1
+                        )
+                        charge = charges.data[0] if charges.data else None
+                        stripe_refund = (
+                            charge.refunds.data[0]
+                            if charge and charge.refunds.data
+                            else type('obj', (object,), {'id': ''})()
+                        )
+                        logger.warning(
+                            f'Order {order_locked.id} was already refunded in Stripe '
+                            f'(refund={getattr(stripe_refund, "id", "unknown")}); '
+                            f'syncing DB state now.'
+                        )
+                    except Exception as lookup_err:
+                        logger.error(f'Could not retrieve existing Stripe refund for order {order_locked.id}: {lookup_err}')
+                        messages.error(request, 'This charge was already refunded in Stripe but we could not retrieve the refund details. Please contact support.')
+                        raise
+                else:
+                    messages.error(request, f'Stripe error: {e.user_message or str(e)}')
+                    logger.error(f'Stripe refund failed for order {order_locked.id}: {e}')
+                    raise  # rolls back the transaction (lock released), no DB changes
 
             # Persist all DB changes atomically.
             tickets_to_cancel = list(
@@ -1793,15 +1817,147 @@ def issue_refund(request, order_id):
     if ticket_refund and order_locked:
         order_locked.send_refund_notification(ticket_refund)
 
+    refund_id = getattr(stripe_refund, 'id', '') or ''
     messages.success(
         request,
-        f'Order #{order_locked.pk} refunded successfully. '
-        f'${order_locked.total} will be returned to {order_locked.emailAddress}. '
-        f'Stripe refund ID: {stripe_refund.id}'
+        f'Order #{order_locked.pk} refunded successfully — '
+        f'all {len(tickets_to_cancel)} ticket(s) invalidated. '
+        f'${order_locked.total} returned to {order_locked.emailAddress}. '
+        f'Stripe refund ID: {refund_id}'
     )
     logger.info(
         f'Refund issued: order={order_locked.pk} stripe={stripe_refund.id} '
         f'amount={order_locked.total} by={request.user.email}'
+    )
+    return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+
+@login_required(login_url='/promoter/account/login/')
+def sync_stripe_refund(request, order_id):
+    """
+    POST: Check Stripe for the payment_intent status.
+    If Stripe shows the charge was already refunded (e.g. via Stripe dashboard),
+    sync it into Eventlinez: invalidate tickets and mark the order REFUNDED.
+    """
+    if request.method != 'POST':
+        return redirect('promoter:order_refunds')
+
+    import stripe as _stripe
+    from django.conf import settings as _settings
+    from django.db import transaction as _transaction
+    from order.models import Order as _Order, TicketRefund as _TicketRefund
+    from ticket.models import Ticket as _Ticket, CancelledTicket as _CancelledTicket
+
+    if not hasattr(request.user, 'promoter') or not request.user.promoter:
+        messages.error(request, "You need a promoter profile to access this page.")
+        return redirect('promoter:signup_promoter')
+
+    promoter = request.user.promoter
+    order = get_object_or_404(_Order, pk=order_id)
+
+    if OrderItem.objects.filter(order=order).exclude(
+        event_ticket__event__promoter=promoter
+    ).exists():
+        messages.error(request, 'This order contains tickets from events you do not own.')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    if order.status == _Order.STATUS_REFUNDED:
+        messages.info(request, f'Order #{order.id} is already marked as refunded in Eventlinez.')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    if not order.payment_code:
+        messages.error(request, f'Order #{order.id} has no payment record — cannot check Stripe.')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    _stripe.api_key = _settings.STRIPE_SECRET_KEY
+
+    try:
+        pi = _stripe.PaymentIntent.retrieve(order.payment_code, expand=['charges'])
+        charges = pi.get('charges', {}).get('data', [])
+        if not charges:
+            messages.warning(request, f'No charges found for Order #{order.id} in Stripe.')
+            return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+        charge = charges[0]
+        amount_refunded = charge.get('amount_refunded', 0)
+        if not charge.get('refunded') and amount_refunded == 0:
+            messages.info(
+                request,
+                f'Order #{order.id} has NOT been refunded in Stripe. No changes made.'
+            )
+            return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+        refunds_data = charge.get('refunds', {}).get('data', [])
+        stripe_refund_id = refunds_data[0].get('id', '') if refunds_data else ''
+        refund_amount = Decimal(str(amount_refunded)) / 100
+
+    except _stripe.error.StripeError as e:
+        messages.error(request, f'Stripe error: {getattr(e, "user_message", None) or str(e)}')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    ticket_refund = None
+    tickets_to_cancel = []
+
+    try:
+        with _transaction.atomic():
+            order_locked = _Order.objects.select_for_update().get(pk=order.pk)
+
+            if order_locked.status == _Order.STATUS_REFUNDED:
+                messages.info(request, f'Order #{order_locked.id} was already synced as refunded.')
+                return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+            tickets_to_cancel = list(
+                _Ticket.objects.filter(order_item__order=order_locked)
+            )
+            _CancelledTicket.objects.bulk_create([
+                _CancelledTicket(
+                    original_ticket_id=t.id,
+                    uuid=t.uuid,
+                    event_ticket=t.event_ticket,
+                    customer=t.customer,
+                    order_item=t.order_item,
+                    price=t.price,
+                    guest_name=t.guest_name,
+                    day_number=t.day_number,
+                    day_event=t.day_event,
+                    vendor=t.vendor,
+                    original_checkin_date=t.checkin_date,
+                    cancelled_reason=_CancelledTicket.REASON_REFUNDED,
+                )
+                for t in tickets_to_cancel
+            ], ignore_conflicts=True)
+            _Ticket.objects.filter(order_item__order=order_locked).delete()
+
+            order_locked.status = _Order.STATUS_REFUNDED
+            order_locked.save(update_fields=['status'])
+
+            ticket_refund, _ = _TicketRefund.objects.get_or_create(
+                order=order_locked,
+                defaults={
+                    'stripe_refund_id': stripe_refund_id,
+                    'amount': refund_amount,
+                    'reason': f'Synced from Stripe by {request.user.email}',
+                    'refunded_by': request.user,
+                }
+            )
+
+    except Exception as exc:
+        logger.error(f'Stripe sync refund failed for order {order.pk}: {exc}')
+        messages.error(request, 'An unexpected error occurred while syncing the refund. Please try again.')
+        return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
+
+    if ticket_refund:
+        order_locked.send_refund_notification(ticket_refund)
+
+    messages.success(
+        request,
+        f'Order #{order_locked.pk} synced from Stripe — '
+        f'{len(tickets_to_cancel)} ticket(s) invalidated. '
+        f'Stripe refund ID: {stripe_refund_id}'
+    )
+    logger.info(
+        f'Stripe sync: order={order_locked.pk} stripe_refund={stripe_refund_id} '
+        f'tickets_cancelled={len(tickets_to_cancel)} by={request.user.email}'
     )
     return redirect(request.META.get('HTTP_REFERER', 'promoter:order_refunds'))
 

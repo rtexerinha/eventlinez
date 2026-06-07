@@ -538,6 +538,13 @@ def checkout(request):
         logger.error(f"Stripe session creation error: {e}")
         return JsonResponse({'error': f'Payment session creation failed: {str(e)}'}, status=500)
 
+    # Reset the reservation clock at the moment the customer is sent to Stripe.
+    # Without this, the 5-minute countdown (running in a background tab) could
+    # expire and wipe cart items while the customer is filling in card details,
+    # causing a "cart empty" error on the success URL even though payment succeeded.
+    cart.reserved_at = timezone.now()
+    cart.save(update_fields=['reserved_at'])
+
     try:
         mark_cart_converted(cart.cart_id, order_id=session.id)
     except Exception as e:

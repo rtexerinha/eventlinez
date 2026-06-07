@@ -48,6 +48,13 @@
   .btn-refund:hover { background: #b3005e; }
   .btn-refund:disabled { background: #ccc; cursor: default; }
 
+  .btn-sync {
+    background: #fff; color: #555; border: 1px solid #ccc;
+    padding: 6px 12px; border-radius: 3px; font-size: 12px; cursor: pointer;
+    margin-top: 4px; display: block; width: 100%;
+  }
+  .btn-sync:hover { background: #f0f0f0; border-color: #999; }
+
   .empty-state { text-align: center; padding: 40px; color: #aaa; }
 
   .modal-overlay {
@@ -162,6 +169,14 @@
             onclick="openRefundModal({{ order.id }}, '{{ order.emailAddress|escapejs }}', '{{ order.total|floatformat:2 }}')">
             <i class="fas fa-undo-alt"></i> Refund
           </button>
+          <form method="post" action="{% url 'promoter:sync_stripe_refund' order.id %}" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn-sync"
+              title="Check if this order was already refunded in Stripe and sync it here"
+              onclick="return confirm('Check Stripe and sync refund status for Order #{{ order.id }}?')">
+              <i class="fas fa-sync-alt"></i> Check Stripe
+            </button>
+          </form>
           {% else %}
           <button class="btn-refund" disabled>Refunded</button>
           {% endif %}

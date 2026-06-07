@@ -7,7 +7,7 @@ from promoter.views import update_promoter, reset_password, signup_view_promoter
     promo_code_update, promo_code_delete, promo_code_toggle_status, promoter_dashboard, \
     revenue_report, revenue_report_export, guest_lists_overview, doorman_dashboard, doorman_checkin_page, \
     partners_list, partner_create, doorman_create, partner_toggle_status, partner_delete, \
-    order_refunds, issue_refund
+    order_refunds, issue_refund, sync_stripe_refund
 from event.views import ticket_type_create, ticket_type_list, ticket_type_update, ticket_type_list_per_event
 from ticket.views import tickets_sold_list, tickets_excel, ticket_checkin, tickets_validate
 from ticket.views_complimentary import (
@@ -76,6 +76,7 @@ urlpatterns = [
     # Refunds
     path('orders/refunds/', order_refunds, name='order_refunds'),
     path('orders/<int:order_id>/refund/', issue_refund, name='issue_refund'),
+    path('orders/<int:order_id>/sync-refund/', sync_stripe_refund, name='sync_stripe_refund'),
 
     # Guest Lists Overview
     path('guest-lists/', guest_lists_overview, name='guest_lists_overview'),
