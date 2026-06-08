@@ -506,23 +506,27 @@ def create(request):
             'PROD': settings.PROD,
         })
 
-    # ── Non-critical: update Stripe metadata + send email ──
+    # ── Update Stripe description + metadata with Order # and customer email ──
     try:
         from order.stripe_utils import build_stripe_description, build_stripe_metadata_from_order
         first_item = order.orderitem_set.first()
         if first_item:
             description = build_stripe_description(
-                first_item.event_ticket.event.name, first_item.event_ticket.name, order_id=order.id
+                first_item.event_ticket.event.name,
+                first_item.event_ticket.name,
+                order_id=order.id,
+                customer_email=order.emailAddress,
             )
         else:
-            description = f"Order #{order.id}"
+            description = f"{order.emailAddress} | Order #{order.id}"
         stripe.PaymentIntent.modify(
             session.payment_intent,
             metadata=build_stripe_metadata_from_order(order),
             description=description,
         )
+        logger.info(f"Updated Stripe description for order {order.id}: {description}")
     except Exception as e:
-        logger.warning(f"Non-critical: failed to update Stripe metadata for order {order.id}: {e}")
+        logger.error(f"Failed to update Stripe description for order {order.id}: {e}")
 
     try:
         send_mail(order.id)

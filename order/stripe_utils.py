@@ -15,35 +15,23 @@ def build_stripe_description(
     event_name: str,
     tier_name: str,
     order_id: Optional[int] = None,
-    cart_id: Optional[int] = None
+    customer_email: Optional[str] = None,
+    cart_id: Optional[int] = None,  # kept for signature compat but no longer used
 ) -> str:
     """
     Build a consistent Stripe payment description.
-    
-    Args:
-        event_name: Name of the event
-        tier_name: Name of the ticket tier
-        order_id: Order ID (if available)
-        cart_id: Cart ID (if order not yet created)
-    
-    Returns:
-        Formatted description string for Stripe
-    
-    Examples:
-        >>> build_stripe_description("Calisamba in San Diego 2025", "Tier 1", order_id=5142)
-        'Calisamba in San Diego 2025/Tier 1 (Order #5142)'
-        
-        >>> build_stripe_description("Calisamba in San Diego 2025", "Tier 1", cart_id=123)
-        'Calisamba in San Diego 2025/Tier 1 (Cart #123)'
+
+    Format (with order):   customer@email.com | EventName/Tier — Order #5142
+    Format (pre-order):    customer@email.com | EventName/Tier
     """
-    base_description = f"{event_name}/{tier_name}"
-    
+    base = f"{event_name}/{tier_name}"
+    parts = []
+    if customer_email:
+        parts.append(customer_email)
+    parts.append(base)
     if order_id:
-        return f"{base_description} (Order #{order_id})"
-    elif cart_id:
-        return f"{base_description} (Cart #{cart_id})"
-    else:
-        return base_description
+        parts.append(f"Order #{order_id}")
+    return " | ".join(parts)
 
 
 def build_stripe_metadata_from_cart(

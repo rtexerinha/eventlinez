@@ -309,12 +309,8 @@ Get in touch with Eventlinez - Your questions, feedback, and inquiries matter to
                             </div>
 
                             {% if RECAPTCHA_PUBLIC_KEY %}
-                            <!-- reCAPTCHA v2 - Visible captcha with images -->
                             <div class="mb-4">
                                 <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_PUBLIC_KEY }}"></div>
-                                {% if form.captcha.errors %}
-                                <div class="text-danger mt-1">{{ form.captcha.errors }}</div>
-                                {% endif %}
                             </div>
                             {% endif %}
 

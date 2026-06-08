@@ -55,7 +55,7 @@ class SignUpFormPromoter(forms.Form):
         return password2
 
     def clean_email(self):
-        email_promoter = self.cleaned_data.get("email")
+        email_promoter = (self.cleaned_data.get("email") or "").lower().strip()
         if User.objects.filter(username=email_promoter).exists() or \
                 Promoter.objects.filter(email=email_promoter).exists():
             raise ValidationError(
@@ -129,7 +129,7 @@ class SignUpForm(forms.Form):
         return password2
 
     def clean_email(self):
-        email_customer = self.cleaned_data.get("email")
+        email_customer = (self.cleaned_data.get("email") or "").lower().strip()
         if User.objects.filter(username=email_customer).exists() or \
                 Customer.objects.filter(email=email_customer).exists():
             raise ValidationError(
@@ -168,6 +168,9 @@ class SignInForm(AuthenticationForm):
         'placeholder': _('Password')
     }))
 
+    def clean_username(self):
+        return (self.cleaned_data.get("username") or "").lower().strip()
+
 
 class SignInPromoterForm(AuthenticationForm):
     username = UsernameField(label='', widget=forms.EmailInput(attrs={
@@ -176,6 +179,9 @@ class SignInPromoterForm(AuthenticationForm):
     password = forms.CharField(label=_(""), widget=forms.PasswordInput(attrs={
         'placeholder': _('Password')
     }))
+
+    def clean_username(self):
+        return (self.cleaned_data.get("username") or "").lower().strip()
 
     def clean(self):
         super(SignInPromoterForm, self).clean()

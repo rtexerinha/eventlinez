@@ -504,16 +504,20 @@ def checkout(request):
     try:
         from order.stripe_utils import build_stripe_description, build_stripe_metadata_from_cart
 
+        customer_email = getattr(request.user, 'email', '') or ''
+        if not customer_email and hasattr(request.user, 'customer'):
+            customer_email = request.user.customer.email or ''
+
         first_item = items.first()
         if first_item:
             description = build_stripe_description(
                 first_item.ticket.event.name,
                 first_item.ticket.name,
-                cart_id=cart.id
+                customer_email=customer_email,
             )
-            metadata = build_stripe_metadata_from_cart(cart, items)
+            metadata = build_stripe_metadata_from_cart(cart, items, customer_email=customer_email)
         else:
-            description = f"Event Tickets - {items.count()} items"
+            description = customer_email or f"Event Tickets - {items.count()} items"
             metadata = {}
 
         if cart.applied_promo_code:
