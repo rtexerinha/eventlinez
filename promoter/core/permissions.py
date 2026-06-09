@@ -34,8 +34,8 @@ class IsDoorman(BasePermission):
         # Promoters always have access
         if hasattr(user, 'promoter'):
             return True
-        # Doormen (partners with DOORMAN role)
-        return Partner.objects.filter(user=user, role="DOORMAN", disable=False).exists()
+        # Doormen and Business Partners
+        return Partner.objects.filter(user=user, role__in=["DOORMAN", "PARTNER"], disable=False).exists()
 
 
 class IsDoormanForEvent(BasePermission):
@@ -65,7 +65,7 @@ class IsDoormanForEvent(BasePermission):
         if Event.objects.filter(id=event_id, promoter__user=user).exists():
             return True
 
-        # Active doorman partner for this event
+        # Active doorman/partner for this event
         return Partner.objects.filter(
-            user=user, event_id=event_id, role="DOORMAN", disable=False
+            user=user, event_id=event_id, role__in=["DOORMAN", "PARTNER"], disable=False
         ).exists()

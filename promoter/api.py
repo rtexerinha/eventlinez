@@ -696,15 +696,16 @@ class DoormanProfileAPIView(APIView):
             user_type = 'promoter'
             assignments = None
         else:
-            # Doorman sees only assigned, active events
+            # Doormen and Business Partners see only their assigned, active events
             assignments = Partner.objects.filter(
-                user=user, role='DOORMAN', disable=False
+                user=user, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).select_related('event')
             events = Event.objects.filter(
                 id__in=assignments.values_list('event_id', flat=True)
             )
-            role = 'DOORMAN'
-            user_type = 'doorman'
+            first = assignments.first()
+            role = first.role if first else 'DOORMAN'
+            user_type = role.lower()
 
         events_data = DoormanEventSerializer(events, many=True).data
 
@@ -737,7 +738,7 @@ class DoormanEventListAPIView(APIView):
             qs = Event.objects.filter(promoter__user=user)
         else:
             assigned_ids = Partner.objects.filter(
-                user=user, role='DOORMAN', disable=False
+                user=user, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).values_list('event_id', flat=True)
             qs = Event.objects.filter(id__in=assigned_ids)
 
@@ -899,11 +900,11 @@ class DoormanScanPaidTicketAPIView(APIView):
         user = request.user
         if not hasattr(user, 'promoter'):
             has_access = Partner.objects.filter(
-                user=user, event=effective_event, role='DOORMAN', disable=False
+                user=user, event=effective_event, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).exists()
             if not has_access:
                 return Response(
-                    {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
+                    {'success': False, 'message': 'You are not assigned to this event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
         else:
@@ -942,7 +943,10 @@ class DoormanScanPaidTicketAPIView(APIView):
                             'message': 'This ticket has already been checked in.',
                             'already_checked_in': True,
                             'ticket_id': ticket.id,
-                            'guest_name': ticket.guest_name or str(ticket.customer),
+                            'guest_name': ticket.guest_name or (
+                                f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+                                if ticket.customer else ''
+                            ) or 'Unknown',
                             'event_name': effective_event.name,
                             'ticket_type': ticket.event_ticket.name,
                             'first_checkin_at': ticket.checkin_date,
@@ -964,7 +968,10 @@ class DoormanScanPaidTicketAPIView(APIView):
                 'message': 'Check-in successful! Welcome!',
                 'already_checked_in': False,
                 'ticket_id': ticket.id,
-                'guest_name': ticket.guest_name or str(ticket.customer),
+                'guest_name': ticket.guest_name or (
+                    f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+                    if ticket.customer else ''
+                ) or 'Unknown',
                 'event_name': effective_event.name,
                 'ticket_type': ticket.event_ticket.name,
                 'checked_in_at': ticket.checkin_date,
@@ -1012,14 +1019,14 @@ class DoormanScanGuestTicketAPIView(APIView):
         event = ticket.event
         user = request.user
 
-        # Verify doorman has access to this event
+        # Verify doorman/partner has access to this event
         if not hasattr(user, 'promoter'):
             has_access = Partner.objects.filter(
-                user=user, event=event, role='DOORMAN', disable=False
+                user=user, event=event, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).exists()
             if not has_access:
                 return Response(
-                    {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
+                    {'success': False, 'message': 'You are not assigned to this event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
@@ -1405,11 +1412,11 @@ class DoormanTicketSearchAPIView(APIView):
         user = request.user
         if not hasattr(user, 'promoter'):
             has_access = Partner.objects.filter(
-                user=user, event=event, role='DOORMAN', disable=False
+                user=user, event=event, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).exists()
             if not has_access:
                 return Response(
-                    {'error': 'You are not assigned as a Doorman for this event.'},
+                    {'error': 'You are not assigned to this event.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
         elif event.promoter.user != user:
@@ -1445,11 +1452,11 @@ class DoormanTicketSearchAPIView(APIView):
         for ticket in tickets:
             customer_name = ticket.guest_name
             if not customer_name and ticket.customer:
-                customer_name = ticket.customer.get_full_name()
-            
+                customer_name = f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+
             customer_email = ''
             if ticket.customer:
-                customer_email = getattr(ticket.customer, 'email', '') or getattr(ticket.customer, 'username', '')
+                customer_email = getattr(ticket.customer, 'email', '') or ''
 
             results.append({
                 'id': ticket.id,
@@ -1492,11 +1499,11 @@ class DoormanManualCheckinAPIView(APIView):
         user = request.user
         if not hasattr(user, 'promoter'):
             has_access = Partner.objects.filter(
-                user=user, event=effective_event, role='DOORMAN', disable=False
+                user=user, event=effective_event, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).exists()
             if not has_access:
                 return Response(
-                    {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
+                    {'success': False, 'message': 'You are not assigned to this event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
         else:
@@ -1526,7 +1533,10 @@ class DoormanManualCheckinAPIView(APIView):
                             'message': 'This ticket has already been checked in.',
                             'already_checked_in': True,
                             'ticket_id': ticket.id,
-                            'guest_name': ticket.guest_name or str(ticket.customer),
+                            'guest_name': ticket.guest_name or (
+                                f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+                                if ticket.customer else ''
+                            ) or 'Unknown',
                             'event_name': effective_event.name,
                             'ticket_type': ticket.event_ticket.name,
                             'first_checkin_at': ticket.checkin_date,
@@ -1548,7 +1558,10 @@ class DoormanManualCheckinAPIView(APIView):
                 'message': 'Check-in successful! Welcome!',
                 'already_checked_in': False,
                 'ticket_id': ticket.id,
-                'guest_name': ticket.guest_name or str(ticket.customer),
+                'guest_name': ticket.guest_name or (
+                    f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+                    if ticket.customer else ''
+                ) or 'Unknown',
                 'event_name': effective_event.name,
                 'ticket_type': ticket.event_ticket.name,
                 'checked_in_at': ticket.checkin_date,
@@ -1598,11 +1611,11 @@ class DoormanGuestListAPIView(APIView):
         user = request.user
         if not hasattr(user, 'promoter'):
             has_access = Partner.objects.filter(
-                user=user, event=event, role='DOORMAN', disable=False
+                user=user, event=event, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).exists()
             if not has_access:
                 return Response(
-                    {'error': 'You are not assigned as a Doorman for this event.'},
+                    {'error': 'You are not assigned to this event.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
         elif event.promoter.user != user:
