@@ -867,17 +867,26 @@ def revenue_report(request):
                     _Q(day_event=selected_event)
                 ).select_related('event_ticket', 'customer', 'order_item').order_by('-cancelled_at')
 
-                # Pre-fetch PromoCodeUsage records keyed by order_id so we can attribute
-                # per-ticket discounts. The discount is stored per-order, not per-ticket.
-                promo_usage_by_order = {}
-                if PromoCodeUsage:
-                    order_ids = set()
-                    for _t in tickets_sold:
-                        if hasattr(_t, 'order_item') and _t.order_item:
-                            order_ids.add(str(_t.order_item.order_id))
-                    if order_ids:
-                        for _u in PromoCodeUsage.objects.filter(order_id__in=order_ids):
-                            promo_usage_by_order[_u.order_id] = _u
+                # Pre-compute per-ticket discount by comparing Order.total (what Stripe
+                # actually charged) against sum(OrderItem.amount) (face value including fees).
+                # This is more reliable than PromoCodeUsage.discount_amount, which is
+                # sometimes stored as 0 when the webhook creates the order instead of the
+                # success-URL view, because Stripe's session.amount_discount is 0 for
+                # manually-discounted totals (Eventlinez applies its own discount rather
+                # than using Stripe coupons).
+                order_discount_per_ticket = {}  # order_id (int) → per-ticket Decimal
+                _order_ids = set()
+                for _t in tickets_sold:
+                    if hasattr(_t, 'order_item') and _t.order_item:
+                        _order_ids.add(_t.order_item.order_id)
+                if _order_ids:
+                    from order.models import Order as _Order
+                    for _ord in _Order.objects.filter(id__in=_order_ids).prefetch_related('orderitem_set'):
+                        _items = list(_ord.orderitem_set.all())
+                        face_value = sum(i.amount for i in _items)
+                        discount_total = max(Decimal('0.00'), face_value - _ord.total)
+                        total_qty = sum(i.quantity for i in _items) or 1
+                        order_discount_per_ticket[_ord.id] = (discount_total / total_qty).quantize(Decimal('0.01'))
 
                 # ── Helper to extract customer display info ──
                 def _customer_info(obj):
@@ -912,13 +921,11 @@ def revenue_report(request):
                     discount_amount = Decimal('0.00')
                     if hasattr(ticket, 'order_item') and ticket.order_item:
                         promo_code_used = ticket.order_item.promo_code or ''
-                        if promo_code_used:
-                            oid = str(ticket.order_item.order_id)
-                            usage = promo_usage_by_order.get(oid)
-                            if usage and usage.discount_amount:
-                                qty = max(ticket.order_item.quantity, 1)
-                                discount_amount = (usage.discount_amount / qty).quantize(Decimal('0.01'))
-                                total_promo_discount += discount_amount
+                        discount_amount = order_discount_per_ticket.get(
+                            ticket.order_item.order_id, Decimal('0.00')
+                        )
+                        if discount_amount > 0:
+                            total_promo_discount += discount_amount
 
                     customer_name, customer_email = _customer_info(ticket)
                     ticket_details.append({

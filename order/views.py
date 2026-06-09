@@ -147,11 +147,21 @@ def _webhook_recover_order(session):
                         order_id=str(order.id)
                     ).exists()
                     if not already_recorded:
+                        # Calculate actual discount: face value minus what Stripe charged.
+                        # session.amount_discount is always 0 for Eventlinez because we
+                        # apply our own discount (not Stripe coupons), so derive it instead.
+                        _face = sum(
+                            Decimal(str(i.get('price', {}).get('unit_amount', 0) or 0)) / 100
+                            * (i.get('quantity') or 1)
+                            for i in session.get('line_items', {}).get('data', [])
+                        )
+                        _charged = Decimal(str(session.get('amount_total') or 0)) / 100
+                        _discount = max(Decimal('0.00'), _face - _charged)
                         PromoCodeUsage.objects.create(
                             promo_code=promo,
                             customer_email=customer.email,
                             order_id=str(order.id),
-                            discount_amount=Decimal(str(session.get('amount_discount') or 0)) / 100,
+                            discount_amount=_discount,
                         )
                         PromoCode.objects.filter(pk=promo.pk).update(
                             current_uses=_F('current_uses') + 1
