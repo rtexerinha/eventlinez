@@ -1428,7 +1428,7 @@ class DoormanTicketSearchAPIView(APIView):
         # Build query — regular tickets by their event; Full Pass tickets by day_event
         tickets = PaidTicket.objects.filter(
             Q(event_ticket__event=event, day_event__isnull=True) | Q(day_event=event)
-        ).select_related('event_ticket', 'customer', 'order_item')
+        ).select_related('event_ticket', 'customer', 'order_item__order')
 
         # Apply search filters
         if guest_name:
@@ -1458,11 +1458,18 @@ class DoormanTicketSearchAPIView(APIView):
             if ticket.customer:
                 customer_email = getattr(ticket.customer, 'email', '') or ''
 
+            order_id = (
+                ticket.order_item.order.id
+                if ticket.order_item and ticket.order_item.order
+                else None
+            )
+
             results.append({
                 'id': ticket.id,
                 'uuid': str(ticket.uuid),
                 'guest_name': customer_name or 'Unknown',
                 'guest_email': customer_email,
+                'order_id': order_id,
                 'event_ticket': {
                     'name': ticket.event_ticket.name,
                     'price': float(ticket.price) if ticket.price else 0.0
@@ -1477,42 +1484,82 @@ class DoormanTicketSearchAPIView(APIView):
 
 class DoormanManualCheckinAPIView(APIView):
     """
-    POST /api/doorman/tickets/<ticket_id>/checkin/
-    Manual check-in for a paid ticket by its database ID (used from the search list).
+    GET  /api/doorman/tickets/<ticket_id>/checkin/ — ticket detail (no check-in performed)
+    POST /api/doorman/tickets/<ticket_id>/checkin/ — perform check-in
     """
     permission_classes = [IsAuthenticated, IsDoorman]
 
-    def post(self, request, ticket_id):
+    def _get_ticket_and_verify(self, request, ticket_id):
+        """Shared lookup + access-check. Returns (ticket, effective_event, error_response)."""
         from ticket.models import Ticket as PaidTicket
-        from django.db import transaction
 
         try:
             ticket = PaidTicket.objects.select_related(
-                'event_ticket__event__promoter', 'day_event', 'customer',
+                'event_ticket__event__promoter', 'day_event', 'customer', 'order_item__order',
             ).get(pk=ticket_id)
         except PaidTicket.DoesNotExist:
-            return Response({'success': False, 'message': 'Ticket not found.'},
-                            status=status.HTTP_404_NOT_FOUND)
+            return None, None, Response(
+                {'success': False, 'message': 'Ticket not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         effective_event = ticket.day_event if ticket.day_event else ticket.event_ticket.event
-
         user = request.user
+
         if not hasattr(user, 'promoter'):
             has_access = Partner.objects.filter(
                 user=user, event=effective_event, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).exists()
             if not has_access:
-                return Response(
+                return None, None, Response(
                     {'success': False, 'message': 'You are not assigned to this event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
         else:
             from event.models import Event as _Event
             if not _Event.objects.filter(pk=effective_event.pk, promoter__user=user).exists():
-                return Response(
+                return None, None, Response(
                     {'success': False, 'message': 'This ticket does not belong to your event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
+
+        return ticket, effective_event, None
+
+    def get(self, request, ticket_id):
+        """Return ticket details without performing check-in (used by the detail screen)."""
+        ticket, effective_event, err = self._get_ticket_and_verify(request, ticket_id)
+        if err:
+            return err
+
+        guest_name = ticket.guest_name or (
+            f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+            if ticket.customer else ''
+        ) or 'Unknown'
+        guest_email = getattr(ticket.customer, 'email', '') or '' if ticket.customer else ''
+        order_id = ticket.order_item.order.id if ticket.order_item and ticket.order_item.order else None
+
+        return Response({
+            'id': ticket.id,
+            'uuid': str(ticket.uuid),
+            'guest_name': guest_name,
+            'guest_email': guest_email,
+            'order_id': order_id,
+            'event_ticket': {
+                'name': ticket.event_ticket.name,
+                'price': float(ticket.price) if ticket.price else 0.0,
+            },
+            'event_name': effective_event.name,
+            'checkin_date': ticket.checkin_date.isoformat() if ticket.checkin_date else None,
+            'created_at': ticket.created_at.isoformat() if ticket.created_at else None,
+            'is_checked_in': ticket.checkin_date is not None,
+        })
+
+    def post(self, request, ticket_id):
+        from django.db import transaction
+
+        ticket, effective_event, err = self._get_ticket_and_verify(request, ticket_id)
+        if err:
+            return err
 
         from datetime import timedelta
         deadline = effective_event.event_date + timedelta(hours=6)
