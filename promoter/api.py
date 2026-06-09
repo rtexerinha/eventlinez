@@ -1,6 +1,9 @@
+import logging
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 from django.db.models import F, Sum, Q
 from django.db.models.functions import ExtractMonth, TruncDate, ExtractYear
 from django.utils import timezone
@@ -1555,15 +1558,30 @@ class DoormanManualCheckinAPIView(APIView):
         })
 
     def post(self, request, ticket_id):
+        import traceback
         from django.db import transaction
+        from ticket.models import Ticket as PaidTicket
+
+        logger.info(
+            "Manual check-in attempt: ticket_id=%s user=%s",
+            ticket_id, request.user.username,
+        )
 
         ticket, effective_event, err = self._get_ticket_and_verify(request, ticket_id)
         if err:
+            logger.warning(
+                "Manual check-in access denied: ticket_id=%s user=%s response=%s",
+                ticket_id, request.user.username, err.data,
+            )
             return err
 
         from datetime import timedelta
         deadline = effective_event.event_date + timedelta(hours=6)
         if timezone.now() > deadline:
+            logger.info(
+                "Manual check-in rejected (deadline passed): ticket_id=%s event=%s deadline=%s",
+                ticket_id, effective_event.name, deadline,
+            )
             return Response(
                 {'success': False, 'message': f'Check-in period has ended. Deadline was {deadline.strftime("%b %d %H:%M")}.'},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -1571,9 +1589,15 @@ class DoormanManualCheckinAPIView(APIView):
 
         try:
             with transaction.atomic():
-                ticket = PaidTicket.objects.select_for_update().get(pk=ticket_id)
+                ticket = PaidTicket.objects.select_related(
+                    'event_ticket', 'customer',
+                ).select_for_update().get(pk=ticket_id)
 
                 if ticket.checkin_date:
+                    logger.info(
+                        "Manual check-in: ticket_id=%s already checked in at %s",
+                        ticket_id, ticket.checkin_date,
+                    )
                     return Response(
                         TicketScanResultSerializer({
                             'success': False,
@@ -1593,9 +1617,17 @@ class DoormanManualCheckinAPIView(APIView):
 
                 ticket.checkin_date = timezone.now()
                 ticket.save(update_fields=['checkin_date'])
-        except Exception:
+                logger.info(
+                    "Manual check-in SUCCESS: ticket_id=%s user=%s event=%s",
+                    ticket_id, request.user.username, effective_event.name,
+                )
+        except Exception as exc:
+            logger.error(
+                "Manual check-in FAILED: ticket_id=%s user=%s error=%s\n%s",
+                ticket_id, request.user.username, exc, traceback.format_exc(),
+            )
             return Response(
-                {'success': False, 'message': 'Check-in failed due to a server error. Please try again.'},
+                {'success': False, 'message': f'Check-in failed: {exc}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
