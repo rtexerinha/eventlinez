@@ -83,23 +83,20 @@
         var isInApp=ua.indexOf('Instagram')>-1||ua.indexOf('FBAN')>-1||
             ua.indexOf('FBAV')>-1||ua.indexOf('LinkedInApp')>-1||ua.indexOf('Twitter')>-1;
         if(!isInApp)return;
+        // document.body is null while parsing <head> — add classes to <html> so CSS
+        // selectors apply immediately, before a single pixel is painted.
         var html=document.documentElement;
-        var body=document.body;
-        if(body)body.classList.add('in-app-browser');
-        if(ua.indexOf('Instagram')>-1&&body)body.classList.add('instagram-browser');
-        [html,body].forEach(function(el){
-            if(!el)return;
-            el.style.overflowX='clip';
-            el.style.overflowY='auto';
-            el.style.height='auto';
-            el.style.position='';
-        });
+        html.classList.add('in-app-browser');
+        if(ua.indexOf('Instagram')>-1)html.classList.add('instagram-browser');
+        html.style.overflowX='clip';
+        html.style.overflowY='auto';
+        html.style.height='auto';
         var style=document.createElement('style');
         style.textContent=
-            '.in-app-browser *{touch-action:pan-y !important;-ms-touch-action:pan-y !important;}'+
-            '.in-app-browser body,.in-app-browser html{overflow-x:clip !important;overflow-y:auto !important;}'+
-            '.in-app-browser main,.in-app-browser .container{overflow:visible !important;}'+
-            '.in-app-browser .card-details{overflow-y:visible !important;max-height:none !important;height:auto !important;overscroll-behavior:auto !important;}';
+            'html.in-app-browser,html.in-app-browser body{overflow-x:clip !important;overflow-y:auto !important;height:auto !important;}'+
+            'html.in-app-browser *{touch-action:pan-y !important;-ms-touch-action:pan-y !important;}'+
+            'html.in-app-browser main,html.in-app-browser .container{overflow:visible !important;}'+
+            'html.in-app-browser .card-details{overflow-y:visible !important;max-height:none !important;height:auto !important;overscroll-behavior:auto !important;}';
         (document.head||document.getElementsByTagName('head')[0]).appendChild(style);
     })();
     </script>
