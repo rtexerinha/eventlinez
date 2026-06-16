@@ -34,15 +34,22 @@ class TicketSoldListAPIView(ListAPIView):
                 Q(day_event__partner__user=user)
             )
 
+        queryset = queryset.select_related('customer', 'order_item__order')
+
         if event_id:
             queryset = queryset.filter(
                 Q(event_ticket__event__id=event_id) | Q(day_event__id=event_id)
             )
 
         if guest_name:
-            queryset = queryset.filter(guest_name__icontains=guest_name)
+            queryset = queryset.filter(
+                Q(guest_name__icontains=guest_name) |
+                Q(customer__first_name__icontains=guest_name) |
+                Q(customer__last_name__icontains=guest_name) |
+                Q(customer__email__icontains=guest_name)
+            )
 
-        return queryset.order_by('guest_name')
+        return queryset.order_by('customer__first_name', 'customer__last_name', 'guest_name')
 
 
 class TicketSoldDetailsAPIView(ListAPIView):
@@ -80,10 +87,10 @@ class TicketSoldCheckinAPIView(APIView):
         user = request.user
         if not hasattr(user, 'promoter'):
             if not Partner.objects.filter(
-                user=user, event=effective_event, role='DOORMAN', disable=False
+                user=user, event=effective_event, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).exists():
                 return Response(
-                    {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
+                    {'success': False, 'message': 'You are not assigned to this event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
         elif effective_event.promoter.user != user:
@@ -101,7 +108,7 @@ class TicketSoldCheckinAPIView(APIView):
 
         try:
             with transaction.atomic():
-                ticket = Ticket.objects.select_for_update().get(pk=pk)
+                ticket = Ticket.objects.select_related('event_ticket', 'customer').select_for_update().get(pk=pk)
 
                 if ticket.checkin_date:
                     return Response({
@@ -109,7 +116,10 @@ class TicketSoldCheckinAPIView(APIView):
                         'message': 'This ticket has already been checked in.',
                         'already_checked_in': True,
                         'ticket_id': ticket.id,
-                        'guest_name': ticket.guest_name or str(ticket.customer),
+                        'guest_name': ticket.guest_name or (
+                            f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+                            if ticket.customer else ''
+                        ) or 'Unknown',
                         'event_name': effective_event.name,
                         'ticket_type': ticket.event_ticket.name,
                         'first_checkin_at': ticket.checkin_date,
@@ -118,9 +128,14 @@ class TicketSoldCheckinAPIView(APIView):
 
                 ticket.checkin_date = timezone.now()
                 ticket.save(update_fields=['checkin_date'])
-        except Exception:
+        except Exception as exc:
+            import traceback, logging
+            logging.getLogger(__name__).error(
+                "TicketSoldCheckinAPIView FAILED: pk=%s user=%s error=%s\n%s",
+                pk, request.user.username, exc, traceback.format_exc(),
+            )
             return Response(
-                {'success': False, 'message': 'Check-in failed due to a server error. Please try again.'},
+                {'success': False, 'message': f'Check-in failed: {exc}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -129,7 +144,10 @@ class TicketSoldCheckinAPIView(APIView):
             'message': 'Check-in successful! Welcome!',
             'already_checked_in': False,
             'ticket_id': ticket.id,
-            'guest_name': ticket.guest_name or str(ticket.customer),
+            'guest_name': ticket.guest_name or (
+                f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+                if ticket.customer else ''
+            ) or 'Unknown',
             'event_name': effective_event.name,
             'ticket_type': ticket.event_ticket.name,
             'checked_in_at': ticket.checkin_date,
@@ -173,10 +191,10 @@ class TicketSoldCheckinQrcodeAPIView(APIView):
         user = request.user
         if not hasattr(user, 'promoter'):
             if not Partner.objects.filter(
-                user=user, event=effective_event, role='DOORMAN', disable=False
+                user=user, event=effective_event, role__in=['DOORMAN', 'PARTNER'], disable=False
             ).exists():
                 return Response(
-                    {'success': False, 'message': 'You are not assigned as a Doorman for this event.'},
+                    {'success': False, 'message': 'You are not assigned to this event.'},
                     status=status.HTTP_403_FORBIDDEN,
                 )
         elif effective_event.promoter.user != user:
@@ -199,7 +217,7 @@ class TicketSoldCheckinQrcodeAPIView(APIView):
 
         try:
             with transaction.atomic():
-                ticket = Ticket.objects.select_for_update().get(pk=ticket.pk)
+                ticket = Ticket.objects.select_related('event_ticket', 'customer').select_for_update().get(pk=ticket.pk)
 
                 if ticket.checkin_date:
                     return Response({
@@ -207,7 +225,10 @@ class TicketSoldCheckinQrcodeAPIView(APIView):
                         'message': 'This ticket has already been checked in.',
                         'already_checked_in': True,
                         'ticket_id': ticket.id,
-                        'guest_name': ticket.guest_name or str(ticket.customer),
+                        'guest_name': ticket.guest_name or (
+                            f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+                            if ticket.customer else ''
+                        ) or 'Unknown',
                         'event_name': effective_event.name,
                         'ticket_type': ticket.event_ticket.name,
                         'first_checkin_at': ticket.checkin_date,
@@ -216,9 +237,14 @@ class TicketSoldCheckinQrcodeAPIView(APIView):
 
                 ticket.checkin_date = timezone.now()
                 ticket.save(update_fields=['checkin_date'])
-        except Exception:
+        except Exception as exc:
+            import traceback, logging
+            logging.getLogger(__name__).error(
+                "TicketSoldCheckinQrcodeAPIView FAILED: uuid=%s user=%s error=%s\n%s",
+                uuid, request.user.username, exc, traceback.format_exc(),
+            )
             return Response(
-                {'success': False, 'message': 'Check-in failed due to a server error. Please try again.'},
+                {'success': False, 'message': f'Check-in failed: {exc}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -227,7 +253,10 @@ class TicketSoldCheckinQrcodeAPIView(APIView):
             'message': 'Check-in successful! Welcome!',
             'already_checked_in': False,
             'ticket_id': ticket.id,
-            'guest_name': ticket.guest_name or str(ticket.customer),
+            'guest_name': ticket.guest_name or (
+                f"{ticket.customer.first_name} {ticket.customer.last_name}".strip()
+                if ticket.customer else ''
+            ) or 'Unknown',
             'event_name': effective_event.name,
             'ticket_type': ticket.event_ticket.name,
             'checked_in_at': ticket.checkin_date,

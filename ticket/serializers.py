@@ -9,9 +9,28 @@ class TicketSoldSerializers(serializers.Serializer):
     event_ticket = serializers.CharField(read_only=True)
     vendor = serializers.CharField(read_only=True)
     guest_name = serializers.CharField(read_only=True)
+    customer_name = serializers.SerializerMethodField()
+    customer_email = serializers.SerializerMethodField()
+    order_id = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(read_only=True)
     checkin_date = serializers.DateTimeField(required=True)
     uuid = serializers.UUIDField(read_only=True)
+
+    def get_customer_name(self, obj):
+        if obj.customer:
+            return f"{obj.customer.first_name} {obj.customer.last_name}".strip() or None
+        return None
+
+    def get_customer_email(self, obj):
+        if obj.customer:
+            return getattr(obj.customer, 'email', None) or None
+        return None
+
+    def get_order_id(self, obj):
+        try:
+            return obj.order_item.order.id
+        except Exception:
+            return None
 
     class Meta:
         model = Ticket
