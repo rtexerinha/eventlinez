@@ -135,7 +135,7 @@ class TicketSoldCheckinAPIView(APIView):
                 pk, request.user.username, exc, traceback.format_exc(),
             )
             return Response(
-                {'success': False, 'message': f'Check-in failed: {exc}'},
+                {'success': False, 'message': 'Check-in failed. Please try again.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -244,7 +244,7 @@ class TicketSoldCheckinQrcodeAPIView(APIView):
                 uuid, request.user.username, exc, traceback.format_exc(),
             )
             return Response(
-                {'success': False, 'message': f'Check-in failed: {exc}'},
+                {'success': False, 'message': 'Check-in failed. Please try again.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
