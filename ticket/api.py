@@ -262,3 +262,52 @@ class TicketSoldCheckinQrcodeAPIView(APIView):
             'checked_in_at': ticket.checkin_date,
             'first_checkin_at': None,
         })
+
+
+class TicketResendEmailAPIView(APIView):
+    """
+    POST /ticket/api/<pk>/resend/
+    Resend the ticket PDF by email.
+    Body: { "email": "override@example.com" }  (optional — defaults to buyer's email)
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        from django.conf import settings
+        from django.core.mail import EmailMessage
+
+        try:
+            ticket = Ticket.objects.select_related(
+                'order_item__order', 'event_ticket__event__promoter'
+            ).get(pk=pk, event_ticket__event__promoter__user=request.user)
+        except Ticket.DoesNotExist:
+            return Response({'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        target_email = request.data.get('email') or ticket.order_item.order.emailAddress
+        if not target_email:
+            return Response({'error': 'No email address available.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            pdf = ticket.as_pdf()
+            event = ticket.event_ticket.event
+            subject = f'Your ticket – {event.name}'
+            body = (
+                f'Hi,\n\nHere is your ticket for {event.name}.\n\n'
+                f'Order: #{ticket.order_item.order.id}\n'
+                f'Ticket type: {ticket.event_ticket.name}\n\n'
+                f'Show the QR code attached (or at https://www.eventlinez.com/ticket/{ticket.uuid}) '
+                f'at the entrance to check in.\n\nSee you there!'
+            )
+            email = EmailMessage(
+                subject=subject,
+                body=body,
+                from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@eventlinez.com'),
+                to=[target_email],
+            )
+            email.attach(f'ticket_{ticket.id}.pdf', pdf, 'application/pdf')
+            email.send()
+            return Response({'success': True, 'message': f'Ticket sent to {target_email}.'})
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error('TicketResendEmailAPIView error pk=%s: %s', pk, e)
+            return Response({'success': False, 'error': 'Failed to send email.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
