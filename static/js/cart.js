@@ -88,8 +88,12 @@ function addToCard() {
   var hasValidTickets = false;
 
   for (var i = 0; i < linhas.length; i++) {
-    var ticket_id = parseInt(linhas[i].getElementsByClassName("ticket-id")[0].innerText, 10);
-    var qty = parseInt(linhas[i].getElementsByClassName("ticket-qty")[0].innerText, 10);
+    var ticketIdEl = linhas[i].getElementsByClassName("ticket-id")[0];
+    if (!ticketIdEl) continue; // sold-out rows have no ticket-id element
+    var ticket_id = parseInt(ticketIdEl.innerText, 10);
+    var qtyEl = linhas[i].getElementsByClassName("ticket-qty")[0];
+    if (!qtyEl) continue;
+    var qty = parseInt(qtyEl.innerText, 10);
     tickets.push({ id: ticket_id, quantity: qty });
     if (qty > 0) hasValidTickets = true;
   }
