@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 import json
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 
 from cart.models import Cart, CartItem
@@ -104,18 +103,30 @@ def change_password_customer(request):
     })
 
 
-@csrf_exempt
 @login_required
 def edit_guest(request):
-    id = request.POST.get('id', '')
-    type = request.POST.get('type', '')
-    value = request.POST.get('value', '')
-    ticket = Ticket.objects.get(id=id)
-    if type == "guest_name":
-        ticket.guest_name = value
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    ticket_id = request.POST.get('id', '')
+    field_type = request.POST.get('type', '')
+    value = request.POST.get('value', '').strip()
+    try:
+        ticket = Ticket.objects.get(id=ticket_id, customer=request.user.customer)
+    except Ticket.DoesNotExist:
+        return JsonResponse({'error': 'Ticket not found'}, status=404)
+    if field_type == 'guest_name':
+        ticket.guest_name = value or None
+        ticket.save(update_fields=['guest_name'])
+    return JsonResponse({'success': True})
 
-    ticket.save()
-    return JsonResponse({"success": "Updated"})
+
+@login_required
+def download_ticket_pdf(request, pk):
+    ticket = get_object_or_404(Ticket, pk=pk, customer=request.user.customer)
+    pdf = ticket.as_pdf()
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="ticket_{ticket.id}.pdf"'
+    return response
 
 
 @login_required()

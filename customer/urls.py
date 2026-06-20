@@ -1,7 +1,7 @@
 from django.urls import path
 
 from customer.views import signup_view, signout_view, update_customer, \
-                           change_password_customer, guest_list, edit_guest
+                           change_password_customer, guest_list, edit_guest, download_ticket_pdf
 
 urlpatterns = [
     path('account/create/', signup_view, name='signup'),
@@ -9,5 +9,6 @@ urlpatterns = [
     path('update/', update_customer, name='customer_update'),
     path('reset_password/', change_password_customer, name='reset_password_costomer'),
     path('ticket/', guest_list, name='guest_list'),
-    path('ticket/save/', edit_guest, name='saveTicket')
+    path('ticket/save/', edit_guest, name='saveTicket'),
+    path('ticket/<int:pk>/download/', download_ticket_pdf, name='download_ticket_pdf'),
 ]

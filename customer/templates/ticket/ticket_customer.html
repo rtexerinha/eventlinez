@@ -520,16 +520,17 @@
                             <i class="fas fa-qrcode"></i>
                             View QR Code
                         </a>
-                        <button class="download-btn" onclick="downloadTicket({{ ticket.id }})">
+                        <a href="{% url 'download_ticket_pdf' ticket.id %}" class="download-btn">
                             <i class="fas fa-download"></i>
-                        </button>
+                        </a>
                     </div>
 
                     <div class="guest-name-section">
                         <label class="guest-name-label">Guest Name (for event check-in)</label>
-                        <input type="text" class="guest-name-input editable" data-id="{{ ticket.id }}"
-                            data-type="guest_name" placeholder="Enter guest name for this ticket"
+                        <input type="text" class="guest-name-input" data-id="{{ ticket.id }}"
+                            placeholder="Enter guest name for this ticket"
                             value="{{ ticket.guest_name|default_if_none:'' }}">
+                        <span class="save-status" style="font-size:0.8rem;transition:opacity 0.5s;opacity:0;"></span>
                     </div>
                 </div>
             </div>
@@ -589,11 +590,11 @@
         </div>
         {% endif %}
 
-        <!-- Save Section -->
+        <!-- Browse more events -->
         <div class="save-section">
             <a href="{% url 'shop:index' %}" class="save-btn">
-                <i class="fas fa-save"></i>
-                Save Changes
+                <i class="fas fa-search"></i>
+                Browse Events
             </a>
         </div>
 
@@ -668,25 +669,6 @@
             });
         }
 
-        // Download ticket functionality
-        window.downloadTicket = function (ticketId) {
-            // This would implement PDF download functionality
-            alert('Download functionality would be implemented here for ticket #' + ticketId);
-        };
-
-        // Add loading states to guest name inputs
-        const guestInputs = document.querySelectorAll('.guest-name-input');
-        guestInputs.forEach(input => {
-            input.addEventListener('input', function () {
-                const card = this.closest('.ticket-card');
-                card.classList.add('loading');
-
-                // Simulate API call delay
-                setTimeout(() => {
-                    card.classList.remove('loading');
-                }, 500);
-            });
-        });
     });
 </script>
 {% endblock %}
