@@ -920,9 +920,13 @@ class DoormanScanPaidTicketAPIView(APIView):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
-        # Check check-in deadline (effective event date + 6 hours)
-        deadline = effective_event.event_date + timedelta(hours=6)
+        # Check check-in deadline (effective event date + 12 hours)
+        deadline = effective_event.event_date + timedelta(hours=12)
         if timezone.now() > deadline:
+            logger.warning(
+                "DoormanScanPaidTicket: deadline expired ticket=%s event=%s deadline=%s now=%s user=%s",
+                ticket.id, effective_event.id, deadline, timezone.now(), request.user.username,
+            )
             return Response(
                 TicketScanResultSerializer({
                     'success': False,
@@ -937,7 +941,9 @@ class DoormanScanPaidTicketAPIView(APIView):
         from django.db import transaction
         try:
             with transaction.atomic():
-                ticket = PaidTicket.objects.select_for_update().get(pk=ticket.pk)
+                ticket = PaidTicket.objects.select_related(
+                    'customer', 'event_ticket'
+                ).select_for_update().get(pk=ticket.pk)
 
                 if ticket.checkin_date:
                     return Response(
@@ -959,9 +965,14 @@ class DoormanScanPaidTicketAPIView(APIView):
 
                 ticket.checkin_date = timezone.now()
                 ticket.save(update_fields=['checkin_date'])
-        except Exception:
+        except Exception as exc:
+            import traceback
+            logger.error(
+                "DoormanScanPaidTicket FAILED: ticket=%s event=%s user=%s error=%s\n%s",
+                ticket.id, effective_event.id, request.user.username, exc, traceback.format_exc(),
+            )
             return Response(
-                {'success': False, 'message': 'Check-in failed due to a server error. Please try again.'},
+                {'success': False, 'message': f'Check-in failed: {exc}. Please try again.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -1576,7 +1587,7 @@ class DoormanManualCheckinAPIView(APIView):
             return err
 
         from datetime import timedelta
-        deadline = effective_event.event_date + timedelta(hours=6)
+        deadline = effective_event.event_date + timedelta(hours=12)
         if timezone.now() > deadline:
             logger.info(
                 "Manual check-in rejected (deadline passed): ticket_id=%s event=%s deadline=%s",

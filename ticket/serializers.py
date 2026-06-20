@@ -44,7 +44,7 @@ class TicketSoldSerializers(serializers.Serializer):
 
         # Use day_event date for Full Pass tickets; fall back to parent event date
         effective_event = instance.day_event if instance.day_event else instance.event_ticket.event
-        deadline = effective_event.event_date + timedelta(hours=6)
+        deadline = effective_event.event_date + timedelta(hours=12)
 
         # Both sides are timezone-aware — safe comparison
         if timezone.now() > deadline:

@@ -99,7 +99,7 @@ class TicketSoldCheckinAPIView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        deadline = effective_event.event_date + timedelta(hours=6)
+        deadline = effective_event.event_date + timedelta(hours=12)
         if timezone.now() > deadline:
             return Response(
                 {'success': False, 'message': f'Check-in period has ended. Deadline was {deadline.strftime("%b %d %H:%M")}.'},
@@ -203,7 +203,7 @@ class TicketSoldCheckinQrcodeAPIView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        deadline = effective_event.event_date + timedelta(hours=6)
+        deadline = effective_event.event_date + timedelta(hours=12)
         if timezone.now() > deadline:
             return Response(
                 {

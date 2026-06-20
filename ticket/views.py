@@ -55,7 +55,7 @@ def ticket_checkin(request, checkin):
             return render(request, 'pages/error401.html', {'error_msg': error_msg})
 
     ticket_date_event = effective_event.event_date
-    deadline = (ticket_date_event + timedelta(hours=6)).strftime("%Y-%m-%d %H:%M:%S")
+    deadline = (ticket_date_event + timedelta(hours=12)).strftime("%Y-%m-%d %H:%M:%S")
     if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > deadline:
         errors.append('Deadline to check in is over')
     if ticket.checkin_date is not None:
