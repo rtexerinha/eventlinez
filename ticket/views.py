@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from datetime import datetime
 from datetime import timedelta
 from django.utils import timezone
 from io import BytesIO
@@ -43,10 +42,10 @@ def ticket_checkin(request, checkin):
             error_msg = "You are not authorized to validate this ticket!"
             return render(request, 'pages/error401.html', {'error_msg': error_msg})
     else:
-        # Check if user is an active doorman assigned to the effective event
+        # Check if user is an active doorman/partner assigned to the effective event
         doorman_qs = Partner.objects.filter(
             user=user,
-            role='DOORMAN',
+            role__in=['DOORMAN', 'PARTNER'],
             disable=False,
             event=effective_event,
         )
@@ -54,9 +53,8 @@ def ticket_checkin(request, checkin):
             error_msg = "You are not authorized to validate this ticket!"
             return render(request, 'pages/error401.html', {'error_msg': error_msg})
 
-    ticket_date_event = effective_event.event_date
-    deadline = (ticket_date_event + timedelta(hours=12)).strftime("%Y-%m-%d %H:%M:%S")
-    if datetime.now().strftime("%Y-%m-%d %H:%M:%S") > deadline:
+    deadline = effective_event.event_date + timedelta(hours=12)
+    if timezone.now() > deadline:
         errors.append('Deadline to check in is over')
     if ticket.checkin_date is not None:
         errors.append('Ticket has already been validated!')
