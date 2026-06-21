@@ -195,9 +195,15 @@
         display: block;
     }
 
+    .guest-name-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
     .guest-name-input {
-        width: 100%;
-        padding: 12px 15px;
+        flex: 1;
+        padding: 10px 13px;
         border: 2px solid #e9ecef;
         border-radius: 8px;
         font-size: 0.9rem;
@@ -208,6 +214,29 @@
         outline: none;
         border-color: #d90075;
         box-shadow: 0 0 0 3px rgba(217, 0, 117, 0.1);
+    }
+
+    .save-guest-btn {
+        flex-shrink: 0;
+        background: #d90075;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .save-guest-btn:hover {
+        background: #b8005f;
+    }
+
+    .save-guest-btn:disabled {
+        background: #adb5bd;
+        cursor: not-allowed;
     }
 
     .ticket-status {
@@ -527,10 +556,13 @@
 
                     <div class="guest-name-section">
                         <label class="guest-name-label">Guest Name (for event check-in)</label>
-                        <input type="text" class="guest-name-input" data-id="{{ ticket.id }}"
-                            placeholder="Enter guest name for this ticket"
-                            value="{{ ticket.guest_name|default_if_none:'' }}">
-                        <span class="save-status" style="font-size:0.8rem;transition:opacity 0.5s;opacity:0;"></span>
+                        <div class="guest-name-row">
+                            <input type="text" class="guest-name-input" data-id="{{ ticket.id }}"
+                                placeholder="Enter guest name for this ticket"
+                                value="{{ ticket.guest_name|default_if_none:'' }}">
+                            <button type="button" class="save-guest-btn" data-id="{{ ticket.id }}">Save</button>
+                        </div>
+                        <span class="save-status" style="font-size:0.8rem;transition:opacity 0.5s;opacity:0;display:block;margin-top:4px;"></span>
                     </div>
                 </div>
             </div>

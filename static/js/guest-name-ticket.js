@@ -7,19 +7,26 @@ function getCsrfToken() {
   return match ? decodeURIComponent(match[1]) : '';
 }
 
-function showSaveFeedback(input, success) {
-  var label = input.closest('.guest-name-section').querySelector('.save-status');
+function showSaveFeedback(section, success) {
+  var label = section.querySelector('.save-status');
   if (!label) return;
-  label.textContent = success ? 'Saved ✓' : 'Error saving';
+  label.textContent = success ? 'Saved ✓' : 'Error — please try again';
   label.style.color = success ? '#28a745' : '#dc3545';
   label.style.opacity = '1';
   clearTimeout(label._hide);
-  label._hide = setTimeout(function () { label.style.opacity = '0'; }, 2000);
+  label._hide = setTimeout(function () { label.style.opacity = '0'; }, 2500);
 }
 
-function saveGuestName(input) {
+function saveGuestName(section) {
+  var input = section.querySelector('.guest-name-input');
+  var btn = section.querySelector('.save-guest-btn');
+  if (!input) return;
+
   var id = input.dataset.id;
-  var value = input.value;
+  var value = input.value.trim();
+
+  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
+
   var formData = new FormData();
   formData.append('id', id);
   formData.append('type', 'guest_name');
@@ -31,15 +38,25 @@ function saveGuestName(input) {
     body: formData,
   })
     .then(function (r) { return r.json(); })
-    .then(function (data) { showSaveFeedback(input, data.success === true); })
-    .catch(function () { showSaveFeedback(input, false); });
+    .then(function (data) { showSaveFeedback(section, data.success === true); })
+    .catch(function () { showSaveFeedback(section, false); })
+    .finally(function () {
+      if (btn) { btn.textContent = 'Save'; btn.disabled = false; }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.guest-name-input').forEach(function (input) {
-    input.addEventListener('blur', function () { saveGuestName(this); });
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); saveGuestName(this); }
-    });
+  document.querySelectorAll('.guest-name-section').forEach(function (section) {
+    var input = section.querySelector('.guest-name-input');
+    var btn = section.querySelector('.save-guest-btn');
+
+    if (btn) {
+      btn.addEventListener('click', function () { saveGuestName(section); });
+    }
+    if (input) {
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); saveGuestName(section); }
+      });
+    }
   });
 });
