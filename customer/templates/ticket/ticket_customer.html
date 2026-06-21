@@ -239,6 +239,11 @@
         cursor: not-allowed;
     }
 
+    .save-guest-btn:active {
+        background: #8c004d;
+        transform: scale(0.97);
+    }
+
     .ticket-status {
         position: absolute;
         top: 15px;
@@ -379,12 +384,42 @@
             gap: 10px;
         }
 
+        /* Keep QR + download in a row on mobile; QR grows, download stays icon-sized */
         .ticket-actions {
-            flex-direction: column;
+            flex-direction: row;
+        }
+
+        .qr-btn {
+            flex: 1;
+            min-height: 48px;
+        }
+
+        .download-btn {
+            flex-shrink: 0;
+            min-height: 48px;
+            padding: 12px 16px;
         }
 
         .filter-buttons {
             justify-content: center;
+        }
+
+        /* Guest name — prevent iOS zoom (needs 16px+) and ensure fat touch targets */
+        .guest-name-input {
+            font-size: 16px;
+            min-height: 48px;
+            padding: 12px 14px;
+        }
+
+        .save-guest-btn {
+            min-height: 48px;
+            padding: 12px 18px;
+            font-size: 0.9rem;
+        }
+
+        .save-status {
+            font-size: 0.85rem !important;
+            margin-top: 6px !important;
         }
     }
 
