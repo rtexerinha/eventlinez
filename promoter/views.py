@@ -1103,6 +1103,11 @@ def revenue_report_export(request, event_id):
         gross_revenue = tickets_sold.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
         total_refunds_export = refunded_tickets_export.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
 
+        # promo_usage queryset kept for the "Promo Code Usage" sheet below
+        promo_usage = PromoCodeUsage.objects.filter(
+            promo_code__event=selected_event
+        ) if PromoCodeUsage else []
+
         # Dual-source discount calculation (mirrors the HTML revenue report exactly):
         # Source A — PromoCodeUsage.discount_amount when > 0
         # Source B — face_value − Order.total (catches orders where Stripe line item
