@@ -1103,13 +1103,35 @@ def revenue_report_export(request, event_id):
         gross_revenue = tickets_sold.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
         total_refunds_export = refunded_tickets_export.aggregate(total=Sum('price'))['total'] or Decimal('0.00')
 
-        # Use conditional check for PromoCodeUsage
-        if PromoCodeUsage:
-            promo_usage = PromoCodeUsage.objects.filter(promo_code__event=selected_event)
-            total_promo_discount = promo_usage.aggregate(total=Sum('discount_amount'))['total'] or Decimal('0.00')
-        else:
-            promo_usage = []
-            total_promo_discount = Decimal('0.00')
+        # Dual-source discount calculation (mirrors the HTML revenue report exactly):
+        # Source A — PromoCodeUsage.discount_amount when > 0
+        # Source B — face_value − Order.total (catches orders where Stripe line item
+        #   already had the discount baked in, leaving Source A at 0)
+        from order.models import Order as _Order
+        _order_ids = set()
+        for _t in tickets_sold:
+            if hasattr(_t, 'order_item') and _t.order_item:
+                _order_ids.add(_t.order_item.order_id)
+
+        _usage_by_order = {}
+        if _order_ids and PromoCodeUsage:
+            for _u in PromoCodeUsage.objects.select_related('promo_code').filter(
+                order_id__in=[str(oid) for oid in _order_ids]
+            ):
+                try:
+                    _usage_by_order[int(_u.order_id)] = _u
+                except (ValueError, TypeError):
+                    pass
+
+        total_promo_discount = Decimal('0.00')
+        for _ord in _Order.objects.filter(id__in=_order_ids).prefetch_related('orderitem_set'):
+            _items = list(_ord.orderitem_set.all())
+            _u = _usage_by_order.get(_ord.id)
+            if _u and _u.discount_amount and _u.discount_amount > 0:
+                total_promo_discount += _u.discount_amount
+            else:
+                _face = sum(i.amount for i in _items)
+                total_promo_discount += max(Decimal('0.00'), _face - _ord.total)
 
         net_revenue = gross_revenue - total_promo_discount
 

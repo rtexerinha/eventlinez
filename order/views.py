@@ -134,7 +134,9 @@ def _webhook_recover_order(session):
                     order=order,
                     vendor=item.vendor,
                 )
-            # Track promo code usage — mirror the logic in the create view
+            # Track promo code usage — derive discount from face value vs Order.total,
+            # because our Stripe line item already has the discount baked in so
+            # line_item.unit_amount == amount_total (face - charged == 0).
             from django.db.models import F as _F
             promo_codes_used = set(
                 item.promo_code for item in items if item.promo_code
@@ -147,15 +149,9 @@ def _webhook_recover_order(session):
                         order_id=str(order.id)
                     ).exists()
                     if not already_recorded:
-                        # Calculate actual discount: face value minus what Stripe charged.
-                        # session.amount_discount is always 0 for Eventlinez because we
-                        # apply our own discount (not Stripe coupons), so derive it instead.
-                        _face = sum(
-                            Decimal(str(i.get('price', {}).get('unit_amount', 0) or 0)) / 100
-                            * (i.get('quantity') or 1)
-                            for i in session.get('line_items', {}).get('data', [])
-                        )
-                        _charged = Decimal(str(session.get('amount_total') or 0)) / 100
+                        # Face value = sum of ticket prices at full price
+                        _face = sum(item.ticket.price * item.quantity for item in items)
+                        _charged = stripe_total
                         _discount = max(Decimal('0.00'), _face - _charged)
                         PromoCodeUsage.objects.create(
                             promo_code=promo,
@@ -166,7 +162,7 @@ def _webhook_recover_order(session):
                         PromoCode.objects.filter(pk=promo.pk).update(
                             current_uses=_F('current_uses') + 1
                         )
-                        logger.info(f"Webhook: promo code '{code}' usage recorded for order {order.id}")
+                        logger.info(f"Webhook: promo code '{code}' usage recorded for order {order.id}, discount={_discount}")
                 except PromoCode.DoesNotExist:
                     logger.warning(f"Webhook: promo code '{code}' not found during usage tracking")
 
@@ -175,6 +171,32 @@ def _webhook_recover_order(session):
         logger.info(
             f"Webhook: recovered order {order.id} for session {session_id}, customer={customer_email}"
         )
+
+        # Update Stripe PaymentIntent description with Order # (same as success URL handler)
+        try:
+            from order.stripe_utils import build_stripe_description, build_stripe_metadata_from_order
+            import stripe as _stripe
+            _stripe.api_key = settings.STRIPE_SECRET_KEY
+            first_item = order.orderitem_set.first()
+            if first_item:
+                _desc = build_stripe_description(
+                    first_item.event_ticket.event.name,
+                    first_item.event_ticket.name,
+                    order_id=order.id,
+                    customer_email=order.emailAddress,
+                )
+            else:
+                _desc = f"{order.emailAddress} | Order #{order.id}"
+            payment_intent_id = session.get('payment_intent', '')
+            if payment_intent_id:
+                _stripe.PaymentIntent.modify(
+                    payment_intent_id,
+                    description=_desc,
+                    metadata=build_stripe_metadata_from_order(order),
+                )
+                logger.info(f"Webhook: updated Stripe description for order {order.id}: {_desc}")
+        except Exception as e:
+            logger.error(f"Webhook: failed to update Stripe description for order {order.id}: {e}")
 
         try:
             send_mail(order.id)
