@@ -474,6 +474,21 @@ def checkout(request):
         }, status=500)
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    # Guard against duplicate charges: if this user already has an open Stripe
+    # session for this same cart, reuse it instead of creating a second charge.
+    _pending_key = f'pending_stripe_session_{cart.id}'
+    _pending_session_id = request.session.get(_pending_key)
+    if _pending_session_id:
+        try:
+            _existing = stripe.checkout.Session.retrieve(_pending_session_id)
+            if _existing.status == 'open':
+                return JsonResponse({
+                    'session_id': _existing.id,
+                    'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
+                })
+        except Exception:
+            pass  # session expired or invalid — fall through to create a new one
     line_items = []
     cents = 100
 
@@ -548,6 +563,10 @@ def checkout(request):
     # causing a "cart empty" error on the success URL even though payment succeeded.
     cart.reserved_at = timezone.now()
     cart.save(update_fields=['reserved_at'])
+
+    # Store session ID in the user's Django session so a repeat checkout request
+    # reuses the same Stripe session rather than creating a duplicate charge.
+    request.session[f'pending_stripe_session_{cart.id}'] = session.id
 
     try:
         mark_cart_converted(cart.cart_id, order_id=session.id)

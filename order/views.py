@@ -538,6 +538,9 @@ def create(request):
             'PROD': settings.PROD,
         })
 
+    # Clear the pending session guard so future purchases for a new cart work normally
+    request.session.pop(f'pending_stripe_session_{cart_pk}', None)
+
     # ── Update Stripe description + metadata with Order # and customer email ──
     try:
         from order.stripe_utils import build_stripe_description, build_stripe_metadata_from_order
