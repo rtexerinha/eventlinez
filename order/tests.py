@@ -1,10 +1,16 @@
-from django.test import TestCase
+import json
+from decimal import Decimal
+from unittest.mock import patch
+
+from django.test import TestCase, override_settings
+from django.contrib.auth.models import User
 from django.core import mail
 from model_bakery import baker
 
 from .models import Order
 from ticket.models import Ticket
 from .models import OrderItem
+from .views import _rebuild_order_from_stripe
 
 
 class OrderModel(TestCase):
@@ -91,3 +97,74 @@ class OrderTicketGeneration(TestCase):
 
         event.refresh_from_db()
         self.assertEqual(event_ticket.qty_available(), 0)
+
+
+@override_settings(EVENTLINEZ_FEE=0.12)
+class RebuildOrderFromStripeTest(TestCase):
+    """Fix #2: rebuild a paid order from the Stripe metadata snapshot when the
+    live cart is gone/empty but Stripe confirms payment."""
+
+    def setUp(self):
+        self.user = User.objects.create_user('john', 'john@example.com', 'pw')
+        self.customer = baker.make(
+            'customer.Customer', user=self.user, email='john@example.com',
+            first_name='John', last_name='Doe',
+        )
+        event = baker.make('event.Event', description="foo", available=False)
+        self.ticket = baker.make('event.Ticket', event=event, quantity=10, price=10)
+
+    def _snapshot_metadata(self, qty=2):
+        return {'cart_items_json': json.dumps([
+            {'t': self.ticket.id, 'q': qty, 'v': None, 'p': None}
+        ])}
+
+    @patch('order.views.send_mail')
+    def test_rebuild_creates_order_from_snapshot(self, _mock_mail):
+        # amount_total in cents: 2 tickets @ $10 + 12% fee = $22.40
+        order = _rebuild_order_from_stripe(
+            session_id='cs_test_1', payment_intent='pi_1', amount_total=2240,
+            metadata=self._snapshot_metadata(qty=2), customer=self.customer,
+            cart=None, source='test',
+        )
+        self.assertIsNotNone(order)
+        self.assertEqual(order.token, 'cs_test_1')
+        self.assertEqual(order.payment_code, 'pi_1')
+        self.assertEqual(order.total, Decimal('22.40'))
+        self.assertEqual(order.orderitem_set.count(), 1)
+        item = order.orderitem_set.first()
+        self.assertEqual(item.quantity, 2)
+        self.assertEqual(item.event_ticket_id, self.ticket.id)
+        # Tickets are generated via the OrderItem post_save signal
+        self.assertEqual(Ticket.objects.filter(order_item=item).count(), 2)
+
+    @patch('order.views.send_mail')
+    def test_rebuild_is_idempotent_on_session_id(self, _mock_mail):
+        kwargs = dict(
+            session_id='cs_dup', payment_intent='pi_2', amount_total=1120,
+            metadata=self._snapshot_metadata(qty=1), customer=self.customer,
+            cart=None, source='test',
+        )
+        first = _rebuild_order_from_stripe(**kwargs)
+        second = _rebuild_order_from_stripe(**kwargs)
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(Order.objects.filter(token='cs_dup').count(), 1)
+
+    @patch('order.views.send_mail')
+    def test_rebuild_returns_none_without_snapshot(self, _mock_mail):
+        order = _rebuild_order_from_stripe(
+            session_id='cs_nosnap', payment_intent='', amount_total=1000,
+            metadata={}, customer=self.customer, cart=None, source='test',
+        )
+        self.assertIsNone(order)
+        self.assertEqual(Order.objects.filter(token='cs_nosnap').count(), 0)
+
+    @patch('order.views.send_mail')
+    def test_rebuild_returns_none_when_snapshot_ticket_gone(self, _mock_mail):
+        metadata = {'cart_items_json': json.dumps([{'t': 999999, 'q': 1, 'v': None, 'p': None}])}
+        order = _rebuild_order_from_stripe(
+            session_id='cs_goneticket', payment_intent='', amount_total=1000,
+            metadata=metadata, customer=self.customer, cart=None, source='test',
+        )
+        self.assertIsNone(order)
+        # No partial order should be left behind
+        self.assertEqual(Order.objects.filter(token='cs_goneticket').count(), 0)

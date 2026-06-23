@@ -155,6 +155,9 @@ function doCheckout() {
       return result.json();
     })
     .then(function (data) {
+      // Duplicate purchase detected server-side — go to the existing confirmation
+      // instead of opening a second Stripe session.
+      if (data && data.redirect_url) { window.location.href = data.redirect_url; return; }
       if (!data.stripe_public_key || !data.session_id) throw new Error('Invalid checkout session data');
       return Stripe(data.stripe_public_key).redirectToCheckout({ sessionId: data.session_id });
     })

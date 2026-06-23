@@ -13,8 +13,11 @@ from django.http import JsonResponse
 
 from .models import Cart
 from .models import CartItem
+from .views import _find_recent_duplicate_order
 from event.models import Event
 from event.models import Ticket
+from order.models import Order, OrderItem
+from order.stripe_utils import build_stripe_metadata_from_cart
 
 
 class TestCartItem(TestCase):
@@ -529,3 +532,115 @@ class CartExpireEndpointTest(TestCase):
     def test_expire_get_not_allowed(self):
         response = self.client.get(reverse('cart:expire'))
         self.assertEqual(response.status_code, 405)
+
+
+class FindRecentDuplicateOrderTest(TestCase):
+    """Fix #1: detect an accidental re-purchase of the same tickets by the same
+    customer within the dedupe window."""
+
+    def setUp(self):
+        self.user = User.objects.create_user('dupuser', 'dup@test.com', 'pw')
+        self.customer = baker.make(
+            'customer.Customer', user=self.user, email='dup@test.com',
+            first_name='D', last_name='U',
+        )
+        event = baker.make(Event, description='x')
+        self.ticket = baker.make(Ticket, event=event, quantity=20, price=50)
+        self.ticket2 = baker.make(Ticket, event=event, quantity=20, price=30)
+
+    def _cart_items(self, ticket, qty=1):
+        cart = baker.make('cart.Cart')
+        CartItem.objects.create(ticket=ticket, quantity=qty, cart=cart)
+        return CartItem.objects.filter(cart=cart, active=True)
+
+    def _make_order(self, ticket, qty=1, status=Order.STATUS_PAID, minutes_ago=0):
+        order = baker.make('order.Order', customer=self.customer, status=status,
+                           total=Decimal('56.00'))
+        baker.make('order.OrderItem', order=order, event_ticket=ticket, quantity=qty,
+                   unit_price=ticket.price, amount=Decimal('56.00'), fee=Decimal('6.00'))
+        if minutes_ago:
+            Order.objects.filter(pk=order.pk).update(
+                created=timezone.now() - timedelta(minutes=minutes_ago)
+            )
+        return order
+
+    def test_matches_recent_identical_order(self):
+        order = self._make_order(self.ticket, qty=1)
+        match = _find_recent_duplicate_order(self.customer, self._cart_items(self.ticket, 1))
+        self.assertIsNotNone(match)
+        self.assertEqual(match.id, order.id)
+
+    def test_no_match_when_order_too_old(self):
+        self._make_order(self.ticket, qty=1, minutes_ago=20)
+        self.assertIsNone(
+            _find_recent_duplicate_order(self.customer, self._cart_items(self.ticket, 1))
+        )
+
+    def test_no_match_when_quantity_differs(self):
+        self._make_order(self.ticket, qty=1)
+        self.assertIsNone(
+            _find_recent_duplicate_order(self.customer, self._cart_items(self.ticket, 2))
+        )
+
+    def test_no_match_when_ticket_differs(self):
+        self._make_order(self.ticket, qty=1)
+        self.assertIsNone(
+            _find_recent_duplicate_order(self.customer, self._cart_items(self.ticket2, 1))
+        )
+
+    def test_no_match_when_order_refunded(self):
+        self._make_order(self.ticket, qty=1, status=Order.STATUS_REFUNDED)
+        self.assertIsNone(
+            _find_recent_duplicate_order(self.customer, self._cart_items(self.ticket, 1))
+        )
+
+
+class CheckoutDuplicateGuardViewTest(TestCase):
+    """Fix #1: the checkout view returns a redirect-to-confirmation response
+    instead of opening a second Stripe session for an accidental duplicate."""
+
+    def setUp(self):
+        self.user = User.objects.create_user('buyer', 'buyer@test.com', 'pw')
+        self.customer = baker.make(
+            'customer.Customer', user=self.user, email='buyer@test.com',
+            first_name='B', last_name='Uyer',
+        )
+        event = baker.make(Event, description='x')
+        self.ticket = baker.make(Ticket, event=event, quantity=20, price=50)
+
+    def test_checkout_redirects_to_existing_order_for_duplicate(self):
+        # Prior recent PAID order for 1 of this ticket
+        order = baker.make('order.Order', customer=self.customer,
+                           status=Order.STATUS_PAID, total=Decimal('56.00'))
+        baker.make('order.OrderItem', order=order, event_ticket=self.ticket, quantity=1,
+                   unit_price=self.ticket.price, amount=Decimal('56.00'), fee=Decimal('6.00'))
+
+        self.client.login(username='buyer', password='pw')
+        payload = json.dumps({'tickets': [{'id': self.ticket.id, 'quantity': 1}]})
+        self.client.post(reverse('cart:add_cart'), payload, content_type='application/json')
+
+        response = self.client.post(reverse('cart:checkout'), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data.get('duplicate'))
+        self.assertEqual(data['redirect_url'], reverse('order:thanks', args=[order.id]))
+        # The cart must survive so the customer can still retry deliberately later
+        self.assertTrue(Cart.objects.filter(cart_id=self.client.session.session_key).exists())
+
+
+class CartItemsSnapshotMetadataTest(TestCase):
+    """Fix #2: checkout metadata carries a machine-readable cart snapshot used
+    to rebuild the order if the cart is gone by the time payment confirms."""
+
+    def test_metadata_includes_cart_items_json(self):
+        cart = baker.make('cart.Cart')
+        event = baker.make('event.Event', description='foo')
+        ticket = baker.make('event.Ticket', event=event, price=10, quantity=10)
+        CartItem.objects.create(ticket=ticket, quantity=2, cart=cart)
+        items = CartItem.objects.filter(cart=cart, active=True)
+
+        metadata = build_stripe_metadata_from_cart(cart, items, customer_email='a@b.com')
+
+        self.assertIn('cart_items_json', metadata)
+        parsed = json.loads(metadata['cart_items_json'])
+        self.assertEqual(parsed, [{'t': ticket.id, 'q': 2, 'v': None, 'p': None}])

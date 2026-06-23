@@ -1,3 +1,4 @@
+import json
 import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -18,6 +19,151 @@ from decimal import Decimal
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 logger = logging.getLogger(__name__)
+
+
+def _customer_from_stripe_session(session):
+    """
+    Resolve the Eventlinez Customer for a paid Stripe session using the email
+    Stripe collected. Returns the Customer or None.
+    """
+    customer_details = session.get('customer_details') or {}
+    email = (customer_details.get('email') or session.get('customer_email') or '').strip()
+    if not email:
+        return None
+    from customer.models import Customer as _Customer
+    return _Customer.objects.filter(email__iexact=email).first()
+
+
+def _rebuild_order_from_stripe(*, session_id, payment_intent, amount_total,
+                               metadata, customer, cart=None, source='unknown'):
+    """
+    Last-resort recovery: rebuild a paid order from the cart snapshot stored in
+    Stripe metadata (``cart_items_json``) when the live cart is gone or has been
+    emptied (closed browser, lost session cookie, reservation timer fired) but
+    Stripe confirms the payment succeeded.
+
+    Idempotent on ``token=session_id``. Returns the Order, or None if recovery is
+    not possible (no snapshot, snapshot tickets no longer exist, etc.) so the
+    caller can fall back to a "contact support" message.
+    """
+    existing = Order.objects.filter(token=session_id).first()
+    if existing:
+        logger.info(f"[{source}] order {existing.id} already exists for session {session_id}, skipping rebuild")
+        return existing
+
+    raw_snapshot = (metadata or {}).get('cart_items_json')
+    if not raw_snapshot:
+        logger.error(f"[{source}] no cart_items_json in metadata for session {session_id}; cannot rebuild order")
+        return None
+    try:
+        snapshot = json.loads(raw_snapshot)
+    except (ValueError, TypeError) as e:
+        logger.error(f"[{source}] invalid cart_items_json for session {session_id}: {e}")
+        return None
+    if not snapshot:
+        logger.error(f"[{source}] empty cart snapshot for session {session_id}")
+        return None
+
+    from event.models import Ticket as EventTicket
+    from promoter.models import Vendor
+    from django.db.models import F as _F
+
+    fee_rate = Decimal(str(getattr(settings, 'EVENTLINEZ_FEE', 0.12)))
+    stripe_total = Decimal(str(amount_total or 0)) / 100
+
+    try:
+        with transaction.atomic():
+            # Re-check idempotency now that we're committing.
+            existing = Order.objects.filter(token=session_id).first()
+            if existing:
+                return existing
+
+            order = Order.objects.create(
+                total=stripe_total,
+                emailAddress=customer.email,
+                customer=customer,
+                token=session_id,
+                payment_code=payment_intent or '',
+            )
+
+            created_items = 0
+            face_total = Decimal('0.00')
+            promo_codes_used = set()
+            for entry in snapshot:
+                ticket_id = entry.get('t')
+                qty = int(entry.get('q') or 0)
+                if not ticket_id or qty <= 0:
+                    continue
+                try:
+                    ticket = EventTicket.objects.get(pk=ticket_id)
+                except EventTicket.DoesNotExist:
+                    logger.error(
+                        f"[{source}] ticket {ticket_id} from snapshot no longer exists "
+                        f"for session {session_id}; skipping"
+                    )
+                    continue
+                vendor = Vendor.objects.filter(pk=entry.get('v')).first() if entry.get('v') else None
+                promo_code = entry.get('p')
+                unit_price = ticket.price
+                fee = (unit_price * fee_rate * qty).quantize(Decimal('0.01'))
+                amount = (unit_price * qty) + fee
+                OrderItem.objects.create(
+                    event_ticket=ticket,
+                    quantity=qty,
+                    unit_price=unit_price,
+                    amount=amount,
+                    fee=fee,
+                    promo_code=promo_code,
+                    order=order,
+                    vendor=vendor,
+                )
+                created_items += 1
+                face_total += amount
+                if promo_code:
+                    promo_codes_used.add(promo_code)
+
+            if created_items == 0:
+                logger.error(
+                    f"[{source}] no valid items rebuilt from snapshot for session {session_id}; rolling back"
+                )
+                raise ValueError("no_items_rebuilt")
+
+            # Promo usage tracking — derive discount as face value minus what Stripe charged.
+            discount = max(Decimal('0.00'), face_total - stripe_total)
+            for code in promo_codes_used:
+                try:
+                    promo = PromoCode.objects.select_for_update().get(code=code)
+                    if not PromoCodeUsage.objects.filter(promo_code=promo, order_id=str(order.id)).exists():
+                        PromoCodeUsage.objects.create(
+                            promo_code=promo,
+                            customer_email=customer.email,
+                            order_id=str(order.id),
+                            discount_amount=discount,
+                        )
+                        PromoCode.objects.filter(pk=promo.pk).update(current_uses=_F('current_uses') + 1)
+                        logger.info(f"[{source}] promo code '{code}' usage recorded for rebuilt order {order.id}")
+                except PromoCode.DoesNotExist:
+                    logger.warning(f"[{source}] promo code '{code}' not found during usage tracking")
+
+            if cart is not None:
+                cart.delete()
+
+    except Exception as e:
+        logger.error(f"[{source}] failed to rebuild order for session {session_id}: {e}", exc_info=True)
+        return None
+
+    logger.info(
+        f"[{source}] REBUILT order {order.id} from Stripe metadata for session {session_id}, "
+        f"customer={customer.email}, items={created_items}"
+    )
+
+    try:
+        send_mail(order.id)
+    except Exception as e:
+        logger.error(f"[{source}] confirmation email failed for rebuilt order {order.id}: {e}")
+
+    return order
+
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -81,34 +227,55 @@ def _webhook_recover_order(session):
         logger.error(f"Webhook: no client_reference_id in session {session_id}")
         return
 
-    try:
-        cart = Cart.objects.get(id=cart_id)
-    except Cart.DoesNotExist:
-        logger.error(
-            f"Webhook RECOVERY FAILED: cart {cart_id} already deleted for paid session "
-            f"{session_id} (payment_intent={session.get('payment_intent')}) — manual recovery required"
-        )
-        return
-
     # Customer lookup by email from Stripe
-    customer_details = session.get('customer_details') or {}
-    customer_email = customer_details.get('email') or session.get('customer_email') or ''
-    if not customer_email:
-        logger.error(f"Webhook: no customer email in session {session_id}")
-        return
-
-    from customer.models import Customer as _Customer
-    try:
-        customer = _Customer.objects.get(email__iexact=customer_email.strip())
-    except _Customer.DoesNotExist:
+    customer = _customer_from_stripe_session(session)
+    if customer is None:
+        customer_details = session.get('customer_details') or {}
+        customer_email = customer_details.get('email') or session.get('customer_email') or ''
         logger.error(
             f"Webhook: customer with email '{customer_email}' not found for session {session_id}"
         )
         return
 
+    try:
+        cart = Cart.objects.get(id=cart_id)
+    except Cart.DoesNotExist:
+        # Cart already deleted — try to rebuild from the Stripe metadata snapshot
+        # before giving up, so the customer still gets their order and email.
+        recovered = _rebuild_order_from_stripe(
+            session_id=session_id,
+            payment_intent=session.get('payment_intent', ''),
+            amount_total=session.get('amount_total', 0),
+            metadata=session.get('metadata') or {},
+            customer=customer,
+            cart=None,
+            source='webhook-rebuild',
+        )
+        if recovered is None:
+            logger.error(
+                f"Webhook RECOVERY FAILED: cart {cart_id} already deleted for paid session "
+                f"{session_id} (payment_intent={session.get('payment_intent')}) and metadata "
+                f"rebuild not possible — manual recovery required"
+            )
+        return
+
     items = cart.cartitem_set.filter(active=True)
     if not items.exists():
-        logger.error(f"Webhook: cart {cart_id} has no active items for session {session_id}")
+        # Items were cleared (e.g. reservation timer) — rebuild from metadata snapshot.
+        recovered = _rebuild_order_from_stripe(
+            session_id=session_id,
+            payment_intent=session.get('payment_intent', ''),
+            amount_total=session.get('amount_total', 0),
+            metadata=session.get('metadata') or {},
+            customer=customer,
+            cart=cart,
+            source='webhook-rebuild',
+        )
+        if recovered is None:
+            logger.error(
+                f"Webhook RECOVERY FAILED: cart {cart_id} has no active items for paid session "
+                f"{session_id} and metadata rebuild not possible — manual recovery required"
+            )
         return
 
     # Use the actual amount Stripe charged (in cents → dollars)
@@ -442,21 +609,6 @@ def create(request):
     # client_reference_id = cart.id (DB pk) set during checkout session creation.
     # This works even if the user's session cookie is gone (closed tab, network drop).
     cart_pk = session.client_reference_id
-    try:
-        cart = Cart.objects.get(id=cart_pk)
-    except (Cart.DoesNotExist, ValueError, TypeError):
-        logger.error(
-            f"Cart pk={cart_pk} not found for paid session {session_id} "
-            f"(payment_intent={session.payment_intent}) — webhook recovery will handle it"
-        )
-        return render(request, 'order/error.html', {
-            'error': (
-                'Your payment was successful but we could not locate your cart. '
-                'Your tickets will be confirmed shortly via email — '
-                'please do not pay again. Contact support if you do not receive them.'
-            ),
-            'PROD': settings.PROD,
-        })
 
     # ── Customer profile ──
     try:
@@ -468,15 +620,57 @@ def create(request):
             'PROD': settings.PROD,
         })
 
+    try:
+        cart = Cart.objects.get(id=cart_pk)
+    except (Cart.DoesNotExist, ValueError, TypeError):
+        # Cart gone (e.g. webhook already deleted it after a prior tab's redirect).
+        # Try to rebuild the order from the Stripe metadata snapshot so we can show
+        # the customer their confirmation immediately instead of a scary error.
+        recovered = _rebuild_order_from_stripe(
+            session_id=session_id,
+            payment_intent=session.payment_intent,
+            amount_total=session.amount_total,
+            metadata=session.metadata or {},
+            customer=customer,
+            cart=None,
+            source='success-url-rebuild',
+        )
+        if recovered is not None:
+            return redirect('order:thanks', recovered.id)
+        logger.error(
+            f"Cart pk={cart_pk} not found for paid session {session_id} "
+            f"(payment_intent={session.payment_intent}) and metadata rebuild not possible "
+            f"— webhook recovery will retry"
+        )
+        return render(request, 'order/error.html', {
+            'error': (
+                'Your payment was successful but we could not locate your cart. '
+                'Your tickets will be confirmed shortly via email — '
+                'please do not pay again. Contact support if you do not receive them.'
+            ),
+            'PROD': settings.PROD,
+        })
+
     items = cart.cartitem_set.filter(active=True)
     if not items.exists():
         # Cart items were cleared — most likely the 5-minute reservation timer fired
         # in a background tab while the customer was on the Stripe payment page.
-        # Payment already succeeded, so log it and let the webhook recover the order.
+        # Payment already succeeded, so rebuild the order from the metadata snapshot.
+        recovered = _rebuild_order_from_stripe(
+            session_id=session_id,
+            payment_intent=session.payment_intent,
+            amount_total=session.amount_total,
+            metadata=session.metadata or {},
+            customer=customer,
+            cart=cart,
+            source='success-url-rebuild',
+        )
+        if recovered is not None:
+            return redirect('order:thanks', recovered.id)
         logger.error(
             f"Cart {cart.id} has no active items for paid session {session_id} "
-            f"(payment_intent={session.payment_intent}) — timer likely cleared items; "
-            f"webhook recovery will create the order"
+            f"(payment_intent={session.payment_intent}) — timer likely cleared items "
+            f"and metadata rebuild not possible; webhook recovery will retry"
         )
         return render(request, 'order/error.html', {
             'error': (
