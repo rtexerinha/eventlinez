@@ -485,6 +485,7 @@ def checkout(request):
             if _existing.status == 'open':
                 return JsonResponse({
                     'session_id': _existing.id,
+                    'checkout_url': _existing.url,
                     'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
                 })
         except Exception:
@@ -575,7 +576,8 @@ def checkout(request):
 
     return JsonResponse({
         'session_id': session.id,
-        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY
+        'checkout_url': session.url,
+        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
     })
 
 
