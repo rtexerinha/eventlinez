@@ -140,7 +140,9 @@ class TicketRefund(models.Model):
 
 
 @receiver(post_save, sender=OrderItem)
-def create_tickets(sender, instance, **kwargs):
+def create_tickets(sender, instance, created, **kwargs):
+    if not created:
+        return  # only run on initial creation, not on updates
     from decimal import Decimal as _Decimal
     days = getattr(instance.event_ticket, 'days', 1) or 1
     unit_price = _Decimal(str(instance.unit_price))
@@ -149,7 +151,9 @@ def create_tickets(sender, instance, **kwargs):
     for i in range(0, instance.quantity):
         guest_name = None
         if instance.quantity == 1:
-            guest_name = instance.order.customer.first_name + " " + instance.order.customer.last_name
+            fn = instance.order.customer.first_name or ''
+            ln = instance.order.customer.last_name or ''
+            guest_name = f"{fn} {ln}".strip() or None
 
         if days > 1:
             # Full-pass: generate one ticket per day, linked to its specific event

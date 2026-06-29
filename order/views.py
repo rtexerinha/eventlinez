@@ -13,6 +13,7 @@ from ticket.models import Ticket, CancelledTicket
 from .models import Order, OrderItem, TicketRefund
 from promoter.models import PromoCode, PromoCodeUsage
 from django.db import transaction
+from django.db import IntegrityError
 from decimal import Decimal
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -530,6 +531,12 @@ def create(request):
 
     except Exception as e:
         logger.error(f"Order creation failed for session {session_id}: {e}", exc_info=True)
+        # Race condition: webhook may have created the order a split-second before us.
+        # Rather than showing an error page, redirect to the order that was created.
+        recovered = Order.objects.filter(token=session_id).first()
+        if recovered:
+            logger.info(f"Race condition recovered: order {recovered.id} already exists for session {session_id}")
+            return redirect('order:thanks', recovered.id)
         return render(request, 'order/error.html', {
             'error': (
                 'Your payment was received but we encountered an error saving your order. '
