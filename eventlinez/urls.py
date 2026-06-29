@@ -54,6 +54,7 @@ urlpatterns += [
     path('terms-of-service/', shop.views.terms, name='terms'),
     path('account/',  include('account.urls'), name='account'),
     path('address/', include('address.urls')),
+    path('api/', include('api.urls', namespace='api')),
 ]
 
 admin.site.site_header = 'Eventlinez'

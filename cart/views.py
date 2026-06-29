@@ -215,6 +215,10 @@ def cart_add(request):
         cart.reserved_at = timezone.now()
         cart.save(update_fields=['reserved_at'])
 
+        # If the user previously reached Stripe then came back and changed the cart,
+        # the old Stripe session no longer matches — force a fresh one on next checkout.
+        request.session.pop(f'pending_stripe_session_{cart.id}', None)
+
         promo_cleared = _clear_cart_promo(cart)
         return JsonResponse({
             "status": "success",
@@ -252,6 +256,7 @@ def change_quantity(request, item_id, operation):
     item.save()
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
+        request.session.pop(f'pending_stripe_session_{cart.id}', None)
         if _clear_cart_promo(cart):
             messages.info(request, "Promo code removed — please re-apply to recalculate your discount.")
     except Cart.DoesNotExist:
@@ -265,6 +270,7 @@ def cart_detail(request, cart_items=None):
 
         if cart.is_expired():
             cart.clear_items()
+            request.session.pop(f'pending_stripe_session_{cart.id}', None)
             messages.warning(request, 'Your reservation expired. Please add tickets again.')
 
         all_items = CartItem.objects.filter(cart=cart, active=True)
@@ -340,6 +346,7 @@ def remove_item(request, item_id):
     item = get_object_or_404(CartItem, id=item_id)
     cart = item.cart
     item.delete()
+    request.session.pop(f'pending_stripe_session_{cart.id}', None)
     if _clear_cart_promo(cart):
         messages.info(request, "Promo code removed — please re-apply to recalculate your discount.")
     return redirect('cart:detail')
@@ -493,6 +500,7 @@ def checkout(request):
 
     if cart.is_expired():
         cart.clear_items()
+        request.session.pop(f'pending_stripe_session_{cart.id}', None)
         return JsonResponse({
             'error': 'cart_expired',
             'message': 'Your reservation expired. Please add tickets again.',
@@ -542,6 +550,22 @@ def checkout(request):
         }, status=500)
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    # Guard against duplicate charges: if this user already has an open Stripe
+    # session for this same cart, reuse it instead of creating a second charge.
+    _pending_key = f'pending_stripe_session_{cart.id}'
+    _pending_session_id = request.session.get(_pending_key)
+    if _pending_session_id:
+        try:
+            _existing = stripe.checkout.Session.retrieve(_pending_session_id)
+            if _existing.status == 'open':
+                return JsonResponse({
+                    'session_id': _existing.id,
+                    'checkout_url': _existing.url,
+                    'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
+                })
+        except Exception:
+            pass  # session expired or invalid — fall through to create a new one
     line_items = []
     cents = 100
 
@@ -617,6 +641,10 @@ def checkout(request):
     cart.reserved_at = timezone.now()
     cart.save(update_fields=['reserved_at'])
 
+    # Store session ID in the user's Django session so a repeat checkout request
+    # reuses the same Stripe session rather than creating a duplicate charge.
+    request.session[f'pending_stripe_session_{cart.id}'] = session.id
+
     try:
         mark_cart_converted(cart.cart_id, order_id=session.id)
     except Exception as e:
@@ -624,7 +652,8 @@ def checkout(request):
 
     return JsonResponse({
         'session_id': session.id,
-        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY
+        'checkout_url': session.url,
+        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
     })
 
 
@@ -636,6 +665,7 @@ def expire_cart(request):
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request))
         cart.clear_items()
+        request.session.pop(f'pending_stripe_session_{cart.id}', None)
         return JsonResponse({'status': 'expired'})
     except Cart.DoesNotExist:
         return JsonResponse({'status': 'already_empty'})

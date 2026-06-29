@@ -123,6 +123,7 @@ INSTALLED_APPS = [
     "account",
     "rest_framework.authtoken",
     "eventlinez",
+    "api",
     "django.contrib.sitemaps",
     "django.contrib.sites",
 ]

@@ -159,6 +159,7 @@ function doCheckout() {
       // instead of opening a second Stripe session.
       if (data && data.redirect_url) { window.location.href = data.redirect_url; return; }
       if (!data.stripe_public_key || !data.session_id) throw new Error('Invalid checkout session data');
+      if (typeof Stripe === 'undefined') throw new Error('Payment library failed to load. Please refresh and try again.');
       return Stripe(data.stripe_public_key).redirectToCheckout({ sessionId: data.session_id });
     })
     .then(function (result) {
