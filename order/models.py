@@ -111,7 +111,7 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     event_ticket = models.ForeignKey('event.Ticket', on_delete=models.CASCADE)
-    promo_code = models.CharField(max_length=10, null=True)
+    promo_code = models.CharField(max_length=20, null=True)
     quantity = models.IntegerField(validators=[MinValueValidator(0)])
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     fee = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
