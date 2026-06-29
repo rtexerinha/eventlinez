@@ -624,10 +624,22 @@ This is the shopping cart page. Proceed to review your items and place the order
             .then((data) => {
                 console.log('Checkout data:', data);
 
+                // Preferred path: redirect to the Stripe-hosted checkout URL.
+                // No Stripe.js library is needed on the client (the <script> tag
+                // was removed to avoid "Stripe is not defined" when the CDN is
+                // blocked or slow to load).
+                if (data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                    return;
+                }
+
+                // Fallback: Stripe.js redirectToCheckout, only if the library is present.
                 if (!data.stripe_public_key || !data.session_id) {
                     throw new Error('Missing Stripe data in response. Please try again.');
                 }
-
+                if (typeof Stripe === 'undefined') {
+                    throw new Error('Payment could not start. Please refresh the page and try again.');
+                }
                 const stripe = Stripe(data.stripe_public_key);
                 return stripe.redirectToCheckout({ sessionId: data.session_id });
             })
