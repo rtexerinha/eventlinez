@@ -300,8 +300,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                         <div class="d-flex justify-content-end text-success">
                             <span class="col-6 h6-home pt-1">Promo discount:</span>
                             <span class="col-6 h6-home d-flex justify-content-end p-0">
-                                {% if cart.promo_discount %}-${{ cart.promo_discount|floatformat:2 }}{% else %}-$0.00{%
-                                endif %}
+                                {% if cart.promo_discount %}-${{ cart.promo_discount|floatformat:2 }}{% else %}-$0.00{% endif %}
                             </span>
                         </div>
                     </div>
@@ -517,8 +516,7 @@ This is the shopping cart page. Proceed to review your items and place the order
 <script>
     // Cart reservation countdown timer
     (function () {
-        var secondsLeft = {{ reservation_seconds|default: 0
-    }};
+        var secondsLeft = {{ reservation_seconds|default:0 }};
     if (secondsLeft <= 0) return;
 
     var display = document.getElementById('reservation-countdown');
