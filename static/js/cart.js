@@ -155,12 +155,9 @@ function doCheckout() {
       return result.json();
     })
     .then(function (data) {
-      if (data.checkout_url) {
-        // Direct redirect — no Stripe.js library needed on the client side.
-        window.location.href = data.checkout_url;
-        return;
-      }
-      // Fallback: use Stripe.js redirectToCheckout if checkout_url is absent
+      // Duplicate purchase detected server-side — go to the existing confirmation
+      // instead of opening a second Stripe session.
+      if (data && data.redirect_url) { window.location.href = data.redirect_url; return; }
       if (!data.stripe_public_key || !data.session_id) throw new Error('Invalid checkout session data');
       if (typeof Stripe === 'undefined') throw new Error('Payment library failed to load. Please refresh and try again.');
       return Stripe(data.stripe_public_key).redirectToCheckout({ sessionId: data.session_id });

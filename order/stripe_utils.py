@@ -4,6 +4,7 @@ Utility functions for Stripe payment integration and order processing.
 This module provides helper functions to ensure consistent descriptions and metadata
 are sent to Stripe for all payment transactions.
 """
+import json
 import logging
 from typing import Dict, Optional, Any
 from decimal import Decimal
@@ -79,7 +80,30 @@ def build_stripe_metadata_from_cart(
         metadata[f'item_{idx}_tier'] = str(item.ticket.name)[:500]
         metadata[f'item_{idx}_qty'] = str(item.quantity)
         metadata[f'item_{idx}_price'] = f"{item.price_total():.2f}"
-    
+
+    # Compact machine-readable snapshot of the cart so the order can be rebuilt
+    # from Stripe alone if the cart is gone/empty by the time payment confirms
+    # (closed browser, lost session cookie, reservation timer fired). Kept under
+    # Stripe's 500-char-per-value limit; falls back gracefully if it overflows.
+    cart_items = [
+        {
+            't': item.ticket_id,
+            'q': item.quantity,
+            'v': item.vendor_id,
+            'p': item.promo_code or None,
+        }
+        for item in items
+    ]
+    cart_items_json = json.dumps(cart_items, separators=(',', ':'))
+    if len(cart_items_json) <= 500:
+        metadata['cart_items_json'] = cart_items_json
+    else:
+        logger.warning(
+            "cart_items_json exceeds Stripe's 500-char metadata limit "
+            "(%d chars, %d items); order recovery from metadata will be unavailable",
+            len(cart_items_json), len(cart_items),
+        )
+
     return metadata
 
 

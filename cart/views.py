@@ -1,11 +1,13 @@
 import logging
 import json
+from datetime import timedelta
 
 import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
@@ -20,6 +22,45 @@ from django.contrib import messages
 from .rate_limiting import rate_limit, get_cart_identifier, get_item_identifier, get_ticket_identifier
 
 logger = logging.getLogger(__name__)
+
+# A second checkout of the exact same tickets by the same customer within this
+# window is treated as an accidental double-purchase, not a deliberate one.
+DUPLICATE_ORDER_WINDOW_MINUTES = 15
+
+
+def _cart_signature(items):
+    """A comparable fingerprint of a cart's contents: sorted (ticket_id, quantity)."""
+    return sorted((item.ticket_id, item.quantity) for item in items)
+
+
+def _find_recent_duplicate_order(customer, items):
+    """
+    Return a recent PAID order belonging to `customer` whose items exactly match
+    the current cart (same tickets, same quantities), created within
+    DUPLICATE_ORDER_WINDOW_MINUTES. Used to stop an accidental second charge when
+    a customer who didn't see a confirmation retries the same purchase.
+
+    Returns the matching Order or None.
+    """
+    from order.models import Order
+
+    cart_sig = _cart_signature(items)
+    cutoff = timezone.now() - timedelta(minutes=DUPLICATE_ORDER_WINDOW_MINUTES)
+    recent_orders = (
+        Order.objects.filter(
+            customer=customer,
+            status=Order.STATUS_PAID,
+            created__gte=cutoff,
+        )
+        .prefetch_related('orderitem_set')
+    )
+    for order in recent_orders:
+        order_sig = sorted(
+            (oi.event_ticket_id, oi.quantity) for oi in order.orderitem_set.all()
+        )
+        if order_sig == cart_sig:
+            return order
+    return None
 
 
 def _cart_id(request):
@@ -469,6 +510,33 @@ def checkout(request):
     if invalid_items.exists():
         names = [item.ticket.name for item in invalid_items]
         return JsonResponse({'error': 'The following tickets are sold out: ' + ', '.join(names)}, status=400)
+
+    # ── Duplicate-payment guard ──────────────────────────────────────────────
+    # If this customer already completed an order for the exact same tickets in
+    # the last few minutes, they almost certainly didn't see their confirmation
+    # and are retrying. Send them to that order's thanks page instead of opening
+    # a second Stripe session and charging them twice.
+    try:
+        customer = request.user.customer
+    except Exception:
+        customer = None
+
+    if customer:
+        duplicate_order = _find_recent_duplicate_order(customer, items)
+        if duplicate_order:
+            logger.warning(
+                f"Duplicate checkout blocked for customer {customer.id} "
+                f"({customer.email}): cart matches existing order {duplicate_order.id} "
+                f"created at {duplicate_order.created} — redirecting to thanks instead of re-charging"
+            )
+            return JsonResponse({
+                'duplicate': True,
+                'message': (
+                    'You have already purchased these tickets. '
+                    'Redirecting you to your confirmation.'
+                ),
+                'redirect_url': reverse('order:thanks', args=[duplicate_order.id]),
+            }, status=200)
 
     # Check if Stripe is properly configured with real keys
     if not settings.STRIPE_SECRET_KEY or settings.STRIPE_SECRET_KEY in [
