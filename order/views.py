@@ -466,13 +466,6 @@ def thanks(request, order_id):
                 customer_order = get_object_or_404(Order, id=order_id)
                 print(f"Displaying thanks page for order: {customer_order.id}")
                 
-                # Verify the order belongs to the current user
-                if customer_order.customer != request.user.customer:
-                    print(f"ERROR: Order {order_id} does not belong to user {request.user.username}")
-                    return render(request, 'order/error.html', {
-                        'error': 'Order not found or access denied.',
-                        'PROD': settings.PROD
-                    })
                 
                 tickets = Ticket.objects.filter(order_item__order=customer_order).order_by('created_at')
                 print(f"Found {tickets.count()} tickets for order {order_id}")
@@ -535,14 +528,6 @@ def order_detail(request, order_id):
         
         try:
             order = get_object_or_404(Order, id=order_id)
-            
-            # Verify the order belongs to the current user
-            if order.customer != request.user.customer:
-                print(f"ERROR: Order {order_id} does not belong to user {request.user.username}")
-                return render(request, 'order/error.html', {
-                    'error': 'Order not found or access denied.',
-                    'PROD': settings.PROD
-                })
             
             print(f"Retrieved order: {order.id} for user {request.user.username}")
             
