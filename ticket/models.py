@@ -1,3 +1,4 @@
+import os
 import uuid
 from io import BytesIO
 
@@ -81,7 +82,7 @@ class Ticket(models.Model):
         p.rect(130, 780, 0, 0, fill=1)
         p.roundRect(130, 390, 300, 430, 10, stroke=1, fill=0)
 
-        img_file = 'static/img/Eventlinez.png'
+        img_file = os.path.join(settings.BASE_DIR, 'static', 'img', 'Eventlinez.png')
         p.drawImage(img_file, 230, 785, width=100, preserveAspectRatio=True, mask='auto')
         p.setStrokeGray(0.8)
         p.line(130, 780, 430, 780)

@@ -2,135 +2,315 @@
 {% load static %}
 
 {% block title %}
-	Thanks - Eventlinez! We hope to see you soon.
+    Thanks - Eventlinez! We hope to see you soon.
+{% endblock %}
+
+{% block custom_css %}
+<style>
+    .ticket-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #f1f3f4;
+    }
+
+    .ticket-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .ticket-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 20px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .ticket-id {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+
+    .ticket-event-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .ticket-type {
+        background: #d90075;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .ticket-body {
+        padding: 25px;
+    }
+
+    .ticket-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .info-item i {
+        color: #d90075;
+        width: 16px;
+    }
+
+    .ticket-actions {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .qr-btn {
+        background: linear-gradient(135deg, #d90075, #ff6b9d);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .qr-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(217, 0, 117, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .download-btn {
+        background: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 15px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .download-btn:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .guest-name-section {
+        border-top: 1px solid #e9ecef;
+        padding-top: 20px;
+    }
+
+    .guest-name-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .guest-name-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .guest-name-input {
+        flex: 1;
+        padding: 10px 13px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .guest-name-input:focus {
+        outline: none;
+        border-color: #d90075;
+        box-shadow: 0 0 0 3px rgba(217, 0, 117, 0.1);
+    }
+
+    .save-guest-btn {
+        flex-shrink: 0;
+        background: #d90075;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .save-guest-btn:hover { background: #b8005f; }
+    .save-guest-btn:disabled { background: #adb5bd; cursor: not-allowed; }
+    .save-guest-btn:active { background: #8c004d; transform: scale(0.97); }
+
+    .thanks-tickets-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    @media (max-width: 768px) {
+        .thanks-tickets-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .ticket-info {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .ticket-actions { flex-direction: row; }
+
+        .qr-btn { flex: 1; min-height: 48px; }
+
+        .download-btn {
+            flex-shrink: 0;
+            min-height: 48px;
+            padding: 12px 16px;
+        }
+
+        .guest-name-input {
+            font-size: 16px;
+            min-height: 48px;
+            padding: 12px 14px;
+        }
+
+        .save-guest-btn {
+            min-height: 48px;
+            padding: 12px 18px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-    <section class="container" style="min-height: 70vh;">
-        {% if tickets|length > 1 %}
-            <main class="col-12 mt-5 mb-5 pt-lg-4" style="min-height: 50vh; margin: auto;">
-                <div class="row">
-                    <aside class="col-lg-5 pl-0 pr-0 pb-lg-5 pb-4 border-r">
-                        <img style="width: 60%; display: block; margin: auto"
-                             src="{% static 'img/thanks.png' %}"
-                             alt="Ilustração de uma pessoa no computador">
-                        <div class="col-12 p-0" style="justify-content: center">
-                            <h3 class="col-12 h3-home mt-2" style="text-align: center;">
-                                Thanks for placing your order
-                            </h3>
-                            <p class="col-12 h6-home mt-0 mt-lg-4" style="text-align: center;margin: auto">
-                                We have received your order and your name was added to the Guest List.
+<section class="container" style="min-height: 70vh;">
 
-                                For your records an email confirmation has been sent to you.
+    <!-- Confirmation -->
+    <div class="row mt-5 mb-4">
+        <div class="col-12 text-center">
+            <img style="width: 180px; display: block; margin: auto;"
+                 src="{% static 'img/thanks.png' %}"
+                 alt="Order confirmed">
+            <h3 class="h3-home mt-3">Thanks for placing your order</h3>
+            <p class="h6-home mt-2" style="max-width: 600px; margin: auto;">
+                We have received your order and your name was added to the Guest List.
+                An email confirmation with your tickets has been sent to you.
+                Your order number is: <strong>{{ customer_order.id }}</strong>
+            </p>
+            <p class="mt-3" style="max-width: 600px; margin: auto; font-weight: 700; color: #d90075; font-size: 1rem;">
+                PLEASE CHECK YOUR TICKETS ON <a href="{% url 'guest_list' %}" style="color: #d90075; text-decoration: underline;">My Tickets</a>.
+            </p>
+        </div>
+    </div>
 
-                                It contains details of the items you purchased. Your order number is:
-                                {{ customer_order.id }}
-                            </p>
-                        </div>
-                    </aside>
-
-                    <article class="col-lg-7 mt-4 mt-lg-2">
-                        <div class="col-12 p-0">
-                         <h4 class="h4-home pb-2 pb-lg-4">
-                             For control purposes, inform the name to whom belongs each ticket
-                         </h4>
-                            <main class="col-12 d-lg-flex p-0 d-none">
-                                <div class="col-7 p-0 d-flex">
-                                    <p class="h6-home p-dark pl-3 pr-4">Ticket</p>
-{#                                </div>#}
-{#                                <div class="col-5 p-0">#}
-                                    <p class="h6-home p-dark">Event/Ticket</p>
-                                </div>
-
-                                <div class="col-5 p-0">
-                                    <p class="h6-home p-dark">Guest Name </p>
-                                </div>
-                            </main>
-
-                            {% for tickets in tickets %}
-                                <main class="d-block d-lg-flex mt-3">
-                                    <div class="col-lg-7 d-flex p-0">
-{#                                        <div class="col-lg-2 col-2" style="padding: revert">#}
-                                            <p class="h6-home p-dark text-lg-center pl-lg-4 pr-lg-4">
-                                                {{ tickets.id }}
-                                            </p>
-{#                                        </div>#}
-
-{#                                        <div class="col-lg-5 col-10">#}
-                                        <p class="h6-home text-left p-dark pl-2 pl-lg-0">
-                                            {% if tickets.day_event %}
-                                                {{ tickets.day_event.name }}/{{ tickets.event_ticket.name }}
-                                                {% if tickets.day_number %}– Day {{ tickets.day_number }}{% endif %}
-                                            {% else %}
-                                                {{ tickets.event_ticket }}
-                                            {% endif %}
-                                        </p>
-{#                                        </div>#}
-                                    </div>
-
-                                    <aside class="h6-home text-center editable col-lg-5 col-12 p-0"
-                                           data-id="{{ tickets.id }}" data-type="guest_name">
-                                        <input type="guest_name" class="input-data form-control-ticket"
-                                               placeholder="Enter Your Guest Name"
-                                               value="{{ tickets.guest_name|default_if_none:'' }}">
-                                    </aside>
-
-                                </main>
-                                {% endfor %}
-                            <div class="d-pr col-12 mt-5 mb-5 pr-0 pb-4">
-                                <a class="buttons-primary h6-home center-text-button" href="{% url 'shop:index' %}">
-                                    Save
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            </main>
-
-            {% else %}
-                <main class="col-12 mt-5 mb-5 pt-lg-5" style="min-height: 50vh; margin: auto;">
-                    <div class="row">
-                        <aside class="col-lg-6 pt-lg-4 pb-lg-5 border-r">
-                            <img style="width: 70%; display: block; margin: auto"
-                                 src="{% static 'img/thanks.png' %}"
-                                 alt="Ilustração de uma pessoa no computador">
-                            <div class="col-12" style="justify-content: center">
-                            </div>
-
-                        </aside>
-
-                        <article class="col-lg-6 mt-5 mt-lg-2 pt-lg-5">
-                            <div class="col-12">
-                                <h3 class="col-12 h3-home mt-2" style="text-align: center;">
-                                    Thanks for placing your order
-                                </h3>
-                                <p class="col-lg-10 col-12 h6-home mt-0 mt-lg-4"
-                                   style="text-align: center;margin: auto">
-                                    We have received your order and your name was added to the Guest List.
-
-                                    For your records an email confirmation has been sent to you.
-
-                                    It contains details of the items you purchased. Your order number is:
-                                    {{ customer_order.id }}
-                                </p>
-                            </div>
-
-                            <div class="col-lg-12 mb-2">
-
-                                <div class="d-flex justify-content-center mt-4 mb-2">
-                                    <a class="buttons-primary h6-home center-text-button" href="{% url 'shop:index' %}">
-                                        Home
-                                    </a>
-                                </div>
-                            </div>
-
-                        </article>
-
+    <!-- Ticket Cards -->
+    {% if tickets %}
+    <div class="mb-4">
+        <h4 class="h4-home text-center mb-4">Your Tickets</h4>
+        <div class="thanks-tickets-grid">
+            {% for ticket in tickets %}
+            {% with display_event=ticket.day_event|default:ticket.event_ticket.event %}
+            <div class="ticket-card">
+                <div class="ticket-header">
+                    <div class="ticket-id">Ticket #{{ ticket.id }}</div>
+                    <div class="ticket-event-name">{{ display_event.name|truncatechars:30 }}</div>
+                    <div class="ticket-type">
+                        {{ ticket.event_ticket.name }}{% if ticket.day_number %} — Day {{ ticket.day_number }}{% endif %}
                     </div>
-                </main>
+                </div>
 
-        {% endif %}
-	</section>
+                <div class="ticket-body">
+                    <div class="ticket-info">
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ display_event.event_date|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ display_event.event_date|date:"H:i" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ display_event.city.name|truncatechars:15 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>${{ ticket.price }}</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-actions">
+                        <a href="{% url 'ticket_qrcode' %}?tkt={{ ticket.uuid|urlencode }}" class="qr-btn" target="_blank">
+                            <i class="fas fa-qrcode"></i>
+                            View QR Code
+                        </a>
+                        <a href="{% url 'download_ticket_pdf' ticket.id %}" class="download-btn">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+
+                    <div class="guest-name-section">
+                        <label class="guest-name-label">Guest Name (for event check-in)</label>
+                        <div class="guest-name-row">
+                            <input type="text" class="guest-name-input" data-id="{{ ticket.id }}"
+                                   placeholder="Enter guest name for this ticket"
+                                   value="{{ ticket.guest_name|default_if_none:'' }}">
+                            <button type="button" class="save-guest-btn" data-id="{{ ticket.id }}">Save</button>
+                        </div>
+                        <span class="save-status" style="font-size:0.8rem;transition:opacity 0.5s;opacity:0;display:block;margin-top:4px;"></span>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Back to home -->
+    <div class="d-flex justify-content-center mb-5">
+        <a class="buttons-primary h6-home center-text-button" href="{% url 'shop:index' %}">
+            Browse More Events
+        </a>
+    </div>
+
+</section>
 {% endblock %}
 
 {% block custom_js %}

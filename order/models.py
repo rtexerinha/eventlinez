@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator
 from django.template.loader import render_to_string
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from django.core.mail import EmailMessage
 from django.db.models import Sum
@@ -48,11 +49,22 @@ class Order(models.Model):
     class Meta:
         ordering = ['-created']
 
-    def send_notification(self):
-        subject = "Eventlinez - New Order #%s" % self.id
+    def send_notification(self, is_resend=False):
+        # Record attempt BEFORE sending so the resend cron sees this order
+        # even if PDF generation or SMTP fails.
+        log, _ = OrderEmailLog.objects.get_or_create(order=self)
+        log.email_to = self.emailAddress
+        if is_resend:
+            log.resent_at = timezone.now()
+            log.delivered_at = None
+            log.bounced = False
+            log.bounce_reason = ''
+        else:
+            log.sent_at = timezone.now()
+        log.save()
 
+        subject = "Eventlinez - New Order #%s" % self.id
         message = render_to_string('order/email/email.html', {'order': self})
-        # message_txt = 'Message de teste'
 
         email = EmailMessage(
             subject=subject,
@@ -137,6 +149,33 @@ class TicketRefund(models.Model):
 
     def __str__(self):
         return f'Refund #{self.id} — Order #{self.order_id} (${self.amount})'
+
+
+class OrderEmailLog(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='email_log')
+    email_to = models.EmailField()
+    sent_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    bounced = models.BooleanField(default=False)
+    bounce_reason = models.TextField(blank=True)
+    resent_at = models.DateTimeField(null=True, blank=True)
+    sendgrid_message_id = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        ordering = ['-sent_at']
+
+    @property
+    def needs_resend(self):
+        if self.delivered_at or self.bounced:
+            return False
+        if self.resent_at:
+            return False
+        if not self.sent_at:
+            return False
+        return (timezone.now() - self.sent_at).total_seconds() >= 7200  # 2 hours
+
+    def __str__(self):
+        return f'EmailLog Order #{self.order_id} → {self.email_to}'
 
 
 @receiver(post_save, sender=OrderItem)

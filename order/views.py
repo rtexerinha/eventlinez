@@ -9,9 +9,9 @@ from django.views.decorators.csrf import csrf_exempt
 import logging
 
 from cart.models import Cart
-from order.tasks import send_mail
+from order.tasks import send_mail_async as send_mail
 from ticket.models import Ticket, CancelledTicket
-from .models import Order, OrderItem, TicketRefund
+from .models import Order, OrderItem, TicketRefund, OrderEmailLog
 from promoter.models import PromoCode, PromoCodeUsage
 from django.db import transaction
 from django.db import IntegrityError
@@ -337,7 +337,7 @@ def _webhook_recover_order(session):
             cart.delete()
 
         logger.info(
-            f"Webhook: recovered order {order.id} for session {session_id}, customer={customer_email}"
+            f"Webhook: recovered order {order.id} for session {session_id}, customer={customer.email}"
         )
 
         # Update Stripe PaymentIntent description with Order # (same as success URL handler)
@@ -756,3 +756,51 @@ def create(request):
 
     logger.info(f"Order {order.id} created via success URL for session {session_id}")
     return redirect('order:thanks', order.id)
+
+
+@csrf_exempt
+def sendgrid_webhook(request):
+    """
+    Receives SendGrid event notifications (delivered, bounce, dropped, etc.)
+    and updates OrderEmailLog so the resend command knows delivery status.
+
+    Configure in SendGrid dashboard:
+      Settings → Mail Settings → Event Webhook → HTTP POST URL:
+      https://eventlinez.com/order/webhook/sendgrid/
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    from django.utils import timezone as tz
+    try:
+        events = json.loads(request.body)
+    except (json.JSONDecodeError, Exception) as e:
+        logger.error(f"SendGrid webhook: invalid JSON — {e}")
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    for event in events:
+        event_type = event.get('event', '')
+        sg_message_id = event.get('sg_message_id', '').split('.')[0]
+        email = event.get('email', '')
+
+        log = None
+        if sg_message_id:
+            log = OrderEmailLog.objects.filter(sendgrid_message_id=sg_message_id).first()
+        if not log and email:
+            log = OrderEmailLog.objects.filter(email_to=email).order_by('-sent_at').first()
+
+        if not log:
+            continue
+
+        if event_type == 'delivered':
+            log.delivered_at = tz.now()
+            log.save(update_fields=['delivered_at'])
+            logger.info(f"EmailLog order #{log.order_id}: marked delivered")
+
+        elif event_type in ('bounce', 'blocked', 'dropped'):
+            log.bounced = True
+            log.bounce_reason = event.get('reason', event_type)
+            log.save(update_fields=['bounced', 'bounce_reason'])
+            logger.warning(f"EmailLog order #{log.order_id}: {event_type} — {log.bounce_reason}")
+
+    return JsonResponse({'status': 'ok'})

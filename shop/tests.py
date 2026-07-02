@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.core.cache import cache
 from model_bakery import baker
 from datetime import datetime, timedelta
 from django.urls import reverse
@@ -6,6 +7,9 @@ from django.test import Client
 
 
 class EventsHomeView(TestCase):
+
+    def setUp(self):
+        cache.clear()
 
     def test_ordem_de_exibicao_dos_eventos(self):
         event1 = baker.make('event.Event', _create_files=True, description="foo",

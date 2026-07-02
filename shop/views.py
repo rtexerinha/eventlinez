@@ -173,10 +173,7 @@ def product_event_detail(request, c_slug, event_slug):
     vendor = None
     if 'vendor' in request.GET:
         vendor = Vendor.objects.filter(code=request.GET.get('vendor')).first()
-    try:
-        event = Event.objects.get(category__slug=c_slug, slug=event_slug)
-    except Exception as e:
-        raise e
+    event = get_object_or_404(Event, category__slug=c_slug, slug=event_slug)
     pathpage = request.META['PATH_INFO']
     if request.META['QUERY_STRING']:
         pathpage = pathpage + '?' + request.META['QUERY_STRING']

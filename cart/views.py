@@ -622,6 +622,7 @@ def checkout(request):
             mode='payment',
             success_url=request.build_absolute_uri('/order/success/') + '?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=request.build_absolute_uri('/cart/'),
+            customer_email=customer_email or None,
             metadata=metadata,
             payment_intent_data={
                 'description': description,

@@ -10,4 +10,5 @@ urlpatterns = [
 	path('<int:order_id>/', views.order_detail, name='order_detail'),
 	path('success/', views.create, name='create_order'),
     path('webhook/stripe/', views.stripe_webhook, name='stripe_webhook'),
+    path('webhook/sendgrid/', views.sendgrid_webhook, name='sendgrid_webhook'),
 ]

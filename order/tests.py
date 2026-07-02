@@ -1,15 +1,17 @@
 import json
 from decimal import Decimal
+from io import StringIO
 from unittest.mock import patch
 
 from django.test import TestCase, override_settings
 from django.contrib.auth.models import User
 from django.core import mail
+from django.urls import reverse
+from django.utils import timezone
 from model_bakery import baker
 
-from .models import Order
+from .models import Order, OrderItem, OrderEmailLog
 from ticket.models import Ticket
-from .models import OrderItem
 from .views import _rebuild_order_from_stripe
 
 
@@ -168,3 +170,195 @@ class RebuildOrderFromStripeTest(TestCase):
         self.assertIsNone(order)
         # No partial order should be left behind
         self.assertEqual(Order.objects.filter(token='cs_goneticket').count(), 0)
+
+
+# ── OrderEmailLog ─────────────────────────────────────────────────────────────
+
+class OrderEmailLogModelTest(TestCase):
+
+    def _make_order(self):
+        event = baker.make('event.Event', description='x', available=False)
+        baker.make('event.Ticket', event=event, quantity=10, price=10)
+        return baker.make('order.Order', emailAddress='test@example.com')
+
+    def test_needs_resend_false_when_just_sent(self):
+        order = self._make_order()
+        log = OrderEmailLog.objects.create(order=order, email_to=order.emailAddress,
+                                           sent_at=timezone.now())
+        self.assertFalse(log.needs_resend)
+
+    def test_needs_resend_true_after_two_hours(self):
+        order = self._make_order()
+        sent = timezone.now() - timezone.timedelta(hours=3)
+        log = OrderEmailLog.objects.create(order=order, email_to=order.emailAddress,
+                                           sent_at=sent)
+        self.assertTrue(log.needs_resend)
+
+    def test_needs_resend_false_when_delivered(self):
+        order = self._make_order()
+        sent = timezone.now() - timezone.timedelta(hours=3)
+        log = OrderEmailLog.objects.create(order=order, email_to=order.emailAddress,
+                                           sent_at=sent, delivered_at=timezone.now())
+        self.assertFalse(log.needs_resend)
+
+    def test_needs_resend_false_when_bounced(self):
+        order = self._make_order()
+        sent = timezone.now() - timezone.timedelta(hours=3)
+        log = OrderEmailLog.objects.create(order=order, email_to=order.emailAddress,
+                                           sent_at=sent, bounced=True)
+        self.assertFalse(log.needs_resend)
+
+    def test_needs_resend_false_when_already_resent(self):
+        order = self._make_order()
+        sent = timezone.now() - timezone.timedelta(hours=3)
+        log = OrderEmailLog.objects.create(order=order, email_to=order.emailAddress,
+                                           sent_at=sent, resent_at=timezone.now())
+        self.assertFalse(log.needs_resend)
+
+
+class SendNotificationLogsEmailTest(TestCase):
+
+    def setUp(self):
+        event = baker.make('event.Event', description='x', available=False)
+        ticket = baker.make('event.Ticket', event=event, quantity=10, price=50)
+        self.order = baker.make('order.Order', emailAddress='customer@example.com')
+        item = OrderItem(event_ticket=ticket, quantity=1, unit_price=50,
+                         amount=50, fee=5, order=self.order)
+        item.save()
+
+    def test_send_notification_creates_email_log(self):
+        self.order.send_notification()
+        log = OrderEmailLog.objects.filter(order=self.order).first()
+        self.assertIsNotNone(log)
+        self.assertEqual(log.email_to, self.order.emailAddress)
+        self.assertIsNotNone(log.sent_at)
+        self.assertIsNone(log.resent_at)
+
+    def test_send_notification_resend_stamps_resent_at(self):
+        self.order.send_notification()
+        self.order.send_notification(is_resend=True)
+        log = OrderEmailLog.objects.get(order=self.order)
+        self.assertIsNotNone(log.resent_at)
+        self.assertIsNone(log.delivered_at)
+
+
+# ── SendGrid webhook ──────────────────────────────────────────────────────────
+
+class SendGridWebhookTest(TestCase):
+
+    def setUp(self):
+        self.url = reverse('order:sendgrid_webhook')
+        event = baker.make('event.Event', description='x', available=False)
+        baker.make('event.Ticket', event=event, quantity=5, price=25)
+        self.order = baker.make('order.Order', emailAddress='buyer@example.com')
+        self.log = OrderEmailLog.objects.create(
+            order=self.order,
+            email_to='buyer@example.com',
+            sent_at=timezone.now(),
+        )
+
+    def _post(self, events):
+        return self.client.post(
+            self.url,
+            data=json.dumps(events),
+            content_type='application/json',
+        )
+
+    def test_get_returns_405(self):
+        r = self.client.get(self.url)
+        self.assertEqual(r.status_code, 405)
+
+    def test_delivered_event_sets_delivered_at(self):
+        r = self._post([{'event': 'delivered', 'email': 'buyer@example.com'}])
+        self.assertEqual(r.status_code, 200)
+        self.log.refresh_from_db()
+        self.assertIsNotNone(self.log.delivered_at)
+        self.assertFalse(self.log.bounced)
+
+    def test_bounce_event_sets_bounced(self):
+        r = self._post([{'event': 'bounce', 'email': 'buyer@example.com',
+                          'reason': 'user unknown'}])
+        self.assertEqual(r.status_code, 200)
+        self.log.refresh_from_db()
+        self.assertTrue(self.log.bounced)
+        self.assertEqual(self.log.bounce_reason, 'user unknown')
+
+    def test_dropped_event_sets_bounced(self):
+        r = self._post([{'event': 'dropped', 'email': 'buyer@example.com',
+                          'reason': 'unsubscribed address'}])
+        self.assertEqual(r.status_code, 200)
+        self.log.refresh_from_db()
+        self.assertTrue(self.log.bounced)
+
+    def test_unknown_event_type_is_ignored(self):
+        r = self._post([{'event': 'open', 'email': 'buyer@example.com'}])
+        self.assertEqual(r.status_code, 200)
+        self.log.refresh_from_db()
+        self.assertIsNone(self.log.delivered_at)
+        self.assertFalse(self.log.bounced)
+
+    def test_invalid_json_returns_400(self):
+        r = self.client.post(self.url, data='not-json',
+                             content_type='application/json')
+        self.assertEqual(r.status_code, 400)
+
+    def test_unknown_email_is_silently_ignored(self):
+        r = self._post([{'event': 'delivered', 'email': 'nobody@example.com'}])
+        self.assertEqual(r.status_code, 200)
+
+
+# ── resend_undelivered_emails management command ──────────────────────────────
+
+class ResendUndeliveredEmailsCommandTest(TestCase):
+
+    def _make_log(self, sent_hours_ago, delivered=False, bounced=False, resent=False):
+        event = baker.make('event.Event', description='x', available=False)
+        ticket = baker.make('event.Ticket', event=event, quantity=10, price=20)
+        order = baker.make('order.Order', emailAddress='x@example.com')
+        item = OrderItem(event_ticket=ticket, quantity=1, unit_price=20,
+                         amount=20, fee=2, order=order)
+        item.save()
+        sent_at = timezone.now() - timezone.timedelta(hours=sent_hours_ago)
+        return OrderEmailLog.objects.create(
+            order=order, email_to=order.emailAddress, sent_at=sent_at,
+            delivered_at=timezone.now() if delivered else None,
+            bounced=bounced,
+            resent_at=timezone.now() if resent else None,
+        )
+
+    def _call(self, dry_run=False):
+        from django.core.management import call_command
+        out = StringIO()
+        kwargs = {'stdout': out}
+        if dry_run:
+            kwargs['dry_run'] = True
+        call_command('resend_undelivered_emails', **kwargs)
+        return out.getvalue()
+
+    def test_resends_undelivered_after_two_hours(self):
+        log = self._make_log(sent_hours_ago=3)
+        self._call()
+        log.refresh_from_db()
+        self.assertIsNotNone(log.resent_at)
+
+    def test_does_not_resend_if_delivered(self):
+        self._make_log(sent_hours_ago=3, delivered=True)
+        self.assertIn('No undelivered emails found', self._call())
+
+    def test_does_not_resend_if_bounced(self):
+        self._make_log(sent_hours_ago=3, bounced=True)
+        self.assertIn('No undelivered emails found', self._call())
+
+    def test_does_not_resend_if_already_resent(self):
+        self._make_log(sent_hours_ago=3, resent=True)
+        self.assertIn('No undelivered emails found', self._call())
+
+    def test_does_not_resend_if_less_than_two_hours(self):
+        self._make_log(sent_hours_ago=1)
+        self.assertIn('No undelivered emails found', self._call())
+
+    def test_dry_run_does_not_stamp_resent_at(self):
+        log = self._make_log(sent_hours_ago=3)
+        self._call(dry_run=True)
+        log.refresh_from_db()
+        self.assertIsNone(log.resent_at)

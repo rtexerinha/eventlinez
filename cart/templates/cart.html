@@ -115,6 +115,22 @@ This is the shopping cart page. Proceed to review your items and place the order
         </div>
     </div>
 
+    <!-- Checkout Error Modal -->
+    <div id="checkout-error-modal"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+        <div
+            style="background:#fff; border-radius:12px; padding:2rem; max-width:400px; width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            <i class="fas fa-exclamation-circle" style="font-size:2.5rem; color:#d90075; margin-bottom:1rem;"></i>
+            <h4 id="checkout-error-title" style="margin-bottom:0.5rem;">Payment Unsuccessful</h4>
+            <p id="checkout-error-message" style="color:#666; margin-bottom:1.5rem;"></p>
+            <button onclick="document.getElementById('checkout-error-modal').style.display='none';"
+                class="buttons-primary h6-home center-text-button"
+                style="border:none; cursor:pointer;">
+                Try Again
+            </button>
+        </div>
+    </div>
+
     <main class="col-12 p-0">
         <article class="d-lg-flex d-none mt-4 border-b">
             <div class="col-5">
@@ -466,7 +482,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                         const waitTime = Math.ceil(resetTime - Date.now() / 1000);
                         const minutes = Math.ceil(waitTime / 60);
 
-                        alert(`Too many attempts. Please wait ${minutes} minute(s) before trying again.`);
+                        showCheckoutError('Too Many Attempts', `Please wait ${minutes} minute(s) before trying again.`);
                         throw new Error('Rate limited');
                     });
                 }
@@ -474,16 +490,15 @@ This is the shopping cart page. Proceed to review your items and place the order
             })
             .then(data => {
                 if (data.success) {
-                    // Reload the page to show updated cart without discount
                     location.reload();
                 } else {
-                    alert(data.error || 'An error occurred while removing the promo code');
+                    showCheckoutError('Promo Code Error', data.error || 'An error occurred while removing the promo code.');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 if (error.message !== 'Rate limited') {
-                    alert('An error occurred while removing the promo code');
+                    showCheckoutError('Promo Code Error', 'An error occurred while removing the promo code. Please try again.');
                 }
             });
     }
@@ -579,10 +594,43 @@ This is the shopping cart page. Proceed to review your items and place the order
 </script>
 
 <script>
-    // Enhanced doCheckout function with better error handling
-    function doCheckout() {
-        console.log('Checkout button clicked');
+    function showCheckoutError(title, message) {
+        document.getElementById('checkout-error-title').textContent = title;
+        document.getElementById('checkout-error-message').textContent = message;
+        document.getElementById('checkout-error-modal').style.display = 'flex';
+    }
 
+    function friendlyCheckoutError(rawMessage) {
+        if (!rawMessage) return ['Payment Unsuccessful', 'Something went wrong. Please try again.'];
+
+        const msg = rawMessage.toLowerCase();
+
+        if (msg.includes('sold out'))
+            return ['Tickets No Longer Available', rawMessage];
+
+        if (msg.includes('cart total cannot be zero'))
+            return ['Empty Cart', 'Your cart total is zero. Please add tickets before checking out.'];
+
+        if (msg.includes('payment processing error') || msg.includes('stripe error') || msg.includes('payment session creation failed'))
+            return ['Payment Provider Error', "We couldn't connect to our payment provider. Please wait a moment and try again."];
+
+        if (msg.includes('payment processing is not available'))
+            return ['Checkout Unavailable', 'Online payments are temporarily unavailable. Please contact us for assistance.'];
+
+        if (msg.includes('missing stripe data') || msg.includes('server error'))
+            return ['Checkout Error', 'Something went wrong starting your payment. Please refresh the page and try again.'];
+
+        if (msg.includes('payment could not start'))
+            return ['Payment Blocked', 'Your browser blocked the payment page from loading. Please disable any ad blockers and try again.'];
+
+        // Generic server errors
+        if (msg.includes('server error') || rawMessage.startsWith('Server error'))
+            return ['Server Error', 'We encountered a problem on our end. Please try again in a moment.'];
+
+        return ['Payment Unsuccessful', rawMessage];
+    }
+
+    function doCheckout() {
         const checkoutBtn = document.getElementById('checkout-btn');
         const originalText = checkoutBtn.innerHTML;
         checkoutBtn.innerHTML = 'Processing...';
@@ -596,9 +644,6 @@ This is the shopping cart page. Proceed to review your items and place the order
             },
         })
             .then((result) => {
-                console.log('Checkout response status:', result.status);
-
-                // If user is not logged in, redirect to login page
                 if (result.status === 401) {
                     return result.json().then(data => {
                         window.location.href = data.login_url || '/accounts/login/?next=/cart/';
@@ -609,7 +654,6 @@ This is the shopping cart page. Proceed to review your items and place the order
                 return result.json().then(data => {
                     if (!result.ok) {
                         if (data.error === 'cart_expired') {
-                            // Show the expiry modal instead of a generic alert
                             var modal = document.getElementById('expiry-modal');
                             if (modal) modal.style.display = 'flex';
                             checkoutBtn.innerHTML = originalText;
@@ -622,23 +666,23 @@ This is the shopping cart page. Proceed to review your items and place the order
                 });
             })
             .then((data) => {
-                console.log('Checkout data:', data);
+                // Duplicate order — redirect to existing confirmation.
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                    return;
+                }
 
-                // Preferred path: redirect to the Stripe-hosted checkout URL.
-                // No Stripe.js library is needed on the client (the <script> tag
-                // was removed to avoid "Stripe is not defined" when the CDN is
-                // blocked or slow to load).
                 if (data.checkout_url) {
                     window.location.href = data.checkout_url;
                     return;
                 }
 
-                // Fallback: Stripe.js redirectToCheckout, only if the library is present.
+                // Fallback: Stripe.js redirectToCheckout.
                 if (!data.stripe_public_key || !data.session_id) {
-                    throw new Error('Missing Stripe data in response. Please try again.');
+                    throw new Error('Missing Stripe data in response.');
                 }
                 if (typeof Stripe === 'undefined') {
-                    throw new Error('Payment could not start. Please refresh the page and try again.');
+                    throw new Error('Payment could not start.');
                 }
                 const stripe = Stripe(data.stripe_public_key);
                 return stripe.redirectToCheckout({ sessionId: data.session_id });
@@ -646,7 +690,8 @@ This is the shopping cart page. Proceed to review your items and place the order
             .then(function (result) {
                 if (result && result.error) {
                     console.error('Stripe error:', result.error);
-                    alert('Payment error: ' + result.error.message);
+                    const [title, msg] = friendlyCheckoutError(result.error.message);
+                    showCheckoutError(title, msg);
                     checkoutBtn.innerHTML = originalText;
                     checkoutBtn.disabled = false;
                 }
@@ -654,7 +699,8 @@ This is the shopping cart page. Proceed to review your items and place the order
             .catch(function (error) {
                 console.error("Checkout Error:", error);
                 if (error.message !== 'Redirecting to login' && error.message !== 'cart_expired') {
-                    alert('Checkout failed: ' + error.message);
+                    const [title, msg] = friendlyCheckoutError(error.message);
+                    showCheckoutError(title, msg);
                     checkoutBtn.innerHTML = originalText;
                     checkoutBtn.disabled = false;
                 }
