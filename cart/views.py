@@ -627,7 +627,7 @@ def checkout(request):
             line_items=line_items,
             mode='payment',
             success_url=request.build_absolute_uri('/order/success/') + '?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=request.build_absolute_uri('/cart/'),
+            cancel_url=request.build_absolute_uri(reverse('cart:stripe-cancel')),
             customer_email=customer_email or None,
             metadata=metadata,
             payment_intent_data={
