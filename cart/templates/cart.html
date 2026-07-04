@@ -120,14 +120,21 @@ This is the shopping cart page. Proceed to review your items and place the order
         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
         <div
             style="background:#fff; border-radius:12px; padding:2rem; max-width:400px; width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-            <i class="fas fa-exclamation-circle" style="font-size:2.5rem; color:#d90075; margin-bottom:1rem;"></i>
+            <i id="checkout-error-icon" class="fas fa-exclamation-circle" style="font-size:2.5rem; color:#d90075; margin-bottom:1rem;"></i>
             <h4 id="checkout-error-title" style="margin-bottom:0.5rem;">Payment Unsuccessful</h4>
             <p id="checkout-error-message" style="color:#666; margin-bottom:1.5rem;"></p>
-            <button onclick="document.getElementById('checkout-error-modal').style.display='none';"
-                class="buttons-primary h6-home center-text-button"
-                style="border:none; cursor:pointer;">
-                Try Again
-            </button>
+            <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
+                <button id="checkout-error-btn"
+                    onclick="document.getElementById('checkout-error-modal').style.display='none';"
+                    class="buttons-primary h6-home center-text-button"
+                    style="border:none; cursor:pointer;">
+                    Try Again
+                </button>
+                <button id="checkout-error-btn2"
+                    style="display:none; border:2px solid #d90075; background:#fff; color:#d90075; border-radius:6px; padding:0.6rem 1.2rem; cursor:pointer; font-weight:600;">
+                    Yes, Buy More Tickets
+                </button>
+            </div>
         </div>
     </div>
 
@@ -605,6 +612,15 @@ This is the shopping cart page. Proceed to review your items and place the order
     function showCheckoutError(title, message) {
         document.getElementById('checkout-error-title').textContent = title;
         document.getElementById('checkout-error-message').textContent = message;
+        var icon = document.getElementById('checkout-error-icon');
+        var btn = document.getElementById('checkout-error-btn');
+        var btn2 = document.getElementById('checkout-error-btn2');
+        if (icon) { icon.className = 'fas fa-exclamation-circle'; icon.style.color = '#d90075'; }
+        if (btn) {
+            btn.textContent = 'Try Again';
+            btn.onclick = function() { document.getElementById('checkout-error-modal').style.display = 'none'; };
+        }
+        if (btn2) { btn2.style.display = 'none'; }
         document.getElementById('checkout-error-modal').style.display = 'flex';
     }
 
@@ -638,7 +654,7 @@ This is the shopping cart page. Proceed to review your items and place the order
         return ['Payment Unsuccessful', rawMessage];
     }
 
-    function doCheckout() {
+    function doCheckout(forceNewPurchase) {
         const checkoutBtn = document.getElementById('checkout-btn');
         const originalText = checkoutBtn.innerHTML;
         checkoutBtn.innerHTML = 'Processing...';
@@ -650,6 +666,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                 'X-CSRFToken': getCSRFToken(),
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({ force_new_purchase: !!forceNewPurchase }),
         })
             .then((result) => {
                 if (result.status === 401) {
@@ -684,9 +701,29 @@ This is the shopping cart page. Proceed to review your items and place the order
                 });
             })
             .then((data) => {
-                // Duplicate order — redirect to existing confirmation.
+                // Duplicate order — show explanation then redirect to existing confirmation.
                 if (data.redirect_url) {
-                    window.location.href = data.redirect_url;
+                    checkoutBtn.innerHTML = originalText;
+                    checkoutBtn.disabled = false;
+                    showCheckoutError(
+                        'You already have these tickets! 🎉',
+                        'Looks like you\'ve already purchased these tickets. Would you like to view your order, or buy additional tickets?'
+                    );
+                    var icon = document.getElementById('checkout-error-icon');
+                    var btn = document.getElementById('checkout-error-btn');
+                    var btn2 = document.getElementById('checkout-error-btn2');
+                    if (icon) { icon.className = 'fas fa-ticket-alt'; icon.style.color = '#d90075'; }
+                    if (btn) {
+                        btn.textContent = 'View My Order';
+                        btn.onclick = function() { window.location.href = data.redirect_url; };
+                    }
+                    if (btn2) {
+                        btn2.style.display = 'inline-block';
+                        btn2.onclick = function() {
+                            document.getElementById('checkout-error-modal').style.display = 'none';
+                            doCheckout(true);
+                        };
+                    }
                     return;
                 }
 

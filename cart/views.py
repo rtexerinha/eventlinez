@@ -527,7 +527,13 @@ def checkout(request):
     except Exception:
         customer = None
 
-    if customer:
+    try:
+        body = json.loads(request.body) if request.body else {}
+    except (json.JSONDecodeError, Exception):
+        body = {}
+    force_new_purchase = body.get('force_new_purchase', False)
+
+    if customer and not force_new_purchase:
         duplicate_order = _find_recent_duplicate_order(customer, items)
         if duplicate_order:
             logger.warning(
