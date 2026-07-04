@@ -47,7 +47,7 @@ class CartRateLimiter:
     # Default rate limits (requests per time period)
     DEFAULT_LIMITS = {
         'cart_add': {'requests': 30, 'window': 300},  # 30 requests per 5 minutes
-        'cart_checkout': {'requests': 5, 'window': 300},  # 5 checkouts per 5 minutes
+        'cart_checkout': {'requests': 5, 'window': 60},  # 5 checkouts per minute
         'promo_apply': {'requests': 10, 'window': 300},  # 10 promo attempts per 5 minutes
         'quantity_change': {'requests': 50, 'window': 300},  # 50 quantity changes per 5 minutes
         'item_remove': {'requests': 20, 'window': 300},  # 20 item removals per 5 minutes

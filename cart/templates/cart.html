@@ -342,7 +342,7 @@ This is the shopping cart page. Proceed to review your items and place the order
                             </a>
 
                             <button id="checkout-btn" onclick="doCheckout()"
-                                class="ml-lg-5 ml-0 buttons-primary h5-home w-10" type="submit">Checkout
+                                class="ml-lg-5 ml-0 buttons-primary h5-home w-10" type="button">Checkout
                             </button>
                         </div>
                     </div>
@@ -659,6 +659,16 @@ This is the shopping cart page. Proceed to review your items and place the order
                     });
                 }
 
+                if (result.status === 429) {
+                    checkoutBtn.innerHTML = originalText;
+                    checkoutBtn.disabled = false;
+                    showCheckoutError(
+                        'Almost there — just a moment!',
+                        'It looks like you\'ve clicked Checkout 5 times in a row. Please wait 1 minute and try again — your tickets are still reserved for you.'
+                    );
+                    throw new Error('rate_limited');
+                }
+
                 return result.json().then(data => {
                     if (!result.ok) {
                         if (data.error === 'cart_expired') {
@@ -706,7 +716,7 @@ This is the shopping cart page. Proceed to review your items and place the order
             })
             .catch(function (error) {
                 console.error("Checkout Error:", error);
-                if (error.message !== 'Redirecting to login' && error.message !== 'cart_expired') {
+                if (error.message !== 'Redirecting to login' && error.message !== 'cart_expired' && error.message !== 'rate_limited') {
                     const [title, msg] = friendlyCheckoutError(error.message);
                     showCheckoutError(title, msg);
                     checkoutBtn.innerHTML = originalText;
