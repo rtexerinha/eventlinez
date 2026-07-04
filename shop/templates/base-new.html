@@ -109,23 +109,29 @@
         html {
             width: 100%;
             -webkit-text-size-adjust: 100%;
-            /* iOS 26/Safari 26: explicit touch-action on the root tells Safari
-               immediately that the page supports vertical panning, eliminating the
-               ~2-second gesture-classification wait before scroll becomes responsive. */
+            /* pan-y tells Safari immediately this page scrolls vertically,
+               skipping the gesture-classification wait on all iOS versions. */
             touch-action: pan-y;
         }
 
         body {
-            /* overflow-x:clip does NOT create a scroll container (unlike hidden)
-               so vertical scroll is never blocked — safe on all iOS versions */
             overflow-x: clip;
             overflow-y: auto;
             width: 100%;
             max-width: 100vw;
             touch-action: pan-y;
-            /* iOS 18 fix: do NOT combine -webkit-overflow-scrolling:touch with
-               overflow-x:clip — in iOS 18 it creates a conflicting scroll context.
-               The property is deprecated and a no-op on modern WebKit anyway. */
+            /* iPhone 17 / Safari 26 bottom navigation bar fix:
+               Push body content above the bottom gesture-conflict zone.
+               When content extends into that zone Safari spends ~2 s
+               deciding "scroll vs. bottom-bar gesture" before it moves.
+               env(safe-area-inset-bottom) equals the height of the bottom
+               bar area on iPhone 17; 0px on devices without one. */
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        /* Footer must clear the bottom navigation bar on iPhone 17 */
+        footer {
+            padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
         }
 
         * {

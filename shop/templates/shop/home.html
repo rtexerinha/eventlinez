@@ -162,16 +162,18 @@
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        background: rgba(255,255,255,.15);
+        /* backdrop-filter removed: forces GPU compositing on every ancestor at
+           paint time, stalling iOS 26 scroll for ~2 s. Slightly more opaque
+           background achieves the same frosted-glass look without the cost. */
+        background: rgba(255,255,255,.22);
         color: white;
         padding: 15px 30px;
         border-radius: 50px;
         text-decoration: none;
         font-weight: 600;
         font-size: 1.1rem;
-        transition: var(--transition-normal);
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(255,255,255,.3);
+        transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        border: 2px solid rgba(255,255,255,.35);
     }
     .hero-cta:hover {
         background: rgba(255,255,255,.25);
