@@ -529,7 +529,9 @@ def checkout(request):
 
     try:
         body = json.loads(request.body) if request.body else {}
-    except (json.JSONDecodeError, Exception):
+    except json.JSONDecodeError:
+        body = {}
+    if not isinstance(body, dict):
         body = {}
     force_new_purchase = body.get('force_new_purchase', False)
 
