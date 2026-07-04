@@ -120,13 +120,27 @@
             width: 100%;
             max-width: 100vw;
             touch-action: pan-y;
-            /* iPhone 17 / Safari 26 bottom navigation bar fix:
-               Push body content above the bottom gesture-conflict zone.
-               When content extends into that zone Safari spends ~2 s
-               deciding "scroll vs. bottom-bar gesture" before it moves.
-               env(safe-area-inset-bottom) equals the height of the bottom
-               bar area on iPhone 17; 0px on devices without one. */
             padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        /* Safari 26 / iPhone 17 bottom navigation bar:
+           overflow-y:scroll pre-registers the body as a scroll container
+           before the first touch lands. With overflow-y:auto the container
+           is registered lazily — on Safari 26 that lazy registration costs
+           ~2 s on the first scroll gesture when the bottom nav bar is active.
+           On iOS, scroll never renders a visible scrollbar, so this is
+           visually identical to auto. Chrome / non-iOS are unaffected because
+           they don't share Safari's gesture recognizer pipeline.
+           -webkit-touch-callout:none is a property only iOS Safari supports,
+           making this rule Safari-only. */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                overflow-y: scroll;
+                /* scroll-padding-bottom reserves space at the bottom of the
+                   scroll port so programmatic scrollIntoView() calls land
+                   above the bottom nav bar, not hidden behind it. */
+                scroll-padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
         }
 
         /* Footer must clear the bottom navigation bar on iPhone 17 */
