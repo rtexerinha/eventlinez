@@ -81,28 +81,28 @@
          Inlining also saves one HTTP round-trip — critical for Instagram's in-app browser
          which opens with no warm connection. -->
     <script>
-    (function(){
-        'use strict';
-        var ua=navigator.userAgent||'';
-        var isInApp=ua.indexOf('Instagram')>-1||ua.indexOf('FBAN')>-1||
-            ua.indexOf('FBAV')>-1||ua.indexOf('LinkedInApp')>-1||ua.indexOf('Twitter')>-1;
-        if(!isInApp)return;
-        // document.body is null while parsing <head> — add classes to <html> so CSS
-        // selectors apply immediately, before a single pixel is painted.
-        var html=document.documentElement;
-        html.classList.add('in-app-browser');
-        if(ua.indexOf('Instagram')>-1)html.classList.add('instagram-browser');
-        html.style.overflowX='clip';
-        html.style.overflowY='auto';
-        html.style.height='auto';
-        var style=document.createElement('style');
-        style.textContent=
-            'html.in-app-browser,html.in-app-browser body{overflow-x:clip !important;overflow-y:auto !important;height:auto !important;}'+
-            'html.in-app-browser *{touch-action:pan-y !important;-ms-touch-action:pan-y !important;}'+
-            'html.in-app-browser main,html.in-app-browser .container{overflow:visible !important;}'+
-            'html.in-app-browser .card-details{overflow-y:visible !important;max-height:none !important;height:auto !important;overscroll-behavior:auto !important;}';
-        (document.head||document.getElementsByTagName('head')[0]).appendChild(style);
-    })();
+        (function () {
+            'use strict';
+            var ua = navigator.userAgent || '';
+            var isInApp = ua.indexOf('Instagram') > -1 || ua.indexOf('FBAN') > -1 ||
+                ua.indexOf('FBAV') > -1 || ua.indexOf('LinkedInApp') > -1 || ua.indexOf('Twitter') > -1;
+            if (!isInApp) return;
+            // document.body is null while parsing <head> — add classes to <html> so CSS
+            // selectors apply immediately, before a single pixel is painted.
+            var html = document.documentElement;
+            html.classList.add('in-app-browser');
+            if (ua.indexOf('Instagram') > -1) html.classList.add('instagram-browser');
+            html.style.overflowX = 'clip';
+            html.style.overflowY = 'auto';
+            html.style.height = 'auto';
+            var style = document.createElement('style');
+            style.textContent =
+                'html.in-app-browser,html.in-app-browser body{overflow-x:clip !important;overflow-y:auto !important;height:auto !important;}' +
+                'html.in-app-browser *{touch-action:pan-y !important;-ms-touch-action:pan-y !important;}' +
+                'html.in-app-browser main,html.in-app-browser .container{overflow:visible !important;}' +
+                'html.in-app-browser .card-details{overflow-y:visible !important;max-height:none !important;height:auto !important;overscroll-behavior:auto !important;}';
+            (document.head || document.getElementsByTagName('head')[0]).appendChild(style);
+        })();
     </script>
 
     <style>
@@ -123,25 +123,6 @@
             padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
-        /* Safari 26 / iPhone 17 bottom navigation bar:
-           overflow-y:scroll pre-registers the body as a scroll container
-           before the first touch lands. With overflow-y:auto the container
-           is registered lazily — on Safari 26 that lazy registration costs
-           ~2 s on the first scroll gesture when the bottom nav bar is active.
-           On iOS, scroll never renders a visible scrollbar, so this is
-           visually identical to auto. Chrome / non-iOS are unaffected because
-           they don't share Safari's gesture recognizer pipeline.
-           -webkit-touch-callout:none is a property only iOS Safari supports,
-           making this rule Safari-only. */
-        @supports (-webkit-touch-callout: none) {
-            body {
-                overflow-y: scroll;
-                /* scroll-padding-bottom reserves space at the bottom of the
-                   scroll port so programmatic scrollIntoView() calls land
-                   above the bottom nav bar, not hidden behind it. */
-                scroll-padding-bottom: env(safe-area-inset-bottom, 0px);
-            }
-        }
 
         /* Footer must clear the bottom navigation bar on iPhone 17 */
         footer {
@@ -223,6 +204,27 @@
                 padding-right: 15px;
             }
         }
+        /* Safari 26 / iPhone 17 bottom navigation bar:
+           overflow-y:scroll pre-registers the body as a scroll container
+           before the first touch lands. With overflow-y:auto the container
+           is registered lazily — on Safari 26 that lazy registration costs
+           ~2 s on the first scroll gesture when the bottom nav bar is active.
+           On iOS, scroll never renders a visible scrollbar, so this is
+           visually identical to auto. Chrome / non-iOS are unaffected because
+           they don't share Safari's gesture recognizer pipeline.
+           -webkit-touch-callout:none is a property only iOS Safari supports,
+           making this rule Safari-only.
+           Placed after @media (max-width: 768px) so it wins the cascade on
+           mobile Safari viewports where both blocks match. */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                overflow-y: scroll;
+                /* scroll-padding-bottom reserves space at the bottom of the
+                   scroll port so programmatic scrollIntoView() calls land
+                   above the bottom nav bar, not hidden behind it. */
+                scroll-padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+        }
 
         @media (hover: none) and (pointer: coarse) {
 
@@ -272,7 +274,7 @@
         !function (f, b, e, v, n, t, s) {
             if (f.fbq) return; n = f.fbq = function () {
                 n.callMethod ?
-                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
             }; if (!f._fbq) f._fbq = n;
             n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
             t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s)
