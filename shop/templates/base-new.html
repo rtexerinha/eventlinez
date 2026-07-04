@@ -218,7 +218,11 @@
            mobile Safari viewports where both blocks match. */
         @supports (-webkit-touch-callout: none) {
             body {
-                overflow-y: scroll;
+                /* !important needed: style2.css sets overflow-y:auto !important
+                   inside @media (max-width:800px), which covers all iPhone viewports.
+                   Both declarations carry !important so source order decides —
+                   this <style> block comes after style2.css, so we win. */
+                overflow-y: scroll !important;
                 /* scroll-padding-bottom reserves space at the bottom of the
                    scroll port so programmatic scrollIntoView() calls land
                    above the bottom nav bar, not hidden behind it. */

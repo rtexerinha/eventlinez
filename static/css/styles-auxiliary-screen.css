@@ -2,7 +2,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 .div-left-new{
@@ -15,7 +15,7 @@
     margin-bottom: 80px;
 }
 .div-right-new{
-    min-height: 100vh;
+    min-height: 100dvh;
     width: 50vw;
     background-color: transparent;
     background-image: url("../../static/img/Mask Group.jpg");
@@ -185,7 +185,7 @@
 
 @media (max-width: 1024px) and  (min-width: 930px) {
     .div-column{
-         min-height: 100vh;
+         min-height: 100dvh;
     }
     .div-left-new{
          padding-left: 5vw;
