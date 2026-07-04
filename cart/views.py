@@ -332,7 +332,13 @@ def cart_detail(request, cart_items=None):
         'PROD': settings.PROD,
     }
     
-    return render(request, 'cart.html', context)
+    response = render(request, 'cart.html', context)
+    # Prevent bfcache on mobile Safari / in-app browsers. Without no-store, the
+    # browser freezes a snapshot of the cart page before redirecting to Stripe.
+    # Hitting back restores that snapshot (stale items, old total, old promo) even
+    # though the server already cleared the cart — leading to duplication on re-add.
+    response['Cache-Control'] = 'no-store'
+    return response
 
 
 @rate_limit('item_remove', identifier_func=get_item_identifier)
@@ -656,6 +662,32 @@ def checkout(request):
         'checkout_url': session.url,
         'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
     })
+
+
+def stripe_cancel(request):
+    """
+    Stripe cancel_url target. Clears the cart and pending session so the
+    customer starts fresh — prevents stale reservations and duplicate sessions.
+    Redirects back to the event detail page so the customer can add tickets again.
+    """
+    event_url = None
+    try:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        first_item = CartItem.objects.filter(cart=cart, active=True).select_related(
+            'ticket__event__category'
+        ).first()
+        if first_item:
+            event = first_item.ticket.event
+            event_url = reverse('shop:product_event_detail', kwargs={
+                'c_slug': event.category.slug,
+                'event_slug': event.slug,
+            })
+        request.session.pop(f'pending_stripe_session_{cart.id}', None)
+        cart.clear_items()
+        logger.info(f"Cart {cart.cart_id} cleared after Stripe cancel")
+    except Cart.DoesNotExist:
+        pass
+    return redirect(event_url or reverse('index'))
 
 
 @csrf_exempt

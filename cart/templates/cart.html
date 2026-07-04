@@ -357,6 +357,14 @@ This is the shopping cart page. Proceed to review your items and place the order
 {% block cart_js %}
 <script src="{% static 'js/cart.js' %}"></script>
 <script>
+    // Belt-and-suspenders bfcache guard: the server already sends Cache-Control: no-store
+    // but some mobile browsers (Samsung Internet, old Instagram WebView) ignore that header
+    // and still restore a frozen snapshot on back-navigation. Force a reload so the
+    // server always renders the current cart — no stale items, no stale promo total.
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) { window.location.reload(); }
+    });
+
     // Cart page: DO NOT call _updateTotal() on load.
     // The total is already correctly calculated and rendered by the server.
     // _updateTotal() is only needed on the event detail page for live qty selection.
