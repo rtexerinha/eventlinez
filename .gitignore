@@ -157,3 +157,6 @@ docker-compose.local.yml
 
 # Node
 node_modules/
+
+# Django file-based cache (written on every request)
+.django_cache/
