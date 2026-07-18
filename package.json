@@ -1,0 +1,40 @@
+{
+  "name": "eventlinez",
+  "version": "1.0.0",
+  "description": "<!---Esses são exemplos. Veja https://shields.io para outras pessoas ou para personalizar este conjunto de escudos. Você pode querer incluir dependências, status do projeto e informações de licença aqui--->",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write \"static/**/*.js\"",
+    "lint": "eslint \"static/**/*.js\"",
+    "lint:fix": "eslint --fix \"static/**/*.js\"",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rtexerinha/eventlinez.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rtexerinha/eventlinez/issues"
+  },
+  "homepage": "https://github.com/rtexerinha/eventlinez#readme",
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "globals": "^17.7.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.1.0",
+    "prettier": "^3.9.5"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  }
+}

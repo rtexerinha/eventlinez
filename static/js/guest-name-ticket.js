@@ -14,7 +14,9 @@ function showSaveFeedback(section, success) {
   label.style.color = success ? '#28a745' : '#dc3545';
   label.style.opacity = '1';
   clearTimeout(label._hide);
-  label._hide = setTimeout(function () { label.style.opacity = '0'; }, 2500);
+  label._hide = setTimeout(function () {
+    label.style.opacity = '0';
+  }, 2500);
 }
 
 function saveGuestName(section) {
@@ -25,7 +27,10 @@ function saveGuestName(section) {
   var id = input.dataset.id;
   var value = input.value.trim();
 
-  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
+  if (btn) {
+    btn.textContent = 'Saving…';
+    btn.disabled = true;
+  }
 
   var formData = new FormData();
   formData.append('id', id);
@@ -37,11 +42,20 @@ function saveGuestName(section) {
     headers: { 'X-CSRFToken': getCsrfToken() },
     body: formData,
   })
-    .then(function (r) { return r.json(); })
-    .then(function (data) { showSaveFeedback(section, data.success === true); })
-    .catch(function () { showSaveFeedback(section, false); })
+    .then(function (r) {
+      return r.json();
+    })
+    .then(function (data) {
+      showSaveFeedback(section, data.success === true);
+    })
+    .catch(function () {
+      showSaveFeedback(section, false);
+    })
     .finally(function () {
-      if (btn) { btn.textContent = 'Save'; btn.disabled = false; }
+      if (btn) {
+        btn.textContent = 'Save';
+        btn.disabled = false;
+      }
     });
 }
 
@@ -51,11 +65,16 @@ document.addEventListener('DOMContentLoaded', function () {
     var btn = section.querySelector('.save-guest-btn');
 
     if (btn) {
-      btn.addEventListener('click', function () { saveGuestName(section); });
+      btn.addEventListener('click', function () {
+        saveGuestName(section);
+      });
     }
     if (input) {
       input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); saveGuestName(section); }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveGuestName(section);
+        }
       });
     }
   });

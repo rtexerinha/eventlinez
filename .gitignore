@@ -154,3 +154,6 @@ backup.sql
 docker-compose.local.yml
 .env.local
 .env.docker
+
+# Node
+node_modules/

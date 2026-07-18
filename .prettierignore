@@ -1,0 +1,8 @@
+# Vendor files
+static/js/jquery*.js
+static/js/bootstrap*.js
+static/js/popper*.js
+static/js/swiper*.js
+static/js/*min.js
+static/date-time/
+node_modules/
