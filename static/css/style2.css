@@ -534,16 +534,25 @@
         font-size: 1.5rem !important;
     }
 
-    /* Page-level: allow scroll in both axes, only clip horizontal overflow */
+    /* Page-level single scroller: html is THE scroll container, body is not.
+       html uses overflow-y:scroll (not auto) for eager registration — the
+       scroll machinery is wired up before the first gesture, so the first
+       gesture scrolls instead of being consumed. On mobile the scrollbar is an
+       invisible overlay, so scroll vs auto is visually identical here. */
     html {
         overflow-x: clip !important;
-        overflow-y: auto !important;
+        overflow-y: scroll !important;
         height: auto !important;
     }
 
     body {
         overflow-x: clip !important;
-        overflow-y: auto !important;
+        /* visible (NOT scroll/auto): body must never be a second scroll
+           container. A body scroll container with no overflow of its own makes
+           Chrome/WebKit latch the first gesture onto it and drop it instead of
+           scrolling the html viewport — the "two scrolls to move" bug.
+           clip + visible clips horizontal overflow without scroll-containing. */
+        overflow-y: visible !important;
         height: auto !important;
         /* iOS 18: use 100dvh (dynamic viewport height) instead of 100vh.
            100vh on iOS 18 resolves to the LARGE viewport (ignoring browser chrome),
