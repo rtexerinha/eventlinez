@@ -37,30 +37,13 @@ This is the shopping cart page. Proceed to review your items and place the order
 {% else %}
 
 
+{% if PROD %}
 <script>
-    // Replace 'your_pixel_id' with your actual Pixel ID
-    var pixelId = '1384266455408952';
-
-    !function (f, b, e, v, n, t, s) {
-        if (f.fbq) return; n = f.fbq = function () {
-            n.callMethod ?
-                n.callMethod.apply(n, arguments) : n.queue.push(arguments)
-        };
-        if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
-        n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t, s)
-    }(window, document, 'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-
-    // Initialize the Pixel with your Pixel ID
-    fbq('init', pixelId);
-
-    // Track the purchase event without specifying the value
-    fbq('track', 'PageView');
-    fbq('track', 'Purchase');
+    if (typeof fbq === 'function') {
+        fbq('track', 'Purchase');
+    }
 </script>
-<noscript><img height="1" width="1" style="display:none"
-        src="https://www.facebook.com/tr?id=1384266455408952&ev=PageView&noscript=1" /></noscript>
+{% endif %}
 
 
 <section class="container mt-4 mb-5" style="min-height: 70vh">
