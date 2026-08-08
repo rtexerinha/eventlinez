@@ -179,10 +179,10 @@ This is the shopping cart page. Proceed to review your items and place the order
 
                 <aside class="col-lg-2 col-6 pt-lg-5 d-justy">
                     {% if item.quantity < item.ticket.qty_available %} <div class="h6-home text-lg-center">
-                        <button onclick="controlQty({{item.ticket.id}}, 'decrease')"
+                        <a href="{% url 'cart:change-quantity' item.id 'decrement' %}"
                             class="button-increment ml-2 pl-5px">
                             <i class="fas fa-minus"></i>
-                        </button>&nbsp;
+                        </a>&nbsp;
 
                         <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
 
@@ -193,18 +193,18 @@ This is the shopping cart page. Proceed to review your items and place the order
                         </button>
                         <p style="color: #d90075; margin-top: 5px">Only one ticket available</p>&nbsp;
                         {% else %}
-                        <button onclick="controlQty({{item.ticket.id}}, 'increase')"
+                        <a href="{% url 'cart:change-quantity' item.id 'increment' %}"
                             class="button-increment mr-2 pl-5px">
                             <i class="fas fa-plus"></i>
-                        </button>
+                        </a>
                         {% endif %}
                         </div>
                         {% else %}
                         <div class="h6-home">
-                            <button onclick="controlQty({{item.ticket.id}}, 'decrease')"
+                            <a href="{% url 'cart:change-quantity' item.id 'decrement' %}"
                                 class="button-increment ml-2 pl-5px">
                                 <i class="fas fa-minus"></i>
-                            </button>&nbsp;
+                            </a>&nbsp;
 
                             <span id="ticket-{{item.ticket.id}}-qty" class="ticket-qty">{{item.quantity }}</span>&nbsp;
 

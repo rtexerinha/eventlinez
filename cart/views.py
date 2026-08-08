@@ -4,7 +4,6 @@ from datetime import timedelta
 
 import stripe
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -233,7 +232,6 @@ def cart_add(request):
         return JsonResponse({"error": "An error occurred while adding items to cart"}, status=500)
 
 
-@login_required()
 @rate_limit('quantity_change', identifier_func=get_item_identifier)
 def change_quantity(request, item_id, operation):
     """
